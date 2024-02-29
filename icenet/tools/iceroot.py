@@ -20,13 +20,13 @@ from icenet.tools import aux
 from icenet.tools import iceroot
 
 
-def read_MC(process_func, process, root_path, param, class_id):
+def read_single(process_func, process, root_path, param, class_id, dtype=None):
     """
-    Loop over different MC (or data) processes as defined in the yaml files
+    Loop over different MC / data processes as defined in the yaml files
     
     Args:
         process_func:  data processing function
-        process:       MC process dictionary (from yaml)
+        process:       MC / data process dictionary (from yaml)
         root_path:     main path of files
         param:         parameters of 'process_func'
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
@@ -35,7 +35,7 @@ def read_MC(process_func, process, root_path, param, class_id):
         X, Y, W, ids, info (awkward array format)
     """
 
-    print(__name__ + f'.read_MC: {process}')
+    print(__name__ + f'.read_single: {process}')
 
     # --------------------
     
@@ -51,7 +51,7 @@ def read_MC(process_func, process, root_path, param, class_id):
     print(datasets)
     print(root_path)
 
-    rootfile     = io.glob_expand_files(datasets=datasets, datapath=root_path)
+    rootfile = io.glob_expand_files(datasets=datasets, datapath=root_path)
     
     # Custom scale event statistics
     if param['maxevents'] is None:
@@ -62,7 +62,7 @@ def read_MC(process_func, process, root_path, param, class_id):
     # Load file
     X_uncut, ids = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
                     entry_start=param['entry_start'], entry_stop=param['entry_stop'],
-                    maxevents=maxevents, ids=param['load_ids'], library='ak')
+                    maxevents=maxevents, ids=param['load_ids'], library='ak', dtype=dtype)
     
     N_before = len(X_uncut)
 
@@ -74,22 +74,22 @@ def read_MC(process_func, process, root_path, param, class_id):
     
     eff_acc = N_after / N_before
     
-    print(__name__ + f'.read_multiple_MC: efficiency x acceptance = {eff_acc:0.6f}')
+    print(__name__ + f'.read_single: efficiency x acceptance = {eff_acc:0.6f}')
 
-    Y = class_id * ak.Array(np.ones(N_after, dtype=int))
+    Y = class_id * ak.Array(np.ones(N_after, dtype=np.int32))
 
     # -------------------------------------------------
     # Visible cross-section weights
     if not force_xs:
         # Sum over W yields --> (eff_acc * xs)
-        W = (ak.Array(np.ones(N_after, dtype=float)) / N_after) * (xs * eff_acc)
+        W = (ak.Array(np.ones(N_after, dtype=np.float32)) / N_after) * (xs * eff_acc)
     
     # 'force_xs' mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants
     # to have equal proportions for e.g. theory conditional MVA training.
     # (then one uses the same input 'xs' value for each process in the steering .yaml file)
     else:
         # Sum over W yields --> xs
-        W = (ak.Array(np.ones(N_after, dtype=float)) / N_after) * xs
+        W = (ak.Array(np.ones(N_after, dtype=np.float32)) / N_after) * xs
 
     # Save statistics information
     info = {'yaml': process, 'cut_stats': stats, 'eff_acc': eff_acc}
@@ -97,7 +97,7 @@ def read_MC(process_func, process, root_path, param, class_id):
     # -------------------------------------------------
     # Add conditional (theory param) variables
     
-    print(__name__ + f'.read_multiple_MC: Adding conditional theory (model) parameters')
+    print(__name__ + f'.read_single: Adding conditional theory (model) parameters')
     
     for var in model_param.keys():
             
@@ -108,14 +108,15 @@ def read_MC(process_func, process, root_path, param, class_id):
             if len(value) != 3:
                 raise Exception(__name__ + f'.read_MC: Input {value} ')
             
-            mva_value = value[1] + (value[2] - value[1]) * ak.Array(np.random.rand(len(X), 1))
+            r         = ak.Array(np.random.rand(len(X), 1).astype(np.float32))
+            mva_value = value[1] + (value[2] - value[1]) * r
             gen_value = value[0]
         
         # Pick only the fixed value
         else:
             if value is None:
                 value = np.nan
-            mva_value = value * ak.Array(np.ones((len(X), 1)).astype(float))
+            mva_value = value * ak.Array(np.ones((len(X), 1)).astype(np.float32))
             gen_value = value
         
         # Create a new 'record' (column) to ak-array [actual input for MVA]
@@ -132,9 +133,9 @@ def read_MC(process_func, process, root_path, param, class_id):
     return {'X':X, 'Y':Y, 'W': W, 'ids':ids, 'info':info}
 
 
-def read_multiple_MC(process_func, processes, root_path, param, class_id):
+def read_multiple(process_func, processes, root_path, param, class_id, dtype=None):
     """
-    Loop over different MC processes as defined in the yaml files
+    Loop over different MC / data processes as defined in the yaml files
     
     Args:
         process_func:  data processing function
@@ -152,8 +153,8 @@ def read_multiple_MC(process_func, processes, root_path, param, class_id):
 
     for i,key in enumerate(processes):
         
-        data = read_MC(process_func, processes[key], root_path, param, class_id)
-
+        data = read_single(process_func, processes[key], root_path, param, class_id, dtype)
+        
         # Concatenate processes
         if i == 0:
             X = copy.deepcopy(data['X'])
@@ -251,7 +252,8 @@ def events_to_jagged_numpy(events, ids, entry_start=0, entry_stop=None, maxevent
     return X, ids
 
 
-def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, ids=None, library='np'):
+def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
+              ids=None, library='np', dtype=None):
     """
     Load ROOT files
 
@@ -287,10 +289,11 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
     print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
     
     if   library == 'np':
+        
         for i in tqdm(range(len(files))):
             with uproot.open(files[i]) as events:
                 
-                param  = {'events': events, 'ids': load_ids,
+                param = {'events': events, 'ids': load_ids,
                           'entry_start': entry_start, 'entry_stop': entry_stop, 'maxevents': maxevents, 'label': files[i]}
                 output, ids = events_to_jagged_numpy(**param)
 
@@ -303,7 +306,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
                     X = X[0:maxevents]
                     cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
                     break
-
+        
         print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
         
         return X, ids
@@ -323,14 +326,18 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
             
             with uproot.open(files[0]) as events:
                 
-                X = events.arrays(load_ids, entry_start=entry_start, entry_stop=entry_stop, library='ak', how='zip')
+                X = events.arrays(load_ids, entry_start=entry_start,
+                                  entry_stop=entry_stop, library='ak', how='zip')
 
+                if dtype is not None:
+                    X = X.values_astype(X, dtype)
+                
                 if (maxevents is not None) and (len(X) > maxevents):
                     X = X[0:maxevents]
-                    cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
+                    cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached (had {num_events})', 'red')
         
         else:
-
+            
             # ======================================================
             # Multiprocessing version for multiple files
             
@@ -344,7 +351,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
             print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
 
             for k in range(num_workers):    
-                futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]], load_ids, entry_start, entry_stop, submaxevents[k]))
+                futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]],
+                                                   load_ids, entry_start, entry_stop, submaxevents[k], dtype))
 
             results = ray.get(futures) # synchronous read-out
             ray.shutdown()
@@ -367,7 +375,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None, id
 
 
 @ray.remote
-def read_file_ak(files, ids, entry_start, entry_stop, maxevents):
+def read_file_ak(files, ids, entry_start, entry_stop, maxevents, dtype=None):
     """
     Ray multiprocess read-wrapper-function per root file.
     
@@ -381,6 +389,7 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents):
         entry_start:  first entry to to read
         entry_stop:   last entry to read
         maxevents:    maximum number of events (in total over all files)
+        dtype:        Data type
     
     Returns:
         awkward array
@@ -393,14 +402,17 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents):
         
         with uproot.open(files[i]) as events:
             
-            output = events.arrays(ids, entry_start=entry_start, entry_stop=entry_stop, library='ak', how='zip')
+            data = events.arrays(ids, entry_start=entry_start, entry_stop=entry_stop, library='ak', how='zip')
+            
+            if dtype is not None:
+                data = data.values_astype(data, dtype)
             
             # Concatenate with other file results
-            X = copy.deepcopy(output) if (i == 0) else ak.concatenate((X, output), axis=0)
-            del output
+            X = copy.deepcopy(data) if (i == 0) else ak.concatenate((X, data), axis=0)
+            del data
             gc.collect()
             io.showmem()
-                        
+            
             if (maxevents is not None) and (len(X) >= maxevents):
                 X = X[0:maxevents]
                 cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')

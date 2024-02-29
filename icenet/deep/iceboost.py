@@ -41,27 +41,82 @@ def _hinge_loss(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tenso
     w       = w.to(device)
     
     targets = 2 * targets - 1
-    loss = w * torch.max(torch.zeros_like(preds), 1 - preds * targets) ** 2
+    loss    = w * torch.max(torch.zeros_like(preds), 1 - preds * targets) ** 2
     
     return loss.sum() * len(preds)
 
+def distance_correlation(x: torch.Tensor, y: torch.Tensor,
+                         weights: torch.Tensor=None, max_N=None, EPS=1E-12):
+    """
+    Distance Correlation
+    
+    See: https://www.statsmodels.org/devel/_modules/statsmodels/stats/dist_dependence_measures.html#distance_correlation
+    
+    Args:
+        x       : data (N x dim)
+        y       : data (N x dim), where dim can be the same or different than for x
+        weights : event weights (not implemented)
+        max_N   : maximum number of samples to consider
+    """
+    
+    # Memory constrained, pick random subsample
+    if max_N is not None and x.shape[0] > max_N:
+        r = torch.randperm(x.shape[0])
+        x = x[r][0:max_N]
+        y = y[r][0:max_N]
+    
+    N = x.shape[0]
+
+    # Add feature dimension if 1D
+    if len(x.shape) == 1:
+        x = x.unsqueeze(-1)
+    if len(y.shape) == 1:
+        y = y.unsqueeze(-1)
+    
+    # Unsqueeze(0) needed for cdist() (expects batched input)
+    x = x.unsqueeze(0)
+    y = y.unsqueeze(0)
+    
+    # Pairwise distance matrices
+    a = torch.cdist(x, x).squeeze()
+    b = torch.cdist(y, y).squeeze()
+    
+    a_row_means = a.mean(dim=0, keepdim=True) # [1 x N]
+    b_row_means = b.mean(dim=0, keepdim=True)
+    a_col_means = a.mean(dim=1, keepdim=True) # [N x 1]
+    b_col_means = b.mean(dim=1, keepdim=True)
+    a_mean      = a.flatten().mean()          # [scalar]
+    b_mean      = b.flatten().mean()
+    
+    # Broadcasted to a matrix
+    A      = a - a_row_means - a_col_means + a_mean
+    B      = b - b_row_means - b_col_means + b_mean
+
+    dcov   = torch.sqrt(torch.clip((A * B).flatten().mean(), min=EPS))
+    dvar_x = torch.sqrt(torch.clip((A * A).flatten().mean(), min=EPS))
+    dvar_y = torch.sqrt(torch.clip((B * B).flatten().mean(), min=EPS))
+    dcor   = dcov / torch.sqrt(dvar_x * dvar_y)
+
+    return dcor
+
 def corrcoeff_weighted(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=None):
     """
-    Per event weighted Pearson 2x2 correlation matrix cf. torch.corrcoef()
+    Per event weighted linear Pearson 2x2 correlation matrix cf. torch.corrcoef()
+    
     Args:
         x  :  data (Nx1)
         y  :  data (Nx1)
         weights : event weights
     """
+    
     data   = torch.vstack((x.squeeze(), y.squeeze()))
     C      = torch.cov(data, aweights=weights.squeeze())
     N      = len(C)
     D      = torch.eye(N).to(C.device)
     
     D[range(N), range(N)] = 1.0 / torch.sqrt(torch.diagonal(C))
-    rho = D @ C @ D
     
-    return rho
+    return D @ C @ D
 
 def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-12):
     """
@@ -132,8 +187,9 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
         loss     = param["beta"] * loss.sum()        
         BCE_loss = BCE_loss + loss
         
-        track_loss[key] = loss.item()
-        loss_str       += f'{key} [beta = {param["beta"]}] = {loss.item():0.5f} | '
+        txt = f'{key} [$\\beta$ = {param["beta"]}]'
+        track_loss[txt] = loss.item()
+        loss_str       += f'{txt} = {loss.item():0.5f} | '
     
     # --------------------------------------------------------------------
     ## MI Regularization
@@ -174,8 +230,14 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
 
                 if np.sum(mm_) > reg_param['min_count']: # Minimum number of events per category cutoff
                     
-                    # Pearson Correlation
-                    if reg_param['losstype'] == 'PEARSON':
+                    # Distance Correlation
+                    if   reg_param['losstype'] == 'DCORR':
+                                                        
+                        rho   = distance_correlation(x=X[mm_], y=Z[mm_], weights=W[mm_], max_N=reg_param['max_N'])
+                        value = value + rho
+                    
+                    # Pearson Correlation (only for DEBUG!)
+                    elif reg_param['losstype'] == 'PEARSON':
                         
                         if len(X.shape) > 1: # if multidim X
                             
@@ -193,7 +255,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                     
                     # Neural MI
                     else:
-                    
+                        
                         # We need .detach() here for Z!
                         model = mine.estimate(X=X[mm_], Z=Z[mm_].detach(), weights=W[mm_],
                             return_model_only=True, device=device, **reg_param)
@@ -225,10 +287,11 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             
             k += 1
 
-        cprint(f'{reg_param["losstype"]} = {values}', 'yellow')
-
-        track_loss['MI'] = MI_loss.item()
-        loss_str        += f'MI [beta = {MI_param["beta"]}] = {MI_loss.item():0.5f}'
+        cprint(f'RAW {reg_param["losstype"]} = {values}', 'yellow')
+        
+        txt = f'{reg_param["losstype"]} [$\\beta$ = {MI_param["beta"]}]'
+        track_loss[txt] = MI_loss.item()
+        loss_str       += f'{txt} = {MI_loss.item():0.5f}'
     
     # --------------------------------------------------------------------
     # Total loss

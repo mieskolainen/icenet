@@ -1,12 +1,12 @@
 FILTER: &FILTER
   
-  filter[0]:
-    operator: 'cartesian_and'  # null (unary), cartesian_and', 'cartesian_or'
-    sets: [0,1]                # input set ids (one or two)
+  #filter[0]:
+  #  operator: 'cartesian_and'  # null (unary), cartesian_and', 'cartesian_or'
+  #  sets: [0,1]                # input set ids (one or two)
   
-  filter[1]:
-    operator: null             # null (unary), cartesian_and', 'cartesian_or'
-    sets: [2]                  # input set ids (one or two)
+  filter[0]:
+    operator: null              # null (unary), cartesian_and', 'cartesian_or'
+    sets: [2]                   # input set ids (one or two)
   
   # ... more filters here
   
@@ -16,28 +16,33 @@ FILTER: &FILTER
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['$\neq(m_\pi = 1$  & $m_A = 0.33)$', '$m_\pi = 1$  & $m_A = 0.33$']},
-       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['$\neq(m_\pi = 2$  & $m_A = 0.67)$', '$m_\pi = 2$  & $m_A = 0.67$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['$\neq(m_\pi = 4$  & $m_A = 0.40)$', '$m_\pi = 4$  & $m_A = 0.40$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['$\neq(m_\pi = 4$  & $m_A = 1.33)$', '$m_\pi = 4$  & $m_A = 1.33$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['$\neq(m_\pi = 10$ & $m_A = 1.00)$', '$m_\pi = 10$ & $m_A = 1.00$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['$\neq(m_\pi = 10$ & $m_A = 3.33)$', '$m_\pi = 10$ & $m_A = 3.33$']}]
+      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['', '$m_\pi = 1$  & $m_A = 0.33$']},
+       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['', '$m_\pi = 2$  & $m_A = 0.67$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['', '$m_\pi = 4$  & $m_A = 0.40$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['', '$m_\pi = 4$  & $m_A = 1.33$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['', '$m_\pi = 10$ & $m_A = 1.00$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['', '$m_\pi = 10$ & $m_A = 3.33$']}]
   
   set[1]:
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: 'GEN_ctau == 0.1', latex: ['$c\tau \neq 0.1$', '$c\tau = 0.1$']},
-       {cut: 'GEN_ctau == 1',   latex: ['$c\tau \neq 1$',   '$c\tau = 1$']  },
-       {cut: 'GEN_ctau == 10',  latex: ['$c\tau \neq 10$',  '$c\tau = 10$'] },
-       {cut: 'GEN_ctau == 100', latex: ['$c\tau \neq 100$', '$c\tau = 100$']}]
+      [{cut: 'GEN_ctau == 0.1', latex: ['', '$c\tau = 0.1$']},
+       {cut: 'GEN_ctau == 1',   latex: ['', '$c\tau = 1$'  ]},
+       {cut: 'GEN_ctau == 10',  latex: ['', '$c\tau = 10$' ]},
+       {cut: 'GEN_ctau == 100', latex: ['', '$c\tau = 100$']}]
   
   set[2]:
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: 'GEN_ctau == 0.1', latex: ['$c\tau \neq 0.1$', '$c\tau = 0.1$']}]
+      [{cut: '0 < muonSV_mass_0 && muonSV_dxy_0 < 1.0  && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} < 1$ & $\delta < 0.2$']},
+       {cut: '0 < muonSV_mass_0 && muonSV_dxy_0 < 1.0  && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} < 1$ & $\delta > 0.2$']},
+       {cut: '0 < muonSV_mass_0 && 1.0  < muonSV_dxy_0 && muonSV_dxy_0 < 10 && muonSV_pAngle_0 < 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta < 0.2$']},
+       {cut: '0 < muonSV_mass_0 && 1.0  < muonSV_dxy_0 && muonSV_dxy_0 < 10 && muonSV_pAngle_0 > 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta > 0.2$']},
+       {cut: '0 < muonSV_mass_0 && muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta < 0.2$']},
+       {cut: '0 < muonSV_mass_0 && muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta > 0.2$']}
+      ]
   
   # ... more sets here
-
 # -----------------------------------------------------------------------
 
 basic:
@@ -57,7 +62,7 @@ ROC:
   active: True
   num_bootstrap: 50
   xmin: 1.0E-6
-  #set_filter: *FILTER
+  set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
@@ -82,11 +87,11 @@ ROC_binned:
 MVA_output:
   active: True
   edges: 80
-  #set_filter: *FILTER
+  set_filter: *FILTER
 
 ## (MVA output x External variable) density (2D)
 MVA_2D:
-  active: True
+  active: False
   
   plot[0]:
     #var:  ['.*'] # RegExp supported
@@ -101,4 +106,3 @@ MVA_2D:
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
   #  density: True
-  

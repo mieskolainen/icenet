@@ -56,7 +56,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         "args":        args,
         "load_ids":    inputvars.LOAD_VARS
     }
-
+    
     INFO = {}
     X    = {}
     Y    = {}
@@ -70,9 +70,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         class_id = int(key.split("_")[1])
         proc     = args["input"][key] 
         
-        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple_MC(class_id=class_id,
+        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple(class_id=class_id,
             process_func=process_root, processes=proc, root_path=root_path, param=param)
-    
     
     # =================================================================
     # Sample conditional theory parameters they are distributed in signal sample
