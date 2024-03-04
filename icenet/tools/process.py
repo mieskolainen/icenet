@@ -185,13 +185,17 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     hash_args = {}
 
-    # Input variables as defined in the python file
-    inputvars_path = f'{cwd}/{config_path}/{args["inputvars"]}.py'
-    if os.path.exists(inputvars_path):
-        hash_args['__hash__inputvars'] = io.make_hash_sha256_file(inputvars_path)
-    else:
-        raise Exception(__name__ + f".read_config: Did not find: {inputvars_path}")
-
+    # Critical Python files content
+    files = {'cuts':      f'{cwd}/{config_path}/cuts.py',
+             'filter':    f'{cwd}/{config_path}/filter.py',
+             'inputvars': f'{cwd}/{config_path}/{args["inputvars"]}.py'}
+    
+    for key in files.keys():
+        if os.path.exists(files[key]):
+            hash_args[f'__hash__{key}'] = io.make_hash_sha256_file(files[key])
+        else:
+            cprint(__name__ + f".read_config: Did not find: {files[key]} [may cause crash]", 'red')
+    
     # Genesis parameters as the first one
     hash_args.update(old_args['genesis_runmode'])
     
