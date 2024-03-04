@@ -446,8 +446,7 @@
   <h1>Source code for icenet.tools.process</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Common input &amp; data reading routines</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2023</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -633,48 +632,78 @@
     <span class="nb">print</span><span class="p">()</span>
     
     <span class="c1"># -------------------------------------------------------------------</span>
-    <span class="c1">## Create a hash based on:</span>
-    <span class="c1"># &quot;rngseed&quot;, &quot;maxevents&quot;, &quot;inputvars&quot;, &quot;genesis&quot; and &quot;inputmap&quot; fields of yaml</span>
+    <span class="c1">## 1. Create the first level hash</span>
     
     <span class="n">hash_args</span> <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="c1"># Input variables as defined in the python file</span>
     <span class="n">inputvars_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.py&#39;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">inputvars_path</span><span class="p">):</span>
         <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;__hash__inputvars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_file</span><span class="p">(</span><span class="n">inputvars_path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.read_config: Did not find: </span><span class="si">{</span><span class="n">inputvars_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">old_args</span><span class="p">[</span><span class="s1">&#39;genesis_runmode&#39;</span><span class="p">])</span> <span class="c1"># This first !</span>
+    <span class="c1"># Genesis parameters as the first one</span>
+    <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">old_args</span><span class="p">[</span><span class="s1">&#39;genesis_runmode&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># These are universal and need to be hashed</span>
     <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;rngseed&#39;</span><span class="p">]</span>
     <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span>
     <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;inputvars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvars&#39;</span><span class="p">]</span>
-    
     <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inputmap</span><span class="p">)</span>
 
+    <span class="c1"># Finally create the hash</span>
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_genesis__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_object</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
     
     <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: Generated config hashes&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
     <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[__hash_genesis__]      : </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">     &#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
     
-    <span class="c1">## Second level hash (depends on all previous) + other parameters</span>
+    <span class="c1"># -------------------------------------------------------------------</span>
+    <span class="c1">## 2. Create the second level hash (depends on all previous) + other parameters</span>
     
     <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span> <span class="ow">or</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
-        <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]</span>
-        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_post_genesis__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_genesis__&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;__&#39;</span> <span class="o">+</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_object</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
+        
+        <span class="c1"># First include all</span>
+        <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        
+        <span class="c1"># Then exclude non-input dependent</span>
+        <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;plot_param&quot;</span><span class="p">)</span>
+        <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;modeltag&quot;</span><span class="p">)</span>
+        <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;models&quot;</span><span class="p">)</span>
+        <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;active_models&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;outlier_param&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;raytune&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;distillation&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hash_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;batch_train_param&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="kc">True</span>
+
+        <span class="c1"># Finally create hash</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_post_genesis__&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_genesis__&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;__&#39;</span> <span class="o">+</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_object</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
         
         <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[__hash_post_genesis__] : </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_post_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
     
     <span class="c1"># -------------------------------------------------------------------</span>
-    <span class="c1">## Create new variables to args dictionary (and create directories)</span>
+    <span class="c1">## Update variables to args dictionary (and create directories)</span>
 
-    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
-    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeltag&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;modeltag&#39;</span><span class="p">]</span>
-    
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;datadir&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/output/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;datadir&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/output/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">runmode</span> <span class="o">!=</span> <span class="s1">&#39;genesis&#39;</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/checkpoint/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/config__</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">safetxt</span><span class="p">(</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1">/modeltag__</span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;modeltag&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plotdir&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/config__</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">safetxt</span><span class="p">(</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1">/inputmap__</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">safetxt</span><span class="p">(</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;inputmap&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1">--modeltag__</span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;modeltag&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/checkpoint/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/config__</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">safetxt</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1">/modeltag__</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeltag&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plotdir&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/figs/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/config__</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">safetxt</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1">/inputmap__</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">safetxt</span><span class="p">(</span><span class="n">cli_dict</span><span class="p">[</span><span class="s2">&quot;inputmap&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1">--modeltag__</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeltag&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">cli</span><span class="o">.</span><span class="n">datapath</span><span class="p">)</span>    
     
