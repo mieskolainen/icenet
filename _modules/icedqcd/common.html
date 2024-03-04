@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.7
+                0.0.9.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -525,24 +525,35 @@
     <span class="c1"># Sample conditional theory parameters they are distributed in signal sample</span>
     
     <span class="n">sig_class</span> <span class="o">=</span> <span class="s2">&quot;class_1&quot;</span> <span class="c1"># fixed here</span>
-    
-    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">MODEL_VARS</span><span class="p">:</span>
-        
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">sig_class</span><span class="p">:</span>
-                
-                <span class="c1"># Random-sample values as in the signal MC</span>
-                <span class="n">p</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">sig_class</span><span class="p">]</span> <span class="o">/</span> <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">sig_class</span><span class="p">]))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># probability per event entry</span>
-                <span class="n">new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">sig_class</span><span class="p">][</span><span class="n">var</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">sig_class</span><span class="p">]</span> <span class="o">/</span> <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">sig_class</span><span class="p">]))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># probability per event entry</span>
 
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Sampling theory conditional parameter &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot; for &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-
-                <span class="c1"># Conditional variable &#39;MODEL_&#39;</span>
-                <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
-
-                <span class="c1"># &quot;Mirror&quot; copy variable &#39;GEN_&#39; (for ROC plots etc. in the evaluation stage)</span>
-                <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">var</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MODEL&#39;</span><span class="p">,</span> <span class="s1">&#39;GEN&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
-    
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="c1"># Loop over classes</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">sig_class</span><span class="p">:</span>
+            
+            <span class="c1"># We pick all variables at once</span>
+            <span class="c1"># (so N-dim random variable N-tuplets are sampled 1-to-1 as in signal class)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">MODEL_VARS</span>
+            
+            <span class="c1"># Random-sample values as in the signal MC</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+            
+            <span class="c1"># Reshape into numpy array</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)):</span>
+                <span class="n">A</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">sig_class</span><span class="p">][</span><span class="n">var</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+            
+            <span class="c1"># Sample</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Sampling theory conditional parameter &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot; for &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Set conditional variables &#39;MODEL_&#39;</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+            
+            <span class="c1"># &quot;Mirror&quot; copy variables to &#39;GEN_&#39; (for ROC plots etc. in the evaluation stage)</span>
+            <span class="n">var_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MODEL&#39;</span><span class="p">,</span> <span class="s1">&#39;GEN&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">var_new</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
     
     <span class="c1"># =================================================================</span>
     <span class="c1"># *** Finally combine ***</span>

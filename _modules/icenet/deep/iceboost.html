@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.7
+                0.0.9.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -566,7 +566,7 @@
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">## MI Regularization</span>
-
+    
     <span class="n">MI_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">MI_param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -590,7 +590,7 @@
             <span class="n">W</span>     <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
             <span class="n">mask</span>  <span class="o">=</span> <span class="n">reg_param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;evt_mask_</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
             
-            <span class="c1"># Total maximum is limited, pick random subsample</span>
+            <span class="c1"># Total maximum is limited, pick subsample</span>
             <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]:</span>
                 <span class="n">X</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]]</span>
                 <span class="n">Z</span>    <span class="o">=</span> <span class="n">Z</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]]</span>
@@ -724,7 +724,10 @@
             <span class="c1"># Per filter category</span>
             <span class="k">if</span> <span class="s1">&#39;set_filter&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
                 <span class="n">mask</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">filter_constructor</span><span class="p">(</span>
-                    <span class="n">filters</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;set_filter&#39;</span><span class="p">],</span> <span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">cind</span><span class="p">,</span><span class="o">...</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+                    <span class="n">filters</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;set_filter&#39;</span><span class="p">],</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">cind</span><span class="p">,</span><span class="o">...</span><span class="p">],</span>
+                    <span class="n">ids</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">cind</span><span class="p">])</span>
             
             <span class="c1"># All inclusive</span>
             <span class="k">else</span><span class="p">:</span>

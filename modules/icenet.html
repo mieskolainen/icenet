@@ -36,7 +36,7 @@
             
           </a>
               <div class="version">
-                0.0.9.7
+                0.0.9.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -2517,11 +2517,11 @@ returns the loss. Optional for most optimizers.</p>
 <dd><p>N-dimensional generalized cartesian product between arrays</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>*arrays</strong> – a list of arrays</p>
+<dd class="field-odd"><p><strong>*arrays</strong> – a list of numpy arrays</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
-<p>cartesian_product(<a href="#id1"><span class="problematic" id="id2">*</span></a>[values[‘m’], values[‘ctau’]])</p>
+<p>cartesian_product(<a href="#id1"><span class="problematic" id="id2">*</span></a>[np.array([1,2,3]), np.array([100,200,500])])</p>
 </dd></dl>
 
 <dl class="py function">
@@ -4162,7 +4162,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.make_plots">
-<span class="sig-name descname"><span class="pre">make_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#make_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.make_plots" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">make_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#make_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.make_plots" title="Link to this definition">¶</a></dt>
 <dd><p>Basic Q/A-plots</p>
 </dd></dl>
 
@@ -4173,7 +4173,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.plot_XYZ_wrap">
-<span class="sig-name descname"><span class="pre">plot_XYZ_wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VARS_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_RAW</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#plot_XYZ_wrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.plot_XYZ_wrap" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_XYZ_wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_RAW</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#plot_XYZ_wrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.plot_XYZ_wrap" title="Link to this definition">¶</a></dt>
 <dd><p>Arbitrary plot wrapper function.</p>
 </dd></dl>
 
@@ -4422,7 +4422,7 @@ ax:  figure axis</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.stx.filter_constructor">
-<span class="sig-name descname"><span class="pre">filter_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/stx.html#filter_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.stx.filter_constructor" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">filter_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/stx.html#filter_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.stx.filter_constructor" title="Link to this definition">¶</a></dt>
 <dd><p>Filter product main constructor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -4430,6 +4430,7 @@ ax:  figure axis</p>
 <li><p><strong>filters</strong> – yaml file input</p></li>
 <li><p><strong>X</strong> – columnar input data</p></li>
 <li><p><strong>ids</strong> – data column keys (list of strings)</p></li>
+<li><p><strong>y</strong> – class labels (default None), used for diplomat (always passing) classes</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.7
+                0.0.9.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -454,7 +454,7 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-
+<span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
@@ -1432,20 +1432,24 @@
             <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.ROC_plot: metrics[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">) is None, continue without&#39;</span><span class="p">)</span>
                 <span class="k">continue</span>
-
+            
             <span class="n">fpr</span>        <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr</span>
             <span class="n">tpr</span>        <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr</span>
             <span class="n">thresholds</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">thresholds</span>
-
+            
             <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-                <span class="c1"># Percentile bootstrap based uncertainties</span>
-                <span class="n">tpr_lo</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-                <span class="n">tpr_hi</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
                 
-                <span class="n">fpr_lo</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-                <span class="n">fpr_hi</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-
+                <span class="c1"># Percentile bootstrap based uncertainties</span>
+                <span class="n">tpr_CI</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+                <span class="n">tpr_lo</span> <span class="o">=</span> <span class="n">tpr_CI</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">tpr_hi</span> <span class="o">=</span> <span class="n">tpr_CI</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                
+                <span class="n">fpr_CI</span> <span class="o">=</span> <span class="n">cortools</span><span class="o">.</span><span class="n">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fpr_bootstrap</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+                <span class="n">fpr_lo</span> <span class="o">=</span> <span class="n">fpr_CI</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">fpr_hi</span> <span class="o">=</span> <span class="n">fpr_CI</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            
             <span class="c1"># Autodetect a ROC point triangle (instead of a curve)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">fpr</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">tpr</span> <span class="o">=</span> <span class="n">tpr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Remove first and last</span>

@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.7
+                0.0.9.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -514,10 +514,10 @@
 <span class="sd">    N-dimensional generalized cartesian product between arrays</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        *arrays: a list of arrays</span>
-<span class="sd">        </span>
+<span class="sd">        *arrays: a list of numpy arrays</span>
+<span class="sd">    </span>
 <span class="sd">    Example:</span>
-<span class="sd">        cartesian_product(*[values[&#39;m&#39;], values[&#39;ctau&#39;]])</span>
+<span class="sd">        cartesian_product(*[np.array([1,2,3]), np.array([100,200,500])])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">la</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">result_type</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">)</span>
