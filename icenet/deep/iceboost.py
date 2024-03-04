@@ -120,7 +120,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     
     # --------------------------------------------------------------------
     ## MI Regularization
-
+    
     MI_loss = torch.tensor(0.0).to(device)
     
     if MI_param is not None:
@@ -144,7 +144,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             W     = weights[cind]
             mask  = reg_param[f'evt_mask_{loss_mode}'][c]
             
-            # Total maximum is limited, pick random subsample
+            # Total maximum is limited, pick subsample
             if reg_param['max_N'] is not None and X.shape[0] > reg_param['max_N']:
                 X    = X[0:reg_param['max_N']]
                 Z    = Z[0:reg_param['max_N']]
@@ -276,7 +276,10 @@ def create_filters(param, data_trn, data_val):
             # Per filter category
             if 'set_filter' in param:
                 mask, text, path = stx.filter_constructor(
-                    filters=param['set_filter'], X=data.x[cind,...], ids=data_trn.ids)
+                    filters=param['set_filter'],
+                    X=data.x[cind,...],
+                    ids=data_trn.ids,
+                    y=data.y[cind])
             
             # All inclusive
             else:

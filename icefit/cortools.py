@@ -22,7 +22,7 @@ import pandas as pd
 from icefit import mine
 
 
-def distance_corr_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=None):
+def distance_corr_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=None, p: float=2.0):
     """
     Distance Correlation, complexity O(N^2)
     
@@ -36,6 +36,7 @@ def distance_corr_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=
         x       : data (N x dim)
         y       : data (N x dim), where dim can be the same or different than for x
         weights : event weights (not implemented)
+        p       : p-norm [0,inf] value
     """
     N = x.shape[0]
 
@@ -46,7 +47,7 @@ def distance_corr_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=
         tot_mean  = D.flatten().mean()          # [scalar]
         
         return D - row_means - col_means + tot_mean
-
+    
     # Add feature dimension if 1D
     if len(x.shape) == 1:
         x = x.unsqueeze(-1)
@@ -58,13 +59,13 @@ def distance_corr_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=
     y = y.unsqueeze(0)
     
     # Pairwise distance matrices
-    Dx = torch.cdist(x, x).squeeze()
-    Dy = torch.cdist(y, y).squeeze()
+    Dx = torch.cdist(x, x, p=p).squeeze()
+    Dy = torch.cdist(y, y, p=p).squeeze()
     
     # Double centered matrices
     A = double_centering(Dx)
     B = double_centering(Dy)
-    
+
     dcovXY = (A * B).flatten().mean()  # V^2(X,Y) >= 0
     dvarXX = (A * A).flatten().mean()  # V^2(X,X) >= 0
     dvarYY = (B * B).flatten().mean()  # V^2(Y,Y) >= 0
@@ -97,9 +98,9 @@ def corrcoeff_weighted_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Te
     
     return D @ C @ D
 
-def percentile_per_dim(x: np.ndarray, q: float):
+def percentile_per_dim(x: np.ndarray, q: float, **kwargs):
     """
-    Compute percentile per column dimension
+    Compute percentiles for each dimension (column) over samples (rows)
 
     Args:
         input: (N x dim)
@@ -108,10 +109,7 @@ def percentile_per_dim(x: np.ndarray, q: float):
     Returns:
         out:   array with length dim
     """
-    out = np.zeros(x.shape[1])
-    for i in range(len(out)):
-        out[i] = np.percentile(x[:,i], q)
-    return out
+    return np.percentile(a=x, q=q, axis=0, **kwargs)
 
 def prc_CI(x: np.ndarray, alpha: float):
     return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])

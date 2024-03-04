@@ -1,6 +1,6 @@
 # Event sample re-weighting tools
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 import awkward as ak
@@ -49,7 +49,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
             except:
                 break    
         
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found classes: {np.unique(y)} from y)")
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> | Found classes: {np.unique(y)} from y")
         
         ### Collect re-weighting variables
         RV = {}
@@ -199,9 +199,9 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
     
     # No differential re-weighting    
     else:
-        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> (Found classes {class_ids} from y)")
+        print(__name__ + f".compute_ND_reweights: Reference class: <{args['reference_class']}> | Found classes {class_ids} from y")
         weights_doublet = {}
-
+        
         for c in class_ids:
             weights_doublet[c] = np.zeros(len(x))
             sample_weights = w[y==c] if w is not None else 1.0 # Feed in the input weights

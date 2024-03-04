@@ -42,7 +42,7 @@ mva_param: &MVA_INPUT_PARAM
 
     - name: 'muonSV'
       var:  'chi2'
-      ascending: True  # True ~ smallest first, False ~ largest first
+      ascending: False # True ~ smallest first, False ~ largest first
     
     - name: 'SV'
       var:  'dlen'
@@ -112,16 +112,14 @@ train_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-  
-  input_tag: null
-  model_tag: null
+  modeltag:  null
   
   # Conditional (theory parametric) dequantization
   conditional_param:
     dequantize_common: True          # Under common.py
     dequantize_batch:  False         # (mini)batch based (reservation)
     n_interp:   1000                 # Number of interpolation points per dimension
-    kind:       'cubic'              # Interpolator ('linear', 'quadratic', 'cubic' ...),
+    kind:       'quadratic'          # Interpolator ('linear', 'quadratic', 'cubic' ...),
                                      # see scipy.interpolate.interp1d
   
   ## Reweighting setup
@@ -155,10 +153,12 @@ train_runmode:
     #- gnet1
     #- gnet3
     
-    - iceboost01-MI
-    - iceboost01-DA-MI
+    #- iceboost01-MI
+    #- iceboost01-DA-MI
     - iceboost01-DA
+    - iceboost01-DA-NC
     - xgb01
+    - xgb01-NC
     
     #- dmlp
     #- lgr0
@@ -205,15 +205,13 @@ eval_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-
-  input_tag: null
-  model_tag: null
+  modeltag:  null
   
   # Conditional (theory parametric) dequantization
   conditional_param:
-    dequantize_common: True          # Under common.py
+    dequantize_common: False         # Under common.py
     n_interp:   1000                 # Number of interpolation points per dimension
-    kind:       'cubic'              # Interpolator ('linear', 'quadratic', 'cubic' ...),
+    kind:       'quadratic'          # Interpolator ('linear', 'quadratic', 'cubic' ...),
                                      # see scipy.interpolate.interp1d
   
   reweight: true
@@ -232,9 +230,7 @@ optimize_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-
-  input_tag: null
-  model_tag: null
+  modeltag:  null
 
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
@@ -252,10 +248,8 @@ deploy_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-
-  input_tag: null
-  model_tag: null
-
+  modeltag:  null
+  
   mc_param: !include configs/dqcd/mc_param.yml
   
   models:  !include configs/dqcd/models.yml

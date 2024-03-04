@@ -1,6 +1,6 @@
 # Deep domain adaptation functions
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import torch
 from torch.autograd import Function

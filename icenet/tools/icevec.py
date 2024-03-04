@@ -258,8 +258,8 @@ class vec4:
         if (self.z > 0):
             return 10e10
         else:
-            return -10e10;
-
+            return -10e10
+    
     @property
     def abseta(self):
         return np.abs(self.eta)

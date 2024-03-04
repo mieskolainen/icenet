@@ -69,6 +69,9 @@ train_runmode:
   <<: *INPUT_PARAM
   <<: *MVA_INPUT_PARAM
 
+  maxevents: null
+  modeltag:  null
+
   models:  !include configs/brk/models.yml
   active_models: &ACTIVE_MODELS
     - xgb
@@ -86,6 +89,9 @@ train_runmode:
 eval_runmode:
   <<: *INPUT_PARAM
   <<: *MVA_INPUT_PARAM
+  
+  maxevents: null
+  modeltag:  null
 
   active_models: *ACTIVE_MODELS
 

@@ -84,9 +84,7 @@ train_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-  
-  input_tag: null
-  model_tag: null
+  modeltag:  null
 
   ## Reweighting setup
   reweight: true
@@ -145,10 +143,8 @@ eval_runmode:
   <<: *MVA_INPUT_PARAM
   
   maxevents: null
-
-  input_tag: null
-  model_tag: null
-
+  modeltag:  null
+  
   reweight: true
   reweight_mode: 'load'          # 'write', 'load'
   reweight_file: 'reweight_train.pkl'

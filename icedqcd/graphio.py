@@ -159,7 +159,7 @@ def parse_graph_data(X, ids, features, node_features, graph_param,
                                        X[ev][a].eta[k],
                                        X[ev][a].phi[k],
                                        X[ev][a].mass[k])
-
+                    
                     elif key == 'cpf':
                         v.setXYZM(X[ev].cpf.px[k], X[ev].cpf.py[k], X[ev].cpf.pz[k], M_PION)
 

@@ -3,7 +3,7 @@
 # https://arxiv.org/abs/1312.6114
 # https://lilianweng.github.io/posts/2018-08-12-vae/
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 

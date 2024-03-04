@@ -1,7 +1,6 @@
 # Non-Negative matrix factorization
 #
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numba
 import numpy as np

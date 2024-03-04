@@ -110,16 +110,14 @@ train_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
+  modeltag:  null
   
-  input_tag: null
-  model_tag: null
-
   # Conditional (theory parametric) dequantization
   conditional_param:
     dequantize_common: True           # Under common.py
     dequantize_batch:  False          # (mini)batch based training (reservation)
     n_interp:   1000                  # Number of interpolation points per dimension
-    kind:       'cubic'               # Interpolator ('linear', 'quadratic', 'cubic' ...),
+    kind:       'quadratic'           # Interpolator ('linear', 'quadratic', 'cubic' ...),
                                       # see scipy.interpolate.interp1d
   
   ## Reweighting setup
@@ -153,10 +151,12 @@ train_runmode:
     #- gnet1
     #- gnet3
     
-    - iceboost01-MI
-    - iceboost01-DA-MI
+    #- iceboost01-MI
+    #- iceboost01-DA-MI
     - iceboost01-DA
+    - iceboost01-DA-NC
     - xgb01
+    - xgb01-NC
     
     #- xgb01-no-mass
     #- xgb01-no-jets
@@ -206,15 +206,13 @@ eval_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-
-  input_tag: null
-  model_tag: null
+  modeltag:  null
   
   # Conditional (theory parametric) dequantization
   conditional_param:
-    dequantize_common: True           # Under common.py
+    dequantize_common: False           # Under common.py
     n_interp:   1000                  # Number of interpolation points per dimension
-    kind:       'cubic'               # Interpolator ('linear', 'quadratic', 'cubic' ...),
+    kind:       'quadratic'              # Interpolator ('linear', 'quadratic', 'cubic' ...),
                                       # see scipy.interpolate.interp1d
   
   reweight: true
@@ -233,9 +231,7 @@ optimize_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-
-  input_tag: null
-  model_tag: null
+  modeltag:  null
 
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
@@ -253,10 +249,8 @@ deploy_runmode:
   <<: *MVA_INPUT_PARAM
 
   maxevents: null
-
-  input_tag: null
-  model_tag: null
-
+  modeltag:  null
+  
   mc_param: !include configs/dqcd/mc_param_new.yml
   
   models:  !include configs/dqcd/models.yml

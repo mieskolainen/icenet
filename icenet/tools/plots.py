@@ -8,7 +8,7 @@ import awkward as ak
 import torch
 import gc
 from pprint import pprint
-
+import copy
 
 from tqdm import tqdm
 
@@ -933,20 +933,24 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
             if metrics[i] is None:
                 print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
                 continue
-
+            
             fpr        = metrics[i].fpr
             tpr        = metrics[i].tpr
             thresholds = metrics[i].thresholds
-
+            
             if metrics[i].tpr_bootstrap is not None:
 
-                # Percentile bootstrap based uncertainties
-                tpr_lo = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=100*(alpha/2))
-                tpr_hi = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=100*(1-alpha/2))
+                q = [100*(alpha/2), 100*(1-alpha/2)]
                 
-                fpr_lo = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=100*(alpha/2))
-                fpr_hi = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=100*(1-alpha/2))
-
+                # Percentile bootstrap based uncertainties
+                tpr_CI = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=q)
+                tpr_lo = tpr_CI[0]
+                tpr_hi = tpr_CI[1]
+                
+                fpr_CI = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=q)
+                fpr_lo = fpr_CI[0]
+                fpr_hi = fpr_CI[1]
+            
             # Autodetect a ROC point triangle (instead of a curve)
             if len(np.unique(fpr)) == 3:
                 tpr = tpr[1:-1] # Remove first and last

@@ -1,6 +1,6 @@
 # Advanced histogramming & automated plotting functions
 # 
-# (c) 2021 Mikael Mieskolainen
+# (c) 2024 Mikael Mieskolainen
 # Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 

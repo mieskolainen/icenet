@@ -1,7 +1,6 @@
 # Input data containers and memory management
 # 
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 import awkward as ak
