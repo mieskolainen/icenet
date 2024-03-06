@@ -2,7 +2,7 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 
   filter[0]:
     operator: null    # null (single set), 'cartesian_and', 'cartesian_or'
-    sets: [0]         # input set ids (one or two)
+    sets: [0]         # input set ids (one or several)
   
   # ... more filters here
 
@@ -28,9 +28,11 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 # -----------------------------------------------------------------------
 
 basic:
-  active: false
+  active: True
   nbins:  70
-  exclude_vals: [null, -999.0]
+  percentile_range: [0.5, 99.5]
+  exclude_vals: [null, -999]
+  plot_unweighted: True
 
 corrmat:
   active: false
@@ -75,7 +77,8 @@ MVA_2D:
     var:   ['tagger_score']
     edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
             {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
-
+    density: True
+  
     set_filter: *FINAL_STATE_FILTER
     
     # -----------------------------
@@ -92,4 +95,5 @@ MVA_2D:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
-
+  #  density: True
+  

@@ -1,6 +1,6 @@
 # Compute S/sqrt[B] (TBD. Update to work with the latest model scenarios)
 # 
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 import awkward as ak
@@ -8,17 +8,17 @@ from tqdm import tqdm
 import pickle
 from pprint import pprint
 import os
+from termcolor import colored, cprint
 
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import interpolate
 from scipy.stats import ncx2,norm
 
-from icenet.tools import aux
+from icenet.tools import aux, io
 from icefit import cortools
 
 #from PyPDF2 import PdfFileMerger
-
 
 latex_header = \
 """
@@ -27,7 +27,7 @@ latex_header = \
 \\usepackage[margin=0.7in]{geometry}
 \\usepackage[parfill]{parskip}
 \\usepackage[utf8]{inputenc}
-  
+
 % Related to math
 \\usepackage{amsmath,amssymb,amsfonts,amsthm}
 
@@ -39,8 +39,13 @@ def func_binormal(x, a, b):
   # Formulas 4, (14):
   # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570585/pdf/nihms-736507.pdf
   F_inv = (1/a) * ncx2.ppf(1-x,  df=1, nc=b)
-  return 1-ncx2.cdf(F_inv, df=1, nc=a*b)
+  return 1 - ncx2.cdf(F_inv, df=1, nc=a*b)
 """
+
+def mask_eff(mask, y_true, class_id, weights):
+  num = np.sum(weights[y_true == class_id]*mask[y_true == class_id])
+  den = np.sum(weights[y_true == class_id])
+  return num / den
 
 def func_binormal(x, a, b):  
   # "binormal" function
@@ -57,7 +62,7 @@ def optimize_selection(args):
   def dprint(string, mode='a'):
     print(string)
     with open(latex_filename, mode) as f:
-      f.write(f'{string} \n')
+      f.write(string + '\n')
 
   latex_path     = aux.makedir(f'{args["plotdir"]}/eval/significance')
   latex_filename = f'{latex_path}/optimize.tex'
@@ -89,8 +94,8 @@ def optimize_selection(args):
 
   print(__name__ + f'.optimize_models: Running ...')
 
-  print('resdict:')
-  pprint(resdict)
+  #print('resdict:')
+  #pprint(resdict)
 
   # MVA-model labels
   MVA_model_names = resdict['roc_labels']['inclusive']
@@ -132,7 +137,10 @@ def optimize_selection(args):
     B_acc_eff_xs += eff_acc * xs
     B_xs_tot     += xs
     
-    dprint(f'{name.replace("_", "-")} & {xs:0.1f} & {trg_eA:0.3f} & {cut_eA:0.3f} & {eff_acc:0.3f} & {N:0.1E} \\\\')
+    name = name.replace("_", "-")
+    name = (name[:85] + '..') if len(name) > 85 else name # Truncate maximum length, add ..
+    
+    dprint(f'{name} & {xs:0.1f} & {trg_eA:0.3f} & {cut_eA:0.3f} & {eff_acc:0.3f} & {N:0.1E} \\\\')
   
   B_trg_eA  = B_trg_eA_xs  / B_xs_tot
   B_cut_eA  = B_cut_eA_xs  / B_xs_tot
@@ -157,20 +165,24 @@ def optimize_selection(args):
     B  = np.zeros(len(S))
     xs = np.zeros(len(S))
 
-    S_trg_eA = np.zeros(len(S))
-    S_cut_eA = np.zeros(len(S))
+    S_trg_eA = np.zeros(len(S))       # Trigger eff x acceptance
+    S_cut_eA = np.zeros(len(S))       # Basic cuts
 
-    MVA_eff  = np.zeros((len(B), 2))
+    CAT_eff  = np.zeros((len(S), 2))  # Category cuts
+    MVA_eff  = np.zeros((len(S), 2))  # MVA cut
+    
     names    = len(S) * [None]
 
-    # Loop over different signal model points
     i = 0
-
+    
     # Create and instance of PdfFileMerger() class
     # merger = PdfFileMerger()
 
-    for name in info[f"class_{c}"].keys():
+    sum_mask = None
 
+    # Loop over different signal model point processes
+    for name in info[f"class_{c}"].keys():
+      
       #print(name)
 
       names[i]  = name.replace('_', '-')
@@ -180,9 +192,30 @@ def optimize_selection(args):
       # ----------------
       # Pick model parameters
       model_param = proc['yaml']['model_param']
-      #print(model_param)
+      #print(model_param
 
-      key       = f"$m = {model_param['m']}$ AND $c\\tau = {model_param['ctau']}$"
+      # Find the matching ROC stats
+      
+      key = None
+
+      #pprint(resdict['roc_mstats'].keys())
+      
+      for label in resdict['roc_mstats'].keys():
+        matches = 0
+        for parameter_name in model_param.keys():
+          if f'{parameter_name} = {model_param[parameter_name]:g}' in label:
+            matches += 1
+
+        if matches == len(model_param.keys()): # all parameters match
+          key = label
+          cprint(f'Signal: {model_param}:  Found matching filter: {label}' , 'green')
+          break
+      
+      if key is None:
+        cprint(f'Warning: No matching filter for the signal: {model_param}, skipping', 'red')
+        continue
+      
+      # Get evaluation results
       roc_obj   = resdict['roc_mstats'][key][MVA_model_index]
       roc_path  = resdict['roc_paths'][key][MVA_model_index]
 
@@ -190,12 +223,14 @@ def optimize_selection(args):
 
       roc_label = resdict['roc_labels'][key][MVA_model_index]
 
-      x,y       = roc_obj.fpr,roc_obj.tpr
-      y_err     = np.ones(len(y))
+      x,y     = roc_obj.fpr,roc_obj.tpr
+      y_err   = np.ones(len(y))
 
       #for k in range(len(y_err)):
       #  y_err[k] = np.std(roc_obj.tpr_bootstrap[:,k])
 
+      y_pred  = resdict['y_preds'][MVA_model_index]
+      
       # -----------------
       # Interpolate ROC-curve
       
@@ -222,32 +257,50 @@ def optimize_selection(args):
       # -----------------
 
       ## Pick ROC-working point from the analytic fit
-      #xval = np.logspace(-8, 0, 1000)
-      #yhat = func_binormal(B_target_eff, *popt)
+      # xval = np.logspace(-8, 0, 1000)
+      # yhat = func_binormal(B_target_eff, *popt)
 
       # -----------------
-      # Construct efficiency for background, signal
+      # Construct category efficiency for background [0], signal [1]
+
+      mask         = resdict['roc_filters'][key][MVA_model_index]
+      eval_y       = resdict['data'].y
+      eval_weights = resdict['data'].w
+
+      CAT_eff[i,:] = np.array([mask_eff(mask=mask, y_true=eval_y, class_id=0, weights=eval_weights),
+                               mask_eff(mask=mask, y_true=eval_y, class_id=1, weights=eval_weights)])
+      
+      if sum_mask is None:      
+        sum_mask = mask
+      else:
+        sum_mask = np.logical_and(sum_mask, mask)
+      
+      print(np.round(CAT_eff[i,:], 3))
+      print(mask)
+      
+      # -----------------
+      # Construct MVA efficiency for background [0], signal [1]
 
       MVA_eff[i,:] = np.array([B_target_eff, yhat])
       
       # ----------------
       # Compute background event count
-      B[i]        = B_tot * MVA_eff[i,0]
+      B[i]    = B_tot * MVA_eff[i,0]
 
       # ----------------
-      xs[i]       = proc['yaml']["xs"]
-      eff_acc     = proc['eff_acc']
+      xs[i]   = proc['yaml']["xs"]
+      eff_acc = proc['eff_acc']
 
       S_trg_eA[i] = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
       S_cut_eA[i] = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
       # ----------------
 
       # Compute signal event count 
-      S[i]        = S_trg_eA[i] * S_cut_eA[i] * xs[i] * L_int * MVA_eff[i,1]
+      S[i] = S_trg_eA[i] * S_cut_eA[i] * MVA_eff[i,1] * xs[i] * L_int
 
       # ------------------------------------
       fig,ax = plt.subplots(1,2)
-      alpha = 0.32
+      alpha  = 0.32
 
       for k in [0,1]:
 
@@ -293,6 +346,19 @@ def optimize_selection(args):
 
       i += 1
 
+    print('Sum of all filters:')
+    print(f'np.sum(CAT_eff, axis=0) = {np.sum(CAT_eff, axis=0)}')
+    
+    """
+    data   = resdict['data']
+    data   = data[['GEN_mpi', 'GEN_mA', 'GEN_ctau']]
+    
+    failed = (sum_mask == 0) * (data.y == 0)
+    xx = data.x[failed]
+    for i in range(len(xx)):
+      print(xx[i])
+    """
+    
     #merger.write(f'{path}/ROC_all.pdf')
     print('')
 
@@ -311,13 +377,13 @@ def optimize_selection(args):
       # Gaussian limit
       ds   = S[i] / np.sqrt(B[i])
 
-      line = f'{names[i]} & {xs[i]:0.1f} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2E} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1E} \\\\'
+      line = f'{names[i]} & {xs[i]:0.1f} & {MVA_eff[i,0]:0.1E} & {S_trg_eA[i]:0.3f} & {S_cut_eA[i]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {S[i]:0.1E} & {ds:0.1E} \\\\'
       dprint(line)
-    
+
     # print(roc_obj.thresholds)
     dprint('\\end{tabular}')
     dprint('')
-    
+  
   dprint('\\end{document}')
 
   # Compile latex

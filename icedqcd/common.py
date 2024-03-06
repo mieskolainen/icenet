@@ -56,7 +56,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         "args":        args,
         "load_ids":    inputvars.LOAD_VARS
     }
-
+    
     INFO = {}
     X    = {}
     Y    = {}
@@ -70,32 +70,42 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         class_id = int(key.split("_")[1])
         proc     = args["input"][key] 
         
-        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple_MC(class_id=class_id,
+        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple(class_id=class_id,
             process_func=process_root, processes=proc, root_path=root_path, param=param)
     
-    
     # =================================================================
-    # Sample conditional theory parameters they are distributed in signal sample
+    # Sample conditional theory parameters as they are distributed in signal sample
     
     sig_class = "class_1" # fixed here
-    
-    for var in inputvars.MODEL_VARS:
-        
-        for key in X.keys():
-            if key != sig_class:
-                
-                # Random-sample values as in the signal MC
-                p   = ak.to_numpy(W[sig_class] / ak.sum(W[sig_class])).squeeze() # probability per event entry
-                new = np.random.choice(ak.to_numpy(X[sig_class][var]).squeeze(), size=len(X[key]), replace=True, p=p)
+    p = ak.to_numpy(W[sig_class] / ak.sum(W[sig_class])).squeeze() # probability per event entry
 
-                print(__name__ + f'.load_root_file: Sampling theory conditional parameter "{var}" for "{key}"')
-
-                # Conditional variable 'MODEL_'
-                X[key][var] = ak.Array(new)
-
-                # "Mirror" copy variable 'GEN_' (for ROC plots etc. in the evaluation stage)
-                X[key][var.replace('MODEL', 'GEN')] = ak.Array(new)
-    
+    for key in X.keys(): # Loop over classes
+        if key != sig_class:
+            
+            # We pick all variables at once
+            # (so N-dim random variable N-tuplets are sampled 1-to-1 as in signal class)
+            var = inputvars.MODEL_VARS
+            
+            # Reshape into numpy array
+            N = len(X[sig_class])
+            A = np.zeros((N, len(var)), dtype=np.float32)
+            for i in range(len(var)):
+                A[:,i] = ak.to_numpy(X[sig_class][var[i]]).squeeze()
+            
+            # Sample
+            rng = np.random.default_rng()
+            new = rng.choice(A, axis=0, size=len(X[key]), p=p, replace=True)
+            
+            print(__name__ + f'.load_root_file: Sampling theory conditional parameter "{var}" for "{key}"')
+            
+            # Set conditional variables 'MODEL_'
+            for i in range(len(var)):
+                X[key][var[i]] = ak.Array(new[:,i])
+            
+            # "Mirror" copy variables to 'GEN_' (for ROC plots etc. in the evaluation stage)
+            var_new = [s.replace('MODEL', 'GEN') for s in var]
+            for i in range(len(var)):
+                X[key][var_new[i]] = ak.Array(new[:,i])
     
     # =================================================================
     # *** Finally combine ***
@@ -224,7 +234,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     for d in args['jagged_filter']:
         
         expr = 'data.x.' + d['condition'].strip() # strip to remove leading/trailing spaces
-        print(__name__ + f'.splitfactor: Filtering collection {d} with {expr}')
+        cprint(__name__ + f'.splitfactor: Filtering collection {d} with {expr}', 'yellow')
         
         filter_ind = eval(expr)
         data.x[d['name']] = data.x[d['name']][filter_ind]
@@ -234,7 +244,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     
     for d in args['jagged_order']:
 
-        print(__name__ + f'.splitfactor: Collection re-ordering {d}')
+        cprint(__name__ + f'.splitfactor: Collection re-ordering {d}', 'yellow')
         
         sort_ind = ak.argsort(data.x[d['name']][d['var']], ascending=d['ascending'])
         data.x[d['name']] = data.x[d['name']][sort_ind]

@@ -1,7 +1,6 @@
 # Common input & data reading routines
 #
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import argparse
 import numpy as np
@@ -182,48 +181,82 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     print()
     
     # -------------------------------------------------------------------
-    ## Create a hash based on:
-    # "rngseed", "maxevents", "inputvars", "genesis" and "inputmap" fields of yaml
+    ## 1. Create the first level hash
     
     hash_args = {}
 
-    inputvars_path = f'{cwd}/{config_path}/{args["inputvars"]}.py'
-    if os.path.exists(inputvars_path):
-        hash_args['__hash__inputvars'] = io.make_hash_sha256_file(inputvars_path)
-    else:
-        raise Exception(__name__ + f".read_config: Did not find: {inputvars_path}")
-
-    hash_args.update(old_args['genesis_runmode']) # This first !
+    # Critical Python files content
+    files = {'cuts':      f'{cwd}/{config_path}/cuts.py',
+             'filter':    f'{cwd}/{config_path}/filter.py',
+             'inputvars': f'{cwd}/{config_path}/{args["inputvars"]}.py'}
+    
+    for key in files.keys():
+        if os.path.exists(files[key]):
+            hash_args[f'__hash__{key}'] = io.make_hash_sha256_file(files[key])
+        else:
+            cprint(__name__ + f".read_config: Did not find: {files[key]} [may cause crash]", 'red')
+    
+    # Genesis parameters as the first one
+    hash_args.update(old_args['genesis_runmode'])
+    
+    # These are universal and need to be hashed
     hash_args['rngseed']   = args['rngseed']
     hash_args['maxevents'] = args['maxevents']
     hash_args['inputvars'] = args['inputvars']
-    
     hash_args.update(inputmap)
 
+    # Finally create the hash
     args['__hash_genesis__'] = io.make_hash_sha256_object(hash_args)
     
     cprint(__name__ + f'.read_config: Generated config hashes', 'magenta')
     cprint(f'[__hash_genesis__]      : {args["__hash_genesis__"]}     ', 'magenta')
     
-    ## Second level hash (depends on all previous) + other parameters
+    # -------------------------------------------------------------------
+    ## 2. Create the second level hash (depends on all previous) + other parameters
     
     if runmode == 'train' or runmode == 'eval':
-        hash_args['use_conditional']  = args['use_conditional']
-        args['__hash_post_genesis__'] = args['__hash_genesis__'] + '__' + io.make_hash_sha256_object(hash_args)
+        
+        # First include all
+        hash_args.update(args)
+        
+        # Then exclude non-input dependent
+        hash_args.pop("plot_param")
+        hash_args.pop("modeltag")
+        hash_args.pop("models")
+        hash_args.pop("active_models")
+        
+        if runmode == 'train':
+            try:
+                hash_args.pop("outlier_param")
+            except:
+                True
+            try:
+                hash_args.pop("raytune")
+            except:
+                True
+            try:
+                hash_args.pop("distillation")
+            except:
+                True
+            try:
+                hash_args.pop("batch_train_param")
+            except:
+                True
+
+        # Finally create hash
+        args['__hash_post_genesis__']  = args['__hash_genesis__'] + '__' + io.make_hash_sha256_object(hash_args)
         
         cprint(f'[__hash_post_genesis__] : {args["__hash_post_genesis__"]}', 'magenta')
     
     # -------------------------------------------------------------------
-    ## Create new variables to args dictionary (and create directories)
+    ## Update variables to args dictionary (and create directories)
 
-    args["config"]     = cli_dict['config']
-    args["modeltag"]   = cli_dict['modeltag']
-    
-    args['datadir']    = aux.makedir(f'{cwd}/output/{args["rootname"]}')
+    args["config"]       = cli_dict['config']
+    args['datadir']      = aux.makedir(f'{cwd}/output/{args["rootname"]}')
     
     if runmode != 'genesis':
-        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/modeltag__{cli_dict["modeltag"]}')
-        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(cli_dict["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{cli_dict["modeltag"]}')
+        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}')
+        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
     
@@ -283,13 +316,14 @@ def generic_flow(rootname, func_loader, func_factor):
         
         prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids,
                                exclude_vals=[args['imputation_param']['fill_value']])
-        make_plots(data=data['trn'], args=args)
+        make_plots(data=data['trn'], args=args, runmode=runmode)
         train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 
     if runmode == 'eval':
 
         prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids,
                                exclude_vals=[args['imputation_param']['fill_value']])
+        make_plots(data=data['tst'], args=args, runmode=runmode)
         evaluate_models(data=data['tst'], info=data['info'], args=args)
 
     return args, runmode
@@ -826,10 +860,15 @@ def evaluate_models(data=None, info=None, args=None):
     global roc_mstats
     global roc_labels
     global roc_paths
+    global roc_filters
+    global y_preds
     global corr_mstats
+    
     roc_mstats  = {}
     roc_labels  = {}
     roc_paths   = {}
+    y_preds     = []
+    roc_filters = {}
     corr_mstats = {}
 
     global ROC_binned_mstats
@@ -857,7 +896,7 @@ def evaluate_models(data=None, info=None, args=None):
     X       = None
     X_RAW   = None
     ids_RAW = None
-
+    
     y       = None
     weights = None
     
@@ -900,10 +939,10 @@ def evaluate_models(data=None, info=None, args=None):
         X_deps  = data['data_deps'].x
     
     X_kin    = None
-    VARS_kin = None
+    ids_kin = None
     if data['data_kin'] is not None:
-        X_kin    = data['data_kin'].x
-        VARS_kin = data['data_kin'].ids
+        X_kin   = data['data_kin'].x
+        ids_kin = data['data_kin'].ids
     # --------------------------------------------------------------------
     
     try:
@@ -953,8 +992,8 @@ def evaluate_models(data=None, info=None, args=None):
         print(f'Evaluating <{ID}> | {param} \n')
         
         inputs = {'weights': weights, 'label': param['label'],
-                 'targetdir': targetdir, 'args':args, 'X_kin': X_kin, 'VARS_kin': VARS_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
-
+                 'targetdir': targetdir, 'args':args, 'X_kin': X_kin, 'ids_kin': ids_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
+        
         if   param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
             if args['plot_param']['contours']['active']:
@@ -1052,24 +1091,28 @@ def evaluate_models(data=None, info=None, args=None):
 
     ## Multiple model comparisons
     plot_XYZ_multiple_models(targetdir=targetdir, args=args)
-
+    
     ## Pickle results to output
-
     resdict = {'roc_mstats':        roc_mstats,
                'roc_labels':        roc_labels,
                'roc_paths':         roc_paths,
+               'roc_filters':       roc_filters,
+               'y_preds':           y_preds,
                'corr_mstats':       corr_mstats,
+               'data':              io.IceXYW(x=X_RAW, y=y, w=weights, ids=ids_RAW),
                'ROC_binned_mstats': ROC_binned_mstats,
                'ROC_binned_mlabel': ROC_binned_mlabel,
                'info':              info}
     
     targetfile = targetdir + '/eval_results.pkl'
-    print(__name__ + f'.evaluate_models: Saving pickle output to "{targetfile}"')
+    print(__name__ + f'.evaluate_models: Saving pickle output to:')
+    print(f'{targetfile}')
     pickle.dump(resdict, open(targetfile, 'wb'))
+    
     return
 
 
-def make_plots(data, args):
+def make_plots(data, args, runmode):
     """
     Basic Q/A-plots
     """
@@ -1077,26 +1120,31 @@ def make_plots(data, args):
     ### Plot variables
     if args['plot_param']['basic']['active']:
         
+        param = copy.deepcopy(args['plot_param']['basic'])
+        param.pop('active')
+        
         ### Specific variables
         if data['data_kin'] is not None:
-            targetdir = aux.makedir(f'{args["plotdir"]}/reweight/1D-kinematic/')
-            plots.plotvars(X = data['data_kin'].x, y = data['data_kin'].y, weights = data['data_kin'].w, ids = data['data_kin'].ids, nbins = args['plot_param']['basic']['nbins'],
-                exclude_vals=args['plot_param']['basic']['exclude_vals'], targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
+            targetdir = aux.makedir(f'{args["plotdir"]}/{runmode}/distributions/kinematic/')
+            plots.plotvars(X = data['data_kin'].x, y = data['data_kin'].y, weights = data['data_kin'].w, ids = data['data_kin'].ids,           
+                targetdir=targetdir, title=f"training re-weight reference class: {args['reweight_param']['reference_class']}",
+                **param)
         
         ### Plot MVA input variable plots
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/1D-distributions/')
-        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w,  ids = data['data'].ids, nbins = args['plot_param']['basic']['nbins'],
-            exclude_vals=args['plot_param']['basic']['exclude_vals'], targetdir = targetdir, title = f"training re-weight reference class: {args['reweight_param']['reference_class']}")
-    
+        targetdir = aux.makedir(f'{args["plotdir"]}/{runmode}/distributions/MVA-input/')
+        plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w,  ids = data['data'].ids,
+            targetdir=targetdir, title=f"training re-weight reference class: {args['reweight_param']['reference_class']}",
+            **param)
+
     ### Correlations
     if args['plot_param']['corrmat']['active']:
-
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/')
+        
+        targetdir = aux.makedir(f'{args["plotdir"]}/{runmode}/distributions/')
         fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, ids=data['data'].ids, y=data['data'].y, targetdir=targetdir)
 
 
 def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
-    X_kin, VARS_kin, X_RAW, ids_RAW):
+    X_kin, ids_kin, X_RAW, ids_RAW):
     """ 
     Arbitrary plot wrapper function.
     """
@@ -1104,7 +1152,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     global roc_mstats
     global roc_labels
     global roc_paths
-
+    global roc_filters
+    global y_preds
     global corr_mstats
 
     global ROC_binned_mstats
@@ -1112,41 +1161,47 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # ** Compute predictions once and for all here **
     y_pred = func_predict(x_input)
-
+    y_preds.append(copy.deepcopy(y_pred))
+    
     # --------------------------------------
     ### ROC plots
 
     if args['plot_param']['ROC']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
+            
+            print(__name__ + f'.plot_XYZ_wrap: Computing aux.Metric for {sublabel}')
+            
             metric = aux.Metric(y_true=y[mask], y_pred=y_pred[mask],
                 weights=weights[mask] if weights is not None else None,
                 num_bootstrap=args['plot_param']['ROC']['num_bootstrap'])
 
             if sublabel not in roc_mstats:
-                roc_mstats[sublabel] = []
-                roc_labels[sublabel] = []
-                roc_paths[sublabel]  = []
-
+                roc_mstats[sublabel]  = []
+                roc_labels[sublabel]  = []
+                roc_paths[sublabel]   = []
+                roc_filters[sublabel] = []
+            
             roc_mstats[sublabel].append(metric)
             roc_labels[sublabel].append(label)
             roc_paths[sublabel].append(pathlabel)
+            roc_filters[sublabel].append(mask)
         
         # ** All inclusive **
         mask = np.ones(len(y_pred), dtype=bool)
         plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
 
-        # ** Powerset filtered **
+        # ** Set filtered **
         if 'set_filter' in args['plot_param']['ROC']:
 
             filters = args['plot_param']['ROC']['set_filter']
-            mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
+            mask_filterset, text_filterset, path_filterset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
 
-            for m in range(mask_powerset.shape[0]):
-                plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
+            for m in range(mask_filterset.shape[0]):
+                plot_helper(mask=mask_filterset[m,:], sublabel=text_filterset[m], pathlabel=path_filterset[m])
 
     # --------------------------------------
-    ### ROC binned plots (no powerset selection supported here)
+    ### ROC binned plots (no filterset selection supported here)
     if args['plot_param']['ROC_binned']['active']:
 
         for i in range(100): # Loop over plot types
@@ -1163,7 +1218,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             if len(var) == 1:
 
                 met_1D, label_1D = plots.binned_1D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                    ids_kin=VARS_kin, X=X_RAW, ids=ids_RAW, edges=edges, VAR=var[0], \
+                    ids_kin=ids_kin, X=X_RAW, ids=ids_RAW, edges=edges, VAR=var[0], \
                     num_bootstrap=args['plot_param']['ROC_binned']['num_bootstrap'])
 
                 if label not in ROC_binned_mstats: # not yet created
@@ -1181,7 +1236,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             ## 2D
             elif len(var) == 2:
                 fig, ax, met = plots.binned_2D_AUC(y_pred=y_pred, y=y, weights=weights, X_kin=X_kin, \
-                    ids_kin=VARS_kin, X=X_RAW, ids=ids_RAW, edges=edges, label=label, VAR=var)
+                    ids_kin=ids_kin, X=X_RAW, ids=ids_RAW, edges=edges, label=label, VAR=var)
                 plt.savefig(aux.makedir(f'{targetdir}/ROC/{label}') + f'/ROC-binned[{i}].pdf', bbox_inches='tight')
 
             else:
@@ -1193,13 +1248,16 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     if args['plot_param']['MVA_output']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
-            hist_edges = args['plot_param'][f'MVA_output']['edges']
-            inputs = {'y_pred': y_pred[mask], 'y': y[mask],
-                'weights': weights[mask] if weights is not None else None, 'class_ids': None,
-                'hist_edges': hist_edges, 'label': f'{label}/{sublabel}', 'path': f'{targetdir}/MVA/{label}/{pathlabel}'}
+            
+            inputs = {'y_pred':     y_pred[mask],
+                      'y':          y[mask],
+                      'weights':    weights[mask] if weights is not None else None,
+                      'class_ids':  None,
+                      'label':      f'{label}/{sublabel}',
+                      'path':       f'{targetdir}/MVA/{label}/{pathlabel}'}
 
-            plots.density_MVA_wclass(**inputs)
-
+            plots.density_MVA_wclass(**inputs, **args['plot_param'][f'MVA_output'])
+        
         # ** All inclusive **
         mask  = np.ones(len(y_pred), dtype=bool)
         plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
@@ -1208,7 +1266,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         if 'set_filter' in args['plot_param']['MVA_output']:
 
             filters = args['plot_param']['MVA_output']['set_filter']
-            mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
+            mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
 
             for m in range(mask_powerset.shape[0]):
                 plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
@@ -1221,13 +1279,12 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             
             pid = f'plot[{i}]'
             if pid in args['plot_param']['MVA_2D']:        
-                var   = args['plot_param']['MVA_2D'][pid]['var']
-                edges = args['plot_param']['MVA_2D'][pid]['edges']
+                var     = args['plot_param']['MVA_2D'][pid]['var']
             else:
                 break # No more this type of plots
             
             def plot_helper(mask, pick_ind, sublabel='inclusive', pathlabel='inclusive', savestats=False):
-
+                
                 # Two step
                 XX = X_RAW[mask, ...]
                 XX = XX[:, pick_ind]
@@ -1238,11 +1295,12 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                     'X':           XX,
                     'ids':         np.array(ids_RAW, dtype=np.object_)[pick_ind].tolist(),
                     'class_ids':   None,
-                    'label':       f'{label}/{sublabel}', 'hist_edges': edges,
-                    'path':        f'{targetdir}/COR/{label}/{pathlabel}'}
+                    'label':       f'{label}/{sublabel}',
+                    'path':        f'{targetdir}/COR/{label}/{pathlabel}/plot-{i}'}
                 
-                output = plots.density_COR_wclass(y=y[mask], **inputs)
-                #plots.density_COR(**inputs)
+                output = plots.density_COR_wclass(y=y[mask], **inputs,
+                                                  **args['plot_param']['MVA_2D'][pid])
+                #plots.density_COR(**inputs, **args['plot_param']['MVA_2D'][pid])
 
                 # Save output
                 if i not in corr_mstats.keys():
@@ -1265,8 +1323,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             if 'set_filter' in args['plot_param']['MVA_2D'][pid]:
                 
                 filters = args['plot_param']['MVA_2D'][pid]['set_filter']
-                mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, ids=ids_RAW)
-
+                mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
+                
                 for m in range(mask_powerset.shape[0]):
                     plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m], pathlabel=path_powerset[m])
             
@@ -1280,6 +1338,8 @@ def plot_XYZ_multiple_models(targetdir, args):
     global roc_paths
     global ROC_binned_mstats
 
+    cprint(__name__ + f'.plot_XYZ_multiple_models: ', 'green')
+    
     # ===================================================================
     # Plot correlation coefficient comparisons
 
@@ -1302,10 +1362,10 @@ def plot_XYZ_multiple_models(targetdir, args):
 
             else:
                 break
-
+    
     # ===================================================================
     # ** Plots for multiple model comparison **
-
+    
     # -------------------------------------------------------------------
     ### Plot all ROC curves
 
@@ -1314,17 +1374,21 @@ def plot_XYZ_multiple_models(targetdir, args):
     # We have the same number of filterset (category) entries for each model, pick the first
     dummy = 0
 
-    # Direct collect:  Plot all models per powerset category
+    # Direct collect:  Plot all models per filter category
     for filterset_key in roc_mstats.keys():
+
+        cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve [{filterset_key}]', 'green')
 
         path_label = roc_paths[filterset_key][dummy]
         plots.ROC_plot(roc_mstats[filterset_key], roc_labels[filterset_key],
             xmin=args['plot_param']['ROC']['xmin'],
             title=f'category: {filterset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
 
-    # Inverse collect: Plot all powerset categories ROCs per model
+    # Inverse collect: Plot all filter categories ROCs per model
     for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
         
+        cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve for the model [{model_index}]', 'green')
+
         rocs_       = [roc_mstats[filterset_key][model_index] for filterset_key in roc_mstats.keys()]
         labels_     = list(roc_mstats.keys())
         model_label = roc_labels[list(roc_labels)[dummy]][model_index]
@@ -1334,11 +1398,11 @@ def plot_XYZ_multiple_models(targetdir, args):
             title=f'model: {model_label}', filename=aux.makedir(targetdir + f'/ROC/{model_label}') + '/ROC-all-categories')
 
     ### Plot all MVA outputs (not implemented)
-    #plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/--ALL--') + '/MVA')
+    # plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/--ALL--') + '/MVA')
 
     ### Plot all 1D-binned ROC curves
     if args['plot_param']['ROC_binned']['active']:
-
+        
         for i in range(100):
             pid = f'plot[{i}]'
 
@@ -1369,7 +1433,9 @@ def plot_XYZ_multiple_models(targetdir, args):
                     plots.ROC_plot(xy, legs, xmin=args['plot_param']['ROC_binned']['xmin'], title=title, filename=targetdir + f'/ROC/--ALL--/ROC-binned[{i}]-bin[{b}]')
                     
                     ### MVA (not implemented)
-                    #title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
-                    #plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/--ALL--/MVA-binned[{i}]-bin[{b}]')
+                    # title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
+                    # plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/--ALL--/MVA-binned[{i}]-bin[{b}]')
+
+    print(__name__ + f'.plot_XYZ_multiple_models: [done]')
 
     return True

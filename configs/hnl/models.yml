@@ -2,7 +2,7 @@ FINAL_STATE_FILTER: &FINAL_STATE_FILTER
 
   filter[0]:
     operator: null   # null (unary), 'cartesian_and', 'cartesian_or'
-    sets: [0]        # input set ids (one or two)
+    sets: [0]        # input set ids (one or several)
   
   # ... more filters here
 
@@ -33,9 +33,15 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   classes: [0]             #  Which classes to use in the regularization
   
+  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for DEBUG)
   min_count: 32            #  Minimum number of events (per category)
+  max_N: null              #  Maximum number of events per function call (use to limit sample size)
+  min_score: null          #  Consider only events with MVA output larger than this value (null for None)
   poisson_weight: True     #  per category Poisson sqrt(N) weighted loss
-  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'PEARSON'
+  
+  # ------------------
+  # Neural MI param
+
   eval_batch_size: 4096    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
@@ -53,6 +59,8 @@ MI_REG_PARAM: &MI_REG_PARAM
   dropout: 0.01
   noise_std: 0.025
   activation: 'relu'
+  
+  # ------------------
 
   set_filter: *FINAL_STATE_FILTER
 # -----------------------------------------------

@@ -8,7 +8,7 @@ import awkward as ak
 import torch
 import gc
 from pprint import pprint
-
+import copy
 
 from tqdm import tqdm
 
@@ -282,7 +282,8 @@ def binned_2D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, label, weights=None,
     return fig, ax, met
 
 
-def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None, VAR:str='trk_pt', num_bootstrap=0):
+def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None,
+                  VAR:str='trk_pt', num_bootstrap=0):
     """
     Evaluate AUC & ROC per 1D-bin.
     
@@ -346,7 +347,7 @@ def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None, VAR:st
     return METS, LABELS
 
 
-def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, hist_edges=80, path=''):
+def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, edges=80, path='', **kwargs):
     """
     Evaluate MVA output (1D) density per class.
     
@@ -383,9 +384,9 @@ def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, hist_edge
         w = weights[ind] if weights is not None else None
         x = y_pred[ind]
 
-        hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=hist_edges, x=x), weights=w,
+        hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=edges, x=x), weights=w,
             density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
-        
+    
     plt.legend(classlegs, loc='upper center')
     plt.xlabel('MVA output $f(\\mathbf{{x}})$')
     plt.ylabel('density')
@@ -490,7 +491,8 @@ def plot_correlation_comparison(corr_mstats, targetdir, xlim=None):
 
 
 def density_COR_wclass(y_pred, y, X, ids, label, \
-    weights=None, class_ids=None, hist_edges=[[50], [50]], path='', cmap='Oranges'):
+    weights=None, class_ids=None, edges=[[50], [50]], density=True,
+    path='', cmap='Oranges', **kwargs):
     
     """
     Evaluate the 2D-density of the MVA algorithm output vs other variables per class.
@@ -504,6 +506,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         weights     :  Sample weights
         class__ids  :  Class ids to plot
         hist_edges  :  Histogram edges list (or number of bins, as an alternative) (2D)
+        density     :  Normalize to density
         path        :  Save path
         cmap        :  Color map
         
@@ -543,7 +546,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
             xx   = y_pred[ind]
             yy   = X[ind, ids.index(var)]
             
-            bins = [binengine(bindef=hist_edges[0], x=xx), binengine(bindef=hist_edges[1], x=yy)]
+            bins = [binengine(bindef=edges[0], x=xx), binengine(bindef=edges[1], x=yy)]
 
             # Apply histogram bounds
             box = np.logical_and(np.logical_and(xx > bins[0][0], xx < bins[0][-1]),
@@ -589,13 +592,13 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                 fig,ax    = plt.subplots()
                 outputdir = aux.makedir(f'{path}')
                 savepath  = f'{outputdir}/var-{var}--class-{k}--{scale}.pdf'
-
+                
                 try:
                     if scale == 'log':
                         import matplotlib as mpl
-                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, density=density, norm=mpl.colors.LogNorm(), cmap=plt.get_cmap(cmap))
                     else:
-                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, cmap=plt.get_cmap(cmap))
+                        h2,xedges,yedges,im = plt.hist2d(x=xx, y=yy, bins=bins, weights=ww, density=density, cmap=plt.get_cmap(cmap))
                     
                     fig.colorbar(im)
                     plt.xlabel(f'MVA output $f(\\mathbf{{x}})$')
@@ -723,7 +726,8 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
     return fig, ax
 
 
-def plotvars(X, y, ids, weights, nbins = 70, exclude_vals = [None], title = '', targetdir = '.'):
+def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
+             exclude_vals=[None], plot_unweighted=True, title = '', targetdir = '.'):
     """ Plot all variables.
     """
     print(__name__ + f'.plotvars: Creating plots ...')
@@ -735,15 +739,19 @@ def plotvars(X, y, ids, weights, nbins = 70, exclude_vals = [None], title = '', 
         for k in range(len(exclude_vals)):
             ind = np.logical_and(ind, (x != exclude_vals[k]))
 
-        plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins, title=title, targetdir=targetdir)
+        plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins,
+                percentile_range=percentile_range, title=title, targetdir=targetdir,
+                plot_unweighted=plot_unweighted)
 
 
-def plotvar(x, y, var, weights, nbins=70, title='', targetdir='.'):
+def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
+            plot_unweighted=True, title='', targetdir='.'):
     """ Plot a single variable.
     """
-    binrange = (np.percentile(x, 0.5), np.percentile(x, 99.5))
+    binrange = (np.percentile(x, percentile_range[0]), np.percentile(x, percentile_range[1]))
     
-    fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights, title=title, xlabel=var)
+    fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights,
+                                    title=title, xlabel=var, plot_unweighted=plot_unweighted)
     plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
 
     # -----
@@ -752,11 +760,12 @@ def plotvar(x, y, var, weights, nbins=70, title='', targetdir='.'):
     gc.collect()
 
 
-def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5):
+def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5,
+                         plot_unweighted=True):
     """ Here plot pure event counts
         so we see that also integrated class fractions are equalized (or not) after weighting!
     """
-    
+
     fig,ax    = plt.subplots(1, 2, figsize = (10, 4.25))
     class_ids = np.unique(y.astype(int))
     legends   = []
@@ -765,7 +774,9 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
     for c in class_ids:
 
         # Compute histograms with numpy (we use nbins and range() for speed)
-        counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
+        if plot_unweighted:
+            counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
+        
         counts_w, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=weights[y == c])
 
         mu, std = aux.weighted_avg_and_std(values=X[y == c], weights=weights[y == c])
@@ -774,14 +785,16 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
         for i in range(2):
 
             plt.sca(ax[i])
-            plt.stairs(counts,   edges, fill=False, linewidth = linewidth)
-            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth+0.5, linestyle='--')
+            if plot_unweighted:
+                plt.stairs(counts,   edges, fill=False, linewidth = linewidth,     linestyle='--')
+            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth+0.5, linestyle='-')
             
             if i == 0:
-                legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
+                if plot_unweighted:
+                    legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
                 legends.append(f'$\\mathcal{{C}} = {c}$ [$\\mu={mu:0.2f}, \\sigma={std:0.2f}$]')
 
-    ax[0].set_ylabel('weighted counts')
+    ax[0].set_ylabel('[weighted] counts')
     ax[0].set_xlabel(xlabel)
     ax[1].set_xlabel(xlabel)
     
@@ -920,20 +933,24 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
             if metrics[i] is None:
                 print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
                 continue
-
+            
             fpr        = metrics[i].fpr
             tpr        = metrics[i].tpr
             thresholds = metrics[i].thresholds
-
+            
             if metrics[i].tpr_bootstrap is not None:
 
-                # Percentile bootstrap based uncertainties
-                tpr_lo = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=100*(alpha/2))
-                tpr_hi = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=100*(1-alpha/2))
+                q = [100*(alpha/2), 100*(1-alpha/2)]
                 
-                fpr_lo = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=100*(alpha/2))
-                fpr_hi = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=100*(1-alpha/2))
-
+                # Percentile bootstrap based uncertainties
+                tpr_CI = cortools.percentile_per_dim(x=metrics[i].tpr_bootstrap, q=q)
+                tpr_lo = tpr_CI[0]
+                tpr_hi = tpr_CI[1]
+                
+                fpr_CI = cortools.percentile_per_dim(x=metrics[i].fpr_bootstrap, q=q)
+                fpr_lo = fpr_CI[0]
+                fpr_hi = fpr_CI[1]
+            
             # Autodetect a ROC point triangle (instead of a curve)
             if len(np.unique(fpr)) == 3:
                 tpr = tpr[1:-1] # Remove first and last

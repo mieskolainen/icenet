@@ -2,7 +2,7 @@
 #
 # Execute with: python icedqcd/limits.py
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 import uproot

@@ -1,6 +1,6 @@
 # Advanced histogramming & automated plotting functions
 # 
-# (c) 2021 Mikael Mieskolainen
+# (c) 2024 Mikael Mieskolainen
 # Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 
@@ -63,9 +63,7 @@ zorder : approximate plotting order
 lw     : linewidth
 ls     : linestyle
 """
-errorbar_style      = {'zorder': 3, 'ls': ' ', 'lw': 1, 'marker': 'o', 'markersize': 2.5}
-errorbar_line_style = {'zorder': 3, 'ls': '-', 'lw': 1, 'marker': 'o', 'markersize': 2.5}
-
+errorbar_style  = {'zorder': 3, 'ls': ' ', 'lw': 1, 'marker': 'o', 'markersize': 2.5}
 plot_style      = {'zorder': 2, 'ls': '-', 'lw': 1}
 hist_style_step = {'zorder': 0, 'ls': '-', 'lw': 1, 'histtype': 'step'}
 hist_style_fill = {'zorder': 0, 'ls': '-', 'lw': 1, 'histtype': 'stepfilled'}
@@ -128,18 +126,17 @@ def stepspace(start, stop, step):
     return np.arange(start, stop + step, step)
 
 
-def plot_horizontal_line(ax, color=(0.5,0.5,0.5), linewidth=0.9, ypos=1.0):
+def plot_horizontal_line(ax, color=(0.5,0.5,0.5), linewidth=0.9):
     """ For the ratio plot
     """
     xlim = ax.get_xlim()
-    ax.plot(np.linspace(xlim[0], xlim[1], 2), np.array([ypos, ypos]), color=color, linewidth=linewidth)
+    ax.plot(np.linspace(xlim[0], xlim[1], 2), np.array([1,1]), color=color, linewidth=linewidth)
 
 
 def tick_calc(lim, step, N=6):
     """ Tick spacing calculator.
     """
-    return [np.round(lim[0] + i*step, N) for i in range(1 + math.floor((lim[1] - lim[0])/step))]
-
+    return [np.round(lim[0] + i*step, N) for i in range(1+math.floor((lim[1]-lim[0])/step))]
 
 def set_axis_ticks(ax, ticks, dim='x'):
     """ Set ticks of the axis.
@@ -151,9 +148,8 @@ def set_axis_ticks(ax, ticks, dim='x'):
         ax.set_yticks(ticks)
         ax.set_yticklabels(list(map(str, ticks)))
 
-
-def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.7, 1.3),
-        ratio_plot=True, minorticks_on=True, ytick_ratio_step=0.15, labelsize=9,
+def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.5, 1.5),
+        ratio_plot=True, minorticks_on=True, ytick_ratio_step=0.25, labelsize=9,
         labelsize_ratio=8, **kwargs) :
     """ Axis tick constructor.
     """
@@ -178,8 +174,9 @@ def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.7, 1.3),
         ax[1].tick_params(axis='y', labelsize=labelsize_ratio)
 
         ticks = tick_calc(lim=ylim_ratio, step=ytick_ratio_step)
-        ticks = ticks[1:-1] # Remove the first and the last
+        ticks = ticks[0:-1] # Remove the last (collapses with upper plot)
         set_axis_ticks(ax[1], ticks, 'y')
+        ax[1].set_ylim(ylim_ratio)
 
     # Tick settings
     for a in ax:
@@ -189,8 +186,7 @@ def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.7, 1.3),
     return ax
 
 def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
-    xlim=(0,1), ylim=None, ylim_ratio=(0.7, 1.3),
-    ratio_plot=True, figsize=(5,4), fontsize=9, units={'x': '', 'y': ''}, **kwargs):
+    xlim=(0,1), ylim=None, ratio_plot=True, figsize=(5,4), fontsize=9, units={'x': '', 'y': ''}, **kwargs):
     """ Axes creator.
     """
     
@@ -201,9 +197,7 @@ def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
     ax = [ax] if (N == 1) else ax
 
     # Axes limits
-    for a in ax:
-        if xlim is not None:
-            a.set_xlim(*xlim)
+    for a in ax: a.set_xlim(*xlim)
 
     if ylim is not None:
         ax[0].set_ylim(*ylim)
@@ -221,11 +215,11 @@ def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
     # Ratio plot
     if ratio_plot:
         ax[1].set_ylabel(ylabel_ratio, fontsize=fontsize)
-        ax[1].set_ylim(*ylim_ratio)
 
     # Setup ticks
+    #print(kwargs)
     ax = tick_creator(ax=ax, ratio_plot=ratio_plot, **kwargs)
-
+    
     return fig, ax
 
 
@@ -277,7 +271,7 @@ def ratioerr(A, B, sigma_A, sigma_B, sigma_AB = 0, EPS = 1E-15):
 
 def hist_to_density(counts, errs, bins):
     """ Normalize to unit integral density function over the visible histogram range """
-
+    
     norm    = binwidth(bins) * counts.sum()
     return counts/norm, errs/norm
 
@@ -293,7 +287,7 @@ def hist_to_density_fullspace(counts, errs, bins, totalweight):
 def hist(x, bins=30, density=False, weights=None):
     """ Calculate a histogram.
     """
-    x = np.asarray(x, dtype=np.float64)
+    x = np.array(x)
 
     # Calculate histogram
     if weights is None:
@@ -301,6 +295,9 @@ def hist(x, bins=30, density=False, weights=None):
 
     weights = np.array(weights)
 
+    if len(weights) != len(x):
+        raise Exception(f'iceplot.hist: len(weights) = {len(weights)} != len(x) = {len(x)}')
+    
     counts, bins = np.histogram(x, bins=bins, weights=weights)
     cbins = edge2centerbins(bins)
 
@@ -344,19 +341,21 @@ def hist_filled_error(ax, bins, cbins, y, err, color, **kwargs):
     new_args['lw'] = 0
     new_args.pop('histtype', None) # Remove
 
-    ax.fill_between(bins[0:-1], y-err, y+err, step='post', alpha=0.3, color=color, **new_args)
+    ax.fill_between(bins[0:-1], y-err, y+err, step='post', alpha=0.2, color=color, **new_args)
 
     # The last bin
-    ax.fill_between(bins[-2:],  (y-err)[-2:], (y+err)[-2:], step='pre', alpha=0.3, color=color, **new_args)
+    ax.fill_between(bins[-2:],  (y-err)[-2:], (y+err)[-2:], step='pre', alpha=0.2, color=color, **new_args)
 
 
 def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_error_plot=True, \
-    legend_counts=False, color=None, legend_properties={'fontsize': 9}, bottom_PRC=5, EPS=1E-12):
+    legend_counts=False, color=None, legend_properties={'fontsize': 7}, bottom_PRC=5, EPS=1E-12):
     """ Superposition (overlaid) plotting
     """
     if observable == None:
         observable = data[0]['obs']
     
+    print(observable)
+
     fig, ax = create_axes(**observable, ratio_plot=ratio_plot)
 
     if color == None:
@@ -408,7 +407,7 @@ def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_err
             
             new_args = data[i]['style'].copy()
             new_args['lw'] = 0
-            ax[0].fill_between(cbins, counts-errs, counts+errs, alpha=0.3, color=c, **new_args)
+            ax[0].fill_between(cbins, counts-errs, counts+errs, alpha=0.2, color=c, **new_args)
 
     # Plot ratiohistograms
     if ratio_plot:
@@ -428,9 +427,11 @@ def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_err
             B        = data[0]['hdata'].counts * data[0]['hdata'].binscale
             sigma_A  = data[i]['hdata'].errs   * data[i]['hdata'].binscale
             sigma_B  = data[0]['hdata'].errs   * data[0]['hdata'].binscale
-            sigma_AB = 0
-            ratio_errs = ratioerr(A=A, B=B, sigma_A=sigma_A, sigma_B=sigma_B, sigma_AB=sigma_AB)
+            sigma_AB = 0 # no correlations
 
+            # Ratio error A/B
+            ratio_errs = ratioerr(A=A, B=B, sigma_A=sigma_A, sigma_B=sigma_B, sigma_AB=sigma_AB)
+            
             EPS      = 1E-30
             ratio    = A / (B + EPS)
             bins     = data[i]['hdata'].bins
@@ -452,7 +453,7 @@ def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_err
 
                 new_args = data[i]['style'].copy()
                 new_args['lw'] = 0
-                ax[1].fill_between(cbins, ratio-ratio_errs, ratio+ratio_errs, alpha=0.3, color=c, **new_args)
+                ax[1].fill_between(cbins, ratio-ratio_errs, ratio+ratio_errs, alpha=0.2, color=c, **new_args)
     
     # Legend
     if legend_labels != []:
@@ -492,7 +493,7 @@ def change2density_labels(all_obs):
 def histmc(mcdata, all_obs, density=False, scale=None, color=(0,0,1), label='none', style=hist_style_step):
     """ Over all observables of an MC sample """
 
-    obj       = {}
+    obj = {}
 
     for OBS in all_obs.keys():
 
@@ -512,7 +513,8 @@ def histmc(mcdata, all_obs, density=False, scale=None, color=(0,0,1), label='non
             counts,errs = hist_to_density(counts=counts, errs=errs, bins=bins)
             binscale    = 1.0
         
-        obj[OBS] = {'hdata': hobj(counts, errs, bins, cbins, binscale), 'hfunc' : 'hist', 'color': color, 'label': label, 'style' : style}
+        obj[OBS] = {'hdata': hobj(counts, errs, bins, cbins, binscale),
+                    'hfunc' : 'hist', 'color': color, 'label': label, 'style' : style}
 
     return obj
 
@@ -545,7 +547,8 @@ def histhepdata(hepdata, all_obs, scale=None, density=False, MC_XS_SCALE=1E12, l
             yerr /= norm
             binscale = 1.0
 
-        obj[OBS] = {'hdata': hobj(y, yerr, bins, cbins, binscale), 'hfunc' : 'hist', 'color': (0,0,0), 'label': label, 'style' : style}
+        obj[OBS] = {'hdata': hobj(y, yerr, bins, cbins, binscale),
+                    'hfunc' : 'hist', 'color': (0,0,0), 'label': label, 'style' : style}
     
     return obj
 

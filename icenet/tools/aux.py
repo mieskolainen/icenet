@@ -1,7 +1,6 @@
 # Auxialary functions
 # 
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import math
 import numpy as np
@@ -57,10 +56,10 @@ def cartesian_product(*arrays):
     N-dimensional generalized cartesian product between arrays
     
     Args:
-        *arrays: a list of arrays
-        
+        *arrays: a list of numpy arrays
+    
     Example:
-        cartesian_product(*[values['m'], values['ctau']])
+        cartesian_product(*[np.array([1,2,3]), np.array([100,200,500])])
     """
     la = len(arrays)
     dtype = np.result_type(*arrays)

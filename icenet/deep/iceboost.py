@@ -20,7 +20,7 @@ from icenet.tools import plots
 from icenet.deep import autogradxgb
 from icenet.deep import optimize
 
-from icefit import mine
+from icefit import mine, cortools
 
 import ray
 from ray import tune
@@ -41,27 +41,9 @@ def _hinge_loss(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tenso
     w       = w.to(device)
     
     targets = 2 * targets - 1
-    loss = w * torch.max(torch.zeros_like(preds), 1 - preds * targets) ** 2
+    loss    = w * torch.max(torch.zeros_like(preds), 1 - preds * targets) ** 2
     
     return loss.sum() * len(preds)
-
-def corrcoeff_weighted(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=None):
-    """
-    Per event weighted Pearson 2x2 correlation matrix cf. torch.corrcoef()
-    Args:
-        x  :  data (Nx1)
-        y  :  data (Nx1)
-        weights : event weights
-    """
-    data   = torch.vstack((x.squeeze(), y.squeeze()))
-    C      = torch.cov(data, aweights=weights.squeeze())
-    N      = len(C)
-    D      = torch.eye(N).to(C.device)
-    
-    D[range(N), range(N)] = 1.0 / torch.sqrt(torch.diagonal(C))
-    rho = D @ C @ D
-    
-    return rho
 
 def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-12):
     """
@@ -132,22 +114,23 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
         loss     = param["beta"] * loss.sum()        
         BCE_loss = BCE_loss + loss
         
-        track_loss[key] = loss.item()
-        loss_str       += f'{key} [beta = {param["beta"]}] = {loss.item():0.5f} | '
+        txt = f'{key} [$\\beta$ = {param["beta"]}]'
+        track_loss[txt] = loss.item()
+        loss_str       += f'{txt} = {loss.item():0.5f} | '
     
     # --------------------------------------------------------------------
     ## MI Regularization
-
+    
     MI_loss = torch.tensor(0.0).to(device)
     
     if MI_param is not None:
-
+        
         # Loop over chosen classes
-        k       = 0
-        values  = []
+        k      = 0
+        values = []
         
         for c in MI_param['classes']:
-
+            
             # -----------
             reg_param = copy.deepcopy(MI_param)
             reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
@@ -159,76 +142,97 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             X     = torch.Tensor(MI_x).to(device)[cind].squeeze()
             Z     = preds[cind].squeeze()
             W     = weights[cind]
+            mask  = reg_param[f'evt_mask_{loss_mode}'][c]
+            
+            # Total maximum is limited, pick subsample
+            if reg_param['max_N'] is not None and X.shape[0] > reg_param['max_N']:
+                X    = X[0:reg_param['max_N']]
+                Z    = Z[0:reg_param['max_N']]
+                W    = W[0:reg_param['max_N']]
+                mask = mask[:,0:reg_param['max_N']]
             
             ### Now loop over all filter categories
-            mask  = reg_param[f'evt_mask_{loss_mode}'][c]
-            N_cat = mask.shape[0]
-
+            N_cat     = mask.shape[0]
+            
             loss_this = torch.tensor(0.0).to(device)
             value     = torch.tensor(0.0).to(device)
             total_ww  = 0.0
-
+            
             for m in range(N_cat):
+                
+                mm_ = torch.from_numpy(mask[m,:]).to(device) # Pick index mask
 
-                mm_ = mask[m,:] # Pick index mask
-
-                if np.sum(mm_) > reg_param['min_count']: # Minimum number of events per category cutoff
+                # Apply target threshold (e.g. we are interested only in high score region)
+                # First iterations might not yield any events passing this, 'min_count' will take care
+                if reg_param['min_score'] is not None:
+                    mm_ = mm_ & (Z > reg_param['min_score']) 
+                
+                # Minimum number of events per category cutoff
+                if reg_param['min_count'] is not None and torch.sum(mm_) < reg_param['min_count']:
+                    continue
+                
+                ## Non-Linear Distance Correlation
+                if   reg_param['losstype'] == 'DCORR':
                     
-                    # Pearson Correlation
-                    if reg_param['losstype'] == 'PEARSON':
+                    value = value + cortools.distance_corr_torch(x=X[mm_], y=Z[mm_], weights=W[mm_])
+                
+                ## Linear Pearson Correlation (only for DEBUG)
+                elif reg_param['losstype'] == 'PEARSON':
+                    
+                    if len(X.shape) > 1: # if multidim X
                         
-                        if len(X.shape) > 1: # if multidim X
+                        for j in range(X.shape[-1]): # dim-by-dim against Z (BDT output)
                             
-                            for j in range(X.shape[-1]): # dim-by-dim against Z (BDT output)
-                                
-                                rho   = corrcoeff_weighted(x=X[mm_, j], y=Z[mm_], weights=W[mm_])
-                                triag = torch.triu(rho, diagonal=1) # upper triangle without diagonal
-                                L     = torch.sum(torch.abs(triag))
-                                value = value + L
-                        else:
-                            rho   = corrcoeff_weighted(x=X[mm_], y=Z[mm_], weights=W[mm_])
-                            triag = torch.triu(rho, diagonal=1)
+                            rho   = cortools.corrcoeff_weighted_torch(x=X[mm_, j], y=Z[mm_], weights=W[mm_])
+                            triag = torch.triu(rho, diagonal=1) # upper triangle without diagonal
                             L     = torch.sum(torch.abs(triag))
                             value = value + L
-                    
-                    # Neural MI
                     else:
-                    
-                        # We need .detach() here for Z!
-                        model = mine.estimate(X=X[mm_], Z=Z[mm_].detach(), weights=W[mm_],
-                            return_model_only=True, device=device, **reg_param)
+                        rho   = cortools.corrcoeff_weighted_torch(x=X[mm_], y=Z[mm_], weights=W[mm_])
+                        triag = torch.triu(rho, diagonal=1)
+                        L     = torch.sum(torch.abs(triag))
+                        value = value + L
 
-                        # ------------------------------------------------------------
-                        # Now apply the MI estimator to the sample
-                        
-                        # No .detach() here, we need the gradients wrt Z!
-                        value = mine.apply_mine_batched(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model,
-                                                    losstype=reg_param['losstype'], batch_size=reg_param['eval_batch_size'])
+                ## Neural Mutual Information
+                else:
                     
-                    # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
-                    if MI_param['poisson_weight']:
-                        cat_ww = np.sqrt(np.sum(mm_))
-                    else:
-                        cat_ww = 1.0
+                    # We need .detach() here for Z!
+                    model = mine.estimate(X=X[mm_], Z=Z[mm_].detach(), weights=W[mm_],
+                        return_model_only=True, device=device, **reg_param)
+
+                    # ------------------------------------------------------------
+                    # Now (re)-apply the MI estimator to the sample
                     
-                    if not torch.isfinite(value): # First boost iteration might yield bad values
-                        value = torch.tensor(0.0).to(device)
-                    
-                    # Save
-                    loss_this = loss_this + MI_param['beta'][k] * value * cat_ww
-                    total_ww    += cat_ww
+                    # No .detach() here, we need the gradients wrt Z!
+                    value = mine.apply_mine_batched(X=X[mm_], Z=Z[mm_], weights=W[mm_], model=model,
+                                                losstype=reg_param['losstype'], batch_size=reg_param['eval_batch_size'])
+                
+                # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
+                if MI_param['poisson_weight']:
+                    cat_ww = torch.sqrt(torch.sum(mm_))
+                else:
+                    cat_ww = 1.0
+                
+                if not torch.isfinite(value): # First boost iteration might yield bad values
+                    value = torch.tensor(0.0).to(device)
+                
+                # Save
+                loss_this = loss_this + MI_param['beta'][k] * value * cat_ww
+                total_ww    += cat_ww
 
                 values.append(np.round(value.item(), 6))
-                
+            
             # Finally add this to the total loss
-            MI_loss = MI_loss + loss_this / total_ww
+            if total_ww > 0:
+                MI_loss = MI_loss + loss_this / total_ww
             
             k += 1
-
-        cprint(f'{reg_param["losstype"]} = {values}', 'yellow')
-
-        track_loss['MI'] = MI_loss.item()
-        loss_str        += f'MI [beta = {MI_param["beta"]}] = {MI_loss.item():0.5f}'
+        
+        cprint(f'RAW {reg_param["losstype"]} = {values}', 'yellow')
+        
+        txt = f'{reg_param["losstype"]} [$\\beta$ = {MI_param["beta"]}]'
+        track_loss[txt] = MI_loss.item()
+        loss_str       += f'{txt} = {MI_loss.item():0.5f}'
     
     # --------------------------------------------------------------------
     # Total loss
@@ -272,7 +276,10 @@ def create_filters(param, data_trn, data_val):
             # Per filter category
             if 'set_filter' in param:
                 mask, text, path = stx.filter_constructor(
-                    filters=param['set_filter'], X=data.x[cind,...], ids=data_trn.ids)
+                    filters=param['set_filter'],
+                    X=data.x[cind,...],
+                    ids=data_trn.ids,
+                    y=data.y[cind])
             
             # All inclusive
             else:

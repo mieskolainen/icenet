@@ -1,11 +1,11 @@
 # Linear (correlation) and non-linear dependency tools
 #
-# Run with: pytest ./icefit/cortools.py -rP (can take few minutes)
+# Run with: pytest icefit/cortools.py -rP (can take few minutes)
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
-#import sys
-#sys.path.append(".")
+import sys
+sys.path.append(".")
 
 import numpy as np
 import torch
@@ -22,9 +22,85 @@ import pandas as pd
 from icefit import mine
 
 
-def percentile_per_dim(x, q):
+def distance_corr_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=None, p: float=2.0):
     """
-    Compute percentile per column dimension
+    Distance Correlation, complexity O(N^2)
+    
+    (torch autograd compatible)
+    
+    https://en.wikipedia.org/wiki/Distance_correlation
+    
+    See: https://dcor.readthedocs.io/en/latest/theory.html
+    
+    Args:
+        x       : data (N x dim)
+        y       : data (N x dim), where dim can be the same or different than for x
+        weights : event weights (not implemented)
+        p       : p-norm [0,inf] value
+    """
+    N = x.shape[0]
+
+    def double_centering(D):
+        
+        row_means = D.mean(dim=0, keepdim=True) # [1 x N]
+        col_means = D.mean(dim=1, keepdim=True) # [N x 1]
+        tot_mean  = D.flatten().mean()          # [scalar]
+        
+        return D - row_means - col_means + tot_mean
+    
+    # Add feature dimension if 1D
+    if len(x.shape) == 1:
+        x = x.unsqueeze(-1)
+    if len(y.shape) == 1:
+        y = y.unsqueeze(-1)
+    
+    # Unsqueeze(0) needed for cdist() (expects batched input)
+    x = x.unsqueeze(0)
+    y = y.unsqueeze(0)
+    
+    # Pairwise distance matrices
+    Dx = torch.cdist(x, x, p=p).squeeze()
+    Dy = torch.cdist(y, y, p=p).squeeze()
+    
+    # Double centered matrices
+    A = double_centering(Dx)
+    B = double_centering(Dy)
+
+    dcovXY = (A * B).flatten().mean()  # V^2(X,Y) >= 0
+    dvarXX = (A * A).flatten().mean()  # V^2(X,X) >= 0
+    dvarYY = (B * B).flatten().mean()  # V^2(Y,Y) >= 0
+    dvarXX_dvarYY = dvarXX * dvarYY
+    
+    if dvarXX_dvarYY > 0: # definition
+        return torch.clip(torch.sqrt(dcovXY / torch.sqrt(dvarXX_dvarYY)), min=0.0, max=1.0)
+    else:
+        return torch.zeros(1).to(x.device)
+
+
+def corrcoeff_weighted_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=None):
+    """
+    Per event weighted linear Pearson 2x2 correlation matrix cf. torch.corrcoef()
+    
+    (torch autograd compatible)
+    
+    Args:
+        x  :  data (Nx1)
+        y  :  data (Nx1)
+        weights : event weights
+    """
+    
+    data   = torch.vstack((x.squeeze(), y.squeeze()))
+    C      = torch.cov(data, aweights=weights.squeeze())
+    N      = len(C)
+    D      = torch.eye(N).to(C.device)
+    
+    D[range(N), range(N)] = 1.0 / torch.sqrt(torch.diagonal(C))
+    
+    return D @ C @ D
+
+def percentile_per_dim(x: np.ndarray, q: float, **kwargs):
+    """
+    Compute percentiles for each dimension (column) over samples (rows)
 
     Args:
         input: (N x dim)
@@ -33,15 +109,12 @@ def percentile_per_dim(x, q):
     Returns:
         out:   array with length dim
     """
-    out = np.zeros(x.shape[1])
-    for i in range(len(out)):
-        out[i] = np.percentile(x[:,i], q)
-    return out
+    return np.percentile(a=x, q=q, axis=0, **kwargs)
 
-def prc_CI(x, alpha):
+def prc_CI(x: np.ndarray, alpha: float):
     return np.array([np.percentile(x, 100*(alpha/2)), np.percentile(x, 100*(1-alpha/2))])
 
-def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
+def hacine_entropy_bin(x: np.ndarray, mode: str="nbins", alpha: float=0.01):
     """
     Hacine-Gharbi et al. 
     “Low Bias Histogram-Based Estimation of Mutual Information for Feature Selection.”
@@ -60,7 +133,7 @@ def hacine_entropy_bin(x, rho, mode="nbins", alpha=0.01):
     else:
         return int(nb)
 
-def hacine_joint_entropy_bin(x, rho, mode="nbins", alpha=0.01):
+def hacine_joint_entropy_bin(x: np.ndarray, rho: float, mode: str="nbins", alpha: float=0.01):
     """
     Hacine-Gharbi, Ravier. "A Binning Formula of Bi-histogram
     for Joint Entropy Estimation Using Mean Square Error Minimization.”
@@ -80,8 +153,7 @@ def hacine_joint_entropy_bin(x, rho, mode="nbins", alpha=0.01):
     else:
         return int(nb)
 
-
-def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
+def freedman_diaconis_bin(x: np.ndarray, mode: str="nbins", alpha: float=0.01):
     """
     Freedman-Diaconis rule for a 1D-histogram bin width
     
@@ -106,7 +178,7 @@ def freedman_diaconis_bin(x, mode="nbins", alpha=0.01):
         return bw2bins(bw=bw, x=x, alpha=alpha)
 
 
-def scott_bin(x, rho, mode="nbins", alpha=0.01, EPS=1e-15):
+def scott_bin(x: np.ndarray, rho: float, mode: str="nbins", alpha: float=0.01):
 
     """ 
     Scott rule for a 2D-histogram bin widths
@@ -130,7 +202,7 @@ def scott_bin(x, rho, mode="nbins", alpha=0.01, EPS=1e-15):
     else:
         return bw2bins(bw=bw, x=x, alpha=alpha)
 
-def bw2bins(x, bw, alpha):
+def bw2bins(x: np.ndarray, bw: float, alpha: float):
     """
     Convert a histogram binwidth to number of bins
     
@@ -149,7 +221,7 @@ def bw2bins(x, bw, alpha):
     else:
         return 1
 
-def H_score(p, EPS=1E-15):
+def H_score(p: float, EPS: float=1E-15):
     """
     Shannon Entropy (log_e ~ nats units)
 
@@ -164,12 +236,12 @@ def H_score(p, EPS=1E-15):
 
     return -np.sum(p_*np.log(p_))
 
-def I_score(C, normalized=None, EPS=1E-15):
+def I_score(C: np.ndarray, normalized: str=None, EPS: float=1E-15):
     """
     Mutual information score (log_e ~ nats units)
 
     Args:
-        C : (X,Y) 2D-histogram array with positive definite event counts
+        C          : (X,Y) 2D-histogram array with positive definite event counts
         normalized : return normalized version (None, 'additive', 'multiplicative')
     
     Returns:
@@ -207,9 +279,9 @@ def I_score(C, normalized=None, EPS=1E-15):
         raise Exception(f'I_score: Error with unknown normalization parameter "{normalized}"')
 
 
-def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalized=None,
-    alpha=0.32, n_bootstrap=300,
-    automethod='Scott2D', minbins=5, maxbins=100, outlier=0.01):
+def mutual_information(x: np.ndarray, y: np.ndarray, weights = None,
+                       bins_x=None, bins_y=None, normalized=None, alpha=0.32, n_bootstrap=300,
+                       automethod='Scott2D', minbins=5, maxbins=100, outlier=0.01):
     """
     Mutual information entropy (non-linear measure of dependency)
     between x and y variables
@@ -292,11 +364,22 @@ def mutual_information(x, y, weights = None, bins_x=None, bins_y=None, normalize
 
     return r, r_CI
 
-def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
+def distance_corr(x: np.ndarray, y: np.ndarray,
+                  weights: np.ndarray=None, alpha: float=0.32, n_bootstrap: int=30):
     """
     Distance correlation
+    https://en.wikipedia.org/wiki/Distance_correlation
+    
+    Args:
+        x,y        : arrays of values
+        weights    : possible event weights
+        alpha      : confidence interval [alpha/2, 1-alpha/2] level 
+        n_bootstrap: number of percentile bootstrap samples
+    
+    Returns:
+        correlation coefficient [0,1], confidence interval
     """
-
+    
     if len(x) != len(y):
         raise Exception('distance_corr: x and y with different size.')
 
@@ -337,7 +420,8 @@ def distance_corr(x, y, weights=None, alpha=0.32, n_bootstrap=100):
     return r, r_CI
 
 
-def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=300):
+def pearson_corr(x: np.ndarray, y: np.ndarray, weights: np.ndarray=None,
+                 return_abs=False, alpha=0.32, n_bootstrap=300):
     """
     Pearson Correlation Coefficient
     https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
@@ -348,6 +432,7 @@ def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=3
         return_abs : return absolute value
         alpha      : confidence interval [alpha/2, 1-alpha/2] level 
         n_bootstrap: number of percentile bootstrap samples
+    
     Returns: 
         correlation coefficient [-1,1], confidence interval, p-value
     """
@@ -415,7 +500,7 @@ def pearson_corr(x, y, weights=None, return_abs=False, alpha=0.32, n_bootstrap=3
     return r, r_CI, prob
 
 
-def gaussian_mutual_information(rho):
+def gaussian_mutual_information(rho: float):
     """
     Analytical 2D-Gaussian mutual information
     using a correlation coefficient rho.
@@ -428,7 +513,8 @@ def gaussian_mutual_information(rho):
     """
     return -0.5*np.log(1-rho**2)
 
-def optbins(x, maxM=150, mode="nbins", alpha=0.025):
+
+def optbins(x: np.ndarray, maxM: int=150, mode="nbins", alpha=0.025):
     """
 
     NOTE: Weak performance, study the method !!
@@ -470,7 +556,7 @@ def optbins(x, maxM=150, mode="nbins", alpha=0.025):
         return optM
 
 
-def optbins2d(x,y, maxM=(40,40), mode="nbins", alpha=0.025):
+def optbins2d(x: np.ndarray, y: np.ndarray, maxM=(40,40), mode="nbins", alpha=0.025):
     """
     
     NOTE: Weak performance, study the method !!
@@ -482,6 +568,7 @@ def optbins2d(x,y, maxM=(40,40), mode="nbins", alpha=0.025):
     
     Args:
         x     : data points
+        y     : data points
         maxM  : maximum number of bins per dimension
         mode  : "nbins" or "width"
         alpha : outlier protection percentile
@@ -523,19 +610,20 @@ def optbins2d(x,y, maxM=(40,40), mode="nbins", alpha=0.025):
 
 def test_gaussian():
     """
-    # Gaussian unit test of the estimators.
+    Gaussian unit test of the estimators.
     """
     import pytest
     
-    EPS = 1.0 # neural MI can fluctuate ...
     
     ## Create synthetic Gaussian data
-    for N in [int(5e3), int(1e4)]:
+    for N in [int(1e4)]:
         
         print(f'*************** statistics N = {N} ***************')
 
         for rho in np.linspace(-0.99, 0.99, 6):
             
+            EPS = 0.2
+
             print(f'<<<rho = {rho:.3f}>>>')
 
             # Create correlation via 2D-Cholesky
@@ -547,24 +635,36 @@ def test_gaussian():
             
             # ---------------------------------------------------------------
             
-            # Linear correlation
+            ## Linear correlation
             r,r_CI,prob = pearson_corr(x=x1, y=x2)
-            assert  r == pytest.approx(rho, rel=EPS)
+            assert  r == pytest.approx(rho, abs=EPS)
             print(f'pearson_corr = {r:.3f}, CI = {r_CI}, p-value = {prob:0.3E}')
 
-            # MI Reference (exact analytic)
+            ## Distance correlation (own function)
+            dcorr = distance_corr_torch(x=torch.Tensor(x1), y=torch.Tensor(x2)).item()
+            print(f'distance_corr_torch = {dcorr:.3f}')
+
+            ## Distance correlation (dcorr package based)
+            dc, dc_CI = distance_corr(x=x1, y=x2)
+            print(f'distance_corr = {dc:.3f}, CI = {dc_CI}')
+
+            assert dcorr == pytest.approx(dc, abs=1E-3)
+            
+            ## MI Reference (exact analytic)
             MI_REF = gaussian_mutual_information(rho)
             print(f'Gaussian exact MI = {MI_REF:.3f}')
-
-            # MI with different histogram autobinnings
+            
+            ## MI with different histogram autobinnings
             automethod = ['Scott2D', 'Hacine2D']
             
             for method in automethod:
                 MI, MI_CI = mutual_information(x=x1, y=x2, automethod=method)
-                assert MI == pytest.approx(MI_REF, rel=EPS)
+                assert MI == pytest.approx(MI_REF, abs=EPS)
                 print(f'Histogram     MI = {MI:0.3f}, CI = {MI_CI} ({method})')
 
-            # Neural MI
+            ## Neural MI
+            EPS = 0.5 # accept some more tolerance due to fluctuations
+            
             neuromethod = ['MINE', 'MINE_EMA', 'DENSITY']
             
             X = torch.Tensor(x1)
@@ -578,24 +678,23 @@ def test_gaussian():
                 MI     = MI.item()
                 MI_err = MI_err.item()
                 
-                assert MI == pytest.approx(MI_REF, rel=EPS)
+                assert MI == pytest.approx(MI_REF, abs=EPS)
                 print(f'Neural (.estimate)            MI = {MI:0.3f} +- {MI_err:0.3f} ({losstype})')
                 
                 ## -----------------
                 MI_full = mine.apply_mine(X=X.to(device), Z=Z.to(device), model=model, losstype=losstype)[0].item()
-                assert MI_full == pytest.approx(MI_REF, rel=EPS)
+                assert MI_full == pytest.approx(MI_REF, abs=EPS)
                 print(f'Neural (.apply_mine)          MI = {MI_full:0.3f} ({losstype})')
-                
+
                 ## -----------------
                 MI_batch = mine.apply_mine_batched(X=X.to(device), Z=Z.to(device), model=model, losstype=losstype, batch_size=512).item()
-                assert MI_batch == pytest.approx(MI_REF, rel=EPS)
+                assert MI_batch == pytest.approx(MI_REF, abs=EPS)
                 print(f'Neural (.apply_mine_batched) MI = {MI_batch:0.3f} ({losstype})')
-                
             
             print('')
 
 
-def test_constant():
+def test_constant(N=10000):
     """
     Constant input unit test of the estimators.
     """
@@ -605,34 +704,105 @@ def test_constant():
     EPS = 1E-3
 
     ### Both ones
-    x1 = np.ones(100)
-    x2 = np.ones(100)
+    x1 = np.ones(N)
+    x2 = np.ones(N)
 
-    r  = pearson_corr(x=x1, y=x2)[0]
+    r     = pearson_corr(x=x1, y=x2)[0]
     assert   r == pytest.approx(1, abs=EPS)
 
-    MI = mutual_information(x=x1, y=x2)[0]
+    dcorr = distance_corr_torch(x=torch.Tensor(x1), y=torch.Tensor(x2)).item()
+    assert  dcorr == pytest.approx(0, abs=EPS)
+    
+    dc, dc_CI = distance_corr(x=x1, y=x2)
+    assert  dc == pytest.approx(0, abs=EPS)
+    
+    # <->
+    assert  dcorr == pytest.approx(dc, abs=EPS)
+    
+    MI      = mutual_information(x=x1, y=x2)[0]
     assert  MI == pytest.approx(0, abs=EPS)
 
     MI_mine = mine.estimate(X=torch.Tensor(x1), Z=torch.Tensor(x2))[0].item()
     assert  MI_mine == pytest.approx(0, abs=EPS)
 
 
-    ### Other zeros    
-    x2 = np.zeros(100)
-
-    r  = pearson_corr(x=x1, y=x2)[0]
+    ### Other one zeros
+    x1 = np.ones(N)
+    x2 = np.zeros(N)
+    
+    r     = pearson_corr(x=x1, y=x2)[0]
     assert   r == pytest.approx(0, abs=EPS)
 
-    MI = mutual_information(x=x1, y=x2)[0]
+    dcorr = distance_corr_torch(x=torch.Tensor(x1), y=torch.Tensor(x2)).item()
+    assert  dcorr == pytest.approx(0, abs=EPS)
+    
+    dc, dc_CI = distance_corr(x=x1, y=x2)
+    assert  dc == pytest.approx(0, abs=EPS)
+    
+    # <->
+    assert  dcorr == pytest.approx(dc, abs=EPS)
+    
+    MI      = mutual_information(x=x1, y=x2)[0]
     assert  MI == pytest.approx(0, abs=EPS)
 
     MI_mine = mine.estimate(X=torch.Tensor(x1), Z=torch.Tensor(x2))[0].item()
     assert  MI_mine == pytest.approx(0, abs=EPS)
+
+
+    ### Other one minus ones
+    x1 = np.ones(N)
+    x2 = (-1)*np.ones(N)
+    
+    r     = pearson_corr(x=x1, y=x2)[0]
+    assert   r == pytest.approx(-1, abs=EPS)
+
+    dcorr = distance_corr_torch(x=torch.Tensor(x1), y=torch.Tensor(x2)).item()
+    assert  dcorr == pytest.approx(0, abs=EPS)
+    
+    dc, dc_CI = distance_corr(x=x1, y=x2)
+    assert  dc == pytest.approx(0, abs=EPS)
+    
+    # <->
+    assert  dcorr == pytest.approx(dc, abs=EPS)
+    
+    MI      = mutual_information(x=x1, y=x2)[0]
+    assert  MI == pytest.approx(0, abs=EPS)
+
+    MI_mine = mine.estimate(X=torch.Tensor(x1), Z=torch.Tensor(x2))[0].item()
+    assert  MI_mine == pytest.approx(0, abs=EPS)
+    
+    
+    EPS = 5E-2
+    
+    ### Both uniform random
+    x1 = np.random.rand(N)
+    x2 = np.random.rand(N)
+
+    r     = pearson_corr(x=x1, y=x2)[0]
+    assert   r == pytest.approx(0, abs=EPS)
+
+    dcorr = distance_corr_torch(x=torch.Tensor(x1), y=torch.Tensor(x2)).item()
+    assert  dcorr == pytest.approx(0, abs=EPS)
+    
+    dc, dc_CI = distance_corr(x=x1, y=x2)
+    assert  dc == pytest.approx(0, abs=EPS)
+    
+    # <->
+    assert  dcorr == pytest.approx(dc, abs=EPS)
+    
+    MI      = mutual_information(x=x1, y=x2)[0]
+    assert  MI == pytest.approx(0, abs=EPS)
+    
+    MI_mine = mine.estimate(X=torch.Tensor(x1), Z=torch.Tensor(x2))[0].item()
+    assert  MI_mine == pytest.approx(0, abs=EPS)
+    
+
 
 
 #if __name__ == "__main__":
-#    test_gaussian()
+    #test_gaussian()
+    #test_constant()
+
 
 
 """

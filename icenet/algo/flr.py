@@ -1,14 +1,12 @@
 # Dim-by-Dim Factorized Histogram Likelihood Ratio Classifier    
 #
-#
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2024
 
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .. tools import aux
+from icenet.tools import aux
 
 
 def train(X, y, weights, param):

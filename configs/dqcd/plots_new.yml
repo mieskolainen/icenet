@@ -1,40 +1,72 @@
 FILTER: &FILTER
   
   filter[0]:
-    operator: 'cartesian_and'  # null (unary), cartesian_and', 'cartesian_or'
-    sets: [0,1]                # input set ids (one or two)
+    operator: 'cartesian_and'   # null (unary), cartesian_and', 'cartesian_or'
+    sets: [0,1]                 # input set ids (one or several)
   
   filter[1]:
-    operator: null             # null (unary), cartesian_and', 'cartesian_or'
-    sets: [2]                  # input set ids (one or two)
+    operator: null            # null (unary), cartesian_and', 'cartesian_or'
+    sets: [0]                 # input set ids (one or several)
+  
+  filter[2]:
+    operator: null            # null (unary), cartesian_and', 'cartesian_or'
+    sets: [1]                 # input set ids (one or several)
+  
+  #filter[1]:
+  #  operator: 'cartesian_and'   # null (unary), cartesian_and', 'cartesian_or'
+  #  sets: [2,3]                 # input set ids (one or several)
+
+  #filter[2]:
+  #  operator: null              # null (unary), cartesian_and', 'cartesian_or'
+  #  sets: [2]                   # input set ids (one or several)
+  
+  #filter[3]:
+  #  operator: null              # null (unary), cartesian_and', 'cartesian_or'
+  #  sets: [3]                   # input set ids (one or several)
   
   # ... more filters here
   
   # --------------------
   
   set[0]:
-    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    #diplomat_classes: [-2, 0]   # classes which always pass the selection
+    expand: 'set'               # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['$\neq(m_\pi = 1$  & $m_A = 0.33)$', '$m_\pi = 1$  & $m_A = 0.33$']},
-       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['$\neq(m_\pi = 2$  & $m_A = 0.67)$', '$m_\pi = 2$  & $m_A = 0.67$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['$\neq(m_\pi = 4$  & $m_A = 0.40)$', '$m_\pi = 4$  & $m_A = 0.40$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['$\neq(m_\pi = 4$  & $m_A = 1.33)$', '$m_\pi = 4$  & $m_A = 1.33$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['$\neq(m_\pi = 10$ & $m_A = 1.00)$', '$m_\pi = 10$ & $m_A = 1.00$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['$\neq(m_\pi = 10$ & $m_A = 3.33)$', '$m_\pi = 10$ & $m_A = 3.33$']}]
+      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['', '$mpi = 1$ & $mA = 0.33$']},
+       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['', '$mpi = 2$ & $mA = 0.67$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['', '$mpi = 4$ & $mA = 0.40$']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['', '$mpi = 4$ & $mA = 1.33$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['', '$mpi = 10$ & $mA = 1.00$']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['', '$mpi = 10$ & $mA = 3.33$']}]
   
   set[1]:
-    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    #diplomat_classes: [-2, 0]   # classes which always pass the selection
+    expand: 'set'               # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: 'GEN_ctau == 0.1', latex: ['$c\tau \neq 0.1$', '$c\tau = 0.1$']},
-       {cut: 'GEN_ctau == 1',   latex: ['$c\tau \neq 1$',   '$c\tau = 1$']  },
-       {cut: 'GEN_ctau == 10',  latex: ['$c\tau \neq 10$',  '$c\tau = 10$'] },
-       {cut: 'GEN_ctau == 100', latex: ['$c\tau \neq 100$', '$c\tau = 100$']}]
+      [{cut: 'GEN_ctau == 0.1', latex: ['', '$ctau = 0.1$']},
+       {cut: 'GEN_ctau == 1',   latex: ['', '$ctau = 1$'  ]},
+       {cut: 'GEN_ctau == 10',  latex: ['', '$ctau = 10$' ]},
+       {cut: 'GEN_ctau == 100', latex: ['', '$ctau = 100$']}]
   
   set[2]:
-    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    expand: 'set'  # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: 'GEN_ctau == 0.1', latex: ['$c\tau \neq 0.1$', '$c\tau = 0.1$']}]
+      [{cut: '0.0 < muonSV_dxy_0  && muonSV_dxy_0 < 1.0 && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} < 1$ & $\delta < 0.2$']},
+       {cut: '0.0 < muonSV_dxy_0  && muonSV_dxy_0 < 1.0 && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} < 1$ & $\delta > 0.2$']},
+       {cut: '1.0 < muonSV_dxy_0  && muonSV_dxy_0 < 10  && muonSV_pAngle_0 < 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta < 0.2$']},
+       {cut: '1.0 < muonSV_dxy_0  && muonSV_dxy_0 < 10  && muonSV_pAngle_0 > 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta > 0.2$']},
+       {cut: 'muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta < 0.2$']},
+       {cut: 'muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta > 0.2$']}
+      ]
+  
+  set[3]:
+    expand: 'set'  # 'set', 'vetoset' or 'powerset'
+    cutset:
+      [{cut: '0.9 < muonSV_mass_0 && muonSV_mass_0 < 1.1',  latex: ['', '0.9 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 1.1']},
+       {cut: '1.8 < muonSV_mass_0 && muonSV_mass_0 < 2.2',  latex: ['', '1.8 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 2.2']},
+       {cut: '3.6 < muonSV_mass_0 && muonSV_mass_0 < 4.4',  latex: ['', '3.6 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 4.4']},
+       {cut: '9.0 < muonSV_mass_0 && muonSV_mass_0 < 11.0', latex: ['', '9.0 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 11.0']}]
   
   # ... more sets here
 
@@ -43,7 +75,9 @@ FILTER: &FILTER
 basic:
   active: False
   nbins:  70
+  percentile_range: [0.5, 99.5]
   exclude_vals: [null, -999.0]
+  plot_unweighted: False
 
 corrmat:
   active: False
@@ -55,7 +89,7 @@ ROC:
   active: True
   num_bootstrap: 50
   xmin: 1.0E-6
-  #set_filter: *FILTER
+  set_filter: *FILTER
 
 ## Binned ROC plots can be 1D or 2D
 ROC_binned:
@@ -80,20 +114,22 @@ ROC_binned:
 MVA_output:
   active: True
   edges: 80
-  #set_filter: *FILTER
+  set_filter: *FILTER
 
 ## (MVA output x External variable) density (2D)
 MVA_2D:
-  active: True
-  
+  active: False
+
   plot[0]:
     #var:  ['.*'] # RegExp supported
     #var:  ['muonSV_mass.*'] # RegExp supported
     var:   ['muonSV_mass_0', 'muonSV_mass_1']
     edges: [{'nbin': 50,  'minmax': [0.0, 1.0],  'space': 'linear'},
             {'nbin': 100, 'minmax': [0.0, 20.0], 'space': 'linear'}]
-
+    density: True
+  
   #plot[1]:
   #  var:   ['.?hlt_pms2.?'] # RegExp supported
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
+  #  density: True

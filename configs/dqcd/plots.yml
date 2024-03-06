@@ -2,40 +2,51 @@ FILTER: &FILTER
   
   filter[0]:
     operator: 'cartesian_and'  # null (unary), cartesian_and', 'cartesian_or'
-    sets: [0,1]                # input set ids (one or two)
+    sets: [0,1]                # input set ids (one or several)
+  
+  filter[1]:
+    operator: null            # null (unary), cartesian_and', 'cartesian_or'
+    sets: [0]                 # input set ids (one or several)
+  
+  filter[2]:
+    operator: null            # null (unary), cartesian_and', 'cartesian_or'
+    sets: [1]                 # input set ids (one or several)
   
   # ... more filters here
-
+  
   # --------------------
   
   set[0]:
+    #diplomat_classes: [-2, 0]    # classes which always pass the selection
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'GEN_m == 2',  latex: ['$m \neq 2$',  '$m = 2$'] },
-       {cut: 'GEN_m == 5',  latex: ['$m \neq 5$',  '$m = 5$'] },
-       {cut: 'GEN_m == 10', latex: ['$m \neq 10$', '$m = 10$']},
-       {cut: 'GEN_m == 15', latex: ['$m \neq 15$', '$m = 15$']},
-       {cut: 'GEN_m == 20', latex: ['$m \neq 20$', '$m = 20$']}]
+      [{cut: 'GEN_m == 2',  latex: ['', '$m = 2$'] },
+       {cut: 'GEN_m == 5',  latex: ['', '$m = 5$'] },
+       {cut: 'GEN_m == 10', latex: ['', '$m = 10$']},
+       {cut: 'GEN_m == 15', latex: ['', '$m = 15$']},
+       {cut: 'GEN_m == 20', latex: ['', '$m = 20$']}]
   
   set[1]:
+    #diplomat_classes: [-2, 0]    # classes which always pass the selection
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: 'GEN_ctau == 1',   latex: ['$c\tau \neq 1$',   '$c\tau = 1$']  },
-       {cut: 'GEN_ctau == 10',  latex: ['$c\tau \neq 10$',  '$c\tau = 10$'] },
-       {cut: 'GEN_ctau == 50',  latex: ['$c\tau \neq 50$',  '$c\tau = 50$'] },
-       {cut: 'GEN_ctau == 100', latex: ['$c\tau \neq 100$', '$c\tau = 100$']},
-       {cut: 'GEN_ctau == 500', latex: ['$c\tau \neq 500$', '$c\tau = 500$']}]
+      [{cut: 'GEN_ctau == 1',   latex: ['', '$ctau = 1$']  },
+       {cut: 'GEN_ctau == 10',  latex: ['', '$ctau = 10$'] },
+       {cut: 'GEN_ctau == 50',  latex: ['', '$ctau = 50$'] },
+       {cut: 'GEN_ctau == 100', latex: ['', '$ctau = 100$']},
+       {cut: 'GEN_ctau == 500', latex: ['', '$ctau = 500$']}]
   
   # ... more sets here
 
 # -----------------------------------------------------------------------
 
-
 basic:
-  active: False
+  active: True
   nbins:  70
+  percentile_range: [0.5, 99.5]
   exclude_vals: [null, -999.0]
+  plot_unweighted: False
 
 corrmat:
   active: false
@@ -78,9 +89,11 @@ MVA_2D:
     var:   ['.*'] # RegExp supported
     edges: [{'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'},
             {'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'}]
-
+    density: True
+  
   #plot[1]:
   #  var:   ['.?hlt_pms2.?']
   #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
   #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
-
+  #  density: True
+  

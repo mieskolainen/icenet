@@ -1,3 +1,6 @@
+# ML model definitions
+#
+# m.mieskolainen@imperial.ac.uk, 2024
 
 # -----------------------------------------------
 # ** Main Domain Filter **
@@ -5,7 +8,7 @@ MAIN_DOMAIN_FILTER: &MAIN_DOMAIN_FILTER
   
   filter[0]:
     operator: null   # null (unary), cartesian_and', 'cartesian_or'
-    sets: [0]        # input set ids (one or two)
+    sets: [0]        # input set ids (one or several)
   
   # ... more filters here
   
@@ -15,7 +18,7 @@ MAIN_DOMAIN_FILTER: &MAIN_DOMAIN_FILTER
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'nMuon > 0', latex: ['$!(nMuon > 0)$', '$nMuon > 0$']}]
+      [{cut: 'nMuon > 0', latex: ['', '$nMuon > 0$']}]
 
 # -----------------------------------------------
 
@@ -26,7 +29,7 @@ DA_DOMAIN_FILTER: &DA_DOMAIN_FILTER
   
   filter[0]:
     operator: null  # null (unary), cartesian_and', 'cartesian_or'
-    sets: [0]       # input set ids (one or two)
+    sets: [0]       # input set ids (one or several)
   
   # ... more filters here
   
@@ -37,7 +40,7 @@ DA_DOMAIN_FILTER: &DA_DOMAIN_FILTER
     cutset:
       # Latex description is for boolean [0,1] per cut
       [{cut: 'nMuon > 0', latex: ['$!(nMuon > 0)$', '$nMuon > 0$']}]
-      #[{cut: '(2.9 < muonSV_mass_0) AND (muonSV_mass_0 < 3.3)', latex: ['$!(2.9 < muonSV_{mass_0} < 3.3)$', '$2.9 < muonSV_{mass_0} < 3.3$']}]
+      #[{cut: '(2.9 < muonSV_mass_0) & (muonSV_mass_0 < 3.3)', latex: ['', '$2.9 < muonSV_{mass_0} < 3.3$']}]
 
 # -----------------------------------------------
 
@@ -47,19 +50,29 @@ DA_DOMAIN_FILTER: &DA_DOMAIN_FILTER
 MI_DOMAIN_FILTER: &MI_DOMAIN_FILTER
   
   filter[0]:
-    operator: null  # null (unary), cartesian_and', 'cartesian_or'
-    sets: [0]       # input set ids (one or two)
+    operator: null  # null (unary), 'cartesian_and', 'cartesian_or'
+    sets: [0]       # input set ids (one or several)
   
   # ... more filters here
   
   # --------------------
   
   set[0]:
-    expand: 'set'    # 'set', 'vetoset' or 'powerset'
+    expand: 'set'  # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: '0 < muonSV_mass_0 AND muonSV_mass_0 < 20', latex: ['!(0 < $muonSV_{mass_0}$ AND $muonSV_{mass_0} < 20$)', '$0 < $muonSV_{mass_0}$ AND $muonSV_{mass_0} < 20$']}]
-
+      [{cut: '0 < muonSV_mass_0 && muonSV_mass_0 < 20', latex: ['', '$0 < $muonSV_{mass_0}$ & $muonSV_{mass_0} < 20$']}]
+  
+  #set[0]:
+  #  expand: 'set'   # 'set', 'vetoset' or 'powerset'
+  #  cutset:
+  #    [{cut: '0 < muonSV_mass_0 && muonSV_dxy_0 < 1.0  && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} < 1$ & $\delta < 0.2$']},
+  #     {cut: '0 < muonSV_mass_0 && muonSV_dxy_0 < 1.0  && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} < 1$ & $\delta > 0.2$']},
+  #     {cut: '0 < muonSV_mass_0 && 1.0  < muonSV_dxy_0 && muonSV_dxy_0 < 10 && muonSV_pAngle_0 < 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta < 0.2$']},
+  #     {cut: '0 < muonSV_mass_0 && 1.0  < muonSV_dxy_0 && muonSV_dxy_0 < 10 && muonSV_pAngle_0 > 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta > 0.2$']},
+  #     {cut: '0 < muonSV_mass_0 && muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta < 0.2$']},
+  #     {cut: '0 < muonSV_mass_0 && muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta > 0.2$']}
+  #    ]
 # -----------------------------------------------
 
 
@@ -68,10 +81,16 @@ MI_DOMAIN_FILTER: &MI_DOMAIN_FILTER
 MI_REG_PARAM: &MI_REG_PARAM
   
   classes: [-2]            #  Which classes to use in the regularization
-
+  
+  losstype: 'DCORR'        # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
   min_count: 32            #  Minimum number of events (per category)
-  poisson_weight: False    #  per category Poisson sqrt(N) weighted loss
-  losstype: 'PEARSON'      # 'MINE', 'MINE_EMA', 'DENSITY', 'PEARSON'
+  max_N: null              #  Maximum number of events per function call (use to limit sample size)
+  min_score: 0.9           #  Consider only events with MVA output larger than this value (null for None)
+  poisson_weight: False    #  Per category Poisson sqrt(N) weighted loss
+  
+  # ------------------
+  # Neural MI param
+
   eval_batch_size: 8192    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
   ma_eT:  [null]           #  EMA tracking values
@@ -79,7 +98,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
   epochs: 5
-  batch_size: 256          # if the estimate (network) turns into NaN, try tuning batch size, lr, weight decay ...
+  batch_size: 256          #  if the estimate (network) turns into NaN, try tuning batch size, lr, weight decay ...
   lr: 1.0e-4
   weight_decay: 1.0e-2
   clip_norm: 1.0
@@ -90,7 +109,9 @@ MI_REG_PARAM: &MI_REG_PARAM
   noise_std: 0.025
   activation: 'relu'
   
-  # Comment out for no categories
+  # -------------------------
+
+  # Comment out for no categories (N.B. dependence structure over inclusive sample != categorical)
   set_filter: *MI_DOMAIN_FILTER
 # -----------------------------------------------
 
@@ -200,6 +221,58 @@ xgb01:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb01-NC:
+  train:   'xgb'
+  predict: 'xgb_logistic'
+  label:   'XGB-NC'
+  raytune:  xgb_trial_0
+  
+  exclude_MVA_vars: ['MODEL.*', 'muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  #include_MVA_vars: ['.*']
+  
+  # general parameters
+  model_param:
+    num_boost_round: 150       # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'       # 'auto', 'cpu', 'cuda'
+    
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
+    
+    # learning task parameters
+    #objective: 'binary:logistic'             # Note that 'multi:softprob' does not work with distillation
+    #eval_metric: ['logloss']                 # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    objective: 'custom:binary_cross_entropy'  # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                   # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  plot_trees: False
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
 iceboost01-DA:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
@@ -207,6 +280,61 @@ iceboost01-DA:
   raytune:  xgb_trial_0
   
   exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  #include_MVA_vars: ['.*']
+  
+  # general parameters
+  model_param:
+    num_boost_round: 150       # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'          # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'        # 'auto', 'cpu', 'cuda'
+    
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
+    
+    # learning task parameters
+    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+    DA:
+      classes: [0,-2]
+      beta: -0.1
+      set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
+  
+  plot_trees: False
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+iceboost01-DA-NC:
+  train:   'xgb'
+  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+  label:   'ICEBOOST-DA-NC'
+  raytune:  xgb_trial_0
+  
+  exclude_MVA_vars: ['MODEL.*', 'muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
   #include_MVA_vars: ['.*']
   
   # general parameters

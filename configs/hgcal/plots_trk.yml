@@ -1,7 +1,9 @@
 basic:
-  active: true
+  active: True
   nbins:  70
+  percentile_range: [0.5, 99.5]
   exclude_vals: [null, 0]
+  plot_unweighted: True
 
 corrmat:
   active: false

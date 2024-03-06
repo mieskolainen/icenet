@@ -1,6 +1,6 @@
 # Torch aux tools
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import torch
 import numpy as np
