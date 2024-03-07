@@ -15,10 +15,10 @@ echo "$(pwd)"
 source $ICEPATH/setenv.sh
 
 # Training
-python configs/dqcd/include/ymlgen.py --process 'QCD'       --filerange '[0-50]'      --outputfile configs/dqcd/include/QCD_newmodels.yml
-python configs/dqcd/include/ymlgen.py --process 'scenarioA' --filerange '[0-20]'      --outputfile configs/dqcd/include/scenarioA.yml
+python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'QCD'       --filerange '[0-50]'      --outputfile configs/dqcd/include/QCD_new.yml
+python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'scenarioA' --filerange '[0-20]'      --outputfile configs/dqcd/include/scenarioA.yml
 
 # Deployment
-python configs/dqcd/include/ymlgen.py --process 'QCD'       --filerange '[51-100000]' --outputfile configs/dqcd/include/QCD_newmodels_deploy.yml
-python configs/dqcd/include/ymlgen.py --process 'scenarioA' --filerange '[21-100000]' --outputfile configs/dqcd/include/scenarioA_deploy.yml
+python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'QCD'       --filerange '[51-100000]' --outputfile configs/dqcd/include/QCD_new_deploy.yml
+python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'scenarioA' --filerange '[21-100000]' --outputfile configs/dqcd/include/scenarioA_deploy.yml
 

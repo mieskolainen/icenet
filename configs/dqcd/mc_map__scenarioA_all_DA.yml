@@ -1,4 +1,4 @@
 input:
-  class_0:  !include include/QCD_newmodels.yml
+  class_0:  !include include/QCD_new.yml
   class_1:  !include include/scenarioA.yml
-  class_-2: !include include/data_DA.yml
+  class_-2: !include include/data_new_DA.yml

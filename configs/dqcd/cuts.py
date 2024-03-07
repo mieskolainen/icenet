@@ -29,10 +29,12 @@ def cut_fiducial(X, xcorr_flow=False):
     global O; O = X  # __technical__ recast due to eval() scope
     
     # Create cut strings
-    names = ['ak.sum(np.logical_and(O.Muon.pt >  5.0, np.abs(O.Muon.eta) < 2.4), -1) > 0',
-             'ak.sum(np.logical_and(O.Jet.pt  > 15.0, np.abs(O.Jet.eta)  < 2.4), -1) > 0']
+    names = ['ak.sum(np.logical_or(O.muonSV.mu1pt > 5.0, O.muonSV.mu2pt > 5.0), -1) > 0']
+    
+    #names = ['ak.sum(np.logical_and(O.Muon.pt >  5.0, np.abs(O.Muon.eta) < 2.4), -1) > 0',
+    #         'ak.sum(np.logical_and(O.Jet.pt  > 15.0, np.abs(O.Jet.eta)  < 2.4), -1) > 0']
              
-             # 'ak.sum(O.muonSV.charge == 0, -1) > 0'
+    # 'ak.sum(O.muonSV.charge == 0, -1) > 0'
     
     # Evaluate columnar cuts; Compute cutflow
     cuts  = [eval(names[i], globals()) for i in range(len(names))]

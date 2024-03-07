@@ -17,4 +17,4 @@ CONFIG="tune0_new.yml"
 DATAPATH="/vols/cms/khl216"
 CONDITIONAL=1
 
-python analysis/dqcd_deploy.py --runmode deploy --use_conditional $CONDITIONAL --inputmap 'include/QCD_newmodels_deploy.yml' --modeltag scenarioA_all --grid_id $GRID_ID --grid_nodes $GRID_NODES --config $CONFIG --datapath $DATAPATH
+python analysis/dqcd_deploy.py --runmode deploy --use_conditional $CONDITIONAL --inputmap 'include/QCD_new_deploy.yml' --modeltag scenarioA_all --grid_id $GRID_ID --grid_nodes $GRID_NODES --config $CONFIG --datapath $DATAPATH

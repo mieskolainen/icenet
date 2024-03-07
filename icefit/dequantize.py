@@ -77,9 +77,12 @@ def iDQF(x, theta=None, pvals=None, N_buffer=int(1e4), n_interp=int(1e4), kind='
         dequantized x values
     """
     
-    if theta is None: # PDF not given, construct empirical PDF
+    if theta is None:   # PDF not given, construct empirical PDF
         theta, counts = np.unique(x, return_counts=True)
         pvals = counts / np.sum(counts)
+    
+    if len(theta) == 1: # No need to dequantize, only one value
+        return x
     
     icdf = construct_icdf(theta=theta, pvals=pvals, n_interp=n_interp, kind=kind)
     
