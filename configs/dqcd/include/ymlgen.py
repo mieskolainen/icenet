@@ -37,9 +37,9 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
 
         # MC signal
         if isMC == 'true' and m != 'null':
-          param_name   = f'm_{m}_ctau_{ctau}_xiO_{xi_pair[0]}_xiL_{xi_pair[1]}'
+          param_name   = f'm_{m}_ctau_{ctau}_xiO_{rp["xi2str"][xi_pair[0]]}_xiL_{rp["xi2str"][xi_pair[1]]}'
           process_name = f'{process}_{param_name}'  
-          folder_name  = f'{process_name}_{end_name}'
+          folder_name  = f'{process_name}'
 
         # MC background
         elif isMC == 'true' and m == 'null':
@@ -131,7 +131,8 @@ def darkphoton(outputfile, filerange='*'):
   rp = {}
   rp['m']         = ['2', '5', '10', '15']
   rp['ctau']      = ['10', '50', '100', '500'] 
-  rp['xi_pair']   = [['1', '1'], ['2p5', '1'], ['2p5', '2p5']]
+  rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
+  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
 
   param = {
     'outputfile':      outputfile,
@@ -150,13 +151,13 @@ def darkphoton(outputfile, filerange='*'):
 
 def vector(outputfile, filerange='*'):
 
-  process         = 'HiddenValley_vector'
+  process         = 'hiddenValleyGridPack_vector'
 
   # ------------------------------------------
   # Basic
-  filename        = f'output_{filerange}.root'
-  path            = 'bparkProductionAll_V1p0'
-  end_name        = 'privateMC_11X_NANOAODSIM_v1p0_generationSync'
+  filename        = f'data_{filerange}.root'
+  path            = 'bparkProductionAll_V1p3'
+  end_name        = ''
   xs              = '1.0 # [pb]'
   force_xs        = 'true'
   isMC            = 'true'
@@ -167,6 +168,7 @@ def vector(outputfile, filerange='*'):
   rp['m']         = ['2', '5', '10', '15', '20']
   rp['ctau']      = ['1', '10', '50', '100', '500'] 
   rp['xi_pair']   = [['1', '1']]
+  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
   
   param = {
     'outputfile':      outputfile,
@@ -201,8 +203,9 @@ def higgs(outputfile, filerange='*'):
   rp = {}
   rp['m']         = ['10', '15', '20']
   rp['ctau']      = ['10', '50', '100', '500'] 
-  rp['xi_pair']   = [['1', '1'], ['2p5', '1'], ['2p5', '2p5']]
-  
+  rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
+  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
+
   param = {
     'outputfile':      outputfile,
     'rp':              rp,
@@ -352,6 +355,7 @@ def scenarioC(outputfile, filerange='*'):
   printer_newmodels(**param)
 
 
+
 def QCD(outputfile, filerange='*'):
 
   processes = [ \
@@ -432,11 +436,11 @@ def QCD(outputfile, filerange='*'):
   rp['m']       = ['null']
   rp['ctau']    = ['null'] 
   rp['xi_pair'] = [['null', 'null']]
+  rp['xi2str']  = ['null']
   '''
-  
   #new models
-  rp['mpi_mA_pair'] = [['null', 'null']]
-  rp['ctau']        = ['null']
+  rp['mpi_mA_pair']     = [['null', 'null']]
+  rp['ctau']            = ['null']
 
   for i in range(len(processes)):
 
@@ -466,7 +470,115 @@ def QCD(outputfile, filerange='*'):
     else:
       printer_newmodels(**param, flush_index=i)
 
+def QCD_old_model(outputfile, filerange='*'):
 
+  processes = [ \
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 2799000.0} # pb
+  ,
+  
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 2526000.0 }
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 1362000.0}
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 376600.0}
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 88930.0} 
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 21230.0}  
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 7055.0}
+  ,
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 619.3} 
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 59.24}
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 18.21}
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 3.275}
+  ,
+
+  {'path':     'bparkProductionAll_V1p3',
+   'process':  'QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
+   'end_name': 'MINIAODSIM_v1p1_generationSync',
+   'xs': 1.078} ]
+  
+  rp = {}
+
+  #old models
+  
+  rp['m']       = ['null']
+  rp['ctau']    = ['null'] 
+  rp['xi_pair'] = [['null', 'null']]
+  rp['xi2str']  = ['null']
+
+  for i in range(len(processes)):
+
+    # ------------------------------------------
+    # Basic
+    filename        = f'output_{filerange}.root'
+    force_xs        = 'false'
+    isMC            = 'true'
+    maxevents_scale = '1.0'
+    # ------------------------------------------
+
+    param = {
+      'outputfile':      outputfile,
+      'rp':              rp,
+      'process':         processes[i]['process'],
+      'path':            processes[i]['path'],
+      'end_name':        processes[i]['end_name'],
+      'filename':        filename,
+      'xs':              processes[i]['xs'],
+      'force_xs':        force_xs,
+      'isMC':            isMC,
+      'maxevents_scale': maxevents_scale
+    }
+
+    if i == 0:
+      printer(**param)
+    else:
+      printer(**param, flush_index=i)
 
 def data(outputfile, filerange='*', period='B'):
 
@@ -503,18 +615,16 @@ def data(outputfile, filerange='*', period='B'):
     raise Exception(__name__ + f'.data: Unknown period "{period}" chosen')
   
   rp              = {}
-  
-  #old models
   '''
-  rp['m']       = ['null']
-  rp['ctau']    = ['null'] 
-  rp['xi_pair'] = [['null', 'null']]
+  rp['m']         = ['null']
+  rp['ctau']      = ['null'] 
+  rp['xi_pair']   = [['null', 'null']]
+  rp['xi2str']    = ['null']
   '''
   
-  #new models
-  rp['mpi_mA_pair'] = [['null', 'null']]
-  rp['ctau']        = ['null']
-  
+  rp['mpi']     = ['null']
+  rp['mA']      = ['null']
+  rp['ctau']    = ['null']
   for i in range(len(processes)):
 
     # ------------------------------------------
@@ -522,7 +632,7 @@ def data(outputfile, filerange='*', period='B'):
     filename        = f'output_{filerange}.root'
     force_xs        = 'false'
     isMC            = 'false'
-    xs              =  2799000.0 # dummy value
+    xs              =  2799000.0
     maxevents_scale = '1.0'
     # ------------------------------------------
 
@@ -583,6 +693,9 @@ if __name__ == '__main__':
 
   elif args.process == 'QCD':
     QCD(outputfile=outputfile, filerange=args.filerange)
+
+  elif args.process == 'QCD_old_model':
+    QCD_old_model(outputfile=outputfile, filerange=args.filerange)
   
   elif args.process == 'data-B':
     data(outputfile=outputfile, filerange=args.filerange, period='B')
