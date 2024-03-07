@@ -5,9 +5,10 @@ bparkProductionAll_V1p3--QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunII
   files: 'output_[0-50].root' 
   xs:   2799000.0 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -18,9 +19,10 @@ bparkProductionAll_V1p3--QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunII
   files: 'output_[0-50].root' 
   xs:   2526000.0 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -31,9 +33,10 @@ bparkProductionAll_V1p3--QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunII
   files: 'output_[0-50].root' 
   xs:   1362000.0 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -44,9 +47,10 @@ bparkProductionAll_V1p3--QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunII
   files: 'output_[0-50].root' 
   xs:   376600.0 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -57,9 +61,10 @@ bparkProductionAll_V1p3--QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunI
   files: 'output_[0-50].root' 
   xs:   88930.0 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -70,9 +75,10 @@ bparkProductionAll_V1p3--QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8_Run
   files: 'output_[0-50].root' 
   xs:   21230.0 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -83,9 +89,10 @@ bparkProductionAll_V1p3--QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8_Run
   files: 'output_[0-50].root' 
   xs:   7055.0 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -96,9 +103,10 @@ bparkProductionAll_V1p3--QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8_Run
   files: 'output_[0-50].root' 
   xs:   619.3 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -109,9 +117,10 @@ bparkProductionAll_V1p3--QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8_Run
   files: 'output_[0-50].root' 
   xs:   59.24 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -122,9 +131,10 @@ bparkProductionAll_V1p3--QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8_Run
   files: 'output_[0-50].root' 
   xs:   18.21 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -135,9 +145,10 @@ bparkProductionAll_V1p3--QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_Ru
   files: 'output_[0-50].root' 
   xs:   3.275 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 
@@ -148,9 +159,10 @@ bparkProductionAll_V1p3--QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISu
   files: 'output_[0-50].root' 
   xs:   1.078 
   model_param: 
-    mpi:    null 
-    mA:     null 
-    ctau:   null 
+    m:    null 
+    ctau: null 
+    xiO:  null 
+    xiL:  null 
   force_xs: false 
   isMC:     true 
   maxevents_scale: 1.0 

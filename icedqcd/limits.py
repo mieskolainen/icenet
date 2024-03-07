@@ -19,7 +19,6 @@ import sys
 sys.path.append(".")
 
 from icenet.tools import aux,io
-from icefit import lognormal
 from icefit.peakfit import TH1_to_numpy
 from icefit.icelimit import *
 
@@ -77,7 +76,7 @@ def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, 
         plot_index = 0
 
         for k,m in enumerate(m_values):
-            limits = [expected_limits[create_filename(m=m, ctau=ctau, portal=portal)] for ctau in ctau_values]
+            limits = [expected_limits[create_root_filename(m=m, ctau=ctau, portal=portal)] for ctau in ctau_values]
 
             # Collect values
             Y = np.zeros((len(ctau_values), 5)) # 5 from -2,-1,0,+1,+2 sigmas
@@ -113,7 +112,7 @@ def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, 
         ## 1D Brazil over ctau
 
         for k,ctau in enumerate(ctau_values):
-            limits = [expected_limits[create_filename(m=m, ctau=ctau, portal=portal)] for m in m_values]
+            limits = [expected_limits[create_root_filename(m=m, ctau=ctau, portal=portal)] for m in m_values]
 
             # Collect values
             Y = np.zeros((len(m_values), 5)) # 5 from -2,-1,0,+1,+2 sigmas
@@ -151,9 +150,9 @@ def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, 
             R = np.zeros((len(m_values), len(ctau_values)))
             for i in range(len(m_values)):
                 for j in range(len(ctau_values)):
-                    limits = expected_limits[create_filename(m=m_values[i], ctau=ctau_values[j], portal=portal)]
+                    limits = expected_limits[create_root_filename(m=m_values[i], ctau=ctau_values[j], portal=portal)]
                     R[i,j] = limits[method][ind]
-
+            
             ## Interpolate
             interp_spline    = RectBivariateSpline(m_values, ctau_values, R, kx=kx, ky=ky)
 
@@ -220,8 +219,8 @@ def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, 
         outputdir = aux.makedir(f'figs/icelimit/{portal}/{method}')
         plt.savefig(f'{outputdir}/plot_{plot_index}_2D_m_ctau_method_{method}.pdf', bbox_inches='tight')
 
-def create_filename(m,ctau,portal):
-    return f'{portal}_m_{m}/output_vector_{m}_{ctau}_1_1.root'
+def create_root_filename(m,ctau,portal):
+    return f'{portal}_m_{m}/output_{portal}_{m}_{ctau}_1_1.root'
 
 def create_limit_tables(expected_limits, observed_limits, statistics, methods, portal):
 
@@ -314,7 +313,7 @@ def create_limit_tables(expected_limits, observed_limits, statistics, methods, p
     os.system(f'pdflatex -output-directory {latex_path} {latex_filename}')
 
 
-def limit_wrapper(files, path, methods, num_toys_obs=int(1E3), bg_regulator=0.0, s_regulator=0.0):
+def limit_wrapper_root(files, path, methods, num_toys_obs=int(1E3), bg_regulator=0.0, s_regulator=0.0):
     
     expected_limits = {}
     observed_limits = {}
@@ -328,8 +327,8 @@ def limit_wrapper(files, path, methods, num_toys_obs=int(1E3), bg_regulator=0.0,
                 h[x] = TH1_to_numpy(f)
 
         # Counts (assumed Poisson)
-        bg_expected   = np.sum(h['background']['counts'])
-        s_hypothesis  = np.sum(h['signal']['counts'])
+        bg_expected  = np.sum(h['background']['counts'])
+        s_hypothesis = np.sum(h['signal']['counts'])
 
         # Regulate MC
         if  bg_expected <= 0:
@@ -346,25 +345,31 @@ def limit_wrapper(files, path, methods, num_toys_obs=int(1E3), bg_regulator=0.0,
         expected_limits[rootfile] = {'asymptotic': None, 'toys': None}
         observed_limits[rootfile] = {'asymptotic': None, 'toys': None}
         statistics[rootfile]      = {'background': bg_expected, 'signal': s_hypothesis}
-
+        
         for method in methods:
             print(f'[method: {method}]')
 
+            # Excepted limits
             opt = CL_single_compute(method=method, observed=None, s_hypothesis=s_hypothesis,
                 bg_expected=bg_expected, s_syst_error=s_syst_error, bg_syst_error=bg_syst_error, num_toys_obs=num_toys_obs)
 
             print(np.round(opt,4))
             expected_limits[rootfile][method] = opt
 
+            # Emulate observed
             opt = CL_single_compute(method=method, observed=s_hypothesis+bg_expected, s_hypothesis=s_hypothesis,
-                                       bg_expected=bg_expected, s_syst_error=s_syst_error, bg_syst_error=bg_syst_error)
+                bg_expected=bg_expected, s_syst_error=s_syst_error, bg_syst_error=bg_syst_error)
+            
             print(np.round(opt,4))
             observed_limits[rootfile][method] = opt
     
     return expected_limits, observed_limits, statistics
 
 
-def run_limits(path='/home/user/Desktop/output/', methods=['asymptotic', 'toys'], num_toys_obs=int(1E4), portal='vector'):
+def run_limits(path='/home/user/Desktop/output/',
+               methods=['asymptotic', 'toys'],
+               num_toys_obs=int(1E4),
+               portal='vector'):
     """
     DQCD analysis 'KISS' limits
     
@@ -379,14 +384,14 @@ def run_limits(path='/home/user/Desktop/output/', methods=['asymptotic', 'toys']
     
 
     # 1. Create all model point filenames
-    files = []
+    root_files = []
     for m in m_values:
         for ctau in ctau_values:
-            files.append(create_filename(m=m, ctau=ctau, portal=portal))
+            root_files.append(create_root_filename(m=m, ctau=ctau, portal=portal))
 
     # 2. Compute limits over all points
-    expected_limits, observed_limits, statistics = limit_wrapper(files=files, path=path, methods=methods,
-        num_toys_obs=num_toys_obs, bg_regulator=0.0, s_regulator=0.0)
+    expected_limits, observed_limits, statistics = limit_wrapper_root(files=root_files,
+        path=path, methods=methods, num_toys_obs=num_toys_obs, bg_regulator=0.0, s_regulator=0.0)
     
     # 3. Create plots
     create_limit_plots(expected_limits=expected_limits,

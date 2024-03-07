@@ -16,30 +16,49 @@ from iceplot import iceplot
 # ------------------------------------------------------------------------
 # Find the latest file
 
-path = './output/dqcd/processed_data_train_'
+if False:
+    
+    path = './output/dqcd/processed_data_train_'
 
-def find_latest(path, filetype):
+    def find_latest(path, filetype):
 
-    list_of_files = glob.glob(f'{path}*{filetype}')
-    return max(list_of_files, key=os.path.getctime)
+        list_of_files = glob.glob(f'{path}*{filetype}')
+        return max(list_of_files, key=os.path.getctime)
 
-fname = find_latest(path=path, filetype='pkl')
+    fname = find_latest(path=path, filetype='pkl')
+
+    # Load data
+    with open(fname, 'rb') as file:
+        obj = pickle.load(file)
+    data = obj['trn']['data']
+
+fname = 'figs/dqcd/config__tune0_new.yml/inputmap__mc_map__scenarioA_all_DA.yml--modeltag__dev_scenarioA_all_DA/eval/eval_results.pkl'
+print(fname)
 
 # Load data
 with open(fname, 'rb') as file:
     obj = pickle.load(file)
-data = obj['trn']['data']
+print(obj)
+data = obj['data']
+pred = obj['y_preds']
 
 # ------------------------------------------------------------------------
 # Selections
-cutstring = 'muonSV_mass_0 > 0.2 AND muonSV_chi2_0 < 10 AND muonSV_deltaR_0 < 0.7'
-new  = data[cutstring]
+
+# Do MVA selection
+MVA_model = 2
+ind  = np.logical_and(0.19 < pred[MVA_model], pred[MVA_model] < 2.1)
+data = data[ind]
+
+cutstring = 'muonSV_mass_0 > 0.2 AND muonSV_chi2_0 < 10 AND muonSV_deltaR_0 < 1.2'
+data = data[cutstring]
 
 # Pick out the variable of interest
-new  = new['muonSV_mass_0']
-x    = new.x.squeeze()
-y    = new.y.astype(int)
-w    = new.w.squeeze()
+data = data['muonSV_mass_0']
+
+x    = data.x.squeeze()
+y    = data.y.astype(int)
+w    = data.w.squeeze()
 
 # ------------------------------------------------------------------------
 # ** Histogramming **
@@ -47,7 +66,7 @@ w    = new.w.squeeze()
 obs_M = {
 
     # Axis limits
-    'xlim'    : (0, 20.0),
+    'xlim'    : (0, 20),
     'ylim'    : (1e-4, 3),
     'xlabel'  : r'$M_{\mu^+\mu^-}$',
     'ylabel'  : r'Counts',
@@ -68,18 +87,22 @@ obs_M = {
 }
 
 # Define class labels
-DATA, QCD  = -2, 0
+DATA, QCD, SIGNAL  = -2, 0, 1
 
 fig, ax = iceplot.create_axes(**obs_M, ratio_plot=True)
 
-# MC
+# QCD MC
 counts0, errs0, bins, cbins = iceplot.hist(x[y==QCD], weights=w[y==QCD], bins=obs_M['bins'], density=obs_M['density'])
 iceplot.hist_filled_error(ax[0], bins, cbins, counts0, errs0, color=(1,0,0))
 ax[0].hist(x=cbins, bins=bins, weights=counts0, color=(1,0,0), label='QCD MC', **iceplot.hist_style_step)
 
+# SIGNAL MC
+counts1, errs1, bins, cbins = iceplot.hist(x[y==SIGNAL], weights=w[y==SIGNAL], bins=obs_M['bins'], density=obs_M['density'])
+iceplot.hist_filled_error(ax[0], bins, cbins, counts1, errs1, color=(0,1,0))
+ax[0].hist(x=cbins, bins=bins, weights=counts1, color=(0,1,0), label='SIGNAL MC', **iceplot.hist_style_step)
+
 # Data
 counts2, errs2, bins, cbins = iceplot.hist(x[y==DATA], weights=w[y==DATA], bins=obs_M['bins'], density=obs_M['density'])
-
 iceplot.hist_filled_error(ax[0], bins, cbins, counts2, errs2, color=(0,0,0))
 #ax[0].errorbar(x=cbins, y=counts2, yerr=errs2, color=(0,0,0), label='Data (2018-D)', **iceplot.errorbar_style)
 ax[0].plot(cbins, counts2, color=(0,0,0), label='Data (2018-D)', **iceplot.errorbar_style)
