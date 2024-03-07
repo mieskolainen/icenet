@@ -818,18 +818,26 @@
         
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>       <span class="c1"># access with a single variable name</span>
             
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">select</span> <span class="o">=</span> <span class="n">key</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">select</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">select</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">select</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">new</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="kc">True</span>
+            
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">:</span>         <span class="c1"># direct access</span>
                 <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
             
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span> <span class="c1"># might be a cut string, try that</span>
+                
                 <span class="n">select</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">eval_boolean_syntax</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">select</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">select</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">select</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
             
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;[operator]: Cannot execute&#39;</span><span class="p">)</span>
-            
-        <span class="k">else</span><span class="p">:</span>                           <span class="c1"># list of variables</span>
+        
+        <span class="k">else</span><span class="p">:</span>                          <span class="c1"># list of variables</span>
             <span class="n">col</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">pick_vars</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_of_vars</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
