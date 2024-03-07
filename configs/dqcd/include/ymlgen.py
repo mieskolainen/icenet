@@ -130,8 +130,7 @@ def darkphoton(outputfile, filerange='*'):
   rp = {}
   rp['m']         = ['2', '5', '10', '15']
   rp['ctau']      = ['10', '50', '100', '500'] 
-  rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
+  rp['xi_pair']   = [['1', '1'], ['2p5', '1'], ['2p5', '2p5']]
 
   param = {
     'outputfile':      outputfile,

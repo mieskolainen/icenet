@@ -4,10 +4,9 @@
 # Conditional (parametric) signal model variables
 
 MODEL_VARS = [
-  'MODEL_m',
-  'MODEL_ctau',
-  'MODEL_xiO',
-  'MODEL_xiL'
+  'MODEL_mpi',
+  'MODEL_mA',
+  'MODEL_ctau'
 ]
 
 # ---------------------------------------------------------
@@ -16,10 +15,9 @@ MODEL_VARS = [
 KINEMATIC_GEN_VARS = [
   # Conditional theory MC point parameters
   # Read from .yaml (input) steering cards and constructed under .iceroot
-  'GEN_m',
+  'GEN_mpi',
+  'GEN_mA',
   'GEN_ctau',
-  'GEN_xiO',
-  'GEN_xiL'
   
   # MC only NanoAOD
   'GenJet_pt',

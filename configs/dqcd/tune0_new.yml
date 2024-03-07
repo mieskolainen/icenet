@@ -4,7 +4,7 @@
 
 rootname: 'dqcd'
 rngseed: 123456                       # Fixed seed for training data mixing
-inputvars: 'mvavars'                  # Main file input description python file
+inputvars: 'mvavars_new'              # Main file input description python file
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM

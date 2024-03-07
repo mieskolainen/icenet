@@ -8,13 +8,13 @@ inputvars: 'mvavars'                 # Main file input description python file
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
-  use_conditional: false             # Conditional (theory parametric) input
+  use_conditional: false              # Conditional (theory parametric) input
+
+  primary_classes: [0,1]              # Primary class IDs in MVA (train, ROC etc.)
+  signal_class: 1                     # Signal class ID
+  DA_class:    -2                     # Domain Adaptation class
   
-  primary_classes: [0,1]             # Primary class IDs in MVA (train, ROC etc.)
-  signal_class: 1                    # Signal class ID
-  DA_class:    -2                    # Domain Adaptation class
-  
-  inputvar_scalar: 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  inputvar_scalar: 'MVA_SCALAR_VARS'  # Input variables, implemented under mvavars.py
   inputvar_jagged: 'MVA_JAGGED_VARS'
   
   # For xgboost etc. fixed input dimension models
@@ -27,22 +27,20 @@ mva_param: &MVA_INPUT_PARAM
     SV:   6
     cpf:  0     # 20
     npf:  0     # 10
-
+  
   
   # Filtering of collection entries (for BDT)
   jagged_filter:
     
     - name: 'muonSV'
       condition: 'muonSV.dlen > 0'   # placeholder, for 'muonSV.charge == 0' condition
-    
-    # add more here ..
 
   # Re-ordering of collection entries (for BDT)
   jagged_order:
 
     - name: 'muonSV'
       var:  'chi2'
-      ascending: False # True ~ smallest first, False ~ largest first
+      ascending: True  # True ~ smallest first, False ~ largest first
     
     - name: 'SV'
       var:  'dlen'
