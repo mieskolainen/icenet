@@ -13,7 +13,7 @@ echo "$(pwd)"
 source $ICEPATH/setenv.sh
 
 CONFIG="tune0.yml"
-DATAPATH="/vols/cms/mc3909"
+DATAPATH="/vols/cms/khl216"
 
 CONDITIONAL=1
 MAX=2000000 # Tune according to maximum CPU RAM available
