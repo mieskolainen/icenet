@@ -36,10 +36,10 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
 
         # MC signal
         if isMC == 'true' and m != 'null':
-          param_name   = f'm_{m}_ctau_{ctau}_xiO_{[xi_pair[0]]}_xiL_{[xi_pair[1]]}'
+          param_name   = f'm_{m}_ctau_{ctau}_xiO_{xi_pair[0]}_xiL_{xi_pair[1]}'
           process_name = f'{process}_{param_name}'
           folder_name  = f'{process_name}'
-
+        
         # MC background
         elif isMC == 'true' and m == 'null':
           process_name = f'{process}'  
