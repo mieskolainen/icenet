@@ -1,0 +1,4 @@
+input:
+  class_0:  !include include/QCD.yml
+  class_1:  !include include/vector.yml
+  class_-2: !include include/data_DA.yml

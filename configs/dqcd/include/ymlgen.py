@@ -24,7 +24,6 @@ def str2float(x):
   else:
     raise Exception(f'str2float: Input {x} should be either str or float')
 
-
 def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, maxevents_scale, rp, flush_index=0):
   
   if flush_index == 0:
@@ -37,8 +36,8 @@ def printer(outputfile, process, path, end_name, filename, xs, force_xs, isMC, m
 
         # MC signal
         if isMC == 'true' and m != 'null':
-          param_name   = f'm_{m}_ctau_{ctau}_xiO_{rp["xi2str"][xi_pair[0]]}_xiL_{rp["xi2str"][xi_pair[1]]}'
-          process_name = f'{process}_{param_name}'  
+          param_name   = f'm_{m}_ctau_{ctau}_xiO_{[xi_pair[0]]}_xiL_{[xi_pair[1]]}'
+          process_name = f'{process}_{param_name}'
           folder_name  = f'{process_name}'
 
         # MC background
@@ -165,10 +164,9 @@ def vector(outputfile, filerange='*'):
   # ------------------------------------------
   
   rp = {}
-  rp['m']         = ['2', '5', '10', '15', '20']
-  rp['ctau']      = ['1', '10', '50', '100', '500'] 
-  rp['xi_pair']   = [['1', '1']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
+  rp['m']       = ['2', '5', '10', '15', '20']
+  rp['ctau']    = ['1', '10', '50', '100', '500'] 
+  rp['xi_pair'] = [['1', '1']]
   
   param = {
     'outputfile':      outputfile,
@@ -201,11 +199,10 @@ def higgs(outputfile, filerange='*'):
   # ------------------------------------------
   
   rp = {}
-  rp['m']         = ['10', '15', '20']
-  rp['ctau']      = ['10', '50', '100', '500'] 
-  rp['xi_pair']   = [['1', '1'], ['2.5', '1'], ['2.5', '2.5']]
-  rp['xi2str']    = {'1': '1', '2.5': '2p5'}
-
+  rp['m']       = ['10', '15', '20']
+  rp['ctau']    = ['10', '50', '100', '500'] 
+  rp['xi_pair'] = [['1', '1'], ['2p5', '1'], ['2p5', '2p5']]
+  
   param = {
     'outputfile':      outputfile,
     'rp':              rp,
@@ -219,6 +216,7 @@ def higgs(outputfile, filerange='*'):
     'maxevents_scale': maxevents_scale
   }
   printer(**param)
+
 
 def scenarioA(outputfile, filerange='*'):
 
@@ -355,122 +353,7 @@ def scenarioC(outputfile, filerange='*'):
   printer_newmodels(**param)
 
 
-
-def QCD(outputfile, filerange='*'):
-
-  processes = [ \
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 2799000.0} # pb
-  ,
-  
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 2526000.0 }
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 1362000.0}
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 376600.0}
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 88930.0} 
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 21230.0}  
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 7055.0}
-  ,
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 619.3} 
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 59.24}
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 18.21}
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 3.275}
-  ,
-
-  {'path':     'bparkProductionAll_V1p3',
-   'process':  'QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2',
-   'end_name': 'MINIAODSIM_v1p1_generationSync',
-   'xs': 1.078} ]
-  
-  rp = {}
-
-  #old models
-  '''
-  rp['m']       = ['null']
-  rp['ctau']    = ['null'] 
-  rp['xi_pair'] = [['null', 'null']]
-  rp['xi2str']  = ['null']
-  '''
-  #new models
-  rp['mpi_mA_pair']     = [['null', 'null']]
-  rp['ctau']            = ['null']
-
-  for i in range(len(processes)):
-
-    # ------------------------------------------
-    # Basic
-    filename        = f'output_{filerange}.root'
-    force_xs        = 'false'
-    isMC            = 'true'
-    maxevents_scale = '1.0'
-    # ------------------------------------------
-
-    param = {
-      'outputfile':      outputfile,
-      'rp':              rp,
-      'process':         processes[i]['process'],
-      'path':            processes[i]['path'],
-      'end_name':        processes[i]['end_name'],
-      'filename':        filename,
-      'xs':              processes[i]['xs'],
-      'force_xs':        force_xs,
-      'isMC':            isMC,
-      'maxevents_scale': maxevents_scale
-    }
-
-    if i == 0:
-      printer_newmodels(**param)
-    else:
-      printer_newmodels(**param, flush_index=i)
-
-def QCD_old_model(outputfile, filerange='*'):
+def QCD(outputfile, filerange='*', paramera='old'):
 
   processes = [ \
   {'path':     'bparkProductionAll_V1p3',
@@ -545,12 +428,24 @@ def QCD_old_model(outputfile, filerange='*'):
   
   rp = {}
 
-  #old models
+  if   paramera == 'old':
+      
+    rp['m']       = ['null']
+    rp['ctau']    = ['null'] 
+    rp['xi_pair'] = [['null', 'null']]
+    rp['xi2str']  = ['null']
+    
+    pfunc = printer
+    
+  elif paramera == 'new':
+    
+    rp['mpi_mA_pair'] = [['null', 'null']]
+    rp['ctau']        = ['null']
+
+    pfunc = printer_newmodels
   
-  rp['m']       = ['null']
-  rp['ctau']    = ['null'] 
-  rp['xi_pair'] = [['null', 'null']]
-  rp['xi2str']  = ['null']
+  else:
+    raise Exception('Unknown model string')
 
   for i in range(len(processes)):
 
@@ -574,13 +469,14 @@ def QCD_old_model(outputfile, filerange='*'):
       'isMC':            isMC,
       'maxevents_scale': maxevents_scale
     }
-
+    
     if i == 0:
-      printer(**param)
+      pfunc(**param)
     else:
-      printer(**param, flush_index=i)
+      pfunc(**param, flush_index=i)
 
-def data(outputfile, filerange='*', period='B'):
+     
+def data(outputfile, filerange='*', period='B', paramera='old'):
 
   processes = None
   
@@ -614,17 +510,28 @@ def data(outputfile, filerange='*', period='B'):
   else:
     raise Exception(__name__ + f'.data: Unknown period "{period}" chosen')
   
-  rp              = {}
-  '''
-  rp['m']         = ['null']
-  rp['ctau']      = ['null'] 
-  rp['xi_pair']   = [['null', 'null']]
-  rp['xi2str']    = ['null']
-  '''
+  rp = {}
   
-  rp['mpi']     = ['null']
-  rp['mA']      = ['null']
-  rp['ctau']    = ['null']
+  if   paramera == 'old':
+    
+    rp['m']         = ['null']
+    rp['ctau']      = ['null'] 
+    rp['xi_pair']   = [['null', 'null']]
+    rp['xi2str']    = ['null']
+    
+    pfunc = printer
+    
+  elif paramera == 'new':
+    
+    rp['mpi']     = ['null']
+    rp['mA']      = ['null']
+    rp['ctau']    = ['null']
+    
+    pfunc = printer_newmodels
+      
+  else:
+    raise Exception('Unknown model type')
+  
   for i in range(len(processes)):
 
     # ------------------------------------------
@@ -650,15 +557,16 @@ def data(outputfile, filerange='*', period='B'):
     }
 
     if i == 0:
-      printer_newmodels(**param)
+      pfunc(**param)
     else:
-      printer_newmodels(**param, flush_index=i)
+      pfunc(**param, flush_index=i)
 
 
 if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Generate some YAML-files.')
   parser.add_argument('--process',    type=str, default='vector')
+  parser.add_argument('--paramera',   type=str, default='new')
   parser.add_argument('--filerange',  type=str, default='*')
   parser.add_argument('--outputfile', type=str, default=None)
   args = parser.parse_args()
@@ -692,19 +600,16 @@ if __name__ == '__main__':
     scenarioC(outputfile=outputfile, filerange=args.filerange)
 
   elif args.process == 'QCD':
-    QCD(outputfile=outputfile, filerange=args.filerange)
-
-  elif args.process == 'QCD_old_model':
-    QCD_old_model(outputfile=outputfile, filerange=args.filerange)
+    QCD(outputfile=outputfile, filerange=args.filerange,  paramera=args.paramera)
   
   elif args.process == 'data-B':
-    data(outputfile=outputfile, filerange=args.filerange, period='B')
+    data(outputfile=outputfile, filerange=args.filerange, period='B', paramera=args.paramera)
 
   elif args.process == 'data-C':
-    data(outputfile=outputfile, filerange=args.filerange, period='C')
+    data(outputfile=outputfile, filerange=args.filerange, period='C', paramera=args.paramera)
   
   elif args.process == 'data-D':
-    data(outputfile=outputfile, filerange=args.filerange, period='D')
+    data(outputfile=outputfile, filerange=args.filerange, period='D', paramera=args.paramera)
   
   else:
     print('Error: unknown --process chosen (run --help)')

@@ -313,18 +313,26 @@ class IceXYW:
         
         if type(key) is not list:       # access with a single variable name
             
+            try:
+                select = key
+                new = IceXYW(x=self.x[select, ...], y=self.y[select], w=self.w[select], ids=self.ids)
+                return new
+            except:
+                True
+            
             if key in self.ids:         # direct access
                 col = self.ids.index(key)
                 ids = [key]
             
             elif isinstance(self.x, np.ndarray): # might be a cut string, try that
+                
                 select = stx.eval_boolean_syntax(expr=key, X=self.x, ids=self.ids, verbose=True)
                 return IceXYW(x=self.x[select, ...], y=self.y[select], w=self.w[select], ids=self.ids)
             
             else:
                 raise Exception(__name__ + f'[operator]: Cannot execute')
-            
-        else:                           # list of variables
+        
+        else:                          # list of variables
             col,ids = pick_vars(data=self, set_of_vars=key)
         
         if isinstance(self.x, np.ndarray):
