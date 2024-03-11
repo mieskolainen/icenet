@@ -1825,11 +1825,12 @@
     <span class="c1"># Plot correlation coefficient comparisons</span>
 
     <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-    <span class="n">pprint</span><span class="p">(</span><span class="n">corr_mstats</span><span class="p">)</span>
 
     <span class="c1">### MVA-output 2D correlation plots</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_2D&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
 
+        <span class="n">pprint</span><span class="p">(</span><span class="n">corr_mstats</span><span class="p">)</span>
+        
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="c1"># Loop over plot indexes</span>
             <span class="n">pid</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;plot[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]&#39;</span>
             <span class="k">if</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_2D&#39;</span><span class="p">]:</span>
@@ -1849,34 +1850,35 @@
     
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">### Plot all ROC curves</span>
-
-    <span class="n">pprint</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">)</span>
-    
-    <span class="c1"># We have the same number of filterset (category) entries for each model, pick the first</span>
-    <span class="n">dummy</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="c1"># Direct collect:  Plot all models per filter category</span>
-    <span class="k">for</span> <span class="n">filterset_key</span> <span class="ow">in</span> <span class="n">roc_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_XYZ_multiple_models: Plot ROC curve [</span><span class="si">{</span><span class="n">filterset_key</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
-        <span class="n">path_label</span> <span class="o">=</span> <span class="n">roc_paths</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">][</span><span class="n">dummy</span><span class="p">]</span>
-        <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">],</span> <span class="n">roc_labels</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">],</span>
-            <span class="n">xmin</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;xmin&#39;</span><span class="p">],</span>
-            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;category: </span><span class="si">{</span><span class="n">filterset_key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC/--ALL--/</span><span class="si">{</span><span class="n">path_label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/ROC-all-models&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Inverse collect: Plot all filter categories ROCs per model</span>
-    <span class="k">for</span> <span class="n">model_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">)[</span><span class="n">dummy</span><span class="p">]])):</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
         
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_XYZ_multiple_models: Plot ROC curve for the model [</span><span class="si">{</span><span class="n">model_index</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
-        <span class="n">rocs_</span>       <span class="o">=</span> <span class="p">[</span><span class="n">roc_mstats</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">][</span><span class="n">model_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">filterset_key</span> <span class="ow">in</span> <span class="n">roc_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-        <span class="n">labels_</span>     <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">roc_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">model_label</span> <span class="o">=</span> <span class="n">roc_labels</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">roc_labels</span><span class="p">)[</span><span class="n">dummy</span><span class="p">]][</span><span class="n">model_index</span><span class="p">]</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">)</span>
         
-        <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">rocs_</span><span class="p">,</span> <span class="n">labels_</span><span class="p">,</span>
-            <span class="n">xmin</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;xmin&#39;</span><span class="p">],</span>
-            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;model: </span><span class="si">{</span><span class="n">model_label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC/</span><span class="si">{</span><span class="n">model_label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/ROC-all-categories&#39;</span><span class="p">)</span>
+        <span class="c1"># We have the same number of filterset (category) entries for each model, pick the first</span>
+        <span class="n">dummy</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Direct collect:  Plot all models per filter category</span>
+        <span class="k">for</span> <span class="n">filterset_key</span> <span class="ow">in</span> <span class="n">roc_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_XYZ_multiple_models: Plot ROC curve [</span><span class="si">{</span><span class="n">filterset_key</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+            <span class="n">path_label</span> <span class="o">=</span> <span class="n">roc_paths</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">][</span><span class="n">dummy</span><span class="p">]</span>
+            <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">],</span> <span class="n">roc_labels</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">],</span>
+                <span class="n">xmin</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;xmin&#39;</span><span class="p">],</span>
+                <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;category: </span><span class="si">{</span><span class="n">filterset_key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC/--ALL--/</span><span class="si">{</span><span class="n">path_label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/ROC-all-models&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Inverse collect: Plot all filter categories ROCs per model</span>
+        <span class="k">for</span> <span class="n">model_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">)[</span><span class="n">dummy</span><span class="p">]])):</span>
+            
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_XYZ_multiple_models: Plot ROC curve for the model [</span><span class="si">{</span><span class="n">model_index</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+            <span class="n">rocs_</span>       <span class="o">=</span> <span class="p">[</span><span class="n">roc_mstats</span><span class="p">[</span><span class="n">filterset_key</span><span class="p">][</span><span class="n">model_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">filterset_key</span> <span class="ow">in</span> <span class="n">roc_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+            <span class="n">labels_</span>     <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">roc_mstats</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">model_label</span> <span class="o">=</span> <span class="n">roc_labels</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">roc_labels</span><span class="p">)[</span><span class="n">dummy</span><span class="p">]][</span><span class="n">model_index</span><span class="p">]</span>
+            
+            <span class="n">plots</span><span class="o">.</span><span class="n">ROC_plot</span><span class="p">(</span><span class="n">rocs_</span><span class="p">,</span> <span class="n">labels_</span><span class="p">,</span>
+                <span class="n">xmin</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;xmin&#39;</span><span class="p">],</span>
+                <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;model: </span><span class="si">{</span><span class="n">model_label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">targetdir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/ROC/</span><span class="si">{</span><span class="n">model_label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/ROC-all-categories&#39;</span><span class="p">)</span>
 
     <span class="c1">### Plot all MVA outputs (not implemented)</span>
     <span class="c1"># plots.MVA_plot(mva_mstats, mva_labels, title = &#39;&#39;, filename=aux.makedir(targetdir + &#39;/MVA/--ALL--&#39;) + &#39;/MVA&#39;)</span>
