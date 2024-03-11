@@ -522,8 +522,7 @@ def data(outputfile, filerange='*', period='B', paramera='old'):
     
   elif paramera == 'new':
     
-    rp['mpi']     = ['null']
-    rp['mA']      = ['null']
+    rp['mpi_mA_pair'] = [['null', 'null']]
     rp['ctau']    = ['null']
     
     pfunc = printer_newmodels
@@ -538,7 +537,7 @@ def data(outputfile, filerange='*', period='B', paramera='old'):
     filename        = f'output_{filerange}.root'
     force_xs        = 'false'
     isMC            = 'false'
-    xs              =  2799000.0
+    xs              =  1.0
     maxevents_scale = '1.0'
     # ------------------------------------------
 

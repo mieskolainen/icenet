@@ -19,7 +19,7 @@ python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'QCD'       --f
 python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'scenarioA' --filerange '[0-20]' --outputfile configs/dqcd/include/scenarioA.yml
 
 # Training (Domain Adaptation)
-python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'data-D'    --filerange '[0-10]'  --outputfile configs/dqcd/include/data_new_DA.yml
+python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'data-D'    --filerange '[0-10]' --outputfile configs/dqcd/include/data_new_DA.yml
 
 # Deployment
 python configs/dqcd/include/ymlgen.py --paramera 'new' --process 'QCD'       --filerange '[51-100000]' --outputfile configs/dqcd/include/QCD_new_deploy.yml

@@ -31,7 +31,7 @@ For end-to-end deep learning examples, see e.g. github actions (CI) workflows un
 
 If you use this work in your research (especially if you find algorithms or ideas novel), please cite:
 ```
-@misc{mieskolainen2023icenet,
+@misc{icenet,
   author = "{Mikael Mieskolainen}",
   title  = "ICENET: a deep learning library for HEP",
   year   = "2024",

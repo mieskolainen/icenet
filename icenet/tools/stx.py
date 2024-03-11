@@ -80,9 +80,9 @@ def filter_constructor(filters, X, ids, y=None):
         except:
             break
         
-        sets     = f['sets']      # a list of set indices
-        operator = f['operator']  # an operator to apply (between sets)
-        
+        sets      = f['sets']      # a list of set indices
+        operator  = f['operator']  # an operator to apply (between sets)
+
         if type(sets) is not list:
             raise Exception(__name__ + f'.filter_constructor: Input "sets" should be a list')
 
@@ -91,60 +91,78 @@ def filter_constructor(filters, X, ids, y=None):
             index = sets[0]
             mask_matrix, text_set, path_set = process_set(filters[f'set[{index}]'], filter_ID=filter_ID)
         
-        # Several sets (2,3,4 ...) combined with cartesian products
+        # Several sets (2,3,4 ...) combined
         else:
             masks, texts, paths = [],[],[]
             
+            running_index = {}    
             for k in range(len(sets)):
                 index = sets[k]
+                running_index[index] = k
+
                 m,t,p = process_set(filters[f'set[{index}]'])
                 masks.append(m), texts.append(t), paths.append(p)
-            
-            # Apply operator
-            if operator == 'cartesian_and' or operator == 'cartesian_or':
-                
+
                 if   operator == 'cartesian_and':
                     logical_func = np.logical_and.reduce
                     name = '&'
                 elif operator == 'cartesian_or':
                     logical_func = np.logical_or.reduce
                     name = '|'
+                    
                 else:
-                    raise Exception(__name__ + f'.filter_constructor: Operator should be "cartesian_and" or "cartesian_or" multiple sets')
-
-                # Loop over all cartesian combinations
-                mask_set, text_set, path_set = [],[],[]
+                    raise Exception(__name__ + f'.filter_constructor: Operator should be "and" or "cartesian_or" multiple sets')
                 
-                dim = [None]*len(sets)
-                for i in range(len(sets)):
-                    dim[i] = np.array(range(masks[i].shape[0]), dtype=int)
-                dimgrid = aux.cartesian_product(*dim)
-                
-                print(__name__ + f'.filter_constructor: Filter combinations {dimgrid.shape} combined with {name}')
-                
-                # Loop over all combinations
+            try:
+                match = []
+                if f['match'] is not None: # Match set indices correctly to running indices
+                    for index in f['match']:
+                        match.append(running_index[index])
+            except:
+                match = None
+            
+            # Loop over all cartesian combinations
+            mask_set, text_set, path_set = [],[],[]
+            
+            dim = [None]*len(sets)
+            for i in range(len(sets)):
+                dim[i] = np.array(range(masks[i].shape[0]), dtype=int)
+            dimgrid = aux.cartesian_product(*dim)
+            
+            if match is not None:
+                # Pick only pair (or N-tuplet)-wise equal combinations
+                pick_ind = []
                 for i in range(dimgrid.shape[0]):
-                    
-                    comb = dimgrid[i,:]
-                    A,T,P = [None]*len(sets), [None]*len(sets), [None]*len(sets)
-                    
-                    for j in range(len(sets)):
-                        A[j],T[j],P[j] = masks[j][comb[j]], texts[j][comb[j]], paths[j][comb[j]]
-                    
-                    mask_set.append( logical_func(A) )
-                    text_set.append( reduce(lambda a, b: f'{a} {name} {b}', T) )
-                    path_set.append( reduce(lambda a, b: f'{a}{name}{b}', P) )
+                    if len(np.unique(dimgrid[i, match])) == 1:
+                        pick_ind.append(i)
+                dimgrid = dimgrid[pick_ind, :]
+            
+            print(__name__ + f'.filter_constructor: Filter combinations {dimgrid.shape} combined with {name} and match {match} (running index)')
+            print(dimgrid)
+            
+            # Loop over all combinations
+            for i in range(dimgrid.shape[0]):
                 
-                # Add filter ID
-                text_set = [f'F[{filter_ID}]: ' + s for s in text_set]
-                path_set = [f'F[{filter_ID}]:'  + s for s in path_set]
+                comb = dimgrid[i,:]
+                A,T,P = [None]*len(sets), [None]*len(sets), [None]*len(sets)
                 
-                pprint.pprint(text_set)
+                for j in range(len(sets)):
+                    A[j],T[j],P[j] = masks[j][comb[j]], texts[j][comb[j]], paths[j][comb[j]]
                 
-                # Turn into matrix [num of masks x num of events]
-                mask_matrix = np.zeros((len(mask_set), len(mask_set[0])), dtype=np.bool_)
-                for i in range(len(mask_set)):
-                    mask_matrix[i,:] = mask_set[i]
+                mask_set.append( logical_func(A) )
+                text_set.append( reduce(lambda a, b: f'{a} {name} {b}', T) )
+                path_set.append( reduce(lambda a, b: f'{a}{name}{b}', P) )
+            
+            # Add filter ID
+            text_set = [f'F[{filter_ID}]: ' + s for s in text_set]
+            path_set = [f'F[{filter_ID}]:'  + s for s in path_set]
+            
+            pprint.pprint(text_set)
+            
+            # Turn into matrix [num of masks x num of events]
+            mask_matrix = np.zeros((len(mask_set), len(mask_set[0])), dtype=np.bool_)
+            for i in range(len(mask_set)):
+                mask_matrix[i,:] = mask_set[i]
         
         ## ** Add to lists of all filter products **
         if all_mask_matrix is not None:

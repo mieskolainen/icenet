@@ -1,55 +1,67 @@
 FILTER: &FILTER
   
   filter[0]:
-    operator: 'cartesian_and'   # null (unary), cartesian_and', 'cartesian_or'
-    sets: [0,1]                 # input set ids (one or several)
+    operator: 'cartesian_and' # null (unary), 'cartesian_and', 'cartesian_or'
+    sets: [0,1]               # input set ids (one or several)
   
   filter[1]:
-    operator: null            # null (unary), cartesian_and', 'cartesian_or'
+    operator: null            # null (unary), 'cartesian_and', 'cartesian_or'
     sets: [0]                 # input set ids (one or several)
   
   filter[2]:
-    operator: null            # null (unary), cartesian_and', 'cartesian_or'
+    operator: null            # null (unary), 'cartesian_and', 'cartesian_or'
     sets: [1]                 # input set ids (one or several)
   
-  #filter[1]:
-  #  operator: 'cartesian_and'   # null (unary), cartesian_and', 'cartesian_or'
-  #  sets: [2,3]                 # input set ids (one or several)
-
-  #filter[2]:
-  #  operator: null              # null (unary), cartesian_and', 'cartesian_or'
-  #  sets: [2]                   # input set ids (one or several)
+  filter[3]:
+    operator: 'cartesian_and' # null (unary), 'cartesian_and', 'cartesian_or'
+    sets: [0,1,2]             # input set ids (one or several)
+    match: [0,2]              # require pair/N-tuplet wise cartesian combination match between these set indices
   
-  #filter[3]:
-  #  operator: null              # null (unary), cartesian_and', 'cartesian_or'
-  #  sets: [3]                   # input set ids (one or several)
+  filter[4]:
+    operator: null            # null (unary), 'cartesian_and', 'cartesian_or'
+    sets: [2]                 # input set ids (one or several)
   
   # ... more filters here
   
+  
   # --------------------
   
+  # Theory model param
   set[0]:
-    #diplomat_classes: [-2, 0]   # classes which always pass the selection
-    expand: 'set'               # 'set', 'vetoset' or 'powerset'
+    #diplomat_classes: [-2, 0]   # classes which always pass this selection (use with care)
+    expand: 'set'                # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['', '$mpi = 1$ & $mA = 0.33$']},
-       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['', '$mpi = 2$ & $mA = 0.67$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['', '$mpi = 4$ & $mA = 0.40$']},
-       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['', '$mpi = 4$ & $mA = 1.33$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['', '$mpi = 10$ & $mA = 1.00$']},
-       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['', '$mpi = 10$ & $mA = 3.33$']}]
+      [{cut: 'GEN_mpi == 1  && GEN_mA == 0.33', latex: ['', 'mpi = 1 & mA = 0.33']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 0.40', latex: ['', 'mpi = 4 & mA = 0.40']},
+       {cut: 'GEN_mpi == 2  && GEN_mA == 0.67', latex: ['', 'mpi = 2 & mA = 0.67']},
+       {cut: 'GEN_mpi == 4  && GEN_mA == 1.33', latex: ['', 'mpi = 4 & mA = 1.33']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 1.00', latex: ['', 'mpi = 10 & mA = 1.00']},
+       {cut: 'GEN_mpi == 10 && GEN_mA == 3.33', latex: ['', 'mpi = 10 & mA = 3.33']}]
   
+  # Theory model param
   set[1]:
-    #diplomat_classes: [-2, 0]   # classes which always pass the selection
-    expand: 'set'               # 'set', 'vetoset' or 'powerset'
+    #diplomat_classes: [-2, 0]   # classes which always pass this selection (use with care)
+    expand: 'set'                # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: 'GEN_ctau == 0.1', latex: ['', '$ctau = 0.1$']},
-       {cut: 'GEN_ctau == 1',   latex: ['', '$ctau = 1$'  ]},
-       {cut: 'GEN_ctau == 10',  latex: ['', '$ctau = 10$' ]},
-       {cut: 'GEN_ctau == 100', latex: ['', '$ctau = 100$']}]
+      [{cut: 'GEN_ctau == 0.1', latex: ['', 'ctau = 0.1']},
+       {cut: 'GEN_ctau == 1',   latex: ['', 'ctau = 1'  ]},
+       {cut: 'GEN_ctau == 10',  latex: ['', 'ctau = 10' ]},
+       {cut: 'GEN_ctau == 100', latex: ['', 'ctau = 100']}]
   
+  # +- 5 sigma windows, assuming 1% mass resolution
   set[2]:
+    expand: 'set'  # 'set', 'vetoset' or 'powerset'
+    cutset:
+      [{cut: '0.3135 < muonSV_mass_0 && muonSV_mass_0 < 0.3465', latex: ['', 'box(M ~ 0.33)']},
+       {cut: '0.38   < muonSV_mass_0 && muonSV_mass_0 < 0.42',   latex: ['', 'box(M ~ 0.40)']},
+       {cut: '0.6365 < muonSV_mass_0 && muonSV_mass_0 < 0.7035', latex: ['', 'box(M ~ 0.67)']},
+       {cut: '1.2635 < muonSV_mass_0 && muonSV_mass_0 < 1.3965', latex: ['', 'box(M ~ 1.33)']},
+       {cut: '0.95   < muonSV_mass_0 && muonSV_mass_0 < 1.05',   latex: ['', 'box(M ~ 1.00)']},
+       {cut: '3.1635 < muonSV_mass_0 && muonSV_mass_0 < 3.4965', latex: ['', 'box(M ~ 3.33)']}]
+  
+  # Final state category cuts
+  set[3]:
     expand: 'set'  # 'set', 'vetoset' or 'powerset'
     cutset:
       [{cut: '0.0 < muonSV_dxy_0  && muonSV_dxy_0 < 1.0 && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} < 1$ & $\delta < 0.2$']},
@@ -57,23 +69,14 @@ FILTER: &FILTER
        {cut: '1.0 < muonSV_dxy_0  && muonSV_dxy_0 < 10  && muonSV_pAngle_0 < 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta < 0.2$']},
        {cut: '1.0 < muonSV_dxy_0  && muonSV_dxy_0 < 10  && muonSV_pAngle_0 > 0.2', latex: ['', '$1 < \Delta_{xy} < 10$ & $\delta > 0.2$']},
        {cut: 'muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 < 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta < 0.2$']},
-       {cut: 'muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta > 0.2$']}
-      ]
-  
-  set[3]:
-    expand: 'set'  # 'set', 'vetoset' or 'powerset'
-    cutset:
-      [{cut: '0.9 < muonSV_mass_0 && muonSV_mass_0 < 1.1',  latex: ['', '0.9 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 1.1']},
-       {cut: '1.8 < muonSV_mass_0 && muonSV_mass_0 < 2.2',  latex: ['', '1.8 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 2.2']},
-       {cut: '3.6 < muonSV_mass_0 && muonSV_mass_0 < 4.4',  latex: ['', '3.6 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 4.4']},
-       {cut: '9.0 < muonSV_mass_0 && muonSV_mass_0 < 11.0', latex: ['', '9.0 < muonSV$_{mass_0}$ & muonSV$_{m_0}$ < 11.0']}]
+       {cut: 'muonSV_dxy_0 > 10.0 && muonSV_pAngle_0 > 0.2', latex: ['', '$\Delta_{xy} > 10$ & $\delta > 0.2$']}]
   
   # ... more sets here
 
 # -----------------------------------------------------------------------
 
 basic:
-  active: False
+  active: True
   nbins:  70
   percentile_range: [0.5, 99.5]
   exclude_vals: [null, -999.0]

@@ -19,7 +19,7 @@ KINEMATIC_GEN_VARS = [
   'GEN_m',
   'GEN_ctau',
   'GEN_xiO',
-  'GEN_xiL'
+  'GEN_xiL',
   
   # MC only NanoAOD
   'GenJet_pt',

@@ -1344,11 +1344,12 @@ def plot_XYZ_multiple_models(targetdir, args):
     # Plot correlation coefficient comparisons
 
     from pprint import pprint
-    pprint(corr_mstats)
 
     ### MVA-output 2D correlation plots
     if args['plot_param']['MVA_2D']['active']:
 
+        pprint(corr_mstats)
+        
         for i in range(100): # Loop over plot indexes
             pid = f'plot[{i}]'
             if pid in args['plot_param']['MVA_2D']:
@@ -1368,34 +1369,35 @@ def plot_XYZ_multiple_models(targetdir, args):
     
     # -------------------------------------------------------------------
     ### Plot all ROC curves
-
-    pprint(roc_mstats)
-    
-    # We have the same number of filterset (category) entries for each model, pick the first
-    dummy = 0
-
-    # Direct collect:  Plot all models per filter category
-    for filterset_key in roc_mstats.keys():
-
-        cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve [{filterset_key}]', 'green')
-
-        path_label = roc_paths[filterset_key][dummy]
-        plots.ROC_plot(roc_mstats[filterset_key], roc_labels[filterset_key],
-            xmin=args['plot_param']['ROC']['xmin'],
-            title=f'category: {filterset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
-
-    # Inverse collect: Plot all filter categories ROCs per model
-    for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
+    if args['plot_param']['ROC']['active']:
         
-        cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve for the model [{model_index}]', 'green')
-
-        rocs_       = [roc_mstats[filterset_key][model_index] for filterset_key in roc_mstats.keys()]
-        labels_     = list(roc_mstats.keys())
-        model_label = roc_labels[list(roc_labels)[dummy]][model_index]
+        pprint(roc_mstats)
         
-        plots.ROC_plot(rocs_, labels_,
-            xmin=args['plot_param']['ROC']['xmin'],
-            title=f'model: {model_label}', filename=aux.makedir(targetdir + f'/ROC/{model_label}') + '/ROC-all-categories')
+        # We have the same number of filterset (category) entries for each model, pick the first
+        dummy = 0
+
+        # Direct collect:  Plot all models per filter category
+        for filterset_key in roc_mstats.keys():
+
+            cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve [{filterset_key}]', 'green')
+
+            path_label = roc_paths[filterset_key][dummy]
+            plots.ROC_plot(roc_mstats[filterset_key], roc_labels[filterset_key],
+                xmin=args['plot_param']['ROC']['xmin'],
+                title=f'category: {filterset_key}', filename=aux.makedir(targetdir + f'/ROC/--ALL--/{path_label}') + '/ROC-all-models')
+
+        # Inverse collect: Plot all filter categories ROCs per model
+        for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
+            
+            cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve for the model [{model_index}]', 'green')
+
+            rocs_       = [roc_mstats[filterset_key][model_index] for filterset_key in roc_mstats.keys()]
+            labels_     = list(roc_mstats.keys())
+            model_label = roc_labels[list(roc_labels)[dummy]][model_index]
+            
+            plots.ROC_plot(rocs_, labels_,
+                xmin=args['plot_param']['ROC']['xmin'],
+                title=f'model: {model_label}', filename=aux.makedir(targetdir + f'/ROC/{model_label}') + '/ROC-all-categories')
 
     ### Plot all MVA outputs (not implemented)
     # plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/--ALL--') + '/MVA')
