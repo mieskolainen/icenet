@@ -151,12 +151,13 @@ train_runmode:
     #- gnet1
     #- gnet3
     
-    #- iceboost01-MI
-    #- iceboost01-DA-MI
+    - iceboost01-DA-MI-NOJETS
+    - iceboost01-DA-MI
     - iceboost01-DA
     - iceboost01-DA-NC
-    - xgb01
-    - xgb01-NC
+    
+    #- xgb01
+    #- xgb01-NC
     
     #- dmlp
     #- lgr0
@@ -207,10 +208,10 @@ eval_runmode:
   
   # Conditional (theory parametric) dequantization
   conditional_param:
-    dequantize_common: False         # Under common.py
-    n_interp:   1000                 # Number of interpolation points per dimension
-    kind:       'quadratic'          # Interpolator ('linear', 'quadratic', 'cubic' ...),
-                                     # see scipy.interpolate.interp1d
+    dequantize_common: False          # Under common.py
+    n_interp:   1000                  # Number of interpolation points per dimension
+    kind:       'quadratic'           # Interpolator ('linear', 'quadratic', 'cubic' ...),
+                                      # see scipy.interpolate.interp1d
   
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
@@ -235,7 +236,62 @@ optimize_runmode:
   reweight_file: 'reweight_train.pkl'
 
   reweight_param: *REWEIGHT_PARAM
+  
+  limits_param:
+    luminosity: 41600          # pb^{-1}
+    signal_xs:  44.0           # pb (reference xs), gg -> H https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV
+    target_r:   0.01           # Benchmark branching ratio (BR)
+    B_target_eff: 1.0E-4       # Background target efficiency for ML cut
+    
+    model_POI: ['m', 'ctau']   # Theory (signal) model param-of-interest
+    box_POI:   ['M', 'm']      # (observable, theory) pair
 
+    # Be very precise with these and which efficiencies need to book-keeped
+    # (see definitions under plots.yml)
+    GEN_filter_tag: 'F[0]'     # Theory param filter
+    BOX_filter_tag: 'F[4]'     # Mass window filter
+    ROC_filter_tag: 'F[3]'     # Theory param filter & mass window
+    
+    channel_mode: 'inclusive'  # 'inclusive', 'categorical' (not implemented)
+    methods: ['asymptotic']    # ['asymptotic', 'toys']
+    num_toys_obs: 10000        # Number of MC samples for 'toys'
+    systematics: null
+
+    brazil:
+      m_fixed_ctau:
+        type: '1D'
+        model_POI:
+          running: 'm'
+          fixed: 'ctau'
+        xlabel: '$m_0$ (GeV)'
+        fixed_label: '$c\tau_0$ (mm)'
+        ylim: [1.0e-4, 1.0e-1]
+
+      ctau_fixed_m:
+        type: '1D'
+        model_POI:
+          running: 'ctau'
+          fixed: 'm'
+        xlabel: '$c\tau_0$ (mm)'
+        fixed_label: '$m_0$ (GeV)'
+        ylim: [1.0e-4, 1.0e-1]
+
+      m_ctau_contour:
+        model_POI:
+          running: ['m', 'ctau']
+          fixed: null
+        xlabel: '$m_0$ (GeV)'
+        ylabel: '$c\tau_0$ (mm)'
+        ylim: [1.0E-4, 1.0e-1]
+        
+        kx: 2   # Spline order
+        ky: 2
+    
+    cosmetics:
+      title:  '$41.6$ fb$^{-1}$, $\sqrt{{s}} = 13$ TeV'
+      ylabel: '$r = \sigma_{gg \rightarrow H \rightarrow DQCD} \, / \sigma_{gg \rightarrow H}$'
+      portal: 'vector'
+  
   models:  !include configs/dqcd/models.yml
   active_models: *ACTIVE_MODELS
 

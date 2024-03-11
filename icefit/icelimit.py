@@ -264,7 +264,7 @@ def CL_single_compute(s_hypothesis, bg_expected, observed=None, s_syst_error=Non
             i += 1
         else:
             trials += 1
-
+        
         if trials > max_restart:
             mu_up[i] = np.nan
             i += 1

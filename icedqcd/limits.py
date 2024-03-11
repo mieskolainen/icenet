@@ -9,7 +9,9 @@ import uproot
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
-
+from termcolor import colored, cprint
+from matplotlib.ticker import FuncFormatter
+                    
 from scipy.interpolate import RectBivariateSpline
 from matplotlib import ticker, cm
 import matplotlib as mpl
@@ -41,7 +43,8 @@ latex_header = \
 """
 
 
-def plot_brazil(x, Y, s1_color=brazil_green, s2_color=brazil_yellow):
+def plot_brazil(x, Y, s1_color=brazil_green, s2_color=brazil_yellow,
+                horizontal_line=1e-1, ylim=[9e-4, 2e-1]):
     """
     Produce classic 1D "Brazil" plot
     
@@ -56,45 +59,92 @@ def plot_brazil(x, Y, s1_color=brazil_green, s2_color=brazil_yellow):
     plt.fill_between(x, Y[:,0], Y[:,4], color=s2_color, alpha=1.0, label='$\\pm 2\\sigma$')
     plt.fill_between(x, Y[:,1], Y[:,3], color=s1_color, alpha=0.6, label='$\\pm 1\\sigma$')
     plt.plot(x, Y[:,2], color='black', linestyle='--', label='Expected')
-    plt.plot(x, np.ones(len(x)), color='gray', linestyle=':') # Horizontal line at 1
+    plt.plot(x, horizontal_line * np.ones(len(x)), color='gray', linestyle=':') # Horizontal line
 
     plt.legend(fontsize=9, frameon=False)
     plt.yscale('log')
+    plt.ylim(ylim)
+    #plt.rcParams['axes.xmargin'] = 0
     
-    return fig,ax
+    return fig, ax
 
 
-def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, methods,
-    portal, experiment_label='LHC', process_label='X', contour_min_r = 1E-9, kx=2, ky=2):
+def find_limits(data, param_fixed, value, param_running, method):
     
-    ylabel  = f'CL95 upper limit on {process_label} (CLs)'
+    running_param_values = []
+    limits_expected      = []
+    limits_observed      = []
     
-    for method in methods:
+    for key in data.keys():
+        if data[key]['param'][param_fixed] == value:
+            running_param_values.append(data[key]['param'][param_running])
+            limits_expected.append(data[key]['limits_expected'][method])
+            limits_observed.append(data[key]['limits_observed'][method])
+    
+    running_param_values = np.array(running_param_values)
+    limits_expected      = np.array(limits_expected)
+    limits_observed      = np.array(limits_observed)
 
-        # -------------------------------------------------
-        # 1D Brazil over mass
+    # Sort according to parameter values
+    idx = np.argsort(running_param_values)
+    
+    return running_param_values[idx], limits_expected[idx], limits_observed[idx]
+
+
+def create_limit_plots_vector(data, param, savepath='.'):
+
+    ylabel = fr"CL95 upper limit on {param['cosmetics']['ylabel']} (CLs)" # note raw fr
+    title  = fr"{param['cosmetics']['title']}"
+    portal = param['cosmetics']['portal']
+    
+    print(ylabel)
+    
+    # -----------------------------------------------------
+    
+    # Find all parameter tuplets
+    params = list(data[list(data.keys())[0]]['param'].keys())
+    values = dict(zip(params, [None]*len(params)))
+    
+    for key in data.keys():
+        for p in params:
+            if values[p] is None: values[p] = set()
+            values[p].add(data[key]['param'][p])
+
+    for p in params:
+        values[p] = np.sort(np.array(list(values[p])))
+    
+    # -----------------------------------------------------
+    
+    for method in param['methods']:
+        
         plot_index = 0
+        
+        # -------------------------------------------------
+        # 1D Brazil per fixed m point with running ctau
+        
+        pp            = param['brazil']['ctau_fixed_m']
+        param_fixed   = pp['model_POI']['fixed']
+        param_running = pp['model_POI']['running']
+        
+        fixed_values  = values[param_fixed]
+        
+        for _, value in enumerate(fixed_values):
+            
+            running_values, expected, observed = find_limits(data=data, param_fixed=param_fixed, value=value,
+                                                          param_running=param_running, method=method)
 
-        for k,m in enumerate(m_values):
-            limits = [expected_limits[create_root_filename(m=m, ctau=ctau, portal=portal)] for ctau in ctau_values]
-
-            # Collect values
-            Y = np.zeros((len(ctau_values), 5)) # 5 from -2,-1,0,+1,+2 sigmas
-            for i in range(len(limits)):
-                Y[i,:] = limits[i][method]
+            ## Collect values
+            Y = np.zeros((len(running_values), 5)) # 5 from -2,-1,0,+1,+2 sigmas
+            for i in range(len(expected)):
+                Y[i,:] = expected[i]
             print(Y)
             
-            # Brazil
-            fig,ax = plot_brazil(x=ctau_values, Y=Y)        
-            plt.xlim([np.min(ctau_values) - 1, np.max(ctau_values) + 1])
+            ## Brazil
+            fig,ax = plot_brazil(x=running_values, Y=expected, ylim=pp['ylim'])        
+            plt.xlim([np.min(running_values)*0.9, np.max(running_values)*1.1])
 
-
-            plt.title(f'$m_0 = {m}$ GeV, ${portal}$ $portal$ | {experiment_label}', fontsize=10)
-            plt.xlabel('$c\\tau_0$ (mm)')
-            plt.ylabel(ylabel)
-            plt.xscale('log')
-
-            ax.xaxis.set_minor_locator(mpl.ticker.FixedLocator([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500]))
+            ## Tick formatter
+            ax.xaxis.set_minor_locator(mpl.ticker.FixedLocator([0, 1, 3, 5, 8, 10, 30, 50, 80, 100, 300, 500]))
             ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%d'))
             ax.xaxis.set_minor_formatter(mpl.ticker.ScalarFormatter())
             
@@ -102,96 +152,128 @@ def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, 
                 tick.set_pad(7) # Add padding
 
             ax.tick_params(axis='x', which='minor', labelsize=5)
-            plt.yticks(fontsize=10); plt.xticks(fontsize=10)
-
-            outputdir = aux.makedir(f'figs/icelimit/{portal}/{method}') 
-            plt.savefig(f'{outputdir}/plot_{plot_index}_1D_m_{m}_method_{method}.pdf', bbox_inches='tight')
+            
+            ## Cosmetics
+            plt.title(f'$m_0 = {value}$ GeV, ${portal}$ $portal$ | {title}', fontsize=10)
+            plt.xlabel(pp['xlabel'])
+            plt.ylabel(ylabel, fontsize=7)
+            plt.xscale('log')
+            plt.yticks(fontsize=10)
+            plt.xticks(fontsize=10)
+            
+            ## Save
+            outputdir = aux.makedir(f'{savepath}/{method}') 
+            plt.savefig(f'{outputdir}/plot_{plot_index:0=4}_1D_{param_fixed}_{value}_method_{method}.pdf', bbox_inches='tight')
             plot_index +=1
+            plt.close()
 
         # -------------------------------------------------
-        ## 1D Brazil over ctau
-
-        for k,ctau in enumerate(ctau_values):
-            limits = [expected_limits[create_root_filename(m=m, ctau=ctau, portal=portal)] for m in m_values]
-
-            # Collect values
-            Y = np.zeros((len(m_values), 5)) # 5 from -2,-1,0,+1,+2 sigmas
-            for i in range(len(limits)):
-                Y[i,:] = limits[i][method]
+        ## 1D Brazil per fixed ctau point with running m
+        
+        pp            = param['brazil']['m_fixed_ctau']
+        param_fixed   = pp['model_POI']['fixed']
+        param_running = pp['model_POI']['running']
+        
+        fixed_values  = values[param_fixed]
+        
+        for _, value in enumerate(fixed_values):
+            
+            running_values, expected, observed = find_limits(data=data, param_fixed=param_fixed, value=value,
+                                                          param_running=param_running, method=method)
+            
+            ## Collect values
+            Y = np.zeros((len(running_values), 5)) # 5 from -2,-1,0,+1,+2 sigmas
+            for i in range(len(expected)):
+                Y[i,:] = expected[i]
             print(Y)
             
-            # Brazil
-            fig,ax = plot_brazil(x=m_values, Y=Y)        
-            plt.xlim([np.min(m_values)*0.9, np.max(m_values)*1.02])
-
+            ## Brazil
+            fig,ax = plot_brazil(x=running_values, Y=Y, ylim=pp['ylim'])        
+            plt.xlim([np.min(running_values)*0.9, np.max(running_values)*1.02])
+            
+            ## Tick formatter
             ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.3g'))
+            
+            ## Cosmetics
+            plt.title(f'$c\\tau_0 = {value}$ mm, ${portal}$ $portal$ | {title}', fontsize=10)
+            plt.xlabel(pp['xlabel'])
+            plt.ylabel(ylabel, fontsize=7)
+            plt.xscale('linear')
+            plt.yticks(fontsize=10)
+            plt.xticks(fontsize=10)
 
-            plt.title(f'$c\\tau_0 = {ctau}$ mm, ${portal}$ $portal$ | {experiment_label}', fontsize=10)
-            plt.xlabel('$m_0$ (GeV)')
-            plt.ylabel(ylabel)
-
-            plt.yticks(fontsize=10); plt.xticks(fontsize=10)
-
-            outputdir = aux.makedir(f'figs/icelimit/{portal}/{method}')
-            plt.savefig(f'{outputdir}/plot_{plot_index}_1D_ctau_{ctau}_method_{method}.pdf', bbox_inches='tight')
+            ## Save
+            outputdir = aux.makedir(f'{savepath}/{method}')
+            plt.savefig(f'{outputdir}/plot_{plot_index:0=4}_1D_{param_fixed}_{value}_method_{method}.pdf', bbox_inches='tight')
             plot_index += 1
-
+            plt.close()
+        
         # -------------------------------------------------
         ## 2D-contours over (mass, ctau)
-
-        fig,ax = plt.subplots(figsize=(4.5, 3.5))
-
-        labels     = ['$\\pm2 \\sigma$ ($r_{up} = 1$)', '$\\pm1 \\sigma$ ($r_{up} = 1$)', 'Median']
-        linestyles = ['dotted', 'dashed', 'solid', 'dashed', 'dotted']
-
+        
+        special_value = 0.01
+        
+        fig,ax        = plt.subplots(figsize=(4.5, 3.5))
+        
+        labels        = [f'$\\pm2 \\sigma$ ($r = {special_value}$)', f'$\\pm1 \\sigma$ ($r = {special_value}$)', 'Median']
+        linestyles    = ['dotted', 'dashed', 'solid', 'dashed', 'dotted']
+        
+        pp            = param['brazil']['m_ctau_contour']
+        kx,ky         = pp['kx'], pp['ky']
+        
+        running_param = pp['model_POI']['running']
+        m_values      = values[running_param[0]]
+        ctau_values   = values[running_param[1]]
+        
+        ylim = param['brazil']['m_ctau_contour']['ylim']
+        
         for ind in range(5):
             
             # Read limit values
             R = np.zeros((len(m_values), len(ctau_values)))
             for i in range(len(m_values)):
                 for j in range(len(ctau_values)):
-                    limits = expected_limits[create_root_filename(m=m_values[i], ctau=ctau_values[j], portal=portal)]
-                    R[i,j] = limits[method][ind]
+                    
+                    for key in data.keys():
+                        if data[key]['param']['m'] == m_values[i] and data[key]['param']['ctau'] == ctau_values[j]:
+                            R[i,j] = data[key]['limits_expected'][method][ind]
             
             ## Interpolate
             interp_spline    = RectBivariateSpline(m_values, ctau_values, R, kx=kx, ky=ky)
 
-            m_values_fine    = np.linspace(np.min(m_values), np.max(m_values), 1000)
+            m_values_fine    = np.linspace(np.min(m_values),    np.max(m_values),    1000)
             ctau_values_fine = np.linspace(np.min(ctau_values), np.max(ctau_values), 10000)
             R_fine           = interp_spline(m_values_fine, ctau_values_fine)
-
+            
             # Post-enforce positivity (splines can go negative)
             R_fine[R_fine < 0] = 0
-
+            
             # Transpose for the plot
             R_fine = R_fine.T
 
             try:
-                # Plot
-                if ind != 2:
-                    cp = ax.contour(m_values_fine, ctau_values_fine, R_fine, [1.0], alpha=0.4, cmap=cm.bone,
-                        linewidths=1.0, linestyles=linestyles[ind])
+                if ind != 2: # ind == 2 is the median value
+                    
+                    # Draw uncertainties at specific chosen special contour
+                    cp = ax.contour(m_values_fine, ctau_values_fine, R_fine, [special_value],
+                                    alpha=0.4, cmap=cm.bone, linewidths=1.0, linestyles=linestyles[ind])
                 else:
-                    levels   = np.logspace(np.log10(np.max([contour_min_r, np.min(R_fine)])), np.log10(1.0), 7)
-                    R[R > 1] = None # Null (draw white) out the domain > 1
-
-                    cp     = ax.contourf(m_values_fine, ctau_values_fine, R_fine, cmap=cm.copper,
+                    
+                    levels   = np.logspace(np.log10(np.max([ylim[0], np.min(R_fine)])), np.log10(ylim[1]), 8)
+                    #R[R > 1] = None # Null (draw white) out the domain > 1
+                    
+                    cp = ax.contourf(m_values_fine, ctau_values_fine, R_fine, cmap=cm.copper,
                         levels=levels, locator=ticker.LogLocator())
-
-                    from matplotlib.ticker import FuncFormatter
-                    fmt  = lambda x, pos: '{:0.2f}'.format(x) # Tick precision formatter
+                    
+                    fmt  = lambda x, pos: '{:0.2E}'.format(x) # Tick precision formatter
                     cbar = plt.colorbar(cp, format=FuncFormatter(fmt))
-                    cbar.set_label(f'Median expected CL95 upper limit on {process_label} (CLs)', rotation=270, labelpad=15, fontsize=7)
+                    cbar.set_label(ylabel, rotation=270, labelpad=15, fontsize=7)
                     cbar.ax.tick_params(labelsize=8)
             except:
                 print(__name__ + f'.create_limit_plots: Problem with the contour plot -- skipping (check the input)')
                 print(R_fine)
-
-        plt.title(f'${portal}$ $portal$ | {experiment_label}', fontsize=10)
-        ax.set_xlabel('$m_0$ (GeV)')
-        ax.set_ylabel('$c\\tau_0$ (mm)')
-
-        ax.set_yscale('log')
+        
+        ## Tick formatter
         ax.xaxis.set_major_locator(mpl.ticker.FixedLocator([2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20]))
         ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.3g'))
 
@@ -207,26 +289,33 @@ def create_limit_plots(expected_limits, observed_limits, m_values, ctau_values, 
         for tick in ax.yaxis.get_major_ticks():
             tick.set_pad(7) # Add padding
 
-        plt.yticks(fontsize=10); plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
+        plt.xticks(fontsize=10)
 
-        # Add legend boxes
+        ## Add legend boxes
         null = np.array([np.NaN, np.NaN])
         for i in range(2):
             plt.plot(null, null, color='gray', linestyle=linestyles[i], label=labels[i])
-        plt.legend(frameon=False, loc='upper left', fontsize=7)
+        plt.legend(frameon=False, loc='upper right', fontsize=7)
 
-        # Save figure
-        outputdir = aux.makedir(f'figs/icelimit/{portal}/{method}')
-        plt.savefig(f'{outputdir}/plot_{plot_index}_2D_m_ctau_method_{method}.pdf', bbox_inches='tight')
+        ## Cosmetics
+        plt.title(f'${portal}$ $portal$ | {title}', fontsize=10)
+        ax.set_xlabel(pp['xlabel'])
+        ax.set_ylabel(pp['ylabel'])
+        ax.set_yscale('log')
 
-def create_root_filename(m,ctau,portal):
-    return f'{portal}_m_{m}/output_{portal}_{m}_{ctau}_1_1.root'
+        ## Save figure
+        outputdir = aux.makedir(f'{savepath}/{method}')
+        plt.savefig(f'{outputdir}/plot_{plot_index:0=4}_2D_m_ctau_method_{method}.pdf', bbox_inches='tight')
+        plt.close()
 
-def create_limit_tables(expected_limits, observed_limits, statistics, methods, portal):
+def create_limit_tables(data, param, savepath):
 
-    for method in methods:
-
-        latex_path     = aux.makedir(f'figs/icelimit/{portal}/{method}')
+    ylabel = fr"CL95 upper limit (CLs) on {param['cosmetics']['ylabel']}" # note raw fr
+    
+    for method in param['methods']:
+        
+        latex_path     = aux.makedir(f'{savepath}/{method}')
         latex_filename = f'{latex_path}/limits_table_method_{method}.tex'
         
         def dprint(string, mode='a', end='\n'):
@@ -238,26 +327,27 @@ def create_limit_tables(expected_limits, observed_limits, statistics, methods, p
         dprint(latex_header)    
 
         dprint('\\Large')
-        dprint('DQCD Upper Limits')
+        dprint('Signal Upper Limits')
         dprint('\\small')
         dprint('\\\\')
-        dprint(f'm.mieskolainen@imperial.ac.uk')
+        dprint(f'github.com/mieskolainen/icenet')
         dprint('\\\\')
         dprint(f"{datetime.now():%d-%m-%Y %H:%M} ")
         dprint('\\\\')
         dprint('\\vspace{0.5em}')
         dprint('\\\\')
         
-        dprint(f'Signal portal: {portal}')
+        dprint(f'Signal portal: {param["cosmetics"]["portal"]}')
         dprint('\\\\')
         dprint(f'Limit method: {method}')
         dprint('\\\\')
         dprint('\\vspace{5em}')
         dprint('\\\\')
 
-        dprint('Expected CL95 signal upper limits on $r$')
+        dprint(f'Expected {ylabel}')
         dprint('\\\\')
-        dprint('$H0$: background only scenario')
+        dprint('$H_0$: background only scenario')
+        dprint('\\vspace{1em}')
         dprint('\\\\')
 
         dprint('\\begin{tabular}{|l||cc|c|cc|}')
@@ -265,11 +355,14 @@ def create_limit_tables(expected_limits, observed_limits, statistics, methods, p
         dprint('Signal model point & $-2\\sigma$ & $-1\\sigma$ & median $r_{up}$ & $+1\\sigma$ & $+2\\sigma$ \\\\')
         dprint('\\hline')
 
-        for key in expected_limits.keys():
-            name = key.replace('_','-')
+        for key in data.keys():
+            name = key.replace('_', '-')
+            name = ('..' + name[20:]) if len(name) > 65 else name # Truncate maximum length, add ..
+            
             dprint(f'{name}', end='')
-            for i in range(len(expected_limits[key][method])):
-                dprint(f' & {expected_limits[key][method][i]:.3g} ', end='')
+            for i in range(len(data[key]["limits_expected"][method])):
+                dprint(f' & {data[key]["limits_expected"][method][i]:.2g} ', end='')
+            
             dprint('\\\\')
         dprint('\\hline')
 
@@ -278,29 +371,35 @@ def create_limit_tables(expected_limits, observed_limits, statistics, methods, p
         dprint('\\vspace{5em}')
         dprint('\\\\')
 
+        dprint('\\newpage')
+        
         dprint('\\small')
-        dprint('Emulated (observed) CL95 signal upper limits on $r$')
+        dprint(f'Emulated (observed) {ylabel}')
         dprint('\\\\')
-        dprint('$H1$: nominal signal ($r=1$) + background scenario')
+        dprint(f'$H_1$: r * signal + background benchmark scenario, with $r={param["target_r"]}$')
+        dprint('\\vspace{1em}')
         dprint('\\\\')
-
+        
         dprint('\\begin{tabular}{|l||c|cc|}')
         dprint('\\hline')
         dprint('Signal model point & Observed $r_{up}$ & $\\langle B \\rangle$ (counts) & $\\langle S \\rangle$ (counts) \\\\')
         dprint('\\hline')
-
-        for key in observed_limits.keys():
-            name = key.replace('_','-')
+        
+        for key in data.keys():
+            name = key.replace('_', '-')
+            name = ('..' + name[20:]) if len(name) > 65 else name # Truncate maximum length, add ..
+            
             dprint(f'{name}', end='')
-            for i in range(len(observed_limits[key][method])):
-
-                B = statistics[key]['background']
-                S = statistics[key]['signal']
-
+            for i in range(len(data[key]["limits_observed"][method])):
+                
+                B = data[key]['limits_statistics']['background']
+                S = param["target_r"] * data[key]['limits_statistics']['signal']
+                
                 B = f'{float(f"{B:.2g}"):g}'
                 S = f'{float(f"{S:.2g}"):g}'
 
-                dprint(f' & {observed_limits[key][method][i]:.3g} & {B} & {S} ', end='')
+                dprint(f' & {data[key]["limits_observed"][method][i]:.2g} & {B} & {S} ', end='')
+            
             dprint('\\\\')
         dprint('\\hline')
 
@@ -315,9 +414,6 @@ def create_limit_tables(expected_limits, observed_limits, statistics, methods, p
 
 def limit_wrapper_root(files, path, methods, num_toys_obs=int(1E3), bg_regulator=0.0, s_regulator=0.0):
     
-    expected_limits = {}
-    observed_limits = {}
-    statistics = {}
 
     for rootfile in files:
         
@@ -342,9 +438,9 @@ def limit_wrapper_root(files, path, methods, num_toys_obs=int(1E3), bg_regulator
 
         print(f'\n{rootfile}: background: {np.round(bg_expected,5)}, signal = {np.round(s_hypothesis,5)}')
 
-        expected_limits[rootfile] = {'asymptotic': None, 'toys': None}
-        observed_limits[rootfile] = {'asymptotic': None, 'toys': None}
-        statistics[rootfile]      = {'background': bg_expected, 'signal': s_hypothesis}
+        expected_limits = {'asymptotic': None, 'toys': None}
+        observed_limits = {'asymptotic': None, 'toys': None}
+        statistics      = {'background': bg_expected, 'signal': s_hypothesis}
         
         for method in methods:
             print(f'[method: {method}]')
@@ -354,57 +450,102 @@ def limit_wrapper_root(files, path, methods, num_toys_obs=int(1E3), bg_regulator
                 bg_expected=bg_expected, s_syst_error=s_syst_error, bg_syst_error=bg_syst_error, num_toys_obs=num_toys_obs)
 
             print(np.round(opt,4))
-            expected_limits[rootfile][method] = opt
+            expected_limits[method] = opt
 
-            # Emulate observed
+            # Emulate observed with benchmark R
             opt = CL_single_compute(method=method, observed=s_hypothesis+bg_expected, s_hypothesis=s_hypothesis,
                 bg_expected=bg_expected, s_syst_error=s_syst_error, bg_syst_error=bg_syst_error)
             
             print(np.round(opt,4))
-            observed_limits[rootfile][method] = opt
+            observed_limits[method] = opt
+    
     
     return expected_limits, observed_limits, statistics
 
 
-def run_limits(path='/home/user/Desktop/output/',
-               methods=['asymptotic', 'toys'],
-               num_toys_obs=int(1E4),
-               portal='vector'):
+def limit_wrapper_dict(data, param, bg_regulator=0.0, s_regulator=0.0):
+    
+    num_toys_obs = param['num_toys_obs']
+    
+    for file in data.keys():
+        
+        # Counts (assumed Poisson)
+        s_hypothesis = data[file]['signal']['counts']
+        bg_expected  = data[file]['background']['counts']
+        
+        # Regulate MC
+        if  bg_expected <= 0:
+            bg_expected = bg_regulator
+        if s_hypothesis <= 0:
+            s_hypothesis = s_regulator
+
+        # Total systematics (MC uncertainties + others would go here)
+        s_syst_error  = data[file]['signal']['systematic']
+        bg_syst_error = data[file]['background']['systematic']
+        
+        print(f'\n{file}: background: {np.round(bg_expected,5)}, signal = {np.round(s_hypothesis,5)}')
+        
+        limits_expected   = {'asymptotic': None, 'toys': None}
+        limits_observed   = {'asymptotic': None, 'toys': None}
+        limits_statistics = {'background': bg_expected, 'signal': s_hypothesis}
+        
+        for method in param['methods']:
+            
+            print(f'[method: {method}]')
+
+            # Excepted limits
+            opt = CL_single_compute(method        = method,
+                                    observed      = None,
+                                    s_hypothesis  = s_hypothesis,
+                                    bg_expected   = bg_expected,
+                                    s_syst_error  = s_syst_error,
+                                    bg_syst_error = bg_syst_error,
+                                    num_toys_obs  = num_toys_obs)
+
+            print(np.round(opt,4))
+            limits_expected[method] = opt
+            
+            # Emulate observed with benchmark r
+            r   = param['target_r']
+            opt = CL_single_compute(method        = method,
+                                    observed      = r * s_hypothesis + bg_expected,
+                                    s_hypothesis  = s_hypothesis,
+                                    bg_expected   = bg_expected,
+                                    s_syst_error  = s_syst_error,
+                                    bg_syst_error = bg_syst_error)
+            
+            print(np.round(opt,4))
+            limits_observed[method] = opt
+        
+        data[file]['limits_expected']   = limits_expected
+        data[file]['limits_observed']   = limits_observed
+        data[file]['limits_statistics'] = limits_statistics
+    
+    return data
+
+
+def run_limits_vector(data={}, param={}, savepath = '.'):
     """
-    DQCD analysis 'KISS' limits
-    
-    root files path: /home/hep/khl216/CMSSW_10_2_13/src/statsForDS/output
+    DQCD fast limits
     """
-
-    m_values     = [2,5,10,15,20]
-    ctau_values  = [10,50,100,500]
-
-    experiment_label = '$41.6$ fb$^{-1}$, $\\sqrt{{s}} = 13$ TeV'
-    process_label    = '$r = \\sigma / \\sigma_{gg \\rightarrow H \\times 0.01}$'
     
-
-    # 1. Create all model point filenames
-    root_files = []
-    for m in m_values:
-        for ctau in ctau_values:
-            root_files.append(create_root_filename(m=m, ctau=ctau, portal=portal))
-
-    # 2. Compute limits over all points
-    expected_limits, observed_limits, statistics = limit_wrapper_root(files=root_files,
-        path=path, methods=methods, num_toys_obs=num_toys_obs, bg_regulator=0.0, s_regulator=0.0)
+    ## Compute limits over all signal (parameter) points
+    data = limit_wrapper_dict(data=data, param=param)
     
-    # 3. Create plots
-    create_limit_plots(expected_limits=expected_limits,
-        observed_limits=observed_limits, portal=portal, ctau_values=ctau_values, m_values=m_values, methods=methods,
-        experiment_label=experiment_label, process_label=process_label, contour_min_r=1e-6, kx=2, ky=2)
+    ## Create plots
+    if param['cosmetics']['portal'] == 'vector':
+        create_limit_plots_vector(data=data, param=param, savepath=savepath)
+    else:
+        cprint(f"Plots not implemented for portal {param['cosmetics']['portal']}", 'red')
     
-    # 4. Produce tables
-    create_limit_tables(expected_limits=expected_limits, observed_limits=observed_limits, statistics=statistics, methods=methods, portal=portal)
-
+    ## Produce tables
+    create_limit_tables(data=data, param=param, savepath=savepath)
+    
     ## Combine pdfs
-    for method in methods:
-        figpath = aux.makedir(f'figs/icelimit/{portal}/{method}')
-        os.system(f'gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile={figpath}/limits_docs_{method}.pdf {figpath}/*.pdf')
+    for method in param['methods']:
+        figpath = aux.makedir(f'{savepath}/{method}')
+        os.system(f'gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile={figpath}/limits_doc_{method}.pdf {figpath}/*.pdf')
+
 
 if __name__ == "__main__":
-    run_limits(path='/vols/cms/mmieskol/dqcd_limits/', methods=['asymptotic'], num_toys_obs=int(1e4), portal='vector')
+    True

@@ -151,12 +151,13 @@ train_runmode:
     #- gnet1
     #- gnet3
     
-    #- iceboost01-MI
-    #- iceboost01-DA-MI
+    - iceboost01-DA-MI-NOJETS
+    - iceboost01-DA-MI
     - iceboost01-DA
     - iceboost01-DA-NC
-    - xgb01
-    - xgb01-NC
+    
+    #- xgb01
+    #- xgb01-NC
     
     #- xgb01-no-mass
     #- xgb01-no-jets
@@ -239,6 +240,34 @@ optimize_runmode:
 
   reweight_param: *REWEIGHT_PARAM
 
+  limits_param:
+    luminosity: 41600          # pb^{-1}
+    signal_xs:  44.0           # pb (reference xs), gg -> H https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV
+    target_r:   0.01           # Benchmark branching ratio (BR)
+    B_target_eff: 1.0E-4       # Background target efficiency for ML cut
+    
+    model_POI: ['mpi', 'mA', 'ctau'] # Theory (signal) model param-of-interest
+    box_POI:   ['M', 'mA']           # (observable, theory) pair
+    
+    # Be very precise with these and which efficiencies need to book-keeped
+    # (see definitions under plots.yml)
+    ROC_filter_tag: 'F[3]'     # Theory param filter & mass window
+    GEN_filter_tag: 'F[0]'     # Theory param filter
+    BOX_filter_tag: 'F[4]'     # Mass window filter
+    
+    channel_mode: 'inclusive'  # 'inclusive', 'categorical' (not implemented)
+    methods: ['asymptotic']    # ['asymptotic', 'toys']
+    num_toys_obs: 10000        # Number of MC samples for 'toys'
+    systematics: null
+
+    # ** NOT IMPLEMENTED YET (only in tune0.yml) **
+    brazil: null
+    
+    cosmetics:
+      title:  '$41.6$ fb$^{-1}$, $\sqrt{{s}} = 13$ TeV'
+      ylabel: '$r = \sigma_{gg \rightarrow H \rightarrow DQCD} \, / \sigma_{gg \rightarrow H}$'
+      portal: 'scenario X'
+  
   models:  !include configs/dqcd/models.yml
   active_models: *ACTIVE_MODELS
 
