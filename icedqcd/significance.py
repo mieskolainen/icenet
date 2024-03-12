@@ -56,6 +56,18 @@ def func_binormal(x, a, b):
     return norm.cdf(a + b*norm.ppf(x))
 
 
+def ADS(s, b, sigma_b):
+    """
+    Asimov discovery significance with background uncertainty
+    https://indico.cern.ch/event/708041/papers/3272129/files/9437-acat19DirectOpti.pdf
+    """
+    
+    T1 = ((s+b)*(b+sigma_b**2)) / (b**2+(s+b)*sigma_b**2)
+    T2 = 1 + (sigma_b**2*s) / (b*(b+sigma_b**2))
+    
+    return np.sqrt(2*((s+b)*np.log(T1) - b**2/sigma_b**2 * np.log(T2)))
+
+
 def mask_eff(num_mask, y_true, class_id, weights, den_mask=None):
     """
     Masked columnar selection efficiency
@@ -333,11 +345,12 @@ def optimize_selection(args):
 
     keys = list(resdict['roc_mstats'].keys())
     num_MVA_models = len(resdict['roc_mstats'][keys[0]])
-
+    
     for MVA_model_index in range(num_MVA_models):
         
         S        = np.zeros(len(info[f"class_{signal_ID}"].keys()))
         B        = np.zeros(len(S))
+        sigma_B  = np.zeros(len(S))
         
         S_trg_eA = np.zeros(len(S))       # Trigger eff x acceptance
         S_cut_eA = np.zeros(len(S))       # Basic cuts
@@ -424,6 +437,7 @@ def optimize_selection(args):
             # Compute and collect values
             
             B[i]        = B_tot * BOX_eff[i,0] * MVA_eff[i,0]
+            sigma_B[i]  = 0.3 * B[i] # ANSATZ FOR NOW, DO ERROR PROPAGATION HERE
             
             S_trg_eA[i] = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
             S_cut_eA[i] = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
@@ -438,7 +452,7 @@ def optimize_selection(args):
         dprint('')
         dprint('\\tiny')
         dprint('\\begin{tabular}{l||cc|cccc|cc|c}')
-        dprint('Signal model point & $B$: $\\epsilon$($M$-box) & $B$: $\\epsilon$(ML) (threshold) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$($M$-box) & $\\epsilon$(ML) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & $\\langle S \\rangle / \\sqrt{{ \\langle B \\rangle }}$ \\\\')
+        dprint('Signal model point & $B$: $\\epsilon$($M$-box) & $B$: $\\epsilon$(ML) (threshold) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$($M$-box) & $\\epsilon$(ML) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & ADS \\\\')
         dprint('\\hline')
         
         output = {}
@@ -448,11 +462,11 @@ def optimize_selection(args):
         
         for i in range(len(S)):
             
-            # Expected discovery significance (Gaussian limit)
-            ds   = BR * S[i] / np.sqrt(B[i])
+            # Asimov Discovery Significance
+            ds   = ADS(s=BR * S[i], b=B[i], sigma_b=sigma_B[i])
             
             name = names[i]
-            name = ('..' + name[40:]) if len(name) > 65 else name # Truncate maximum length, add ..
+            name = ('..' + name[30:]) if len(name) > 45 else name # Truncate maximum length, add ..
             
             line = f'{name} & {BOX_eff[i,0]:0.1E} & {MVA_eff[i,0]:0.1E} ({thr[i]:0.3f}) & {S_trg_eA[i]:0.3f} & {S_cut_eA[i]:0.2f} & {BOX_eff[i,1]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {BR * S[i]:0.1E} & {ds:0.1f} \\\\'
             dprint(line)

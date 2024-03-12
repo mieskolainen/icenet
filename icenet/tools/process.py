@@ -59,7 +59,8 @@ def read_cli():
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS)
     parser.add_argument("--use_cache",       type=int,  default=1)
-
+    parser.add_argument("--fastplot",        type=int,  default=0)
+    
     parser.add_argument("--grid_id",         type=int,  default=0)
     parser.add_argument("--grid_nodes",      type=int,  default=1)
     
@@ -168,7 +169,15 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     else:
         raise Exception(__name__ + f'.read_config: Unknown runmode = {runmode}')
     # -----------------------------------------------------
-
+    
+    # Fast plot mode
+    if cli_dict['fastplot']:
+        new_args['plot_param']['basic']['active']    = False
+        new_args['plot_param']['corrmat']['active']  = False
+        new_args['plot_param']['contours']['active'] = False
+        
+        print(__name__ + f'.read_config: fastplot mode on (turning off slow plots)')
+    
     old_args = copy.deepcopy(args)
     args     = copy.deepcopy(new_args)
 
