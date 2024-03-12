@@ -507,7 +507,8 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--maxevents&quot;</span><span class="p">,</span>       <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>  <span class="n">default</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--use_conditional&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>  <span class="n">default</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--use_cache&quot;</span><span class="p">,</span>       <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>  <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--fastplot&quot;</span><span class="p">,</span>        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>  <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--grid_id&quot;</span><span class="p">,</span>         <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>  <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--grid_nodes&quot;</span><span class="p">,</span>      <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>  <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     
@@ -619,7 +620,15 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: Unknown runmode = </span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="c1"># -----------------------------------------------------</span>
-
+    
+    <span class="c1"># Fast plot mode</span>
+    <span class="k">if</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;fastplot&#39;</span><span class="p">]:</span>
+        <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;basic&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;corrmat&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">new_args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;contours&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: fastplot mode on (turning off slow plots)&#39;</span><span class="p">)</span>
+    
     <span class="n">old_args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="n">args</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_args</span><span class="p">)</span>
 
