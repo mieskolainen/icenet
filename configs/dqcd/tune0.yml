@@ -124,7 +124,7 @@ train_runmode:
   reweight: true
   reweight_mode: 'write'          # 'write', 'load'
   reweight_file: 'reweight_train.pkl' # differential reweighting model file
-
+  
   reweight_param: &REWEIGHT_PARAM
     
     maxevents: 1000000             # Maximum number of events for the PDF construction
@@ -151,13 +151,13 @@ train_runmode:
     #- gnet1
     #- gnet3
     
+    - xgb01
+    - xgb01-NOJETS
+
     - iceboost01-DA-MI-NOJETS
     - iceboost01-DA-MI
     - iceboost01-DA
     - iceboost01-DA-NC
-    
-    #- xgb01
-    #- xgb01-NC
     
     #- dmlp
     #- lgr0

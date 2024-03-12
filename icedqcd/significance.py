@@ -82,7 +82,7 @@ def mask_eff(num_mask, y_true, class_id, weights, den_mask=None):
     return num / den
 
 
-def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args):
+def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args, savename):
     """
     Plot ROC fits
     """
@@ -109,7 +109,7 @@ def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args)
     fit_label += ')$'
     
     # ------------------------------------
-    fig,ax = plt.subplots(1,2)
+    fig,ax = plt.subplots(1,2, figsize=(8,4))
     alpha  = 0.32
     
     for k in [0,1]:
@@ -147,7 +147,7 @@ def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args)
 
         plt.ylim([0,1])
 
-    pdf_filename = f'{path}/{roc_label}.pdf'
+    pdf_filename = f'{path}/{savename}.pdf'
     plt.savefig(pdf_filename, bbox_inches='tight')
     plt.close()
 
@@ -223,6 +223,9 @@ def find_filter(resdict, model_param, args):
     if GEN_filter_key is None:
         cprint(f'ERROR: No matching GEN filter for the signal: {model_param}, exit', 'red')
         exit()
+    
+    # Sort alphabetically by parameter name
+    param_point = dict(sorted(param_point.items()))
     
     return ROC_filter_key, BOX_filter_key, GEN_filter_key, param_point
 
@@ -361,6 +364,7 @@ def optimize_selection(args):
         names    = len(S) * [None]
 
         param_values = []
+        output       = {}
         i = 0
         
         # Loop over different signal model point processes
@@ -402,7 +406,8 @@ def optimize_selection(args):
             
             roc_obj   = resdict['roc_mstats'][ROC_filter_key][MVA_model_index]
             roc_label = resdict['roc_labels'][ROC_filter_key][MVA_model_index]
-
+            roc_path  = resdict['roc_paths'][ROC_filter_key][MVA_model_index]
+            
             fpr, tpr, thresholds = roc_obj.fpr, roc_obj.tpr, roc_obj.thresholds
             tpr_err   = np.ones(len(tpr))
             fpr_err   = np.ones(len(tpr))
@@ -431,7 +436,9 @@ def optimize_selection(args):
             # -----------------
             # Plot ROC fit
             
-            plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args)
+            plot_ROC_fit(i=i, fpr=fpr, tpr=tpr, tpr_err=tpr_err, fpr_err=fpr_err,
+                         roc_obj=roc_obj, roc_label=roc_label, names=names,
+                         args=args, savename=roc_path)
             
             # ----------------
             # Compute and collect values
@@ -444,41 +451,34 @@ def optimize_selection(args):
             
             # Expected signal event count (without BR applied !)
             S[i] = S_trg_eA[i] * S_cut_eA[i] * BOX_eff[i,1] * MVA_eff[i,1] * signal_xs * L_int
+
+            output[names[i]] = {'param':      param_values[i],
+                                'signal':     {'counts': S[i], 'systematic': 0},
+                                'background': {'counts': B[i], 'systematic': 0}}
             
             i += 1
+
             # << == Loop over signal points ends
         
         dprint(f'\\textbf{{ML model: {MVA_model_names[MVA_model_index]} }} \\\\')
         dprint('')
         dprint('\\tiny')
         dprint('\\begin{tabular}{l||cc|cccc|cc|c}')
-        dprint('Signal model point & $B$: $\\epsilon$($M$-box) & $B$: $\\epsilon$(ML) (threshold) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$($M$-box) & $\\epsilon$(ML) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & ADS \\\\')
+        dprint('Signal model point & $B$: $\\epsilon$($M$-box) & $\\epsilon$(ML) (threshold) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$($M$-box) & $\\epsilon$(ML) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & ADS \\\\')
         dprint('\\hline')
-        
-        output = {}
         
         # -----------------
         # Plot summary table
-        
         for i in range(len(S)):
             
             # Asimov Discovery Significance
             ds   = ADS(s=BR * S[i], b=B[i], sigma_b=sigma_B[i])
             
-            name = names[i]
-            name = ('..' + name[30:]) if len(name) > 45 else name # Truncate maximum length, add ..
-            
-            line = f'{name} & {BOX_eff[i,0]:0.1E} & {MVA_eff[i,0]:0.1E} ({thr[i]:0.3f}) & {S_trg_eA[i]:0.3f} & {S_cut_eA[i]:0.2f} & {BOX_eff[i,1]:0.2f} & {MVA_eff[i,1]:0.2f} & {B[i]:0.1E} & {BR * S[i]:0.1E} & {ds:0.1f} \\\\'
+            line = f'{param_values[i]} & {BOX_eff[i,0]:0.1E} & {MVA_eff[i,0]:0.1E} ({thr[i]:0.3f}) & {S_trg_eA[i]:0.2g} & {S_cut_eA[i]:0.2g} & {BOX_eff[i,1]:0.2g} & {MVA_eff[i,1]:0.2g} & {B[i]:0.1E} & {BR * S[i]:0.1E} & {ds:0.2g} \\\\'
             dprint(line)
-            
-            output[names[i]] = {'param':      param_values[i],
-                                'signal':     {'counts': S[i], 'systematic': 0},
-                                'background': {'counts': B[i], 'systematic': 0}}
         
         dprint('\\end{tabular}')
         dprint('')
-        
-        print(output)
         
         # -----------------
         # Compute upper limits

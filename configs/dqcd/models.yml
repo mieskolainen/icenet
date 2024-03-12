@@ -224,13 +224,13 @@ xgb01:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb01-NC:
+xgb01-NOJETS:
   train:   'xgb'
   predict: 'xgb_logistic'
-  label:   'XGB-NC'
+  label:   'XGB-NOJETS'
   raytune:  xgb_trial_0
   
-  exclude_MVA_vars: ['MODEL.*', 'muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_.*']
   #include_MVA_vars: ['.*']
   
   # general parameters
@@ -319,7 +319,7 @@ iceboost01-DA:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.09
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   plot_trees: False
@@ -374,7 +374,7 @@ iceboost01-DA-NC:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.09
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   plot_trees: False
@@ -483,7 +483,7 @@ iceboost01-DA-MI:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.09
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
@@ -541,7 +541,7 @@ iceboost01-DA-MI-NOJETS:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.09
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
