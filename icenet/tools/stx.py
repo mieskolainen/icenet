@@ -374,7 +374,7 @@ def parse_boolean_exptree(instring):
         See: https://stackoverflow.com/questions/11133339/
              parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion
     """
-
+    
     # Functions use internally AND and OR
     instring = instring.replace("&&", "AND")
     instring = instring.replace("||", "OR")    
