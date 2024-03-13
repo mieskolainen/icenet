@@ -235,8 +235,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.statstools">icefit.statstools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.ADS"><code class="docutils literal notranslate"><span class="pre">ADS()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.analytical_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">analytical_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.clopper_pearson_err"><code class="docutils literal notranslate"><span class="pre">clopper_pearson_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.columnar_mask_efficiency"><code class="docutils literal notranslate"><span class="pre">columnar_mask_efficiency()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.cormat2covmat"><code class="docutils literal notranslate"><span class="pre">cormat2covmat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.correlation_matrix"><code class="docutils literal notranslate"><span class="pre">correlation_matrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.covmat2corrmat"><code class="docutils literal notranslate"><span class="pre">covmat2corrmat()</span></code></a></li>
@@ -248,10 +250,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.p2zscore"><code class="docutils literal notranslate"><span class="pre">p2zscore()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.poisson_ratio"><code class="docutils literal notranslate"><span class="pre">poisson_ratio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.poisson_tail"><code class="docutils literal notranslate"><span class="pre">poisson_tail()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.prodratio_eprop"><code class="docutils literal notranslate"><span class="pre">prodratio_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.prod_eprop"><code class="docutils literal notranslate"><span class="pre">prod_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.ratio_eprop"><code class="docutils literal notranslate"><span class="pre">ratio_eprop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">test_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_ratios"><code class="docutils literal notranslate"><span class="pre">test_ratios()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.weighted_binomial_err"><code class="docutils literal notranslate"><span class="pre">weighted_binomial_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.welch_ttest"><code class="docutils literal notranslate"><span class="pre">welch_ttest()</span></code></a></li>
 </ul>
 </li>
@@ -603,25 +607,139 @@
 
 
 
-<div class="viewcode-block" id="prodratio_eprop">
-<a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.prodratio_eprop">[docs]</a>
-<span class="k">def</span> <span class="nf">prodratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">sigmaA</span><span class="p">,</span> <span class="n">sigmaB</span><span class="p">,</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="prod_eprop">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.prod_eprop">[docs]</a>
+<span class="k">def</span> <span class="nf">prod_eprop</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">sigmaA</span><span class="p">,</span> <span class="n">sigmaB</span><span class="p">,</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Error propagation (Taylor expansion) of product A*B or ratio A/B</span>
+<span class="sd">    Error propagation (Taylor expansion) of a product A*B</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        A : Value A </span>
-<span class="sd">        B : Value B</span>
+<span class="sd">        A       : Value A </span>
+<span class="sd">        B       : Value B</span>
 <span class="sd">        sigmaA  : 1 sigma uncertainty on A</span>
 <span class="sd">        sigmaB  : 1 sigma uncertainty on B</span>
 <span class="sd">        sigmaAB : Covariance of A,B</span>
-<span class="sd">        mode    : &#39;prod&#39; or &#39;ratio&#39;</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Uncertainty on A/B </span>
+<span class="sd">        Uncertainty</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;prod&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">sigmaA</span><span class="o">/</span><span class="n">A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigmaB</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">sign</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">sigmaAB</span><span class="o">/</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)))</span></div>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">B</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">sigmaA</span><span class="o">/</span><span class="n">A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigmaB</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigmaAB</span><span class="o">/</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="ratio_eprop">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.ratio_eprop">[docs]</a>
+<span class="k">def</span> <span class="nf">ratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">sigmaA</span><span class="p">,</span> <span class="n">sigmaB</span><span class="p">,</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Error propagation (Taylor expansion) of a ratio A/B</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        A       : Value A </span>
+<span class="sd">        B       : Value B</span>
+<span class="sd">        sigmaA  : 1 sigma uncertainty on A</span>
+<span class="sd">        sigmaB  : 1 sigma uncertainty on B</span>
+<span class="sd">        sigmaAB : Covariance of A,B</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Uncertainty</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">A</span> <span class="o">/</span> <span class="n">B</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">sigmaA</span><span class="o">/</span><span class="n">A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigmaB</span><span class="o">/</span><span class="n">B</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigmaAB</span><span class="o">/</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">B</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="weighted_binomial_err">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.weighted_binomial_err">[docs]</a>
+<span class="k">def</span> <span class="nf">weighted_binomial_err</span><span class="p">(</span><span class="n">b1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">e1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">e2</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Binomial counting efficiency error with weights</span>
+<span class="sd">    </span>
+<span class="sd">    For the reference, see:</span>
+<span class="sd">    https://root.cern/doc/master/TH1_8cxx_source.html#l02962</span>
+<span class="sd">    </span>
+<span class="sd">    If e1 ~ sqrt(b1) and e2 ~ sqrt(b2), one should recover results of this</span>
+<span class="sd">    function by using the proper covariance with:</span>
+<span class="sd">    </span>
+<span class="sd">    prodratio_eprop(A=b1, B=b2, sigma_A=e1, sigma_B=e2, sigmaAB=b1, mode=&#39;ratio)</span>
+<span class="sd">    </span>
+<span class="sd">    N.B. If b1 == b2, will return 0</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        b1: binomial numerator (e.g. count or sum of weights)</span>
+<span class="sd">        b2: binomial denominator</span>
+<span class="sd">        e1: error on the numerator (e.g. \sqrt(\sum_i(w_i^2))</span>
+<span class="sd">        e2: error on the denominator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">b1</span> <span class="o">==</span> <span class="n">b2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    
+    <span class="n">r</span>   <span class="o">=</span> <span class="n">b1</span> <span class="o">/</span> <span class="n">b2</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">r</span><span class="p">))</span><span class="o">*</span><span class="n">e1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="n">e2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">b2</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">err</span></div>
+
+
+
+<div class="viewcode-block" id="columnar_mask_efficiency">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.columnar_mask_efficiency">[docs]</a>
+<span class="k">def</span> <span class="nf">columnar_mask_efficiency</span><span class="p">(</span><span class="n">num_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">den_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                             <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_target</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Masked columnar selection efficiency with event weights and classes</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        num_mask: numerator mask vector (Nx1, bool)</span>
+<span class="sd">        den_mask: denominator mask      (Nx1, bool)</span>
+<span class="sd">        y_true:   label vector          (Nx1, int)</span>
+<span class="sd">        y_target: target label          (int)</span>
+<span class="sd">        weights:  event weights         (Nx1, float)</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        binomial efficiency, weighted binomial stat. error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+     
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">y_target</span><span class="p">]</span><span class="o">*</span><span class="n">num_mask</span><span class="p">[</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">y_target</span><span class="p">]</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">y_target</span><span class="p">]</span><span class="o">*</span><span class="n">den_mask</span><span class="p">[</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">y_target</span><span class="p">]</span>
+    
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+    <span class="n">b2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+    <span class="n">e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w1</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w2</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="n">eff</span>     <span class="o">=</span> <span class="n">b1</span> <span class="o">/</span> <span class="n">b2</span>
+    <span class="n">eff_err</span> <span class="o">=</span> <span class="n">weighted_binomial_err</span><span class="p">(</span><span class="n">b1</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">e1</span><span class="o">=</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="o">=</span><span class="n">e2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">eff</span><span class="p">,</span> <span class="n">eff_err</span></div>
+
+
+
+<div class="viewcode-block" id="ADS">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.ADS">[docs]</a>
+<span class="k">def</span> <span class="nf">ADS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">sigma_b</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Asimov discovery significance with background uncertainty</span>
+<span class="sd">    https://indico.cern.ch/event/708041/papers/3272129/files/9437-acat19DirectOpti.pdf</span>
+<span class="sd">    </span>
+<span class="sd">    when sigma_b --&gt; 0, this gives np.sqrt(2*((s+b)*np.log(1.0 + s/b) - s))</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        s:        expected signal count</span>
+<span class="sd">        b:        expected background count</span>
+<span class="sd">        sigma_b:  error on the background estimate</span>
+<span class="sd">        EPS:      regularization constant</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">+</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">EPS</span>
+    <span class="k">if</span> <span class="n">sigma_b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sigma_b</span> <span class="o">=</span> <span class="n">EPS</span>
+
+    <span class="n">T1</span> <span class="o">=</span> <span class="p">((</span><span class="n">s</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">sigma_b</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">s</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">sigma_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">T2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma_b</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">sigma_b</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">s</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T1</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">sigma_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T2</span><span class="p">)))</span></div>
 
 
 
@@ -957,7 +1075,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Poisson tail p = </span><span class="si">{</span><span class="n">ppois</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">p2zscore</span><span class="p">(</span><span class="n">ppois</span><span class="p">)</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sigmas)&#39;</span><span class="p">)</span>
 
         <span class="c1"># Error propagation</span>
-        <span class="n">errAB</span> <span class="o">=</span> <span class="n">prodratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaA</span><span class="o">=</span><span class="n">s_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaB</span><span class="o">=</span><span class="n">s_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">errAB</span> <span class="o">=</span> <span class="n">ratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaA</span><span class="o">=</span><span class="n">s_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sigmaB</span><span class="o">=</span><span class="n">s_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">PRE_over_OBS</span> <span class="o">=</span> <span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  error propagated rel.uncertainty on the ratio: err / (pre/obs) = </span><span class="si">{</span><span class="n">errAB</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">PRE_over_OBS</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 

@@ -238,8 +238,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.statstools">icefit.statstools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.ADS"><code class="docutils literal notranslate"><span class="pre">ADS()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.analytical_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">analytical_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.clopper_pearson_err"><code class="docutils literal notranslate"><span class="pre">clopper_pearson_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.columnar_mask_efficiency"><code class="docutils literal notranslate"><span class="pre">columnar_mask_efficiency()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.cormat2covmat"><code class="docutils literal notranslate"><span class="pre">cormat2covmat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.correlation_matrix"><code class="docutils literal notranslate"><span class="pre">correlation_matrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.covmat2corrmat"><code class="docutils literal notranslate"><span class="pre">covmat2corrmat()</span></code></a></li>
@@ -251,10 +253,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.p2zscore"><code class="docutils literal notranslate"><span class="pre">p2zscore()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.poisson_ratio"><code class="docutils literal notranslate"><span class="pre">poisson_ratio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.poisson_tail"><code class="docutils literal notranslate"><span class="pre">poisson_tail()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.prodratio_eprop"><code class="docutils literal notranslate"><span class="pre">prodratio_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.prod_eprop"><code class="docutils literal notranslate"><span class="pre">prod_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.ratio_eprop"><code class="docutils literal notranslate"><span class="pre">ratio_eprop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.test_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">test_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.test_ratios"><code class="docutils literal notranslate"><span class="pre">test_ratios()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.weighted_binomial_err"><code class="docutils literal notranslate"><span class="pre">weighted_binomial_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.welch_ttest"><code class="docutils literal notranslate"><span class="pre">welch_ttest()</span></code></a></li>
 </ul>
 </li>
@@ -1467,6 +1471,24 @@ cov_arr  : Covariance matrix</p>
 <section id="module-icefit.statstools">
 <span id="icefit-statstools"></span><h2>icefit.statstools<a class="headerlink" href="#module-icefit.statstools" title="Link to this heading">¶</a></h2>
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.ADS">
+<span class="sig-name descname"><span class="pre">ADS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#ADS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.ADS" title="Link to this definition">¶</a></dt>
+<dd><p>Asimov discovery significance with background uncertainty
+<a class="reference external" href="https://indico.cern.ch/event/708041/papers/3272129/files/9437-acat19DirectOpti.pdf">https://indico.cern.ch/event/708041/papers/3272129/files/9437-acat19DirectOpti.pdf</a></p>
+<p>when sigma_b –&gt; 0, this gives np.sqrt(2*((s+b)*np.log(1.0 + s/b) - s))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – expected signal count</p></li>
+<li><p><strong>b</strong> – expected background count</p></li>
+<li><p><strong>sigma_b</strong> – error on the background estimate</p></li>
+<li><p><strong>EPS</strong> – regularization constant</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.statstools.analytical_extreme_npdf">
 <span class="sig-name descname"><span class="pre">analytical_extreme_npdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#analytical_extreme_npdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.analytical_extreme_npdf" title="Link to this definition">¶</a></dt>
 <dd><p>Analytical expectation (mean) value approximation (based on an expansion)
@@ -1491,6 +1513,26 @@ Below, beta.ppf (percent point functions) returns inverse CDF for quantiles.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>confidence interval [lower, upper]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.columnar_mask_efficiency">
+<span class="sig-name descname"><span class="pre">columnar_mask_efficiency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">den_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#columnar_mask_efficiency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.columnar_mask_efficiency" title="Link to this definition">¶</a></dt>
+<dd><p>Masked columnar selection efficiency with event weights and classes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_mask</strong> – numerator mask vector (Nx1, bool)</p></li>
+<li><p><strong>den_mask</strong> – denominator mask      (Nx1, bool)</p></li>
+<li><p><strong>y_true</strong> – label vector          (Nx1, int)</p></li>
+<li><p><strong>y_target</strong> – target label          (int)</p></li>
+<li><p><strong>weights</strong> – event weights         (Nx1, float)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>binomial efficiency, weighted binomial stat. error</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1685,9 +1727,9 @@ E[k2] = lambda2 (Poisson mean)</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icefit.statstools.prodratio_eprop">
-<span class="sig-name descname"><span class="pre">prodratio_eprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaAB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ratio'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#prodratio_eprop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.prodratio_eprop" title="Link to this definition">¶</a></dt>
-<dd><p>Error propagation (Taylor expansion) of product A*B or ratio A/B</p>
+<dt class="sig sig-object py" id="icefit.statstools.prod_eprop">
+<span class="sig-name descname"><span class="pre">prod_eprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaAB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#prod_eprop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.prod_eprop" title="Link to this definition">¶</a></dt>
+<dd><p>Error propagation (Taylor expansion) of a product A*B</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1696,11 +1738,30 @@ E[k2] = lambda2 (Poisson mean)</p>
 <li><p><strong>sigmaA</strong> – 1 sigma uncertainty on A</p></li>
 <li><p><strong>sigmaB</strong> – 1 sigma uncertainty on B</p></li>
 <li><p><strong>sigmaAB</strong> – Covariance of A,B</p></li>
-<li><p><strong>mode</strong> – ‘prod’ or ‘ratio’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Uncertainty on A/B</p>
+<dd class="field-even"><p>Uncertainty</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.ratio_eprop">
+<span class="sig-name descname"><span class="pre">ratio_eprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaAB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#ratio_eprop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.ratio_eprop" title="Link to this definition">¶</a></dt>
+<dd><p>Error propagation (Taylor expansion) of a ratio A/B</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> – Value A</p></li>
+<li><p><strong>B</strong> – Value B</p></li>
+<li><p><strong>sigmaA</strong> – 1 sigma uncertainty on A</p></li>
+<li><p><strong>sigmaB</strong> – 1 sigma uncertainty on B</p></li>
+<li><p><strong>sigmaAB</strong> – Covariance of A,B</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Uncertainty</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1733,6 +1794,28 @@ E[k2] = lambda2 (Poisson mean)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Error propagated ratio error</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.statstools.weighted_binomial_err">
+<span class="sig-name descname"><span class="pre">weighted_binomial_err</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">e1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">e2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/statstools.html#weighted_binomial_err"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.statstools.weighted_binomial_err" title="Link to this definition">¶</a></dt>
+<dd><p>Binomial counting efficiency error with weights</p>
+<p>For the reference, see:
+<a class="reference external" href="https://root.cern/doc/master/TH1_8cxx_source.html#l02962">https://root.cern/doc/master/TH1_8cxx_source.html#l02962</a></p>
+<p>If e1 ~ sqrt(b1) and e2 ~ sqrt(b2), one should recover results of this
+function by using the proper covariance with:</p>
+<p>prodratio_eprop(A=b1, B=b2, sigma_A=e1, sigma_B=e2, sigmaAB=b1, mode=’ratio)</p>
+<p>N.B. If b1 == b2, will return 0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b1</strong> – binomial numerator (e.g. count or sum of weights)</p></li>
+<li><p><strong>b2</strong> – binomial denominator</p></li>
+<li><p><strong>e1</strong> – error on the numerator (e.g. sqrt(sum_i(w_i^2))</p></li>
+<li><p><strong>e2</strong> – error on the denominator</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

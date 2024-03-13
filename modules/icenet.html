@@ -239,8 +239,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="icefit.html#module-icefit.statstools">icefit.statstools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.ADS"><code class="docutils literal notranslate"><span class="pre">ADS()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.analytical_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">analytical_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.clopper_pearson_err"><code class="docutils literal notranslate"><span class="pre">clopper_pearson_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.columnar_mask_efficiency"><code class="docutils literal notranslate"><span class="pre">columnar_mask_efficiency()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.cormat2covmat"><code class="docutils literal notranslate"><span class="pre">cormat2covmat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.correlation_matrix"><code class="docutils literal notranslate"><span class="pre">correlation_matrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.covmat2corrmat"><code class="docutils literal notranslate"><span class="pre">covmat2corrmat()</span></code></a></li>
@@ -252,10 +254,12 @@
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.p2zscore"><code class="docutils literal notranslate"><span class="pre">p2zscore()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.poisson_ratio"><code class="docutils literal notranslate"><span class="pre">poisson_ratio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.poisson_tail"><code class="docutils literal notranslate"><span class="pre">poisson_tail()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.prodratio_eprop"><code class="docutils literal notranslate"><span class="pre">prodratio_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.prod_eprop"><code class="docutils literal notranslate"><span class="pre">prod_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.ratio_eprop"><code class="docutils literal notranslate"><span class="pre">ratio_eprop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.test_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">test_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.test_ratios"><code class="docutils literal notranslate"><span class="pre">test_ratios()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.weighted_binomial_err"><code class="docutils literal notranslate"><span class="pre">weighted_binomial_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="icefit.html#icefit.statstools.welch_ttest"><code class="docutils literal notranslate"><span class="pre">welch_ttest()</span></code></a></li>
 </ul>
 </li>
@@ -4445,7 +4449,8 @@ ax:  figure axis</p>
 <dd><p>A boolean expression tree parser.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>instring</strong> – input string, e.g. “pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)”</p>
+<dd class="field-odd"><p><strong>instring</strong> – input string,
+e.g. “pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)”</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A syntax tree as a list of lists</p>

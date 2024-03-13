@@ -235,8 +235,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.statstools">icefit.statstools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.ADS"><code class="docutils literal notranslate"><span class="pre">ADS()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.analytical_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">analytical_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.clopper_pearson_err"><code class="docutils literal notranslate"><span class="pre">clopper_pearson_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.columnar_mask_efficiency"><code class="docutils literal notranslate"><span class="pre">columnar_mask_efficiency()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.cormat2covmat"><code class="docutils literal notranslate"><span class="pre">cormat2covmat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.correlation_matrix"><code class="docutils literal notranslate"><span class="pre">correlation_matrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.covmat2corrmat"><code class="docutils literal notranslate"><span class="pre">covmat2corrmat()</span></code></a></li>
@@ -248,10 +250,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.p2zscore"><code class="docutils literal notranslate"><span class="pre">p2zscore()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.poisson_ratio"><code class="docutils literal notranslate"><span class="pre">poisson_ratio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.poisson_tail"><code class="docutils literal notranslate"><span class="pre">poisson_tail()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.prodratio_eprop"><code class="docutils literal notranslate"><span class="pre">prodratio_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.prod_eprop"><code class="docutils literal notranslate"><span class="pre">prod_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.ratio_eprop"><code class="docutils literal notranslate"><span class="pre">ratio_eprop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.test_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">test_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.test_ratios"><code class="docutils literal notranslate"><span class="pre">test_ratios()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.weighted_binomial_err"><code class="docutils literal notranslate"><span class="pre">weighted_binomial_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.statstools.welch_ttest"><code class="docutils literal notranslate"><span class="pre">welch_ttest()</span></code></a></li>
 </ul>
 </li>
@@ -645,7 +649,6 @@
     <span class="c1"># Turn into matrix</span>
     <span class="n">mask_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_set</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
 
-
     <span class="c1"># Create description strings</span>
     <span class="n">text_set</span><span class="p">,</span> <span class="n">path_set</span> <span class="o">=</span> <span class="p">[],[]</span>
 
@@ -837,7 +840,8 @@
 <span class="sd">    A boolean expression tree parser.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        instring : input string, e.g. &quot;pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)&quot;</span>
+<span class="sd">        instring : input string,</span>
+<span class="sd">            e.g. &quot;pt &gt; 7.0 AND (x &lt; 2 OR x &gt;= 4)&quot;</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        A syntax tree as a list of lists</span>
@@ -846,6 +850,11 @@
 <span class="sd">        See: https://stackoverflow.com/questions/11133339/</span>
 <span class="sd">             parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Check we don&#39;t have single &amp; or single | (need to be &amp;&amp;, ||)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;|&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">instring</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_boolean_exptree: Problem with </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">, use only C-style &amp;&amp; or ||&#39;</span><span class="p">)</span>
     
     <span class="c1"># Functions use internally AND and OR</span>
     <span class="n">instring</span> <span class="o">=</span> <span class="n">instring</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&amp;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;AND&quot;</span><span class="p">)</span>
@@ -896,7 +905,7 @@
                                 <span class="p">(</span><span class="s2">&quot;OR&quot;</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">opAssoc</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="n">makeLRlike</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
                                 <span class="p">(</span><span class="s2">&quot;AND&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pp</span><span class="o">.</span><span class="n">opAssoc</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="n">makeLRlike</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
                                 <span class="p">])</span>
-
+    
     <span class="n">output</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">instring</span><span class="p">)</span>
 
     <span class="c1"># Remove excess []</span>
