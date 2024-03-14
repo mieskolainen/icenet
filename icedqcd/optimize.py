@@ -213,8 +213,8 @@ def optimize_selection(args):
         print(string)
         with open(latex_filename, mode) as f:
             f.write(string + '\n')
-
-    latex_path     = aux.makedir(f'{args["plotdir"]}/eval/significance')
+    
+    latex_path     = aux.makedir(f'{args["plotdir"]}/eval/optimize')
     latex_filename = f'{latex_path}/optimize.tex'
     
     # -----------------
@@ -233,6 +233,10 @@ def optimize_selection(args):
     const_mode     = args['limits_param']['const_mode']
     const_cut      = args['limits_param']['const_cut']
     const_bgk_eff  = args['limits_param']['const_bgk_eff']
+    
+    # BOX emulation
+    commutate_BOX  = args['limits_param']['commutate_BOX']
+    
     # -----------------
     
     dprint('', 'w')
@@ -257,12 +261,13 @@ def optimize_selection(args):
     dprint('\\\\')
     
     if   const_mode == 'cut':
-        dprint(f'Const mode: ML score cut threshold fixed at $c > {const_cut:0.2f}$ -- floating efficiency \\\\')
+        dprint(f'Const mode: ML score cut threshold fixed at $c > {const_cut:0.2f}$ \\\\')
     elif const_mode == 'bgk_eff':
-        dprint(f'Const mode: Bgk-efficiency fixed at $ = {const_bgk_eff:0.1E} -- floating cut \\\\')
+        dprint(f'Const mode: Bgk-efficiency target fixed at {const_bgk_eff:0.1E} (after trg + pre-selection) \\\\')
     else:
         raise Exception(__name__ + f".optimize_selection: Unknown const mode '{const_mode}'")
     
+    dprint(f'commutate BOX cut: {commutate_BOX} (low MC stats treatment) \\\\')
     dprint(f'Signal scenario: {args["limits_param"]["cosmetics"]["portal"]} \\\\')
     dprint('\\vspace{1em}')
     dprint('\\\\')
@@ -283,7 +288,7 @@ def optimize_selection(args):
     info = rd['info']
 
     # MVA-model labels
-    MVA_model_names = rd['roc_labels']['inclusive']
+    ML_model_names = rd['roc_labels']['inclusive']
 
     # background, signal
     class_ids = args['primary_classes']
@@ -328,7 +333,8 @@ def optimize_selection(args):
     dprint('\\end{tabular}')
     dprint('\\\\')
     dprint('')
-
+    
+    
     # -----------------
     # Signal estimate per model point
 
@@ -344,14 +350,17 @@ def optimize_selection(args):
         ADS         = np.zeros(len(S))
         ds          = np.zeros(len(S))
         
-        S_trg_eA    = np.zeros(len(S))       # Trigger eff x acceptance
-        S_cut_eA    = np.zeros(len(S))       # Basic cuts
+        S_trg_eA    = np.zeros(len(S))          # Trigger eff x acceptance
+        S_cut_eA    = np.zeros(len(S))          # Basic cuts
         
-        ML_eff      = np.zeros((len(S), 2))  # ML cut
-        ML_eff_err  = np.zeros((len(S), 2))  # ML cut
+        ML_eff         = np.zeros((len(S), 2))  # ML cut
+        ML_eff_err     = np.zeros((len(S), 2))  # ML cut
         
-        BOX_eff     = np.zeros((len(S), 2))  # Box cut
-        BOX_eff_err = np.zeros((len(S), 2))  # Box cut
+        BOX_eff        = np.zeros((len(S), 2))  # Box cut
+        BOX_eff_err    = np.zeros((len(S), 2))  # Box cut
+        
+        ML_BOX_eff     = np.zeros((len(S), 2))  # ML x Box cut
+        ML_BOX_eff_err = np.zeros((len(S), 2))  # ML x Box cut
         
         tot_eff_err = np.zeros((len(S), 2))
         
@@ -377,14 +386,19 @@ def optimize_selection(args):
                 = find_filter(rd, model_param, args)
             
             param_values.append(param_point)
-                        
+            
             # -----------------
             # Get the pre-computed MVA-ROC results after combined GEN & BOX cut
             # (background uses "diplomat_class" filter under plots)
             
-            roc_obj   = rd['roc_mstats'][GBX_filter_key][ML_idx]
-            roc_label = rd['roc_labels'][GBX_filter_key][ML_idx]
-            roc_path  = rd['roc_paths'][GBX_filter_key][ML_idx]
+            if commutate_BOX:           # Low MC stats treatment
+                fKEY = GEN_filter_key # Gen
+            else:
+                fKEY = GBX_filter_key # Gen & Box
+            
+            roc_obj   = rd['roc_mstats'][fKEY][ML_idx]
+            roc_label = rd['roc_labels'][fKEY][ML_idx]
+            roc_path  = rd['roc_paths'][fKEY][ML_idx]
             
             fpr, tpr, thresholds = roc_obj.fpr, roc_obj.tpr, roc_obj.thresholds
             fpr_err, tpr_err     = 0,0
@@ -393,18 +407,32 @@ def optimize_selection(args):
                 roc_obj=roc_obj, roc_label=roc_label, names=names, args=args, savename=roc_path)
             
             # -----------------
+            # Construct box cut efficiency prior ML cut
+            
+            BOX_cut_mask = rd['roc_filters'][BOX_filter_key][ML_idx] & rd['roc_filters'][GEN_filter_key][ML_idx]
+            den_mask     = copy.deepcopy(rd['roc_filters'][GEN_filter_key][ML_idx]) #! deepcopy
+            
+            for C in range(2):
+
+                BOX_eff[i,C], BOX_eff_err[i,C] = statstools.columnar_mask_efficiency(
+                    num_mask=BOX_cut_mask, den_mask=den_mask,
+                    y_true=rd['data'].y, y_target=class_ids[C], weights=rd['data'].w)
+            
+            # -----------------
             # Construct ML cut efficiency such that the combined BOX & ML efficiency
-            # matches the FPR level we want for the background (or use a fixed cut)
+            # matches the FPR level we want for the background (or use a constant cut)
             
             if   const_mode == 'cut':
-                thr[i]       = const_cut
+                thr[i] = const_cut
             elif const_mode == 'bgk_eff':
-                func_fpr2thr = interpolate.interp1d(fpr, thresholds, 'linear')
-                thr[i]       = func_fpr2thr(const_bgk_eff)
+                func   = interpolate.interp1d(fpr * BOX_eff[i,0], thresholds, 'linear')
+                thr[i] = func(const_bgk_eff)
             else:
                 raise Exception(__name__ + f'.optimize_selection: Unknown const_mode "{const_mode}"')
             
-            # Obtain efficiency error estimate by applying the cut
+            # -----------------
+            # ML cut
+            
             ML_cut_mask = (rd['y_preds'][ML_idx] > thr[i]) & rd['roc_filters'][GEN_filter_key][ML_idx]
             den_mask    = copy.deepcopy(rd['roc_filters'][GEN_filter_key][ML_idx]) #! deepcopy
             
@@ -414,38 +442,51 @@ def optimize_selection(args):
                     y_true=rd['data'].y, y_target=class_ids[C], weights=rd['data'].w)
             
             # -----------------
-            # Construct box cut efficiency
+            # BOX cut
 
             BOX_cut_mask = ML_cut_mask & rd['roc_filters'][BOX_filter_key][ML_idx]
             den_mask     = copy.deepcopy(ML_cut_mask) #! deepcopy
             
-            for C in range(2): 
+            for C in range(2):
+                
+                if commutate_BOX and C == 0:
+                    continue # Low MC stats treatment, computed above
                 
                 BOX_eff[i,C], BOX_eff_err[i,C] = statstools.columnar_mask_efficiency(
                     num_mask=BOX_cut_mask, den_mask=den_mask,
                     y_true=rd['data'].y, y_target=class_ids[C], weights=rd['data'].w)
             
             # ----------------
-            # Total efficiency error (N.B. currently only ML & BOX uncertainties)
+            # Total ML x BOX cut
+            
+            ML_BOX_cut_mask = ML_cut_mask & BOX_cut_mask
+            den_mask        = copy.deepcopy(rd['roc_filters'][GEN_filter_key][ML_idx]) #! deepcopy
             
             for C in range(2):
                 
-                tot_eff_err[i,C] = statstools.prod_eprop(A=ML_eff[i,C], B=BOX_eff[i,C],
-                    sigmaA=ML_eff_err[i,C], sigmaB=BOX_eff_err[i,C], sigmaAB=0)
+                if commutate_BOX and C == 0: # Low MC stats treatment
+                    ML_BOX_eff[i,C]     = ML_eff[i,C] * BOX_eff[i,C]
+                    ML_BOX_eff_err[i,C] = statstools.prod_eprop(A=ML_eff[i,C], B=BOX_eff[i,C],
+                        sigmaA=ML_eff_err[i,C], sigmaB=BOX_eff_err[i,C], sigmaAB=0)
+                    continue
+                
+                ML_BOX_eff[i,C], ML_BOX_eff_err[i,C] = statstools.columnar_mask_efficiency(
+                        num_mask=ML_BOX_cut_mask, den_mask=den_mask,
+                        y_true=rd['data'].y, y_target=class_ids[C], weights=rd['data'].w)
             
             # ----------------
             # Compute values
             
-            B[i]        = B_tot * ML_eff[i,0] * BOX_eff[i,0]
-            sigma_B[i]  = B_tot * tot_eff_err[i,0]
-
+            B[i]        = B_tot * ML_BOX_eff[i,0]
+            sigma_B[i]  = B_tot * ML_BOX_eff_err[i,0]
+            
             S_trg_eA[i] = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
             S_cut_eA[i] = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
             
             # Expected signal event count (without BR applied here!)
             S_tot       = (signal_xs * L_int) * S_trg_eA[i] * S_cut_eA[i]
-            S[i]        = S_tot * BOX_eff[i,1] * ML_eff[i,1]
-            sigma_S[i]  = S_tot * tot_eff_err[i,1]
+            S[i]        = S_tot * ML_BOX_eff[i,1]
+            sigma_S[i]  = S_tot * ML_BOX_eff_err[i,1]
             
             # Asimov Discovery Significance
             ADS[i] = statstools.ADS(s=BR * S[i], b=B[i], sigma_b=sigma_B[i])
@@ -453,31 +494,33 @@ def optimize_selection(args):
             # Naive
             ds[i]  = BR * S[i] / np.sqrt(B[i])
 
-            output[names[i]] = {'param':      param_values[i],
-                                'signal':     {'counts': S[i], 'systematic': sigma_S[i]},
-                                'background': {'counts': B[i], 'systematic': sigma_B[i]}}
+            output[names[i]] = {'ML_model':     ML_model_names[ML_idx],
+                                'model_param':  param_values[i],
+                                'signal':       {'counts': S[i], 'systematic': sigma_S[i]},
+                                'background':   {'counts': B[i], 'systematic': sigma_B[i]}}
             
             # ----------------
             # Diagnostics
             print(f'ML_eff:  {np.round(ML_eff[i,:], 6)}  | ML_eff_err  = {np.round(100 * ML_eff_err[i,:]  / ML_eff[i,:], 1)} %')
             print(f'BOX_eff: {np.round(BOX_eff[i,:], 6)} | BOX_eff_err = {np.round(100 * BOX_eff_err[i,:] / BOX_eff[i,:], 1)} %')
+            print(f'tot_eff: {np.round(ML_eff[i,:] * BOX_eff[i,:], 6)} | tot_eff_err = {np.round(100 * tot_eff_err[i,:] / (ML_eff[i,:] * BOX_eff[i,:]), 1)} %')
             
             i += 1
             
             # << == Loop over signal points ends
         
-        dprint(f'\\textbf{{ML model: {MVA_model_names[ML_idx]} }} \\\\')
+        dprint(f'\\textbf{{ML model: {ML_model_names[ML_idx]} }} \\\\')
         dprint('')
         dprint('\\tiny')
-        dprint('\\begin{tabular}{l||cc|cccc|cc|cc}')
-        dprint('Signal model point & $B$: $\\epsilon$(ML) (threshold) & $\\epsilon$($M$-box) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$(ML) & $\\epsilon$($M$-box) & $\\langle B \\rangle \\pm$ [\\%] & $\\langle S \\rangle \\pm$ [\\%] & ADS & $S / \\sqrt{B}$ \\\\')
+        dprint('\\begin{tabular}{l|c|cc|cccc|cc|cc}')
+        dprint('Signal model point & ML-cut & $B$: $\\epsilon$(ML) & $\\epsilon$($M$-box) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$(ML) & $\\epsilon$($M$-box) & $\\langle B \\rangle \\pm$ [\\%] & $\\langle S \\rangle \\pm$ [\\%] & ADS & $S / \\sqrt{B}$ \\\\')
         dprint('\\hline')
         
         # -----------------
         # Plot summary table
         for i in range(len(S)):
             
-            line = f'{param_values[i]} & {ML_eff[i,0]:0.1E} ({thr[i]:0.3f}) & {BOX_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2g} & {S_cut_eA[i]:0.2g} & {ML_eff[i,1]:0.2g} & {BOX_eff[i,1]:0.2g} & {B[i]:0.1E} $\\pm$ {100*sigma_B[i]/B[i]:0.1f} & {BR*S[i]:0.1E} $\\pm$ {100*sigma_S[i]/S[i]:0.1f} & {ADS[i]:0.2g} & {ds[i]:0.2g} \\\\'
+            line = f'{param_values[i]} & {thr[i]:0.3f} &{ML_eff[i,0]:0.1E} & {BOX_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2g} & {S_cut_eA[i]:0.2g} & {ML_eff[i,1]:0.2g} & {BOX_eff[i,1]:0.2g} & {B[i]:0.1E} $\\pm$ {100*sigma_B[i]/B[i]:0.1f} & {BR*S[i]:0.1E} $\\pm$ {100*sigma_S[i]/S[i]:0.1f} & {ADS[i]:0.2g} & {ds[i]:0.2g} \\\\'
             dprint(line)
         
         dprint('\\end{tabular}')
@@ -487,7 +530,7 @@ def optimize_selection(args):
         # Compute upper limits
         
         limits.run_limits_vector(data=output, param=args['limits_param'],
-            savepath = f'{args["plotdir"]}/eval/limits/{MVA_model_names[ML_idx]}')
+            savepath = f'{args["plotdir"]}/eval/limits/{ML_model_names[ML_idx]}')
         
         # << == Loop over models ends
     

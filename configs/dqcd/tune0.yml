@@ -243,8 +243,9 @@ optimize_runmode:
     target_r:   0.01           # Benchmark branching ratio (BR)
     
     const_mode: 'bgk_eff'      # Which to keep constant, 'cut', 'bgk_eff'
-    const_cut:     0.9         # Target cut value (--> background varies per signal point)
-    const_bgk_eff: 8.0E-3      # Background efficiency target (--> cut varies per signal point)
+    const_cut:     0.9         # Target cut value (--> FPR varies per signal point)
+    const_bgk_eff: 1.0e-5      # Background efficiency (FPR) target after trigger & pre-cut (--> cut varies per signal point)
+    commutate_BOX: True        # True if commutate BOX cut (with low MC stats), False if apply physically
     
     model_POI: ['m', 'ctau']   # Theory (signal) model param-of-interest
     box_POI:   ['M', 'm']      # (observable, theory) pair
