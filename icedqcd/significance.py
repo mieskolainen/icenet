@@ -11,6 +11,7 @@ import os
 from termcolor import colored, cprint
 from datetime import datetime
 from scanf import scanf
+import copy
 
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -18,7 +19,7 @@ from scipy import interpolate
 from scipy.stats import ncx2,norm
 
 from icenet.tools import aux, io
-from icefit import cortools
+from icefit import cortools, statstools
 from icedqcd import limits
 
 
@@ -54,33 +55,6 @@ def func_binormal(x, a, b):
     a = (mu1 - mu0) / sd1
     """
     return norm.cdf(a + b*norm.ppf(x))
-
-
-def ADS(s, b, sigma_b):
-    """
-    Asimov discovery significance with background uncertainty
-    https://indico.cern.ch/event/708041/papers/3272129/files/9437-acat19DirectOpti.pdf
-    """
-    
-    T1 = ((s+b)*(b+sigma_b**2)) / (b**2+(s+b)*sigma_b**2)
-    T2 = 1 + (sigma_b**2*s) / (b*(b+sigma_b**2))
-    
-    return np.sqrt(2*((s+b)*np.log(T1) - b**2/sigma_b**2 * np.log(T2)))
-
-
-def mask_eff(num_mask, y_true, class_id, weights, den_mask=None):
-    """
-    Masked columnar selection efficiency
-    """
-    
-    if den_mask is None:
-        den_mask = np.ones_like(num_mask)
-
-    num = np.sum(weights[y_true == class_id]*num_mask[y_true == class_id])
-    den = np.sum(weights[y_true == class_id]*den_mask[y_true == class_id])
-
-    return num / den
-
 
 def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args, savename):
     """
@@ -152,47 +126,46 @@ def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args,
     plt.close()
 
 
-def find_filter(resdict, model_param, args):
+def find_filter(rd, model_param, args):
     """
     Find filter strings
     """
     model_POI      = args['limits_param']['model_POI']
     box_POI        = args['limits_param']['box_POI'] 
     
-    ROC_filter_tag = args['limits_param']['ROC_filter_tag']
-    BOX_filter_tag = args['limits_param']['BOX_filter_tag']
     GEN_filter_tag = args['limits_param']['GEN_filter_tag']
+    BOX_filter_tag = args['limits_param']['BOX_filter_tag']
+    GBX_filter_tag = args['limits_param']['GBX_filter_tag']
     
-    ROC_filter_key = None
-    BOX_filter_key = None
     GEN_filter_key = None
+    BOX_filter_key = None
+    GBX_filter_key = None
     param_point    = {}
     
     cprint(__name__ + f'.find_filter: Signal: {model_param}', 'yellow')
-    
+
     # --------------
     
-    for filter in resdict['roc_mstats'].keys():
+    for filter in rd['roc_mstats'].keys():
         matches = 0
-        for param_name in model_POI :
+        for param_name in model_POI:
             
-            if f'{param_name} = {model_param[param_name]:g}' in filter and ROC_filter_tag in filter:
+            if f'{param_name} = {model_param[param_name]:g}' in filter and GEN_filter_tag in filter:
                 matches += 1
                 param_point[param_name] = model_param[param_name]
         
         if matches == len(model_POI): # all parameters match
-            ROC_filter_key = filter
-            
-            cprint(f'Found ROC filter: {ROC_filter_key}' , 'green')
+            GEN_filter_key = filter
+            cprint(f'Found GEN filter: {GEN_filter_key}' , 'green')
             break
     
-    if ROC_filter_key is None:
-        cprint(f'ERROR: No matching ROC filter for the signal: {model_param}, exit', 'red')
+    if GEN_filter_key is None:
+        cprint(f'ERROR: No matching GEN filter for the signal: {model_param}, exit', 'red')
         exit()
-    
+        
     # --------------
     
-    for filter in resdict['roc_mstats'].keys():
+    for filter in rd['roc_mstats'].keys():
         
         if BOX_filter_tag in filter:
             param_value = scanf(f"{BOX_filter_tag}: box({box_POI[0]} ~ %f)", filter)[0]
@@ -208,34 +181,33 @@ def find_filter(resdict, model_param, args):
     
     # --------------
     
-    for filter in resdict['roc_mstats'].keys():
+    for filter in rd['roc_mstats'].keys():
         matches = 0
-        for param_name in model_POI:
+        for param_name in model_POI :
             
-            if f'{param_name} = {model_param[param_name]:g}' in filter and GEN_filter_tag in filter:
+            if f'{param_name} = {model_param[param_name]:g}' in filter and GBX_filter_tag in filter:
                 matches += 1
         
         if matches == len(model_POI): # all parameters match
-            GEN_filter_key = filter
-            cprint(f'Found GEN filter: {GEN_filter_key}' , 'green')
+            GBX_filter_key = filter
+            
+            cprint(f'Found GBX filter: {GBX_filter_key}' , 'green')
             break
     
-    if GEN_filter_key is None:
-        cprint(f'ERROR: No matching GEN filter for the signal: {model_param}, exit', 'red')
+    if GBX_filter_key is None:
+        cprint(f'ERROR: No matching GBX filter for the signal: {model_param}, exit', 'red')
         exit()
     
     # Sort alphabetically by parameter name
     param_point = dict(sorted(param_point.items()))
     
-    return ROC_filter_key, BOX_filter_key, GEN_filter_key, param_point
+    return GEN_filter_key, BOX_filter_key, GBX_filter_key, param_point
 
 
 def optimize_selection(args):
     """
     Main program
     """
-    
-    cprint(__name__ + f'.optimize_selection: Running ...', 'yellow')
     
     def dprint(string, mode='a'):
         print(string)
@@ -244,21 +216,23 @@ def optimize_selection(args):
 
     latex_path     = aux.makedir(f'{args["plotdir"]}/eval/significance')
     latex_filename = f'{latex_path}/optimize.tex'
-     
+    
     # -----------------
     ## Main parameters
 
     # Integrated luminosity
-    L_int        = args['limits_param']['luminosity'] # in pb^{-1}
+    L_int          = args['limits_param']['luminosity'] # in pb^{-1}
     
     # Signal production cross section
-    signal_xs    = args['limits_param']['signal_xs']  # in pb
+    signal_xs      = args['limits_param']['signal_xs']  # in pb
     
     # Benchmark BR
-    BR           = args['limits_param']['target_r']
+    BR             = args['limits_param']['target_r']
     
-    # Background ML cut efficiency target
-    B_target_eff = args['limits_param']['B_target_eff']
+    # Targets
+    const_mode     = args['limits_param']['const_mode']
+    const_cut      = args['limits_param']['const_cut']
+    const_bgk_eff  = args['limits_param']['const_bgk_eff']
     # -----------------
     
     dprint('', 'w')
@@ -278,9 +252,17 @@ def optimize_selection(args):
     dprint(f'$L = {L_int} \\; \\text{{pb}}^{{-1}}$ \\\\')
     dprint(f'$\\sigma_S$ = {signal_xs} \\text{{pb}} \\\\')
     dprint(f'$\\text{{BR}} = {BR}$ (benchmark) \\\\')
-    dprint(f'$\\langle S \\rangle \\equiv L \\times (\\sigma_S \\times \\text{{BR}}) \\times \\epsilon A_S (\\text{{trg}}) \\times \\epsilon_S (\\text{{pre-cut}}) \\times \\epsilon_S (M\\text{{-box}}) \\times \\epsilon_S (\\text{{ML}})$ \\\\')
+    dprint(f'$\\langle S \\rangle \\equiv L \\times (\\sigma_S \\times \\text{{BR}}) \\times \\epsilon A_S (\\text{{trg}}) \\times \\epsilon_S (\\text{{pre-cut}}) \\times \\epsilon_S (\\text{{ML}}) \\times \\epsilon_S (M\\text{{-box}})$ (cut ordered) \\\\')
     dprint('\\vspace{1em}')
     dprint('\\\\')
+    
+    if   const_mode == 'cut':
+        dprint(f'Const mode: ML score cut threshold fixed at $c > {const_cut:0.2f}$ -- floating efficiency \\\\')
+    elif const_mode == 'bgk_eff':
+        dprint(f'Const mode: Bgk-efficiency fixed at $ = {const_bgk_eff:0.1E} -- floating cut \\\\')
+    else:
+        raise Exception(__name__ + f".optimize_selection: Unknown const mode '{const_mode}'")
+    
     dprint(f'Signal scenario: {args["limits_param"]["cosmetics"]["portal"]} \\\\')
     dprint('\\vspace{1em}')
     dprint('\\\\')
@@ -292,16 +274,19 @@ def optimize_selection(args):
     
     # -----------------
     # Load evaluation data
+    
     targetfile = f'{args["plotdir"]}/eval/eval_results.pkl'
+    cprint(__name__ + f'.optimize_selection: Loading "{targetfile}" ...', 'yellow')
+    
     with open(targetfile, 'rb') as file:
-        resdict = pickle.load(file)
-    info = resdict['info']
+        rd = pickle.load(file)
+    info = rd['info']
 
     # MVA-model labels
-    MVA_model_names = resdict['roc_labels']['inclusive']
+    MVA_model_names = rd['roc_labels']['inclusive']
 
-    background_ID = 0
-    signal_ID     = 1
+    # background, signal
+    class_ids = args['primary_classes']
 
     # -----------------
     # Background estimate
@@ -313,9 +298,9 @@ def optimize_selection(args):
     B_acc_eff_xs = 0
 
     # Loop over background sub-processes
-    for name in info[f"class_{background_ID}"].keys():
+    for name in info[f"class_{class_ids[0]}"].keys():
         
-        proc          = info[f"class_{background_ID}"][name]
+        proc          = info[f"class_{class_ids[0]}"][name]
         
         xs            = proc['yaml']["xs"]            # Cross-section
         trg_eA        = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
@@ -323,13 +308,14 @@ def optimize_selection(args):
         
         N             = trg_eA  * cut_eA * xs * L_int # Number of events expected
         B_tot        += N
+        
         B_trg_eA_xs  += trg_eA * xs
         B_cut_eA_xs  += cut_eA * xs
         B_acc_eff_xs += trg_eA * cut_eA * xs
         B_xs_tot     += xs
         
         name = name.replace("_", "-")
-        name = (name[:85] + '..') if len(name) > 85 else name # Truncate maximum length, add ..
+        name = (name[:65] + '..') if len(name) > 65 else name # Truncate maximum length, add ..
         
         dprint(f'{name} & {xs:0.1f} & {trg_eA:0.3f} & {cut_eA:0.3f} & {trg_eA*cut_eA:0.3f} & {N:0.1E} \\\\')
     
@@ -346,135 +332,152 @@ def optimize_selection(args):
     # -----------------
     # Signal estimate per model point
 
-    keys = list(resdict['roc_mstats'].keys())
-    num_MVA_models = len(resdict['roc_mstats'][keys[0]])
+    keys = list(rd['roc_mstats'].keys())
+    num_ML_models = len(rd['roc_mstats'][keys[0]])
     
-    for MVA_model_index in range(num_MVA_models):
+    for ML_idx in range(num_ML_models):
         
-        S        = np.zeros(len(info[f"class_{signal_ID}"].keys()))
-        B        = np.zeros(len(S))
-        sigma_B  = np.zeros(len(S))
+        S           = np.zeros(len(info[f"class_{class_ids[1]}"].keys()))
+        sigma_S     = np.zeros(len(S))
+        B           = np.zeros(len(S))
+        sigma_B     = np.zeros(len(S))
+        ADS         = np.zeros(len(S))
+        ds          = np.zeros(len(S))
         
-        S_trg_eA = np.zeros(len(S))       # Trigger eff x acceptance
-        S_cut_eA = np.zeros(len(S))       # Basic cuts
+        S_trg_eA    = np.zeros(len(S))       # Trigger eff x acceptance
+        S_cut_eA    = np.zeros(len(S))       # Basic cuts
         
-        BOX_eff  = np.zeros((len(S), 2))  # Category cuts
-        MVA_eff  = np.zeros((len(S), 2))  # MVA cut
-        thr      = np.zeros(len(S))
-        names    = len(S) * [None]
-
+        ML_eff      = np.zeros((len(S), 2))  # ML cut
+        ML_eff_err  = np.zeros((len(S), 2))  # ML cut
+        
+        BOX_eff     = np.zeros((len(S), 2))  # Box cut
+        BOX_eff_err = np.zeros((len(S), 2))  # Box cut
+        
+        tot_eff_err = np.zeros((len(S), 2))
+        
+        thr         = np.zeros(len(S))
+        names       = len(S) * [None]
+        
         param_values = []
         output       = {}
         i = 0
         
         # Loop over different signal model point processes
-        for name in info[f"class_{signal_ID}"].keys():
+        for name in info[f"class_{class_ids[1]}"].keys():
             
             names[i]  = name.replace('_', '-')
-            proc      = info[f"class_{signal_ID}"][name]
+            proc      = info[f"class_{class_ids[1]}"][name]
             
             # -----------------
             # Pick model parameters
             model_param = proc['yaml']['model_param']
             
             # Find the matching filter strings
-            ROC_filter_key, BOX_filter_key, GEN_filter_key, param_point \
-                = find_filter(resdict, model_param, args)
+            GEN_filter_key, BOX_filter_key, GBX_filter_key, param_point \
+                = find_filter(rd, model_param, args)
             
             param_values.append(param_point)
-            
+                        
             # -----------------
-            # Construct box cut efficiency for background [0], signal [1]
-
-            # For the background, we require only the fiducial box
-            mask         = resdict['roc_filters'][BOX_filter_key][MVA_model_index]
-            BOX_eff[i,0] = mask_eff(num_mask=mask, den_mask=None,
-                                    y_true=resdict['data'].y, class_id=background_ID, weights=resdict['data'].w)
+            # Get the pre-computed MVA-ROC results after combined GEN & BOX cut
+            # (background uses "diplomat_class" filter under plots)
             
-            # For the signal, we require the right GEN sample in the denominator and numerator
-            den_mask     = resdict['roc_filters'][GEN_filter_key][MVA_model_index]
-            num_mask     = np.logical_and(resdict['roc_filters'][GEN_filter_key][MVA_model_index],
-                                          resdict['roc_filters'][BOX_filter_key][MVA_model_index])
-            
-            BOX_eff[i,1] = mask_eff(num_mask=num_mask, den_mask=den_mask,
-                                    y_true=resdict['data'].y, class_id=signal_ID, weights=resdict['data'].w)
-            
-            print(np.round(BOX_eff[i,:], 3))
-            
-            # -----------------
-            # Get the pre-computed MVA-ROC results
-            
-            roc_obj   = resdict['roc_mstats'][ROC_filter_key][MVA_model_index]
-            roc_label = resdict['roc_labels'][ROC_filter_key][MVA_model_index]
-            roc_path  = resdict['roc_paths'][ROC_filter_key][MVA_model_index]
+            roc_obj   = rd['roc_mstats'][GBX_filter_key][ML_idx]
+            roc_label = rd['roc_labels'][GBX_filter_key][ML_idx]
+            roc_path  = rd['roc_paths'][GBX_filter_key][ML_idx]
             
             fpr, tpr, thresholds = roc_obj.fpr, roc_obj.tpr, roc_obj.thresholds
-            tpr_err   = np.ones(len(tpr))
-            fpr_err   = np.ones(len(tpr))
-            
-            for k in range(len(tpr_err)):
-                tpr_err[k] = np.std(roc_obj.tpr_bootstrap[:,k])
-                fpr_err[k] = np.std(roc_obj.fpr_bootstrap[:,k])
-            
-            # -----------------
-            # Interpolate ROC-curve
-            
-            func     = interpolate.interp1d(fpr, tpr,        'linear')
-            func_thr = interpolate.interp1d(fpr, thresholds, 'linear')
-            
-            ## Pick ROC-working point from the interpolation
-            s_eff  = func(B_target_eff)
-            thr[i] = func_thr(B_target_eff)
-
-            ## Pick ROC-working point from the analytic fit
-            # xval = np.logspace(-8, 0, 1000)
-            # yhat = func_binormal(B_target_eff, *popt)
-
-            # Save efficiency values
-            MVA_eff[i,:] = np.array([B_target_eff, s_eff])
-            
-            # -----------------
-            # Plot ROC fit
+            fpr_err, tpr_err     = 0,0
             
             plot_ROC_fit(i=i, fpr=fpr, tpr=tpr, tpr_err=tpr_err, fpr_err=fpr_err,
-                         roc_obj=roc_obj, roc_label=roc_label, names=names,
-                         args=args, savename=roc_path)
+                roc_obj=roc_obj, roc_label=roc_label, names=names, args=args, savename=roc_path)
+            
+            # -----------------
+            # Construct ML cut efficiency such that the combined BOX & ML efficiency
+            # matches the FPR level we want for the background (or use a fixed cut)
+            
+            if   const_mode == 'cut':
+                thr[i]       = const_cut
+            elif const_mode == 'bgk_eff':
+                func_fpr2thr = interpolate.interp1d(fpr, thresholds, 'linear')
+                thr[i]       = func_fpr2thr(const_bgk_eff)
+            else:
+                raise Exception(__name__ + f'.optimize_selection: Unknown const_mode "{const_mode}"')
+            
+            # Obtain efficiency error estimate by applying the cut
+            ML_cut_mask = (rd['y_preds'][ML_idx] > thr[i]) & rd['roc_filters'][GEN_filter_key][ML_idx]
+            den_mask    = copy.deepcopy(rd['roc_filters'][GEN_filter_key][ML_idx]) #! deepcopy
+            
+            for C in range(2):
+                
+                ML_eff[i,C], ML_eff_err[i,C] = statstools.columnar_mask_efficiency(num_mask=ML_cut_mask, den_mask=den_mask,
+                    y_true=rd['data'].y, y_target=class_ids[C], weights=rd['data'].w)
+            
+            # -----------------
+            # Construct box cut efficiency
+
+            BOX_cut_mask = ML_cut_mask & rd['roc_filters'][BOX_filter_key][ML_idx]
+            den_mask     = copy.deepcopy(ML_cut_mask) #! deepcopy
+            
+            for C in range(2): 
+                
+                BOX_eff[i,C], BOX_eff_err[i,C] = statstools.columnar_mask_efficiency(
+                    num_mask=BOX_cut_mask, den_mask=den_mask,
+                    y_true=rd['data'].y, y_target=class_ids[C], weights=rd['data'].w)
             
             # ----------------
-            # Compute and collect values
+            # Total efficiency error (N.B. currently only ML & BOX uncertainties)
             
-            B[i]        = B_tot * BOX_eff[i,0] * MVA_eff[i,0]
-            sigma_B[i]  = 0.3 * B[i] # ANSATZ FOR NOW, DO ERROR PROPAGATION HERE
+            for C in range(2):
+                
+                tot_eff_err[i,C] = statstools.prod_eprop(A=ML_eff[i,C], B=BOX_eff[i,C],
+                    sigmaA=ML_eff_err[i,C], sigmaB=BOX_eff_err[i,C], sigmaAB=0)
             
+            # ----------------
+            # Compute values
+            
+            B[i]        = B_tot * ML_eff[i,0] * BOX_eff[i,0]
+            sigma_B[i]  = B_tot * tot_eff_err[i,0]
+
             S_trg_eA[i] = proc['cut_stats']['filterfunc']['after'] / proc['cut_stats']['filterfunc']['before']
             S_cut_eA[i] = proc['cut_stats']['cutfunc']['after']    / proc['cut_stats']['cutfunc']['before']
             
-            # Expected signal event count (without BR applied !)
-            S[i] = S_trg_eA[i] * S_cut_eA[i] * BOX_eff[i,1] * MVA_eff[i,1] * signal_xs * L_int
+            # Expected signal event count (without BR applied here!)
+            S_tot       = (signal_xs * L_int) * S_trg_eA[i] * S_cut_eA[i]
+            S[i]        = S_tot * BOX_eff[i,1] * ML_eff[i,1]
+            sigma_S[i]  = S_tot * tot_eff_err[i,1]
+            
+            # Asimov Discovery Significance
+            ADS[i] = statstools.ADS(s=BR * S[i], b=B[i], sigma_b=sigma_B[i])
+
+            # Naive
+            ds[i]  = BR * S[i] / np.sqrt(B[i])
 
             output[names[i]] = {'param':      param_values[i],
-                                'signal':     {'counts': S[i], 'systematic': 0},
-                                'background': {'counts': B[i], 'systematic': 0}}
+                                'signal':     {'counts': S[i], 'systematic': sigma_S[i]},
+                                'background': {'counts': B[i], 'systematic': sigma_B[i]}}
+            
+            # ----------------
+            # Diagnostics
+            print(f'ML_eff:  {np.round(ML_eff[i,:], 6)}  | ML_eff_err  = {np.round(100 * ML_eff_err[i,:]  / ML_eff[i,:], 1)} %')
+            print(f'BOX_eff: {np.round(BOX_eff[i,:], 6)} | BOX_eff_err = {np.round(100 * BOX_eff_err[i,:] / BOX_eff[i,:], 1)} %')
             
             i += 1
-
+            
             # << == Loop over signal points ends
         
-        dprint(f'\\textbf{{ML model: {MVA_model_names[MVA_model_index]} }} \\\\')
+        dprint(f'\\textbf{{ML model: {MVA_model_names[ML_idx]} }} \\\\')
         dprint('')
         dprint('\\tiny')
-        dprint('\\begin{tabular}{l||cc|cccc|cc|c}')
-        dprint('Signal model point & $B$: $\\epsilon$($M$-box) & $\\epsilon$(ML) (threshold) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$($M$-box) & $\\epsilon$(ML) & $\\langle B \\rangle$ & $\\langle S \\rangle$ & ADS \\\\')
+        dprint('\\begin{tabular}{l||cc|cccc|cc|cc}')
+        dprint('Signal model point & $B$: $\\epsilon$(ML) (threshold) & $\\epsilon$($M$-box) & $S$: $\\epsilon A$(trg) & $\\epsilon$(pre-cut) & $\\epsilon$(ML) & $\\epsilon$($M$-box) & $\\langle B \\rangle \\pm$ [\\%] & $\\langle S \\rangle \\pm$ [\\%] & ADS & $S / \\sqrt{B}$ \\\\')
         dprint('\\hline')
         
         # -----------------
         # Plot summary table
         for i in range(len(S)):
             
-            # Asimov Discovery Significance
-            ds   = ADS(s=BR * S[i], b=B[i], sigma_b=sigma_B[i])
-            
-            line = f'{param_values[i]} & {BOX_eff[i,0]:0.1E} & {MVA_eff[i,0]:0.1E} ({thr[i]:0.3f}) & {S_trg_eA[i]:0.2g} & {S_cut_eA[i]:0.2g} & {BOX_eff[i,1]:0.2g} & {MVA_eff[i,1]:0.2g} & {B[i]:0.1E} & {BR * S[i]:0.1E} & {ds:0.2g} \\\\'
+            line = f'{param_values[i]} & {ML_eff[i,0]:0.1E} ({thr[i]:0.3f}) & {BOX_eff[i,0]:0.1E} & {S_trg_eA[i]:0.2g} & {S_cut_eA[i]:0.2g} & {ML_eff[i,1]:0.2g} & {BOX_eff[i,1]:0.2g} & {B[i]:0.1E} $\\pm$ {100*sigma_B[i]/B[i]:0.1f} & {BR*S[i]:0.1E} $\\pm$ {100*sigma_S[i]/S[i]:0.1f} & {ADS[i]:0.2g} & {ds[i]:0.2g} \\\\'
             dprint(line)
         
         dprint('\\end{tabular}')
@@ -484,7 +487,7 @@ def optimize_selection(args):
         # Compute upper limits
         
         limits.run_limits_vector(data=output, param=args['limits_param'],
-            savepath = f'{args["plotdir"]}/eval/limits/{MVA_model_names[MVA_model_index]}')
+            savepath = f'{args["plotdir"]}/eval/limits/{MVA_model_names[ML_idx]}')
         
         # << == Loop over models ends
     

@@ -356,16 +356,14 @@ def create_limit_tables(data, param, savepath):
         dprint('\\hline')
 
         for key in data.keys():
-            name = key.replace('_', '-')
-            name = ('..' + name[20:]) if len(name) > 65 else name # Truncate maximum length, add ..
             
-            dprint(f'{name}', end='')
+            dprint(f'{data[key]["param"]}', end='')
+            
             for i in range(len(data[key]["limits_expected"][method])):
                 dprint(f' & {data[key]["limits_expected"][method][i]:.2g} ', end='')
-            
             dprint('\\\\')
         dprint('\\hline')
-
+        
         dprint('\\end{tabular}')
         dprint('\\\\')
         dprint('\\vspace{5em}')
@@ -386,10 +384,9 @@ def create_limit_tables(data, param, savepath):
         dprint('\\hline')
         
         for key in data.keys():
-            name = key.replace('_', '-')
-            name = ('..' + name[20:]) if len(name) > 65 else name # Truncate maximum length, add ..
             
-            dprint(f'{name}', end='')
+            dprint(f'{data[key]["param"]}', end='')
+            
             for i in range(len(data[key]["limits_observed"][method])):
                 
                 B = data[key]['limits_statistics']['background']
@@ -399,10 +396,8 @@ def create_limit_tables(data, param, savepath):
                 S = f'{float(f"{S:.2g}"):g}'
 
                 dprint(f' & {data[key]["limits_observed"][method][i]:.2g} & {B} & {S} ', end='')
-            
             dprint('\\\\')
         dprint('\\hline')
-
         dprint('\\end{tabular}')
         dprint('')
     
@@ -410,57 +405,6 @@ def create_limit_tables(data, param, savepath):
 
     # Compile latex
     os.system(f'pdflatex -output-directory {latex_path} {latex_filename}')
-
-
-def limit_wrapper_root(files, path, methods, num_toys_obs=int(1E3), bg_regulator=0.0, s_regulator=0.0):
-    
-
-    for rootfile in files:
-        
-        h = {}
-        for x in ['background', 'signal']:
-            with uproot.open(f'{path}/{rootfile}')[x] as f:
-                h[x] = TH1_to_numpy(f)
-
-        # Counts (assumed Poisson)
-        bg_expected  = np.sum(h['background']['counts'])
-        s_hypothesis = np.sum(h['signal']['counts'])
-
-        # Regulate MC
-        if  bg_expected <= 0:
-            bg_expected = bg_regulator
-        if s_hypothesis <= 0:
-            s_hypothesis = s_regulator
-
-        # Total systematics (MC uncertainties + others would go here)
-        s_syst_error  = None #0.05 * s_hypothesis
-        bg_syst_error = None #0.05 * bg_expected
-
-        print(f'\n{rootfile}: background: {np.round(bg_expected,5)}, signal = {np.round(s_hypothesis,5)}')
-
-        expected_limits = {'asymptotic': None, 'toys': None}
-        observed_limits = {'asymptotic': None, 'toys': None}
-        statistics      = {'background': bg_expected, 'signal': s_hypothesis}
-        
-        for method in methods:
-            print(f'[method: {method}]')
-
-            # Excepted limits
-            opt = CL_single_compute(method=method, observed=None, s_hypothesis=s_hypothesis,
-                bg_expected=bg_expected, s_syst_error=s_syst_error, bg_syst_error=bg_syst_error, num_toys_obs=num_toys_obs)
-
-            print(np.round(opt,4))
-            expected_limits[method] = opt
-
-            # Emulate observed with benchmark R
-            opt = CL_single_compute(method=method, observed=s_hypothesis+bg_expected, s_hypothesis=s_hypothesis,
-                bg_expected=bg_expected, s_syst_error=s_syst_error, bg_syst_error=bg_syst_error)
-            
-            print(np.round(opt,4))
-            observed_limits[method] = opt
-    
-    
-    return expected_limits, observed_limits, statistics
 
 
 def limit_wrapper_dict(data, param, bg_regulator=0.0, s_regulator=0.0):

@@ -48,7 +48,7 @@ FILTER: &FILTER
        {cut: 'GEN_ctau == 100', latex: ['', 'ctau = 100']},
        {cut: 'GEN_ctau == 500', latex: ['', 'ctau = 500']}]
   
-  # +- 5 sigma windows, assuming 1% mass resolution
+  # +- 5 sigma windows, assuming 1% mass resolution ~ 1 sigma
   set[2]:
     expand: 'set'   # 'set', 'vetoset' or 'powerset'
     cutset:

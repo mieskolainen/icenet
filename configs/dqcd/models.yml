@@ -43,7 +43,9 @@ DA_DOMAIN_FILTER: &DA_DOMAIN_FILTER
       [{cut: 'muonSV_chi2_0 > 10', latex: ['', 'muonSV_chi2_0 > 10']}]
 
       # J/psi domain
-      # [{cut: '(2.9 < muonSV_mass_0) && (muonSV_mass_0 < 3.3)', latex: ['', '2.9 < M < 3.3']}]
+      #[{cut: '(2.9 < muonSV_mass_0) && (muonSV_mass_0 < 3.3)', latex: ['', '2.9 < M < 3.3']}]
+      
+      # Add Upsilon domain ...
 
 # -----------------------------------------------
 
@@ -319,7 +321,7 @@ iceboost01-DA:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.09
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   plot_trees: False
@@ -374,7 +376,7 @@ iceboost01-DA-NC:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.09
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   plot_trees: False
@@ -483,7 +485,7 @@ iceboost01-DA-MI:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.09
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
@@ -498,10 +500,10 @@ iceboost01-DA-MI:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost01-DA-MI-NOJETS:
+iceboost01-DA-NOJETS:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST-DA-MI-NOJETS'
+  label:   'ICEBOOST-DA-NOJETS'
   raytune:  xgb_trial_0
   
   exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_.*']
@@ -541,12 +543,8 @@ iceboost01-DA-MI-NOJETS:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.09
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
-  
-  MI_param:
-    beta: [0.1]                # Positive for minimizing
-    <<: *MI_REG_PARAM
   
   plot_trees: False
 

@@ -22,6 +22,8 @@ from scipy import stats
 import scipy.special as special
 from scipy import interpolate
 
+from icefit import statstools
+
 
 def weighted_avg_and_std(values, weights):
     """
@@ -1011,7 +1013,8 @@ class Metric:
         self.fpr        = out['fpr']
         self.tpr        = out['tpr']
         self.thresholds = out['thresholds']
-
+        
+        # Compute bootstrap
         if num_bootstrap > 0 and type(self.tpr) is not int:
             
             self.tpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.tpr)))
@@ -1022,7 +1025,7 @@ class Metric:
             for i in range(num_bootstrap):
 
                 # ------------------
-                trials = 0
+                trials     = 0
                 max_trials = 10000
                 while True:
                     ind = np.random.choice(range(len(y_true)), size=len(y_true), replace=True)

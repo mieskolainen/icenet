@@ -151,13 +151,13 @@ train_runmode:
     #- gnet1
     #- gnet3
     
-    - xgb01
-    - xgb01-NOJETS
-
-    - iceboost01-DA-MI-NOJETS
-    - iceboost01-DA-MI
     - iceboost01-DA
-    - iceboost01-DA-NC
+    - iceboost01-DA-NOJETS
+    #- iceboost01-DA-MI
+    #- iceboost01-DA-NC
+    
+    - xgb01
+    #- xgb01-NOJETS
     
     #- dmlp
     #- lgr0
@@ -232,7 +232,7 @@ optimize_runmode:
   modeltag:  null
 
   reweight: true
-  reweight_mode: 'load'               # 'write', 'load'
+  reweight_mode: 'load'        # 'write', 'load'
   reweight_file: 'reweight_train.pkl'
 
   reweight_param: *REWEIGHT_PARAM
@@ -241,7 +241,10 @@ optimize_runmode:
     luminosity: 41600          # pb^{-1}
     signal_xs:  44.0           # pb (reference xs), gg -> H https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV
     target_r:   0.01           # Benchmark branching ratio (BR)
-    B_target_eff: 1.0E-4       # Background target efficiency for ML cut
+    
+    const_mode: 'bgk_eff'      # Which to keep constant, 'cut', 'bgk_eff'
+    const_cut:     0.9         # Target cut value (--> background varies per signal point)
+    const_bgk_eff: 8.0E-3      # Background efficiency target (--> cut varies per signal point)
     
     model_POI: ['m', 'ctau']   # Theory (signal) model param-of-interest
     box_POI:   ['M', 'm']      # (observable, theory) pair
@@ -250,7 +253,7 @@ optimize_runmode:
     # (see definitions under plots.yml)
     GEN_filter_tag: 'F[0]'     # Theory param filter
     BOX_filter_tag: 'F[4]'     # Mass window filter
-    ROC_filter_tag: 'F[3]'     # Theory param filter & mass window
+    GBX_filter_tag: 'F[3]'     # Theory param filter & mass window together
     
     channel_mode: 'inclusive'  # 'inclusive', 'categorical' (not implemented)
     methods: ['asymptotic']    # ['asymptotic', 'toys']
