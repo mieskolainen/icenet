@@ -544,8 +544,12 @@
         <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span>
 
     <span class="c1"># Save statistics information</span>
-    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;yaml&#39;</span><span class="p">:</span> <span class="n">process</span><span class="p">,</span> <span class="s1">&#39;cut_stats&#39;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span> <span class="s1">&#39;eff_acc&#39;</span><span class="p">:</span> <span class="n">eff_acc</span><span class="p">}</span>
-
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;yaml&#39;</span><span class="p">:</span>      <span class="n">process</span><span class="p">,</span>
+            <span class="s1">&#39;cut_stats&#39;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span>
+            <span class="s1">&#39;eff_acc&#39;</span><span class="p">:</span>   <span class="n">eff_acc</span><span class="p">,</span>
+            <span class="s1">&#39;W_sum&#39;</span><span class="p">:</span>     <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="p">),</span>
+            <span class="s1">&#39;W2_sum&#39;</span><span class="p">:</span>    <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="o">**</span><span class="mi">2</span><span class="p">)}</span>
+    
     <span class="c1"># -------------------------------------------------</span>
     <span class="c1"># Add conditional (theory param) variables</span>
     
