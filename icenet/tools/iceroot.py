@@ -92,8 +92,12 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
         W = (ak.Array(np.ones(N_after, dtype=np.float32)) / N_after) * xs
 
     # Save statistics information
-    info = {'yaml': process, 'cut_stats': stats, 'eff_acc': eff_acc}
-
+    info = {'yaml':      process,
+            'cut_stats': stats,
+            'eff_acc':   eff_acc,
+            'W_sum':     ak.sum(W),
+            'W2_sum':    ak.sum(W**2)}
+    
     # -------------------------------------------------
     # Add conditional (theory param) variables
     

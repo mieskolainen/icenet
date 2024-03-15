@@ -101,8 +101,8 @@ def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args,
         plt.plot(xval, func_binormal(xval, *popt), linestyle='-', color=(0.35,0.35,0.35), label='binormal fit')
         plt.plot(xval, xval, color=(0.5,0.5,0.5), linestyle=':')
 
-        path = aux.makedir(f'{args["plotdir"]}/eval/significance/ROC_fit/{roc_label}')
-
+        path = aux.makedir(f'{args["plotdir"]}/eval/optimize/ROC_fit/{roc_label}')
+        
         if k == 0:
             plt.xscale('linear')
             plt.xlim([0, 1])
@@ -362,8 +362,6 @@ def optimize_selection(args):
         ML_BOX_eff     = np.zeros((len(S), 2))  # ML x Box cut
         ML_BOX_eff_err = np.zeros((len(S), 2))  # ML x Box cut
         
-        tot_eff_err = np.zeros((len(S), 2))
-        
         thr         = np.zeros(len(S))
         names       = len(S) * [None]
         
@@ -503,7 +501,7 @@ def optimize_selection(args):
             # Diagnostics
             print(f'ML_eff:  {np.round(ML_eff[i,:], 6)}  | ML_eff_err  = {np.round(100 * ML_eff_err[i,:]  / ML_eff[i,:], 1)} %')
             print(f'BOX_eff: {np.round(BOX_eff[i,:], 6)} | BOX_eff_err = {np.round(100 * BOX_eff_err[i,:] / BOX_eff[i,:], 1)} %')
-            print(f'tot_eff: {np.round(ML_eff[i,:] * BOX_eff[i,:], 6)} | tot_eff_err = {np.round(100 * tot_eff_err[i,:] / (ML_eff[i,:] * BOX_eff[i,:]), 1)} %')
+            print(f'tot_eff: {np.round(ML_eff[i,:] * BOX_eff[i,:], 6)} | tot_eff_err = {np.round(100 * ML_BOX_eff_err[i,:] / (ML_BOX_eff[i,:]), 1)} %')
             
             i += 1
             

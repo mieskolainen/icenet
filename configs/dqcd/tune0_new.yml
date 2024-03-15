@@ -150,14 +150,15 @@ train_runmode:
     #- gnet2
     #- gnet1
     #- gnet3
-
+    
     - iceboost01-DA
     - iceboost01-DA-NOJETS
-    #- iceboost01-DA-MI
-    #- iceboost01-DA-NC
-
+    - iceboost01-DA-MI
+    - iceboost01-DA-MI-NOJETS
     - xgb01
+    
     #- xgb01-NOJETS
+    #- iceboost01-DA-NC
     
     #- xgb01-no-mass
     #- xgb01-no-jets
