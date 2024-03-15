@@ -18,7 +18,7 @@ MAIN_DOMAIN_FILTER: &MAIN_DOMAIN_FILTER
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'muonSV_chi2_0 < 10', latex: ['', 'muonSV_chi2_0 < 10']}]
+      [{cut: 'muonSV_chi2_0 > 0', latex: ['', 'muonSV_chi2_0 > 0']}]
 
 # -----------------------------------------------
 
