@@ -1,5 +1,7 @@
 # Statistical tests and tools
 #
+# pytest icefit/statstools.py -rP
+#
 # m.mieskolainen@imperial.ac.uk, 2023
 
 import numpy as np
@@ -515,6 +517,33 @@ def test_extreme_npdf():
     print(f' Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
 
 
+def test_efficiency_ratio(EPS=1e-6):
+
+    import pytest
+    
+    # Ratio error, where b1 is the numerator (number of successes)
+    # in a binomial ratio and b2 is the denominator (total number of trials)
+
+    b1 = 5
+    b2 = 20
+    e1 = np.sqrt(b1)
+    e2 = np.sqrt(b2)
+
+    eff       = b1 / b2
+    eff_err_A = weighted_binomial_err(b1=b1, b2=b2, e1=e1, e2=e2)
+    eff_err_B = ratio_eprop(A=b1, B=b2, sigmaA=e1, sigmaB=e2, sigmaAB=b1)
+    eff_err_C = tpratio_taylor(x=b1, y=b2-b1, x_err=e1, y_err=np.sqrt(b2 - b1))
+    
+    print(f'eff = {eff}')
+    print(f'err_eff = {eff_err_A:0.6g} (A)')
+    print(f'err_eff = {eff_err_B:0.6g} (B)')
+    print(f'err_eff = {eff_err_C:0.6g} (C)')
+
+    assert   eff_err_A == pytest.approx(eff_err_B, abs=EPS)
+    assert   eff_err_B == pytest.approx(eff_err_C, abs=EPS)
+    assert   eff_err_A == pytest.approx(eff_err_C, abs=EPS)
+
+
 def test_ratios():
     """
     Test function
@@ -553,7 +582,6 @@ def test_ratios():
         covers = lambda n,a,b : (n - a)*(n - b) <= 0
         res = 0 if covers(1, ppois95[0], ppois95[1]) else np.min(np.abs(ppois95 - 1))
         print(f'Systematic residual: {res:0.2f}')
-        
         
         # Single sample Poisson tail integral
         ppois = poisson_tail(k1=k_pre[i], k2=k_obs[i])
