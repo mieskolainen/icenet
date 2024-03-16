@@ -252,6 +252,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.poisson_tail"><code class="docutils literal notranslate"><span class="pre">poisson_tail()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.prod_eprop"><code class="docutils literal notranslate"><span class="pre">prod_eprop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.ratio_eprop"><code class="docutils literal notranslate"><span class="pre">ratio_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_efficiency_ratio"><code class="docutils literal notranslate"><span class="pre">test_efficiency_ratio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">test_extreme_npdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_ratios"><code class="docutils literal notranslate"><span class="pre">test_ratios()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
@@ -449,6 +450,8 @@
              
   <h1>Source code for icefit.statstools</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Statistical tests and tools</span>
+<span class="c1">#</span>
+<span class="c1"># pytest icefit/statstools.py -rP</span>
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
 
@@ -1028,6 +1031,36 @@
 
 
 
+<div class="viewcode-block" id="test_efficiency_ratio">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.test_efficiency_ratio">[docs]</a>
+<span class="k">def</span> <span class="nf">test_efficiency_ratio</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    
+    <span class="c1"># Ratio error, where b1 is the numerator (number of successes)</span>
+    <span class="c1"># in a binomial ratio and b2 is the denominator (total number of trials)</span>
+
+    <span class="n">b1</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">b2</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b2</span><span class="p">)</span>
+
+    <span class="n">eff</span>       <span class="o">=</span> <span class="n">b1</span> <span class="o">/</span> <span class="n">b2</span>
+    <span class="n">eff_err_A</span> <span class="o">=</span> <span class="n">weighted_binomial_err</span><span class="p">(</span><span class="n">b1</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">e1</span><span class="o">=</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="o">=</span><span class="n">e2</span><span class="p">)</span>
+    <span class="n">eff_err_B</span> <span class="o">=</span> <span class="n">ratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">sigmaA</span><span class="o">=</span><span class="n">e1</span><span class="p">,</span> <span class="n">sigmaB</span><span class="o">=</span><span class="n">e2</span><span class="p">,</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="n">b1</span><span class="p">)</span>
+    <span class="n">eff_err_C</span> <span class="o">=</span> <span class="n">tpratio_taylor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">b2</span><span class="o">-</span><span class="n">b1</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="n">e1</span><span class="p">,</span> <span class="n">y_err</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b2</span> <span class="o">-</span> <span class="n">b1</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eff = </span><span class="si">{</span><span class="n">eff</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;err_eff = </span><span class="si">{</span><span class="n">eff_err_A</span><span class="si">:</span><span class="s1">0.6g</span><span class="si">}</span><span class="s1"> (A)&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;err_eff = </span><span class="si">{</span><span class="n">eff_err_B</span><span class="si">:</span><span class="s1">0.6g</span><span class="si">}</span><span class="s1"> (B)&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;err_eff = </span><span class="si">{</span><span class="n">eff_err_C</span><span class="si">:</span><span class="s1">0.6g</span><span class="si">}</span><span class="s1"> (C)&#39;</span><span class="p">)</span>
+
+    <span class="k">assert</span>   <span class="n">eff_err_A</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">eff_err_B</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    <span class="k">assert</span>   <span class="n">eff_err_B</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">eff_err_C</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    <span class="k">assert</span>   <span class="n">eff_err_A</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">eff_err_C</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="test_ratios">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.statstools.test_ratios">[docs]</a>
 <span class="k">def</span> <span class="nf">test_ratios</span><span class="p">():</span>
@@ -1068,7 +1101,6 @@
         <span class="n">covers</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="p">:</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span>
         <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">covers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ppois95</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ppois95</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ppois95</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Systematic residual: </span><span class="si">{</span><span class="n">res</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        
         
         <span class="c1"># Single sample Poisson tail integral</span>
         <span class="n">ppois</span> <span class="o">=</span> <span class="n">poisson_tail</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="n">k_pre</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">k2</span><span class="o">=</span><span class="n">k_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
