@@ -523,7 +523,9 @@ def test_efficiency_ratio(EPS=1e-6):
     
     # Ratio error, where b1 is the numerator (number of successes)
     # in a binomial ratio and b2 is the denominator (total number of trials)
-
+    # where we allow both numerator and denominator to fluctuate aka take
+    # here Poisson errors for them.
+    
     b1 = 5
     b2 = 20
     e1 = np.sqrt(b1)
