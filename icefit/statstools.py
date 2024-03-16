@@ -125,6 +125,9 @@ def tpratio_taylor(x,y, x_err,y_err, xy_err=0.0):
 
     r = x/(x+y)
     
+    If x and y are e.g. counts from stat. independent histograms,
+    then xy_err = 0 (~ tag & probe style ratios).
+    
     Args:
         x,y         : values
         x_err,y_err : uncertainties
