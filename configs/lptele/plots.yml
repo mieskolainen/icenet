@@ -1,0 +1,54 @@
+basic:
+  active: false
+  nbins:  70
+  percentile_range: [0.5, 99.5]
+  exclude_vals: [null, 0]
+  plot_unweighted: True
+
+corrmat:
+  active: false
+
+contours: 
+  active: false
+
+ROC:
+  active: true
+  num_bootstrap: 200
+  xmin: 1.0E-3
+
+## Binned ROC plots can be 1D or 2D
+ROC_binned:
+  active: false
+  num_bootstrap: 200
+  xmin: 1.0E-3
+  
+  plot[0]:
+    var:   ['trk_pt']
+    edges: [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]
+
+  plot[1]:
+    var:   ['trk_eta', 'trk_pt']
+    edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
+            [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
+
+## MVA output density (1D)
+MVA_output:
+  active: false
+  edges: 80
+
+## MVA (output, external variable) density (2D)
+MVA_2D:
+  active: false
+  
+  plot[0]:
+    var:   ['.*'] # RegExp supported
+    edges: [{'nbin': 50, 'q': [0.0,  1.0],  'space': 'linear'},
+            {'nbin': 50, 'q': [0.0,  0.95], 'space': 'linear'}]
+    density: True
+  
+  #plot[1]:
+  #  var:   ['.?hlt_pms2.?']
+  #  edges: [{'nbin': 30, 'minmax': [0.0, 1.0], 'space': 'linear'},
+  #          {'nbin': 30, 'q': [0.0, 0.95],     'space': 'log10'}]
+  #  density: True
+  

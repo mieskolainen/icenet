@@ -8,7 +8,9 @@ paths = ['',
 		 '/icenet/',
 		 '/icebrk/',
 		 '/iceid/',
-		 '/icefit/']
+		 '/icefit/',
+		 '/lptele/',
+        ]
 
 for p in paths:
 	fullpath = os.path.abspath('.') + p

@@ -1,0 +1,136 @@
+# Low-pT Electron ID tune0.yml
+#
+# General comments:
+#
+# - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
+# - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
+
+rootname: 'lptele'
+rngseed: 123456                      # Fixed seed for training data mixing
+inputvars: 'mvavars'                 # Main file input description python file
+
+# ----------------------------------------------------
+mva_param: &MVA_INPUT_PARAM
+  use_conditional: false             # Conditional (theory parametric) input
+  primary_classes: [0,1]             # Primary class IDs in MVA (train, ROC etc.)
+  signal_class: 1                    # Signal class ID
+  #DA_class:    -2                   # Domain Adaptation class
+  
+  inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  #inputvar_jagged: null              # 'MVA_JAGGED_VARS'
+  #jagged_maxdim:
+  #  
+  #  Jet:   4
+  #  Muon:  8
+  #  sv:    4
+  #  cpf:   20
+  #  npf:   10
+
+  varnorm: null                      # Variable normalization: 'zscore', 'madscore', null
+  varnorm_tensor: null               # Tensor variable normalization
+  #varnorm_graph: null               # Not implemented yet
+  
+  frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
+  
+  # Imputation
+  imputation_param:
+    active: true                      # True / False
+    var: 'CMSSW_MVA_SCALAR_VARS'      # Array of variables to be imputated
+    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                     # For constant imputation
+    knn_k: 8                          # Number of nearest neighbours considered
+    values: [-999, -666, -10]         # Special values which indicate the need for imputation, if null, then only Inf/Nan are imputed
+  
+# ----------------------------------------------------
+genesis_runmode:
+
+  maxevents:  null
+  inputmap: null #"mc_input.yml"
+  tree_name:  'ntuplizer/tree'
+  
+  targetfunc: 'target_e'              # Training target,    implemented under mctargets.py
+  filterfunc: 'filter_no_egamma'      # Training filtering, implemented under mcfilter.py
+  #filterfunc: 'filter_lptele'         # Training filtering, implemented under mcfilter.py
+  cutfunc:    'cut_standard'          # Basic cuts,         implemented under cuts.py
+
+  xcorr_flow: True                    # Full N-point correlations computed between cuts
+  pickle_size: 1000                  # Number of entries (events) per pickle file
+
+
+# ----------------------------------------------------
+train_runmode:
+
+  <<: *MVA_INPUT_PARAM
+
+  maxevents: null
+  modeltag:  null
+
+  ## Reweighting setup
+  reweight: true
+  reweight_mode: 'write'          # 'write', 'load'
+  reweight_file: 'reweight_train.pkl' # differential reweighting model file
+
+  reweight_param: &REWEIGHT_PARAM
+
+    maxevents: 100000             # Maximum number of events for the PDF construction
+    equal_frac: true              # Equalize integrated class fractions
+    differential: true            # Differential reweighting
+    
+    reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
+    
+    # -----------------------------
+
+    # Note about asymmetry: Keep the reference class as 0 == background, because signal
+    # MC has much longer tail over pt. Thus, it is not possible to re-weight background
+    # to signal very easily, but it is possible to re-weight signal to background.
+    # This is seen by inspecting the re-weighted distributions with small and large statistics.
+
+    dimension: 'pseudo-2D'        # '2D', 'pseudo-2D', '1D'
+    pseudo_type: 'product'        # 'product', 'geometric_mean'
+
+    var:  ['trk_pt', 'trk_eta']
+
+    bins:  [[0.1, 20.0, 40], [-2.5, 2.5, 40]] # Make sure the bounds cover the phase space
+    binmode:  ['log10', 'linear']          # 'log10' or 'linear' or 'edges' (custom array) binning
+    
+    # ! Variable, and binning min/max boundaries are both transformed !
+    transform: [null, null]         # 'log10', 'sqrt', 'square', null
+    
+    max_reg: 1000.0                      # Maximum weight cut-off regularization
+
+
+  ## Outlier protection in the training
+  outlier_param:
+    algo: 'truncate'   # algorithm: 'truncate', null
+    qmin: 0.01         # in [0,100] 
+    qmax: 99.9         # in [0,100]
+
+  # ** Activate models here **
+  # Give all models some unique identifier and label
+  models:  !include configs/lptele/models.yml
+  active_models: &ACTIVE_MODELS
+
+    - xgb0
+    - cut0
+
+  raytune: !include configs/lptele/raytune.yml
+
+# ----------------------------------------------------
+eval_runmode:
+  
+  <<: *MVA_INPUT_PARAM
+  
+  maxevents: null
+  modeltag:  null
+  
+  reweight: false
+  reweight_mode: 'load'          # 'write', 'load'
+  reweight_file: 'reweight_train.pkl'
+
+  reweight_param: *REWEIGHT_PARAM
+
+  models:  !include configs/lptele/models.yml
+  active_models: *ACTIVE_MODELS
+
+# ----------------------------------------------------
+plot_param: !include configs/lptele/plots.yml
