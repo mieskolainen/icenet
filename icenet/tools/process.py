@@ -694,7 +694,7 @@ def train_models(data_trn, data_val, args=None) :
 
 
     def set_distillation_drain(ID, param, inputs, dtype='torch'):
-        if args['distillation']['drains'] is not None:
+        if 'distillation' in args and args['distillation']['drains'] is not None:
             if ID in args['distillation']['drains']:
                 cprint(__name__ + f'.train_models: Creating soft distillation drain for the model <{ID}>', 'yellow')
                 
@@ -825,7 +825,7 @@ def train_models(data_trn, data_val, args=None) :
 
         # --------------------------------------------------------
         # If distillation
-        if ID == args['distillation']['source']:
+        if 'distillation' in args and ID == args['distillation']['source']:
             
             if len(args['primary_classes']) != 2:
                 raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
