@@ -1,4 +1,4 @@
-mctargets.py # MC only. Supervised training signal class target definitions.
+# MC only. Supervised training signal class target definitions.
 #
 # m.mieskolainen@imperial.ac.uk, 2022
 
