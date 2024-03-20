@@ -1168,7 +1168,7 @@
 
 
     <span class="k">def</span> <span class="nf">set_distillation_drain</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;torch&#39;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;distillation&#39;</span> <span class="ow">in</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
                 <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Creating soft distillation drain for the model &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
                 
@@ -1299,7 +1299,7 @@
 
         <span class="c1"># --------------------------------------------------------</span>
         <span class="c1"># If distillation</span>
-        <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;source&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="s1">&#39;distillation&#39;</span> <span class="ow">in</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">ID</span> <span class="o">==</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;source&#39;</span><span class="p">]:</span>
             
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;primary_classes&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Distillation supported now only for 2-class classification&#39;</span><span class="p">)</span>
