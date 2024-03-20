@@ -8,6 +8,7 @@ import awkward as ak
 import torch
 import gc
 from pprint import pprint
+from termcolor import colored, cprint
 import copy
 
 from tqdm import tqdm
@@ -1017,6 +1018,7 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
 
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
+            cprint('Saved: ' + filename + '.pdf','green')
         
         if k == 1: # Log-Linear
 
