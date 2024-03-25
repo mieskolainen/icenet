@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.0.9.9
+                0.1.0.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -451,14 +451,18 @@
   <h1>Source code for iceid.common</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Common input &amp; data reading routines for the electron ID</span>
 <span class="c1">#</span>
-<span class="c1"># Mikael Mieskolainen, 2023</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">ray</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
@@ -510,8 +514,10 @@
     <span class="c1"># --------------------------------------------------------------</span>
     <span class="c1"># Load all files</span>
 
+    <span class="n">LOAD_VARS</span> <span class="o">=</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">LOAD_VARS</span> <span class="c1"># Which variables do we read</span>
+    
     <span class="n">X</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="n">rootfile</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;tree_name&#39;</span><span class="p">],</span>
-        <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="n">library</span><span class="p">)</span>
+        <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">LOAD_VARS</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="n">library</span><span class="p">)</span>
     <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># --------------------------------------------------------------</span>
     
@@ -524,12 +530,13 @@
 
     <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
 
-        <span class="c1"># @@ MC target definition here @@</span>
+        <span class="c1"># @@ MC class target definition here @@</span>
         <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;targetfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Y.shape = </span><span class="si">{</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="c1"># @@ MC filtering done here @@</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;filterfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">mask_mc</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
         <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &lt;filterfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">mask_mc</span><span class="p">)</span><span class="si">}</span><span class="s1"> events&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
@@ -586,7 +593,11 @@
     
     <span class="c1">### Pick active variables out</span>
     <span class="n">scalar_vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;inputvars.&#39;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_scalar&#39;</span><span class="p">]))</span>
-    <span class="n">image_vars</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">inputvars</span><span class="o">.</span><span class="n">CMSSW_MVA_IMAGE_VARS</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_image&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">image_vars</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;inputvars.&#39;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvar_image&#39;</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">image_vars</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### Pick kinematic variables out</span>
@@ -606,14 +617,53 @@
     <span class="c1">### Tensor representation</span>
     <span class="n">data_tensor</span> <span class="o">=</span> <span class="kc">None</span>
     
-    <span class="n">data_tensor</span> <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_tensor_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">image_vars</span><span class="o">=</span><span class="n">image_vars</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">image_vars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_tensor</span> <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_tensor_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">image_vars</span><span class="o">=</span><span class="n">image_vars</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
     
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## Graph representation</span>
     <span class="n">data_graph</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">data_graph</span> <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> 
-        <span class="n">features</span><span class="o">=</span><span class="n">scalar_vars</span><span class="p">,</span> <span class="n">graph_param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">][</span><span class="s1">&#39;num_workers&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        
+        <span class="n">data_graph</span> <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">scalar_vars</span><span class="p">,</span>
+            <span class="n">graph_param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        
+        <span class="c1"># Parallel processing of graph objects with Ray</span>
+        
+        <span class="n">start_time</span>  <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="n">num_workers</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">][</span><span class="s1">&#39;num_workers&#39;</span><span class="p">]</span>
+        <span class="n">chunk_ind</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_start_end</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">)),</span> <span class="n">num_workers</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">chunk_ind</span><span class="p">)</span>
+
+        <span class="n">data_graph</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">job_index</span>  <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">_temp_dir</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="si">}</span><span class="s1">/tmp/&#39;</span><span class="p">)</span>
+        
+        <span class="n">graph_futures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">obj_ref</span>       <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="c1"># ** Ray seems not able to handle numpy(object) array without copy ..</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_workers</span><span class="p">):</span>
+            
+            <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span> <span class="o">=</span> <span class="n">chunk_ind</span><span class="p">[</span><span class="n">job_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">chunk_ind</span><span class="p">[</span><span class="n">job_index</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="n">graph_futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> \
+                <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data_ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span> \
+                    <span class="n">obj_ref</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">],</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">job_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">data_graph</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">graph_futures</span><span class="p">),</span> <span class="p">[])</span> <span class="c1"># Join split array results</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ray_results: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### Finally pick active scalar variables out</span>
@@ -623,288 +673,6 @@
     <span class="n">data</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
-
-
-
-<span class="c1"># ========================================================================</span>
-<span class="c1"># ========================================================================</span>
-
-<span class="c1"># def init_multiprocess(maxevents=None):</span>
-<span class="c1">#     &quot;&quot;&quot; Initialize electron ID data [UNTESTED FUNCTION]</span>
-
-<span class="c1">#     Args:</span>
-<span class="c1">#         Implicit commandline and yaml file input.</span>
-    
-<span class="c1">#     Returns:</span>
-<span class="c1">#         jagged array data, arguments</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-
-<span class="c1">#     args, cli = process.read_config(config_path=&#39;./configs/eid&#39;)</span>
-<span class="c1">#     features  = globals()[args[&#39;imputation_param&#39;][&#39;var&#39;]]</span>
-    
-<span class="c1">#     ### SET random seed</span>
-<span class="c1">#     print(__name__ + f&#39;.init: Setting random seed {args[&quot;rngseed&quot;]}&#39;)</span>
-<span class="c1">#     np.random.seed(args[&#39;rngseed&#39;])</span>
-
-<span class="c1">#     # --------------------------------------------------------------------</span>
-<span class="c1">#     ### SET GLOBALS (used only in this file)</span>
-<span class="c1">#     global ARGS</span>
-<span class="c1">#     ARGS = args</span>
-
-<span class="c1">#     if maxevents is not None:</span>
-<span class="c1">#         ARGS[&#39;maxevents&#39;] = maxevents</span>
-    
-<span class="c1">#     print(__name__ + f&#39;.init: inputvar   =  {args[&quot;inputvar&quot;]}&#39;)</span>
-<span class="c1">#     print(__name__ + f&#39;.init: cutfunc    =  {args[&quot;cutfunc&quot;]}&#39;)</span>
-<span class="c1">#     print(__name__ + f&#39;.init: targetfunc =  {args[&quot;targetfunc&quot;]}&#39;)</span>
-<span class="c1">#     # --------------------------------------------------------------------</span>
-
-<span class="c1">#     ### Load data</span>
-<span class="c1">#     #data     = io.DATASET(func_loader=, files=args[&#39;root_files&#39;], frac=args[&#39;frac&#39;], rngseed=args[&#39;rngseed&#39;])</span>
-    
-<span class="c1">#     CPU_count = None</span>
-
-<span class="c1">#     if CPU_count is None:</span>
-<span class="c1">#         CPU_count = int(np.ceil(multiprocessing.cpu_count()/2))</span>
-
-<span class="c1">#     # Loop over all files</span>
-<span class="c1">#     for i in range(len(args[&#39;root_files&#39;])):</span>
-
-<span class="c1">#         file     = uproot.open(args[&#39;root_files&#39;][i])</span>
-<span class="c1">#         num_events = int(file[&quot;ntuplizer&quot;][&quot;tree&quot;].numentries)</span>
-<span class="c1">#         file.close()</span>
-
-<span class="c1">#         # Truncate upto max events</span>
-<span class="c1">#         num_events = np.min([args[&#39;maxevents&#39;], num_events])</span>
-<span class="c1">#         N_cpu    = 1 if num_events &lt;= 128 else CPU_count</span>
-
-<span class="c1">#         # Create blocks</span>
-<span class="c1">#         block_ind = aux.split_start_end(range(num_events), N_cpu)</span>
-
-<span class="c1">#         manager = multiprocessing.Manager()</span>
-<span class="c1">#         return_dict = manager.dict()</span>
-
-<span class="c1">#         # Extend with other variables</span>
-<span class="c1">#         procs = []</span>
-<span class="c1">#         for k in range(len(block_ind)):</span>
-<span class="c1">#             inputs = {</span>
-<span class="c1">#                 &#39;root_path&#39;   : args[&#39;root_files&#39;][i],</span>
-<span class="c1">#                 &#39;ids&#39;         : None,</span>
-<span class="c1">#                 &#39;entry_start&#39; : block_ind[k][0],</span>
-<span class="c1">#                 &#39;entry_stop&#39;  : block_ind[k][1],</span>
-<span class="c1">#                 &#39;image_on&#39;    : args[&#39;image_on&#39;],</span>
-<span class="c1">#                 &#39;graph_on&#39;    : args[&#39;graph_on&#39;],</span>
-<span class="c1">#                 &#39;args&#39;        : args</span>
-<span class="c1">#             }</span>
-
-<span class="c1">#             p = multiprocessing.Process(target=load_root_file_multiprocess, args=(k, inputs, return_dict))</span>
-<span class="c1">#             procs.append(p)</span>
-<span class="c1">#             p.start()</span>
-
-<span class="c1">#         # Join processes</span>
-<span class="c1">#         for k in range(len(procs)):</span>
-<span class="c1">#             procs[k].join()</span>
-
-<span class="c1">#         # Join data</span>
-<span class="c1">#         #</span>
-<span class="c1">#         # ... add here ...</span>
-<span class="c1">#         io.showmem(&#39;yellow&#39;)</span>
-
-<span class="c1">#         # Fuse data</span>
-<span class="c1">#         N_tot = 0</span>
-<span class="c1">#         N_ind = []</span>
-<span class="c1">#         for k in tqdm(range(len(procs))):</span>
-<span class="c1">#             N_this = return_dict[k][&#39;N&#39;]</span>
-<span class="c1">#             N_ind.append([N_tot, N_tot+N_this])</span>
-<span class="c1">#             N_tot += N_this</span>
-        
-<span class="c1">#         print(N_ind)</span>
-<span class="c1">#         print(__name__ + &#39;: Combining multiprocess data ...&#39;)</span>
-
-<span class="c1">#         td = return_dict[0][&#39;X_tensor&#39;].shape[1:4] # Tensor dimensions</span>
-
-<span class="c1">#         data = {</span>
-<span class="c1">#             &#39;X&#39;        : np.zeros((N_tot, return_dict[0][&#39;X&#39;].shape[1]), dtype=object),</span>
-<span class="c1">#             &#39;Y&#39;        : np.zeros((N_tot), dtype=np.long),</span>
-<span class="c1">#             &#39;X_tensor&#39; : np.zeros((N_tot, td[0], td[1], td[2]), dtype=np.float),</span>
-<span class="c1">#             &#39;X_graph&#39;  : np.zeros((N_tot), dtype=object),</span>
-<span class="c1">#             &#39;ids&#39;     : return_dict[0][&#39;ids&#39;]</span>
-<span class="c1">#         }</span>
-
-<span class="c1">#         for k in tqdm(range(len(procs))):</span>
-
-<span class="c1">#             ind = np.arange(N_ind[k][0], N_ind[k][1])</span>
-<span class="c1">#             data[&#39;X&#39;][ind,...]        = return_dict[k][&#39;X&#39;]</span>
-<span class="c1">#             data[&#39;Y&#39;][ind]            = return_dict[k][&#39;Y&#39;]</span>
-<span class="c1">#             data[&#39;X_tensor&#39;][ind,...] = return_dict[k][&#39;X_tensor&#39;]</span>
-<span class="c1">#             data[&#39;X_graph&#39;][ind]      = return_dict[k][&#39;X_graph&#39;]</span>
-
-<span class="c1">#         # Torch conversions</span>
-<span class="c1">#         data[&#39;X_graph&#39;]  = graphio.graph2torch(data[&#39;X_graph&#39;])</span>
-    
-<span class="c1">#     return data, args, features</span>
-
-
-<span class="c1"># def load_root_file_multiprocess(procnumber, inputs, return_dict, library=&#39;np&#39;):</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     [UNTESTED FUNCTION]</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-
-<span class="c1">#     print(&#39;\n\n\n\n\n&#39;)</span>
-<span class="c1">#     print(inputs)</span>
-
-
-<span class="c1">#     root_path   = inputs[&#39;root_path&#39;]</span>
-<span class="c1">#     ids         = inputs[&#39;ids&#39;]</span>
-<span class="c1">#     entry_start = inputs[&#39;entry_start&#39;]</span>
-<span class="c1">#     entry_stop  = inputs[&#39;entry_stop&#39;]</span>
-<span class="c1">#     graph_on    = inputs[&#39;graph_on&#39;]</span>
-<span class="c1">#     image_on    = inputs[&#39;image_on&#39;]</span>
-<span class="c1">#     args        = inputs[&#39;args&#39;]</span>
-
-
-<span class="c1">#     &quot;&quot;&quot; Loads the root file.</span>
-    
-<span class="c1">#     Args:</span>
-<span class="c1">#         root_path : paths to root files</span>
-    
-<span class="c1">#     Returns:</span>
-<span class="c1">#         X,Y       : input, output matrices</span>
-<span class="c1">#         ids      : variable names</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-
-<span class="c1">#     # -----------------------------------------------</span>
-<span class="c1">#     # ** GLOBALS **</span>
-
-<span class="c1">#     if args is None:</span>
-<span class="c1">#         args = ARGS</span>
-
-<span class="c1">#     CUTFUNC    = globals()[args[&#39;cutfunc&#39;]]</span>
-<span class="c1">#     TARFUNC    = globals()[args[&#39;targetfunc&#39;]]</span>
-<span class="c1">#     FILTERFUNC = globals()[args[&#39;filterfunc&#39;]]</span>
-
-<span class="c1">#     if entry_stop is None:</span>
-<span class="c1">#         entry_stop = args[&#39;maxevents&#39;]</span>
-<span class="c1">#     # -----------------------------------------------</span>
-
-    
-<span class="c1">#     ### From root trees</span>
-<span class="c1">#     print(&#39;\n&#39;)</span>
-<span class="c1">#     cprint( __name__ + f&#39;.load_root_file: Loading with uproot from file &#39; + root_path, &#39;yellow&#39;)</span>
-<span class="c1">#     cprint( __name__ + f&#39;.load_root_file: entry_start = {entry_start}, entry_stop = {entry_stop}&#39;)</span>
-
-<span class="c1">#     file = uproot.open(root_path)</span>
-<span class="c1">#     events = file[&quot;ntuplizer&quot;][&quot;tree&quot;]</span>
-    
-<span class="c1">#     print(events)</span>
-<span class="c1">#     print(events.name)</span>
-<span class="c1">#     print(events.title)</span>
-<span class="c1">#     #cprint(__name__ + f&#39;.load_root_file: events.numentries = {events.numentries}&#39;, &#39;green&#39;)</span>
-
-<span class="c1">#     ### All variables</span>
-<span class="c1">#     if ids is None:</span>
-<span class="c1">#         #ids = events.keys()</span>
-<span class="c1">#         ids = [x.decode() for x in events.keys()]# if b&#39;image_&#39; not in x]</span>
-
-<span class="c1">#     # Check is it MC (based on the first event)</span>
-<span class="c1">#     X_test = events.array(&#39;is_mc&#39;, entry_start=entry_start, entry_stop=entry_stop, library=library)</span>
-
-<span class="c1">#     print(X_test)</span>
-
-<span class="c1">#     isMC   = bool(X_test[0]) # Take the first event</span>
-<span class="c1">#     N      = len(X_test)</span>
-<span class="c1">#     print(__name__ + f&#39;.load_root_file: isMC = {isMC}&#39;)</span>
-<span class="c1">#     print(__name__ + f&#39;.load_root_file: N    = {N}&#39;)    </span>
-
-
-<span class="c1">#     # Now read the data</span>
-<span class="c1">#     print(__name__ + &#39;.load_root_file: Loading root file variables ...&#39;)</span>
-
-<span class="c1">#     # --------------------------------------------------------------</span>
-<span class="c1">#     # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)</span>
-
-<span class="c1">#     # Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !</span>
-<span class="c1">#     X = np.empty((N, len(ids)), dtype=object) </span>
-
-<span class="c1">#     for j in tqdm(range(len(ids))):</span>
-<span class="c1">#         x = events.array(ids[j], entry_start=entry_start, entry_stop=entry_stop, library=library)</span>
-<span class="c1">#         X[:,j] = np.asarray(x)</span>
-<span class="c1">#     # --------------------------------------------------------------</span>
-<span class="c1">#     Y = None</span>
-
-
-<span class="c1">#     print(__name__ + f&#39;common: X.shape = {X.shape}&#39;)</span>
-<span class="c1">#     io.showmem()</span>
-
-<span class="c1">#     prints.printbar()</span>
-
-<span class="c1">#     # =================================================================</span>
-<span class="c1">#     # *** MC ONLY ***</span>
-
-<span class="c1">#     if isMC:</span>
-
-<span class="c1">#         # @@ MC target definition here @@</span>
-<span class="c1">#         cprint(__name__ + f&#39;.load_root_file: Computing MC &lt;targetfunc&gt; ...&#39;, &#39;yellow&#39;)</span>
-<span class="c1">#         Y = TARFUNC(events, entry_start=entry_start, entry_stop=entry_stop)</span>
-<span class="c1">#         Y = np.asarray(Y).T</span>
-
-<span class="c1">#         print(__name__ + f&#39;.load_root_file: Y.shape = {Y.shape}&#39;)</span>
-
-<span class="c1">#         # For info</span>
-<span class="c1">#         labels1 = [&#39;is_e&#39;, &#39;is_egamma&#39;]</span>
-<span class="c1">#         aux.count_targets(events=events, ids=labels1, entry_start=entry_start, entry_stop=entry_stop)</span>
-
-<span class="c1">#         prints.printbar()</span>
-
-<span class="c1">#         # @@ MC filtering done here @@</span>
-<span class="c1">#         cprint(__name__ + f&#39;.load_root_file: Computing MC &lt;filterfunc&gt; ...&#39;, &#39;yellow&#39;)</span>
-<span class="c1">#         indmc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args[&#39;xcorr_flow&#39;])</span>
-
-<span class="c1">#         cprint(__name__ + f&#39;.load_root_file: Prior MC &lt;filterfunc&gt;: {len(X)} events&#39;, &#39;green&#39;)</span>
-<span class="c1">#         cprint(__name__ + f&#39;.load_root_file: After MC &lt;filterfunc&gt;: {sum(indmc)} events &#39;, &#39;green&#39;)</span>
-<span class="c1">#         prints.printbar()</span>
-        
-        
-<span class="c1">#         X = X[indmc]</span>
-<span class="c1">#         Y = Y[indmc].squeeze() # Remove useless dimension</span>
-<span class="c1">#     # =================================================================</span>
-    
-<span class="c1">#     # -----------------------------------------------------------------</span>
-<span class="c1">#     # @@ Observable cut selections done here @@</span>
-<span class="c1">#     cprint(colored(__name__ + f&#39;.load_root_file: Computing &lt;cutfunc&gt; ...&#39;), &#39;yellow&#39;)</span>
-<span class="c1">#     cind = CUTFUNC(X=X, ids=ids, xcorr_flow=args[&#39;xcorr_flow&#39;])</span>
-<span class="c1">#     # -----------------------------------------------------------------</span>
-    
-<span class="c1">#     N_before = X.shape[0]</span>
-
-<span class="c1">#     ### Select events</span>
-<span class="c1">#     X = X[cind]</span>
-<span class="c1">#     if isMC: Y = Y[cind]</span>
-
-<span class="c1">#     N_after = X.shape[0]</span>
-<span class="c1">#     cprint(__name__ + f&quot;.load_root_file: Prior &lt;cutfunc&gt; selections: {N_before} events &quot;, &#39;green&#39;)</span>
-<span class="c1">#     cprint(__name__ + f&quot;.load_root_file: Post  &lt;cutfunc&gt; selections: {N_after} events ({N_after / N_before:.3f})&quot;, &#39;green&#39;)</span>
-<span class="c1">#     print(&#39;&#39;)</span>
-<span class="c1">#     prints.printbar()</span>
-
-<span class="c1">#     # ** REMEMBER TO CLOSE **</span>
-<span class="c1">#     file.close()</span>
-
-<span class="c1">#     # --------------------------------------------------------------------</span>
-<span class="c1">#     ### Datatype conversions</span>
-
-<span class="c1">#     X_tensor = None</span>
-<span class="c1">#     X_graph  = None</span>
-
-<span class="c1">#     if image_on:</span>
-<span class="c1">#         X_tensor = graphio.parse_tensor_data(X=X, ids=ids, image_vars=globals()[&#39;CMSSW_MVA_IMAGE_VARS&#39;], args=args)</span>
-
-<span class="c1">#     if graph_on:</span>
-<span class="c1">#         X_graph  = graphio.parse_graph_data_np(X=X, Y=Y, ids=ids, features=globals()[args[&#39;imputation_param&#39;][&#39;var&#39;]])</span>
-
-<span class="c1">#     io.showmem()</span>
-
-<span class="c1">#     return_dict[procnumber] = {&#39;X&#39;: X, &#39;Y&#39;: Y, &#39;ids&#39;: ids, &quot;X_tensor&quot;: X_tensor, &quot;X_graph&quot;: X_graph, &#39;N&#39;: X.shape[0]}</span>
 
 </pre></div>
 
