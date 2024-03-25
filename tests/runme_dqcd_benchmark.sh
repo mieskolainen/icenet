@@ -16,8 +16,9 @@ source $ICEPATH/setenv.sh
 ## Process input
 
 CONFIG="tune0.yml"
+
 DATAPATH="/home/user/travis-stash/input/icedqcd"
-#DATAPATH="/vols/cms/mc3909"
+#DATAPATH="/vols/cms/khl216""
 
 CMD="python analysis/dqcd.py"
 

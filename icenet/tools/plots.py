@@ -398,7 +398,7 @@ def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, edges=80,
         outputdir = aux.makedir(f'{path}')
         savepath  = f'{outputdir}/MVA-output--{scale}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
-        print(__name__ + f'.density_MVA_wclass: Save: "{savepath}"')
+        cprint(__name__ + f'.density_MVA_wclass: Saved: "{savepath}"', 'green')
     
     # --------        
     fig.clf()
@@ -611,7 +611,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     # -----
 
                     plt.savefig(savepath, bbox_inches='tight')
-                    print(__name__ + f'.density_COR_wclass: Save: "{savepath}"')
+                    cprint(__name__ + f'.density_COR_wclass: Saved: "{savepath}"', 'green')
                     
                     # -----                    
                     fig.clf()
@@ -669,7 +669,7 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
         outputdir = aux.makedir(f'{path}/{label}')
         savepath = f'{outputdir}/var-{var}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
-        print(__name__ + f'.density_COR: Save: "{savepath}"')
+        cprint(__name__ + f'.density_COR: Saved: "{savepath}"', 'green')
 
         # -----                    
         fig.clf()
@@ -749,16 +749,20 @@ def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
             plot_unweighted=True, title='', targetdir='.'):
     """ Plot a single variable.
     """
-    binrange = (np.percentile(x, percentile_range[0]), np.percentile(x, percentile_range[1]))
+    try:
+        binrange = (np.percentile(x, percentile_range[0]), np.percentile(x, percentile_range[1]))
+        
+        fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights,
+                                        title=title, xlabel=var, plot_unweighted=plot_unweighted)
+        plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
+        
+        fig.clf()
+        plt.close()
+        gc.collect()
     
-    fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights,
-                                    title=title, xlabel=var, plot_unweighted=plot_unweighted)
-    plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
-
-    # -----
-    fig.clf()
-    plt.close()
-    gc.collect()
+    except Exception as e:
+        cprint(e, 'red')
+        cprint(__name__ + f'.plotvar: Problem plotting variable "{var}"', 'red')
 
 
 def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5,
@@ -860,7 +864,7 @@ def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetd
 
         if targetdir is not None:
             fname = targetdir + f'{label}-correlation-matrix.pdf'
-            print(__name__ + f'.plot_correlations: Save: "{fname}"')
+            print(__name__ + f'.plot_correlations: Saved: "{fname}"')
             plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
 
     return figs, axs
@@ -1018,7 +1022,7 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
 
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-            cprint('Saved: ' + filename + '.pdf','green')
+            cprint(__name__ + f'.ROC_plot: Saved: ' + filename + '.pdf','green')
         
         if k == 1: # Log-Linear
 
@@ -1096,6 +1100,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             #plt.xlim(0.0, 1.0)
             #ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
+            cprint(__name__ + f'.MVA_plot: Saved: ' + filename + '.pdf','green')
         
         if k == 1:
             #plt.ylim(0.0, 1.0)
@@ -1176,7 +1181,9 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             plt.ylabel(f'x[{dim2}] {ids[dim2]}')
             plt.colorbar(cs, ticks = np.linspace(0.0, 1.0, 11))
             
-            plt.savefig(targetdir + f'{dim1}-{dim2}.pdf', bbox_inches='tight')
+            filename = targetdir + f'{dim1}-{dim2}.pdf'
+            plt.savefig(filename, bbox_inches='tight')
+            cprint(__name__ + f'.plot_contour_grid: Saved: ' + filename,'green')
             
             # --------        
             fig.clf()

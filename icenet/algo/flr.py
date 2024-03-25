@@ -5,6 +5,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
 
 from icenet.tools import aux
 
@@ -64,7 +65,7 @@ def predict(X, b_pdfs, s_pdfs, bin_edges, return_prob=True, EPS=1e-12):
     
     # Loop over events
     out = np.zeros((X.shape[0]))
-    for k in range(X.shape[0]):
+    for k in tqdm(range(X.shape[0])):
 
         # Log-likelihoods
         b_ll = 0

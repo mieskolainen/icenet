@@ -101,7 +101,7 @@ genesis_runmode:
   targetfunc:  null                  # -- not active --
   
   xcorr_flow: True                   # Full N-point correlations computed between cuts
-  pickle_size: 1000                  # Number of entries (events) per pickle file
+  pickle_size: 10000                 # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------

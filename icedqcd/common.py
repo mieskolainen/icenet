@@ -305,7 +305,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
         start_time  = time.time()
         
         big_chunk_size = 10000
-        num_workers    = multiprocessing.cpu_count()
+        num_workers    = multiprocessing.cpu_count() // 2
         big_chunks     = int(np.ceil(len(data.x) / big_chunk_size))
         
         chunk_ind   = aux.split_start_end(range(len(data.x)), num_workers * big_chunks)

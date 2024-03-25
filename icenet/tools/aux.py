@@ -1015,7 +1015,7 @@ class Metric:
         self.thresholds = out['thresholds']
         
         # Compute bootstrap
-        if num_bootstrap > 0 and type(self.tpr) is not int:
+        if (num_bootstrap is not None and num_bootstrap > 0) and type(self.tpr) is not int:
             
             self.tpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.tpr)))
             self.fpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.fpr)))

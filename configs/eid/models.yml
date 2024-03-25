@@ -1,3 +1,13 @@
+# - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
+
+# Reference BDT (pre-computed in ROOT files)
+cut0:
+  train:    'cut'
+  predict:  'cut'
+  label:    'ele_mva_depth15'
+  variable: 'ele_mva_value_depth15'
+  sign: 1
+  transform: null
 
 # Dual graph + XGB network
 gxgb0:
@@ -26,7 +36,7 @@ gxgb0:
       conv_MLP_act: 'relu'
       conv_MLP_bn: True
       conv_MLP_dropout: 0.01
-      conv_aggr: 'max'
+      conv_aggr: 'mean'
       conv_knn: 8
 
       fusion_MLP_act: 'relu'
@@ -47,13 +57,13 @@ gxgb0:
       gamma: 2                  # focal_entropy exponent
       temperature: 1            # logit norm temperature
       
-      optimizer: 'Adam'
+      optimizer: 'AdamW'
       clip_norm: 1.0
 
       epochs: 150
-      batch_size: 64
+      batch_size: 256
       lr: 1.0e-3
-      weight_decay:  0.00005     # L2-regularization
+      weight_decay:  1.0e-5     # L2-regularization
 
     # Scheduler
     scheduler_param:
@@ -127,7 +137,7 @@ gnet0:
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
     conv_MLP_dropout: 0.01
-    conv_aggr: 'max'
+    conv_aggr: 'mean'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
@@ -148,13 +158,13 @@ gnet0:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
-    epochs: 150
-    batch_size: 64
+    epochs: 30
+    batch_size: 256
     lr: 3.0e-4
-    weight_decay:  0.00005      # L2-regularization
+    weight_decay:  1.0e-5      # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -188,7 +198,7 @@ gnet1:
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
     conv_MLP_dropout: 0.01
-    conv_aggr: 'max'
+    conv_aggr: 'mean'
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
@@ -209,13 +219,13 @@ gnet1:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
-    epochs: 150
-    batch_size: 64
+    epochs: 30
+    batch_size: 256
     lr: 3.0e-4
-    weight_decay:  0.00005      # L2-regularization
+    weight_decay:  1.0e-5      # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -249,7 +259,7 @@ gnet2:
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
     conv_MLP_dropout: 0.01
-    conv_aggr: 'max'
+    conv_aggr: 'mean'         # 'mean', 'max', 'VariancePreserving', https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#aggregation-operators
     conv_knn: 8
 
     fusion_MLP_act: 'relu'
@@ -270,13 +280,13 @@ gnet2:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
-    epochs: 150
-    batch_size: 64
+    epochs: 30
+    batch_size: 256
     lr: 3.0e-4
-    weight_decay:  0.00005      # L2-regularization
+    weight_decay:  1.0e-5      # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -310,9 +320,9 @@ gnet3:
     conv_MLP_act: 'relu'
     conv_MLP_bn: True
     conv_MLP_dropout: 0.01
-    conv_aggr: 'max'
+    conv_aggr: 'mean'
     conv_knn: 8
-
+    
     fusion_MLP_act: 'relu'
     fusion_MLP_bn: False
     fusion_MLP_dropout: 0.01
@@ -331,13 +341,13 @@ gnet3:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
-    epochs: 150
-    batch_size: 64
+    epochs: 30
+    batch_size: 256
     lr: 3.0e-4
-    weight_decay:  0.00005      # L2-regularization
+    weight_decay:  1.0e-5      # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -346,7 +356,7 @@ gnet3:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-
+  
   # Read/Write of epochs
   savemode: 'all'             # 'all', 'latest'
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
@@ -374,7 +384,7 @@ xgb0:
 
   # general parameters
   model_param:
-    num_boost_round: 100    # number of epochs (equal to the number of trees!)
+    num_boost_round: 150    # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
@@ -382,18 +392,18 @@ xgb0:
 
     # booster parameters
     learning_rate: 0.1
-    gamma: 0.0
+    gamma: 1.67
     max_depth: 10
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
 
-    colsample_bytree:  1
-    colsample_bylevel: 1
-    colsample_bynode:  1
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
     
-    reg_lambda: 2.0       # L2 regularization
-    reg_alpha: 0.0        # L1 regularization
+    reg_lambda: 2.0          # L2 regularization
+    reg_alpha: 0.05          # L1 regularization
     
     # learning task parameters
     objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
@@ -427,20 +437,20 @@ dmlp:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 50
+    epochs: 30
     batch_size: 196
     lr: 1.0e-3
-    weight_decay: 0.00001     # L2-regularization
-
+    weight_decay: 1.0e-5       # L2-regularization
+  
   # Scheduler
   scheduler_param:
     step_size: 200
     gamma: 0.1
   
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
@@ -466,14 +476,14 @@ lgr0:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
 
     clip_norm: 1.0
 
-    epochs: 50
+    epochs: 10
     batch_size: 196
     lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
+    weight_decay: 1.0e-5     # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -513,13 +523,13 @@ cnn0:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 100
+    epochs: 30
     batch_size: 128
     lr: 1.0e-3
-    weight_decay: 0.00         # L2-regularization
+    weight_decay: 1.0e-5     # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -527,48 +537,6 @@ cnn0:
     gamma: 0.1
       
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XTX (hyperbinned) classifier
-xtx0:
-  train:   'xtx'
-  predict: 'xtx'
-  label:   'XTX'
-  raytune:  null
-
-  # Choose kinematic binning variables
-  binning:
-    var:   ['trk_eta', 'trk_pt']
-    edges: [[-2.5, -1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5, 2.5],
-            [0.5, 0.7, 1.0, 1.25, 1.5, 1.75, 2.5, 4.0, 10, 10000]]
-
-  # Model param
-  conv_type: 'maxo'
-  model_param:
-    num_units: 2
-    neurons:  20
-    dropout:  0.5
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-
-    optimizer: 'Adam'        # Adam, AdamW
-    clip_norm: 1.0
-
-    epochs: 50
-    batch_size:  196
-    lr: 1.0e-3
-    weight_decay: 0.01        # L2-regularization
-
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
@@ -596,13 +564,13 @@ dmx0:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'        # Adam, AdamW
+    optimizer: 'AdamW'        # Adam, AdamW
     clip_norm: 1.0
 
-    epochs: 50
+    epochs: 30
     batch_size: 128
     lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
+    weight_decay: 1.0e-5     # L2-regularization
 
   # Scheduler
   scheduler_param:

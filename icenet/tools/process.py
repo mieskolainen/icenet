@@ -7,9 +7,11 @@ import numpy as np
 import awkward as ak
 import gc
 import torch
+import torch_geometric
+
 import copy
 from tqdm import tqdm
-
+            
 from importlib import import_module
 from termcolor import colored, cprint
 import os
@@ -172,9 +174,11 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     # Fast plot mode
     if cli_dict['fastplot']:
-        new_args['plot_param']['basic']['active']    = False
-        new_args['plot_param']['corrmat']['active']  = False
-        new_args['plot_param']['contours']['active'] = False
+        new_args['plot_param']['basic']['active']      = False
+        new_args['plot_param']['corrmat']['active']    = False
+        new_args['plot_param']['contours']['active']   = False
+        new_args['plot_param']['ROC_binned']['active'] = False
+        new_args['plot_param']['MVA_2D']['active']     = False
         
         print(__name__ + f'.read_config: fastplot mode on (turning off slow plots)')
     
@@ -376,6 +380,9 @@ def read_data(args, func_loader, runmode):
                 pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \
                     handle, protocol=pickle.HIGHEST_PROTOCOL)
         
+        gc.collect()
+        io.showmem()
+        
         return predata
         
     else:
@@ -399,8 +406,9 @@ def read_data(args, func_loader, runmode):
                     X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)
                 
                 gc.collect() # important!
-                
-    
+        
+        io.showmem()
+        
         return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
@@ -435,6 +443,8 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             predata = pickle.load(handle)
             gc.enable()
 
+    io.showmem()
+    
     # --------------------------------------------------------------------
     # 'DATA': Further processing step
     
@@ -460,6 +470,9 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             gc.disable()
             processed_data = pickle.load(handle)
             gc.enable()
+    
+    gc.collect()
+    io.showmem()
     
     return processed_data
 
@@ -540,6 +553,8 @@ def process_data(args, predata, func_factor, mvavars, runmode):
                 pickle.dump(pdf, open(fmodel, 'wb'))
         
         # Compute different data representations
+        cprint(__name__ + f'.process_data: Compute representations (func_factor)', 'green')
+        
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
         
@@ -573,6 +588,8 @@ def process_data(args, predata, func_factor, mvavars, runmode):
                 pickle.dump(pdf, open(fmodel, 'wb'))
         
         # Compute different data representations
+        cprint(__name__ + f'.process_data: Compute representations (func_factor)', 'green')
+        
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
         
         ## Imputate
@@ -582,6 +599,8 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             cprint(__name__ + f'.process_data: Loading imputer from: {inputfile}', 'green')
             imputer = pickle.load(open(inputfile, 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
+    
+    io.showmem()
     
     return output
 
@@ -911,9 +930,6 @@ def evaluate_models(data=None, info=None, args=None):
     
     if data['data'] is not None:
 
-        ## Set feature indices for simple cut classifiers
-        args['features'] = data['data'].ids
-
         X       = copy.deepcopy(data['data'].x)
         ids     = copy.deepcopy(data['data'].ids)
 
@@ -931,7 +947,7 @@ def evaluate_models(data=None, info=None, args=None):
                     
                     index   = np.where(np.isin(data['data_kin'].ids, var))[0]
                     X_RAW   = np.concatenate([X_RAW, data['data_kin'].x[:,index]], axis=1)
-        
+                
         y        = data['data'].y
         weights  = data['data'].w
 
@@ -1051,7 +1067,6 @@ def evaluate_models(data=None, info=None, args=None):
             func_predict = predict.pred_torch_graph(args=args, param=param)
 
             # Geometric type -> need to use batch loader, get each graph, node or edge prediction
-            import torch_geometric
             loader  = torch_geometric.loader.DataLoader(X_graph, batch_size=len(X_graph), shuffle=False)
             for batch in loader: # Only one big batch
                 plot_XYZ_wrap(func_predict = func_predict, x_input=X_graph, y=batch.to('cpu').y.detach().cpu().numpy(), **inputs)
@@ -1079,17 +1094,13 @@ def evaluate_models(data=None, info=None, args=None):
         elif param['predict'] == 'flr':
             func_predict = predict.pred_flr(args=args, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y = y, **inputs)
-            
-        #elif param['predict'] == 'xtx':
-        # ...   
-        #
         
         elif param['predict'] == 'cut':
-            func_predict = predict.pred_cut(args=args, param=param)
+            func_predict = predict.pred_cut(ids=ids_RAW, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
         
         elif param['predict'] == 'cutset':
-            func_predict = predict.pred_cutset(args=args, param=param)
+            func_predict = predict.pred_cutset(ids=ids_RAW, param=param)
             plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
 
             if args['plot_param']['contours']['active']:

@@ -5,7 +5,7 @@
 
 import numpy as np
 from   tqdm import tqdm
-
+import ray
 from termcolor import colored, cprint
 
 import torch
@@ -14,23 +14,6 @@ from   torch_geometric.data import Data
 import icenet.algo.analytic as analytic
 from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
-
-
-# # Torch conversion
-# def graph2torch(X):
-
-#     # Turn into torch geometric Data object
-#     Y = np.zeros(len(X), dtype=object)
-#     for i in range(len(X)):
-        
-#         d = X[i]
-#         Y[i] = Data(x=torch.tensor(d['x'], dtype=torch.float),
-#                     edge_index=torch.tensor(d['edge_index'], dtype=torch.long),
-#                     edge_attr =torch.tensor(d['edge_attr'],  dtype=torch.float),
-#                     y=torch.tensor(d['y'], dtype=torch.long),
-#                     w=torch.tensor(d['w'], dtype=torch.float),
-#                     u=torch.tensor(d['u'], dtype=torch.float))
-#     return Y
 
 
 def parse_tensor_data(X, ids, image_vars, args):
@@ -62,7 +45,7 @@ def parse_tensor_data(X, ids, image_vars, args):
         xyz = [['image_clu_eta', 'image_clu_phi', 'image_clu_e'], 
                ['image_pf_eta',  'image_pf_phi',  'image_pf_p']]
     else:
-        raise Except(__name__ + f'.splitfactor: Unknown [image_param][channels] parameter')
+        raise Exception(__name__ + f'.splitfactor: Unknown [image_param][channels] parameter')
 
     eta_binedges = args['image_param']['eta_bins']
     phi_binedges = args['image_param']['phi_bins']    
@@ -73,6 +56,12 @@ def parse_tensor_data(X, ids, image_vars, args):
 
     return tensor
 
+@ray.remote
+def parse_graph_data_ray(X, ids, features, graph_param, Y=None, weights=None,
+                         entry_start=None, entry_stop=None):
+    
+    return parse_graph_data(X, ids, features, graph_param,
+        Y, weights, entry_start, entry_stop)
 
 def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_start=None, entry_stop=None, EPS=1e-12, null_value=-999.0):
     """
@@ -98,20 +87,19 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
 
     # ----------------------------------------------
     
-    num_node_features = 6
+    num_node_features = 5
     num_edge_features = 4
     
     entry_start, entry_stop, num_events = aux.slice_range(start=entry_start, stop=entry_stop, N=len(X))
     dataset = []
     
     print(__name__ + f'.parse_graph_data: Converting {num_events} events into graphs ...')
-    zerovec = vec4()
 
     # Collect feature indices
     feature_ind = np.zeros(len(features), dtype=np.int32)
     for i in range(len(features)):
         feature_ind[i] = ids.index(features[i])
-
+    
     # Collect indices
     ind__trk_pt        = ids.index('trk_pt')
     ind__trk_eta       = ids.index('trk_eta')
@@ -126,7 +114,8 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
     # Loop over events
     for ev in tqdm(range(entry_start, entry_stop)):
 
-        num_nodes = 1 + len(X[ev, ind__image_clu_eta]) # +1 for the virtual node (empty data)
+        num_clu   = len(X[ev, ind__image_clu_eta])
+        num_nodes = num_clu + 1 # +1 for the virtual node (empty data)
         num_edges = analytic.count_simple_edges(num_nodes=num_nodes, directed=directed, self_loops=self_loops)
 
         # Construct 4-vector for the track, with pion mass
@@ -135,10 +124,9 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
 
         # Construct 4-vector for each ECAL cluster
         p4vec = []
-        N_c = len(X[ev, ind__image_clu_e])
         
-        if N_c > 0:
-            for k in range(N_c): 
+        if num_clu > 0:
+            for k in range(num_clu): 
                 
                 pt    = X[ev, ind__image_clu_e][k] / np.cosh(X[ev, ind__image_clu_eta][k]) # Massless approx.
                 eta   = X[ev, ind__image_clu_eta][k]
@@ -172,7 +160,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
             w = torch.tensor([weights[ev]], dtype=torch.float)
 
         ## Construct node features
-        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[ev], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
+        x = get_node_features(p4vec=p4vec, p4track=p4track, X=X[ev, ...], ids=ids, num_nodes=num_nodes, num_node_features=num_node_features, coord=coord)
         
         x[~np.isfinite(x)] = null_value # Input protection
         x = torch.tensor(x, dtype=torch.float)
@@ -208,7 +196,7 @@ def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coor
     # Node feature matrix
     x = np.zeros((num_nodes, num_node_features), dtype=float)
 
-    for i in range(num_nodes - 1): # Last one is the empty event case
+    for i in range(num_nodes - 1): # -1, because last one is the dummy (empty) node
         
         if   coord == 'ptetaphim':
             x[i,0] = p4vec[i].pt
@@ -223,14 +211,10 @@ def get_node_features(p4vec, p4track, X, ids, num_nodes, num_node_features, coor
         else:
             raise Exception(__name__ + f'.get_node_features: Unknown coordinate representation')
         
-        # other features
+        # Other features
         x[i,4] = p4track.deltaR(p4vec[i])
-
-        try:
-            x[i,5] = X[ids.index('image_clu_nhit')][i]
-        except:
-            continue
-            # Not able to read it (empty cluster data)
+        
+        # Add more here ... from X
     
     # Cast
     x = x.astype(float)

@@ -10,8 +10,6 @@ CONFIG="tune0_trk.yml"
 DATAPATH="/home/user/travis-stash/input/icehgcal/close_by_double_pion"
 TAG='close_by_double_pion'
 
-mkdir "figs/hgcal_trk/config-[$CONFIG]" -p # for output ascii dump
-
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 # Use * or other glob wildcards for filenames

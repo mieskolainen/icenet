@@ -4,20 +4,20 @@ KINEMATIC_GEN_VARS = [
 
 # For plots, diagnostics etc.
 KINEMATIC_VARS = [
+  'has_gsf',
+  'gsf_pt',
+  'is_egamma',
+  'is_e',
+  'tag_pt',
+  'tag_eta',
+  
   'trk_pt',
   'trk_eta',
   'trk_phi',
   'ele_mva_value_depth15'
 ]
 
-# Use these to test that the (re-weight trained) classifier
-# is independent of these
-UNIT_TEST_ID = [
-  'trk_pt',
-  'trk_eta'
-]
-
-CMSSW_MVA_SCALAR_VARS = [
+CMSSW_MVA_SCALAR_VARS_ORIG = [
   'gsf_bdtout1',
   'eid_rho',
   'eid_ele_pt',
@@ -34,6 +34,8 @@ CMSSW_MVA_SCALAR_VARS = [
   'eid_gsf_chi2red',
   'eid_brem_frac',
   'eid_gsf_nhits',
+  'eid_match_SC_EoverP',
+  'eid_match_eclu_EoverP',
   'eid_match_SC_dEta',
   'eid_match_SC_dPhi',
   'eid_match_seed_dEta',
@@ -70,7 +72,6 @@ CMSSW_MVA_IMAGE_VARS = [
  'image_clu_eta',
  'image_clu_phi',
  'image_clu_e',
- 'image_clu_nhit',
  'image_pf_n',
  'image_pf_eta',
  'image_pf_phi',
@@ -80,28 +81,20 @@ CMSSW_MVA_IMAGE_VARS = [
  'image_pf_lost'
 ]
 
-CMSSW_MVA_SCALAR_VARS_ORIG = [
-  'gsf_bdtout1',
-  'eid_rho',
-  'eid_ele_pt',
-  'eid_sc_eta',
-  'eid_shape_full5x5_sigmaIetaIeta',
-  'eid_shape_full5x5_sigmaIphiIphi',
-  'eid_shape_full5x5_circularity',
-  'eid_shape_full5x5_r9',
-  'eid_sc_etaWidth',
-  'eid_sc_phiWidth',
-  'eid_shape_full5x5_HoverE',
-  'eid_trk_nhits',
-  'eid_trk_chi2red',
-  'eid_gsf_chi2red',
-  'eid_brem_frac',
-  'eid_gsf_nhits',
-  'eid_match_SC_EoverP',
-  'eid_match_eclu_EoverP',
-  'eid_match_SC_dEta',
-  'eid_match_SC_dPhi',
-  'eid_match_seed_dEta',
-  'eid_sc_E',
-  'eid_trk_p',
+CMSSW_MVA_GRAPH_VARS = [
+ 'image_clu_eta',
+ 'image_clu_phi',
+ 'image_clu_e',
+ 
+ 'image_pf_eta',
+ 'image_pf_phi',
+ 'image_pf_p'
 ]
+
+# These variables are read out from ROOT files
+LOAD_VARS  = []
+LOAD_VARS += KINEMATIC_GEN_VARS
+LOAD_VARS += KINEMATIC_VARS
+LOAD_VARS += CMSSW_MVA_SCALAR_VARS_ORIG
+#LOAD_VARS += CMSSW_MVA_IMAGE_VARS
+LOAD_VARS += CMSSW_MVA_GRAPH_VARS
