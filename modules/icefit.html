@@ -188,7 +188,9 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.lognormal">icefit.lognormal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.create_label"><code class="docutils literal notranslate"><span class="pre">create_label()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.lognormal_param"><code class="docutils literal notranslate"><span class="pre">lognormal_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.rand_lognormal"><code class="docutils literal notranslate"><span class="pre">rand_lognormal()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.rand_powexp"><code class="docutils literal notranslate"><span class="pre">rand_powexp()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.test_accuracy"><code class="docutils literal notranslate"><span class="pre">test_accuracy()</span></code></a></li>
@@ -983,8 +985,13 @@ Observed versus expected Fisher Information”. Biometrika. 65 (3): 457–487.</
 <section id="module-icefit.lognormal">
 <span id="icefit-lognormal"></span><h2>icefit.lognormal<a class="headerlink" href="#module-icefit.lognormal" title="Link to this heading">¶</a></h2>
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.lognormal.create_label">
+<span class="sig-name descname"><span class="pre">create_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#create_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.create_label" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.lognormal.lognormal_param">
-<span class="sig-name descname"><span class="pre">lognormal_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#lognormal_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.lognormal_param" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">lognormal_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#lognormal_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.lognormal_param" title="Link to this definition">¶</a></dt>
 <dd><p>Compute log-normal distribution mu and sigma parameters from
 the target mean (or median) m and variance v</p>
 <p>mu and sigma follow the Wikipedia convention:
@@ -994,15 +1001,20 @@ the target mean (or median) m and variance v</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>m</strong> – mean (or median or mode) value of the target log-normal pdf</p></li>
 <li><p><strong>v</strong> – variance value of the target log-normal pdf</p></li>
-<li><p><strong>inmode</strong> – input m as ‘mean’, ‘median’, or ‘mode’</p></li>
+<li><p><strong>match_mode</strong> – input m as ‘mean’, ‘median’, or ‘mode’</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icefit.lognormal.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icefit.lognormal.rand_lognormal">
-<span class="sig-name descname"><span class="pre">rand_lognormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#rand_lognormal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.rand_lognormal" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rand_lognormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#rand_lognormal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.rand_lognormal" title="Link to this definition">¶</a></dt>
 <dd><p>Generate random numbers from log-normal density with
 the distribution target mean (or median) m and variance v</p>
 <dl class="field-list simple">
@@ -1011,7 +1023,7 @@ the distribution target mean (or median) m and variance v</p>
 <li><p><strong>m</strong> – mean (or median or mode) value of the target log-normal pdf</p></li>
 <li><p><strong>v</strong> – variance value of the target log-normal pdf</p></li>
 <li><p><strong>N</strong> – number of samples</p></li>
-<li><p><strong>inmode</strong> – input m as ‘mean’, ‘median’, or ‘mode’</p></li>
+<li><p><strong>match_mode</strong> – input m as ‘mean’, ‘median’, or ‘mode’</p></li>
 </ul>
 </dd>
 </dl>
@@ -1019,12 +1031,13 @@ the distribution target mean (or median) m and variance v</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.lognormal.rand_powexp">
-<span class="sig-name descname"><span class="pre">rand_powexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#rand_powexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.rand_powexp" title="Link to this definition">¶</a></dt>
-<dd><p>Power+exp type parametrization (positive definite)</p>
+<span class="sig-name descname"><span class="pre">rand_powexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/lognormal.html#rand_powexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.lognormal.rand_powexp" title="Link to this definition">¶</a></dt>
+<dd><p>Power+exp type parametrization for median matching</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sigma</strong> – standard deviation</p></li>
+<li><p><strong>m</strong> – median target</p></li>
+<li><p><strong>std</strong> – standard deviation target</p></li>
 <li><p><strong>N</strong> – number of samples</p></li>
 </ul>
 </dd>
