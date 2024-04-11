@@ -542,11 +542,12 @@ def histhepdata(hepdata, all_obs, scale=None, density=False, MC_XS_SCALE=1E12, l
         
         # Density integral 1 over the histogram bins
         if density:
-            norm  = hepdata[OBS]['binwidth'] * y.sum()
+             # note .mean(), each element is already differentially normalized
+            norm  = hepdata[OBS]['binwidth'].mean() * y.sum()
             y    /= norm
             yerr /= norm
             binscale = 1.0
-
+        
         obj[OBS] = {'hdata': hobj(y, yerr, bins, cbins, binscale),
                     'hfunc' : 'hist', 'color': (0,0,0), 'label': label, 'style' : style}
     
