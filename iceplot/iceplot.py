@@ -85,6 +85,10 @@ class hobj:
         else:
             self.is_empty = False
 
+    # Compute histogram integral (piece-wise differential sum)
+    def integral(self):
+        return np.sum(self.binscale * self.counts * binwidth(self.bins))
+    
     # + operator
     def __add__(self, other):
 
@@ -100,7 +104,7 @@ class hobj:
         counts = self.counts + other.counts
         errs   = np.sqrt(self.errs**2   + other.errs**2)
 
-        return hobj(counts, errs, bins, cbins, binscale)
+        return hobj(counts, errs, self.bins, self.cbins, binscale)
     
     # += operator
     def __iadd__(self, other):
@@ -503,7 +507,7 @@ def histmc(mcdata, all_obs, density=False, scale=None, color=(0,0,1), label='non
         # Compute differential cross section within histogram range
         # Note that division by sum(weights) handles the histogram range integral (overflow) properly
         binscale = mcdata['xsection_pb'] / binwidth(bins) / np.sum(mcdata['weights']) 
-
+        
         # Additional scale factor
         if scale is not None:
             binscale *= scale
@@ -516,6 +520,8 @@ def histmc(mcdata, all_obs, density=False, scale=None, color=(0,0,1), label='non
         obj[OBS] = {'hdata': hobj(counts, errs, bins, cbins, binscale),
                     'hfunc' : 'hist', 'color': color, 'label': label, 'style' : style}
 
+        print(f'histmc: integral = {obj[OBS]["hdata"].integral():0.2E} ({OBS})')
+        
     return obj
 
 
@@ -525,13 +531,11 @@ def histhepdata(hepdata, all_obs, scale=None, density=False, MC_XS_SCALE=1E12, l
     obj = {}
 
     for OBS in all_obs.keys():
-
-        # Over all DATA files (now fixed to one)
-        data_obj = []
-
+        
         y        = hepdata[OBS]['y']    
         yerr     = hepdata[OBS]['y_err']
         bins     = hepdata[OBS]['bins']
+        binwidth = hepdata[OBS]['binwidth']
         cbins    = hepdata[OBS]['x']
 
         binscale = hepdata[OBS]['scale'] * MC_XS_SCALE
@@ -542,14 +546,15 @@ def histhepdata(hepdata, all_obs, scale=None, density=False, MC_XS_SCALE=1E12, l
         
         # Density integral 1 over the histogram bins
         if density:
-             # note .mean(), each element is already differentially normalized
-            norm  = hepdata[OBS]['binwidth'].mean() * y.sum()
+            norm  = (y * binwidth).sum()
             y    /= norm
             yerr /= norm
             binscale = 1.0
         
         obj[OBS] = {'hdata': hobj(y, yerr, bins, cbins, binscale),
                     'hfunc' : 'hist', 'color': (0,0,0), 'label': label, 'style' : style}
+
+        print(f'histhepdata: integral = {obj[OBS]["hdata"].integral():0.2E} ({OBS})')
     
     return obj
 
