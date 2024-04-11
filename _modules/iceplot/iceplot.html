@@ -1066,11 +1066,12 @@
         
         <span class="c1"># Density integral 1 over the histogram bins</span>
         <span class="k">if</span> <span class="n">density</span><span class="p">:</span>
-            <span class="n">norm</span>  <span class="o">=</span> <span class="n">hepdata</span><span class="p">[</span><span class="n">OBS</span><span class="p">][</span><span class="s1">&#39;binwidth&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+             <span class="c1"># note .mean(), each element is already differentially normalized</span>
+            <span class="n">norm</span>  <span class="o">=</span> <span class="n">hepdata</span><span class="p">[</span><span class="n">OBS</span><span class="p">][</span><span class="s1">&#39;binwidth&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="n">y</span>    <span class="o">/=</span> <span class="n">norm</span>
             <span class="n">yerr</span> <span class="o">/=</span> <span class="n">norm</span>
             <span class="n">binscale</span> <span class="o">=</span> <span class="mf">1.0</span>
-
+        
         <span class="n">obj</span><span class="p">[</span><span class="n">OBS</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;hdata&#39;</span><span class="p">:</span> <span class="n">hobj</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span><span class="p">,</span> <span class="n">binscale</span><span class="p">),</span>
                     <span class="s1">&#39;hfunc&#39;</span> <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span> <span class="p">:</span> <span class="n">style</span><span class="p">}</span>
     
