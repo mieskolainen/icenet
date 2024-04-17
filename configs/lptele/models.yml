@@ -46,8 +46,8 @@ xgb1:
   predict: 'xgb'
   label:   '2020Sept15 (retrained)'
   raytune:  'xgb_setup'
-#  exclude_MVA_vars: ['.*']
-#  include_MVA_vars: 'CMSSW_MVA_SCALAR_VARS_2020Sept15'
+  exclude_MVA_vars: ['.*']
+  include_MVA_vars: 'CMSSW_MVA_SCALAR_VARS_2020Sept15'
 
   # general parameters
   model_param:
