@@ -16,15 +16,8 @@ mva_param: &MVA_INPUT_PARAM
   signal_class: 1                    # Signal class ID
   #DA_class:    -2                   # Domain Adaptation class
   
-  inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  #inputvar_jagged: null              # 'MVA_JAGGED_VARS'
-  #jagged_maxdim:
-  #  
-  #  Jet:   4
-  #  Muon:  8
-  #  sv:    4
-  #  cpf:   20
-  #  npf:   10
+  inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS_2020Sept15'       # 'LOAD_VARS' # Input variables, implemented under mvavars.py
+  inputvar_image: null               # Image variables, set 'CMSSW_MVA_IMAGE_VARS'
 
   varnorm: null                      # Variable normalization: 'zscore', 'madscore', null
   varnorm_tensor: null               # Tensor variable normalization
@@ -35,7 +28,7 @@ mva_param: &MVA_INPUT_PARAM
   # Imputation
   imputation_param:
     active: true                      # True / False
-    var: 'CMSSW_MVA_SCALAR_VARS'      # Array of variables to be imputated
+    var: 'CMSSW_MVA_SCALAR_VARS_2020Sept15'                  # 'LOAD_VARS' # Array of variables to be imputated
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
     fill_value: 0                     # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
@@ -50,11 +43,10 @@ genesis_runmode:
   
   targetfunc: 'target_e'              # Training target,    implemented under mctargets.py
   filterfunc: 'filter_no_egamma'      # Training filtering, implemented under mcfilter.py
-  #filterfunc: 'filter_lptele'         # Training filtering, implemented under mcfilter.py
   cutfunc:    'cut_standard'          # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
-  pickle_size: 1000                  # Number of entries (events) per pickle file
+  pickle_size: 10000                  # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
@@ -67,7 +59,7 @@ train_runmode:
 
   ## Reweighting setup
   reweight: true
-  reweight_mode: 'write'          # 'write', 'load'
+  reweight_mode: 'write'              # 'write', 'load'
   reweight_file: 'reweight_train.pkl' # differential reweighting model file
 
   reweight_param: &REWEIGHT_PARAM
@@ -85,18 +77,18 @@ train_runmode:
     # to signal very easily, but it is possible to re-weight signal to background.
     # This is seen by inspecting the re-weighted distributions with small and large statistics.
 
-    dimension: 'pseudo-2D'        # '2D', 'pseudo-2D', '1D'
-    pseudo_type: 'product'        # 'product', 'geometric_mean'
+    dimension: '2D' # '2D', 'pseudo-2D', '1D'
+    pseudo_type: 'product' # 'product', 'geometric_mean'
 
     var:  ['trk_pt', 'trk_eta']
 
-    bins:  [[0.1, 20.0, 40], [-2.5, 2.5, 40]] # Make sure the bounds cover the phase space
-    binmode:  ['log10', 'linear']          # 'log10' or 'linear' or 'edges' (custom array) binning
+    bins:  [[0.1, 20.0, 20], [-2.5, 2.5, 20]] # Make sure the bounds cover the phase space
+    binmode:  ['log10', 'linear'] # 'log10' or 'linear' or 'edges' (custom array) binning
     
     # ! Variable, and binning min/max boundaries are both transformed !
-    transform: [null, null]         # 'log10', 'sqrt', 'square', null
+    transform: [null, null] # 'log10', 'sqrt', 'square', null
     
-    max_reg: 1000.0                      # Maximum weight cut-off regularization
+    max_reg: 10.0 # Maximum weight cut-off regularization
 
 
   ## Outlier protection in the training
@@ -110,8 +102,10 @@ train_runmode:
   models:  !include configs/lptele/models.yml
   active_models: &ACTIVE_MODELS
 
-    - xgb0
+#    - xgb0
+    - xgb1
     - cut0
+    - cut1
 
   raytune: !include configs/lptele/raytune.yml
 
@@ -124,7 +118,7 @@ eval_runmode:
   modeltag:  null
   
   reweight: false
-  reweight_mode: 'load'          # 'write', 'load'
+  reweight_mode: 'load' # 'write', 'load'
   reweight_file: 'reweight_train.pkl'
 
   reweight_param: *REWEIGHT_PARAM

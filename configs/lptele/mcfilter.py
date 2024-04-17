@@ -38,8 +38,8 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     """
     
     # Fiducial cuts for the tag-side muon trigger object
-    MINPT   = 5.0
-    MAXETA  = 2.5
+    MINPT   = 9.0
+    MAXETA  = 1.5
     
     # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
     #                              also ABS@, POW2@, SQRT@, INV@, BOOL@)

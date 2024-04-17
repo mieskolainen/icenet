@@ -1,6 +1,6 @@
 param:
-  #active:         ['xgb0'] # Add model identifiers here
   active:         [null]
+  #active:         ['xgb1'] # Add model identifiers here
   num_samples:    5   # Trial count parameter
 
 setup:

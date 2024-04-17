@@ -24,8 +24,8 @@ def cut_standard(X, ids, xcorr_flow=False):
     """
     
     # Fiducial cuts
-    MINPT   = 0.7
-    MAXETA  = 1.5
+    MINPT   = 1.0
+    MAXETA  = 2.5
     
     # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
     #                              also ABS@, POW2@, SQRT@, INV@, BOOL@)
