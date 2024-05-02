@@ -41,7 +41,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     
     datasets        = process['path'] + '/' + process['files']
     xs              = process['xs']
-    model_param     = process['model_param']
+    model_param     = process['model_param'] if 'model_param' in process.keys() else None
     force_xs        = process['force_xs']
     maxevents_scale = process['maxevents_scale']
     isMC            = process['isMC']
@@ -101,27 +101,27 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     # -------------------------------------------------
     # Add conditional (theory param) variables
     
-    print(__name__ + f'.read_single: Adding conditional theory (model) parameters')
-    
-    for var in model_param.keys():
+    if model_param is not None:
+        print(__name__ + f'.read_single: Adding conditional theory (model) parameters')
+        for var in model_param.keys():
             
-        value = model_param[var]
+            value = model_param[var]
         
-        # Pick uniform random between [a,b] ~ "dequantized" sampling
-        if type(value) == list:
-            if len(value) != 3:
-                raise Exception(__name__ + f'.read_MC: Input {value} ')
+            # Pick uniform random between [a,b] ~ "dequantized" sampling
+            if type(value) == list:
+                if len(value) != 3:
+                    raise Exception(__name__ + f'.read_MC: Input {value} ')
             
-            r         = ak.Array(np.random.rand(len(X), 1).astype(np.float32))
-            mva_value = value[1] + (value[2] - value[1]) * r
-            gen_value = value[0]
+                r         = ak.Array(np.random.rand(len(X), 1).astype(np.float32))
+                mva_value = value[1] + (value[2] - value[1]) * r
+                gen_value = value[0]
         
-        # Pick only the fixed value
-        else:
-            if value is None:
-                value = np.nan
-            mva_value = value * ak.Array(np.ones((len(X), 1)).astype(np.float32))
-            gen_value = value
+            # Pick only the fixed value
+            else:
+                if value is None:
+                    value = np.nan
+                mva_value = value * ak.Array(np.ones((len(X), 1)).astype(np.float32))
+                gen_value = value
         
         # Create a new 'record' (column) to ak-array [actual input for MVA]
         col_name    = f'MODEL_{var}'
