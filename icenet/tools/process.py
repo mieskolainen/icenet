@@ -512,6 +512,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         
         elif isinstance(X, ak.Array):
             X = X[idxvar]
+            ids = [ids_[j] for j in index]
         
     # ----------------------------------------------------------
     
