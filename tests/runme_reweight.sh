@@ -5,7 +5,7 @@
 # Run with: source runme.sh
 
 CONFIG="tune_reweight.yml"
-DATAPATH="./data/lptele"
+DATAPATH="./travis-stash/input/lptele"
 MCMAP="mc_map.yml"
 #DATASETS="output_mc*.root"
 MAX=10000000
