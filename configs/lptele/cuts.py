@@ -13,7 +13,7 @@ def cut_nocut(X, ids, xcorr_flow=False):
     return np.ones(X.shape[0], dtype=np.bool_) # # Note datatype np.bool_
 
 
-def cut_standard(X, ids, xcorr_flow=False):
+def cut_standard(X, xcorr_flow=False):
     """ Function implements basic selections (cuts)
 
     Args:
@@ -26,15 +26,18 @@ def cut_standard(X, ids, xcorr_flow=False):
     # Fiducial cuts
     MINPT   = 1.0
     MAXETA  = 2.5
+
+    # __technical__ recast due to eval() scope
+    global O; O = X
     
-    # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
-    #                              also ABS@, POW2@, SQRT@, INV@, BOOL@)
-    cutlist = [f'BOOL@has_gsf == True' ,
-               f'gsf_pt       > {MINPT}',
-               f'ABS@trk_eta < {MAXETA}']
+    names = [
+        'O.has_ele == True' ,
+        f'O.gsf_pt > {MINPT}',
+        f'np.abs(O.gsf_eta) < {MAXETA}',
+        ]
     
     # Construct and apply
-    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+    cuts  = [eval(names[i], globals()) for i in range(len(names))]
     mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     
     return mask

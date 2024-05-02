@@ -1,5 +1,5 @@
 basic:
-  active: false
+  active: true
   nbins:  70
   percentile_range: [0.5, 99.5]
   exclude_vals: [null, 0]
@@ -33,7 +33,7 @@ ROC_binned:
 
 ## MVA output density (1D)
 MVA_output:
-  active: false
+  active: true
   edges: 80
 
 ## MVA (output, external variable) density (2D)

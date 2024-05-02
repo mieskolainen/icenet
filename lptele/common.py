@@ -1,13 +1,18 @@
 # Common input & data reading routines for the electron ID
 #
-# Mikael Mieskolainen, 2023
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import copy
 import numpy as np
 import uproot
 from importlib import import_module
 from termcolor import colored, cprint
+import multiprocessing
+import time
+from tqdm import tqdm
+import ray
+import os
+import awkward as ak
 
 from icenet.tools import io
 from icenet.tools import aux
@@ -17,98 +22,109 @@ from icenet.tools import iceroot
 # Globals
 from configs.lptele.mctargets import *
 from configs.lptele.mcfilter  import *
+from configs.lptele.filter  import *
 from configs.lptele.cuts import *
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None, library='np'):
-    """ Loads the root files.
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
+    """ Loads the root files
     
     Args:
-        root_path : paths to root files (list)
+        root_path: path to root files
     
     Returns:
-        X:     columnar data
+        X:     jagged columnar data
         Y:     class labels
         W:     event weights
-        ids:   columnar variable string (list)
-        info:  trigger and pre-selection acceptance x efficiency information (dict)
+        ids:   columnar variables string (list)
+        info:  trigger, MC xs, pre-selection acceptance x efficiency information (dict)
     """
+
     inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
     
-    if type(root_path) is not list:
-        root_path = [root_path] # Make sure it is a list, even if one file only
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list
+
+    # ----------
+        
+    param = {
+        "tree":        "ntuplizer/tree",
+        "entry_start": entry_start,
+        "entry_stop":  entry_stop,
+        "maxevents":   maxevents,
+        "args":        args,
+        "load_ids":    inputvars.LOAD_VARS
+    }
     
-    # -----------------------------------------------
-    CUTFUNC    = globals()[args['cutfunc']]
-    TARFUNC    = globals()[args['targetfunc']]
+    INFO = {}
+    X    = {}
+    Y    = {}
+    W    = {}
+
+    # ----------
+
+    for key in args["input"].keys(): # input from yamlgen generated yml
+        class_id = int(key.split("_")[1])
+        proc     = args["input"][key] 
+        
+        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple(
+            class_id=class_id,
+            process_func=process_root,
+            processes=proc,
+            root_path=root_path,
+            param=param)
+        
+    X = ak.concatenate(X.values(), axis=0)
+    Y = ak.concatenate(Y.values(), axis=0)
+    W = ak.concatenate(W.values(), axis=0)
+    
+    rand = np.random.permutation(len(X)) # Randomize order, crucial!
+    X    = X[rand]
+    Y    = Y[rand]
+    W    = W[rand]
+
+    print(__name__ + f'.common.load_root_file: Event counts per class')
+    unique, counts = np.unique(Y, return_counts=True)
+    print(np.asarray((unique, counts)).T)
+    
+    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info': INFO}
+
+
+def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None, **kwargs):
+    """
+    Apply selections
+    """
+
     FILTERFUNC = globals()[args['filterfunc']]
-    # -----------------------------------------------
-
-    print('\n')
-    cprint( __name__ + f'.load_root_file: Loading root file {root_path}', 'yellow')
+    CUTFUNC    = globals()[args['cutfunc']]
     
-    # Check is it MC (based on the first file and first event)
-    file   = uproot.open(root_path[0])
-    events = file[args['tree_name']]
-    isMC   = bool(events.arrays('is_mc')[0]['is_mc'])
-
-    # --------------------------------------------------------------
-    # Load all files
-
-    X,ids = iceroot.load_tree(rootfile=root_path, tree=args['tree_name'],
-        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=None, library=library)
-    Y = None
-    # --------------------------------------------------------------
+    stats = {'filterfunc': None, 'cutfunc': None}
     
-    print(__name__ + f'.load_root_file: X.shape = {X.shape}')
-    io.showmem()
+    # @@ Filtering done here @@
+    fmask = FILTERFUNC(X=X, isMC=isMC, class_id=class_id, xcorr_flow=args['xcorr_flow'])
+    stats['filterfunc'] = {'before': len(X), 'after': sum(fmask)}
+    
+    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(fmask)} events ({sum(fmask)/(len(X)+1E-12):0.6f})', 'green')
     prints.printbar()
-
-    # =================================================================
-    # *** MC ONLY ***
-
-    if isMC:
-
-        # @@ MC target definition here @@
-        cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
-        Y = TARFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-        print(__name__ + f'.load_root_file: Y.shape = {Y.shape}')
-        
-        # @@ MC filtering done here @@
-        mask_mc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-        cprint(__name__ + f'.load_root_file: <filterfunc> | before: {len(X)}, after: {sum(mask_mc)} events', 'green')
-        prints.printbar()
-        
-        X = X[mask_mc]
-        Y = Y[mask_mc].squeeze() # Remove useless dimension
     
-    # =================================================================
-
+    X_new = X[fmask]
+    
     # @@ Observable cut selections done here @@
-    cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
-    cmask = CUTFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-    cprint(__name__ + f".load_root_file: <cutfunc> | before: {len(X)}, after: {np.sum(cmask)} events \n", 'green')
+    cmask = CUTFUNC(X=X_new, xcorr_flow=args['xcorr_flow'])
+    stats['cutfunc'] = {'before': len(X_new), 'after': sum(cmask)}
     
-    X = X[cmask]
-    if isMC: Y = Y[cmask]
-    
-    io.showmem()
+    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X_new)}, after: {sum(cmask)} events ({sum(cmask)/(len(X_new)+1E-12):0.6f}) \n", 'green')
     prints.printbar()
-    file.close()
-
-    # Trivial weights
-    W = np.ones(len(X))
-
-    # TBD add cut statistics etc. info here
-    info = {}
+    io.showmem()
     
-    # ** Crucial -- randomize order to avoid problems with other functions **
-    rand = np.random.permutation(len(X))
-    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
-    Y    = Y[rand].squeeze()
-    W    = W[rand].squeeze()
+    X_final = X_new[cmask]
 
-    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
-
+    if return_mask == False:
+        return X_final, ids, stats
+    else:
+        fmask_np = fmask.to_numpy()
+        fmask_np[fmask_np] = cmask # cmask is evaluated for which fmask == True
+        
+        return fmask_np
 
 def splitfactor(x, y, w, ids, args):
     """
@@ -121,328 +137,47 @@ def splitfactor(x, y, w, ids, args):
     Returns:
         dictionary with different data representations
     """
+
+    # ----------
+    # Init
     inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
     
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
-    
-    ### Pick active variables out
-    scalar_vars = aux.process_regexp_ids(all_ids=ids, ids=eval('inputvars.' + args['inputvar_scalar']))
-    #image_vars  = aux.process_regexp_ids(all_ids=ids, ids=inputvars.CMSSW_MVA_IMAGE_VARS)
 
-    # -------------------------------------------------------------------------
-    ### Pick kinematic variables out
+    if data.y is not None:
+        data.y = ak.to_numpy(data.y).astype(np.float32)
+    
+    if data.w is not None:
+        data.w = ak.to_numpy(data.w).astype(np.float32)
+
+    # ----------
+    # Pick active variables out
+    scalar_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),  ids=eval('inputvars.' + args['inputvar_scalar']))
+
+    # ----------
+    # Extract active kinematic variables
     data_kin = None
-    
     if inputvars.KINEMATIC_VARS is not None:
-
-        vars       = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.KINEMATIC_VARS)
-        data_kin   = data[vars]
-        data_kin.x = data_kin.x.astype(np.float32)
-    
-    # -------------------------------------------------------------------------
-    ### DeepSets representation
-    data_deps = None
-    
-    # -------------------------------------------------------------------------
-    ### Tensor representation
-    data_tensor = None
-    
-    #data_tensor = graphio.parse_tensor_data(X=data.x, ids=ids, image_vars=image_vars, args=args)
-    
-    # -------------------------------------------------------------------------
-    ## Graph representation
-    data_graph = None
-
-    #data_graph = graphio.parse_graph_data(X=data.x, Y=data.y, weights=data.w, ids=data.ids, 
-    #features=scalar_vars, graph_param=args['graph_param'])
-    
-    # --------------------------------------------------------------------
-    ### Finally pick active scalar variables out
-    
-    vars   = aux.process_regexp_ids(all_ids=data.ids, ids=scalar_vars)
-    data   = data[vars]
-    data.x = data.x.astype(np.float32)
-    
-    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
-
-
-# ========================================================================
-# ========================================================================
-
-# def init_multiprocess(maxevents=None):
-#     """ Initialize electron ID data [UNTESTED FUNCTION]
-
-#     Args:
-#         Implicit commandline and yaml file input.
-    
-#     Returns:
-#         jagged array data, arguments
-#     """
-
-#     args, cli = process.read_config(config_path='./configs/ele')
-#     features  = globals()[args['imputation_param']['var']]
-    
-#     ### SET random seed
-#     print(__name__ + f'.init: Setting random seed {args["rngseed"]}')
-#     np.random.seed(args['rngseed'])
-
-#     # --------------------------------------------------------------------
-#     ### SET GLOBALS (used only in this file)
-#     global ARGS
-#     ARGS = args
-
-#     if maxevents is not None:
-#         ARGS['maxevents'] = maxevents
-    
-#     print(__name__ + f'.init: inputvar   =  {args["inputvar"]}')
-#     print(__name__ + f'.init: cutfunc    =  {args["cutfunc"]}')
-#     print(__name__ + f'.init: targetfunc =  {args["targetfunc"]}')
-#     # --------------------------------------------------------------------
-
-#     ### Load data
-#     #data     = io.DATASET(func_loader=, files=args['root_files'], frac=args['frac'], rngseed=args['rngseed'])
-    
-#     CPU_count = None
-
-#     if CPU_count is None:
-#         CPU_count = int(np.ceil(multiprocessing.cpu_count()/2))
-
-#     # Loop over all files
-#     for i in range(len(args['root_files'])):
-
-#         file     = uproot.open(args['root_files'][i])
-#         num_events = int(file["ntuplizer"]["tree"].numentries)
-#         file.close()
-
-#         # Truncate upto max events
-#         num_events = np.min([args['maxevents'], num_events])
-#         N_cpu    = 1 if num_events <= 128 else CPU_count
-
-#         # Create blocks
-#         block_ind = aux.split_start_end(range(num_events), N_cpu)
-
-#         manager = multiprocessing.Manager()
-#         return_dict = manager.dict()
-
-#         # Extend with other variables
-#         procs = []
-#         for k in range(len(block_ind)):
-#             inputs = {
-#                 'root_path'   : args['root_files'][i],
-#                 'ids'         : None,
-#                 'entry_start' : block_ind[k][0],
-#                 'entry_stop'  : block_ind[k][1],
-#                 'image_on'    : args['image_on'],
-#                 'graph_on'    : args['graph_on'],
-#                 'args'        : args
-#             }
-
-#             p = multiprocessing.Process(target=load_root_file_multiprocess, args=(k, inputs, return_dict))
-#             procs.append(p)
-#             p.start()
-
-#         # Join processes
-#         for k in range(len(procs)):
-#             procs[k].join()
-
-#         # Join data
-#         #
-#         # ... add here ...
-#         io.showmem('yellow')
-
-#         # Fuse data
-#         N_tot = 0
-#         N_ind = []
-#         for k in tqdm(range(len(procs))):
-#             N_this = return_dict[k]['N']
-#             N_ind.append([N_tot, N_tot+N_this])
-#             N_tot += N_this
+        kinematic_vars = aux.process_regexp_ids(
+            all_ids=aux.unroll_ak_fields(x=x, order='first'),
+            ids=inputvars.KINEMATIC_VARS)
+        data_kin       = copy.deepcopy(data)
+        data_kin.x     = aux.ak2numpy(x=data.x, fields=kinematic_vars)
+        data_kin.ids   = kinematic_vars
         
-#         print(N_ind)
-#         print(__name__ + ': Combining multiprocess data ...')
-
-#         td = return_dict[0]['X_tensor'].shape[1:4] # Tensor dimensions
-
-#         data = {
-#             'X'        : np.zeros((N_tot, return_dict[0]['X'].shape[1]), dtype=object),
-#             'Y'        : np.zeros((N_tot), dtype=np.long),
-#             'X_tensor' : np.zeros((N_tot, td[0], td[1], td[2]), dtype=np.float),
-#             'X_graph'  : np.zeros((N_tot), dtype=object),
-#             'ids'     : return_dict[0]['ids']
-#         }
-
-#         for k in tqdm(range(len(procs))):
-
-#             ind = np.arange(N_ind[k][0], N_ind[k][1])
-#             data['X'][ind,...]        = return_dict[k]['X']
-#             data['Y'][ind]            = return_dict[k]['Y']
-#             data['X_tensor'][ind,...] = return_dict[k]['X_tensor']
-#             data['X_graph'][ind]      = return_dict[k]['X_graph']
-
-#         # Torch conversions
-#         data['X_graph']  = graphio.graph2torch(data['X_graph'])
+    # ----------
+    # Unnecessary representations
+    data_MI     = None # Mutual information
+    data_deps   = None # DeepSets
+    data_tensor = None # Tensor
+    data_graph  = None # Graph
     
-#     return data, args, features
-
-
-# def load_root_file_multiprocess(procnumber, inputs, return_dict, library='np'):
-#     """
-#     [UNTESTED FUNCTION]
-#     """
-
-#     print('\n\n\n\n\n')
-#     print(inputs)
-
-
-#     root_path   = inputs['root_path']
-#     ids         = inputs['ids']
-#     entry_start = inputs['entry_start']
-#     entry_stop  = inputs['entry_stop']
-#     graph_on    = inputs['graph_on']
-#     image_on    = inputs['image_on']
-#     args        = inputs['args']
-
-
-#     """ Loads the root file.
-    
-#     Args:
-#         root_path : paths to root files
-    
-#     Returns:
-#         X,Y       : input, output matrices
-#         ids      : variable names
-#     """
-
-#     # -----------------------------------------------
-#     # ** GLOBALS **
-
-#     if args is None:
-#         args = ARGS
-
-#     CUTFUNC    = globals()[args['cutfunc']]
-#     TARFUNC    = globals()[args['targetfunc']]
-#     FILTERFUNC = globals()[args['filterfunc']]
-
-#     if entry_stop is None:
-#         entry_stop = args['maxevents']
-#     # -----------------------------------------------
-
-    
-#     ### From root trees
-#     print('\n')
-#     cprint( __name__ + f'.load_root_file: Loading with uproot from file ' + root_path, 'yellow')
-#     cprint( __name__ + f'.load_root_file: entry_start = {entry_start}, entry_stop = {entry_stop}')
-
-#     file = uproot.open(root_path)
-#     events = file["ntuplizer"]["tree"]
-    
-#     print(events)
-#     print(events.name)
-#     print(events.title)
-#     #cprint(__name__ + f'.load_root_file: events.numentries = {events.numentries}', 'green')
-
-#     ### All variables
-#     if ids is None:
-#         #ids = events.keys()
-#         ids = [x.decode() for x in events.keys()]# if b'image_' not in x]
-
-#     # Check is it MC (based on the first event)
-#     X_test = events.array('is_mc', entry_start=entry_start, entry_stop=entry_stop, library=library)
-
-#     print(X_test)
-
-#     isMC   = bool(X_test[0]) # Take the first event
-#     N      = len(X_test)
-#     print(__name__ + f'.load_root_file: isMC = {isMC}')
-#     print(__name__ + f'.load_root_file: N    = {N}')    
-
-
-#     # Now read the data
-#     print(__name__ + '.load_root_file: Loading root file variables ...')
-
-#     # --------------------------------------------------------------
-#     # Important to lead variables one-by-one (because one single np.assarray call takes too much RAM)
-
-#     # Needs to be of object type numpy array to hold arbitrary objects (such as jagged arrays) !
-#     X = np.empty((N, len(ids)), dtype=object) 
-
-#     for j in tqdm(range(len(ids))):
-#         x = events.array(ids[j], entry_start=entry_start, entry_stop=entry_stop, library=library)
-#         X[:,j] = np.asarray(x)
-#     # --------------------------------------------------------------
-#     Y = None
-
-
-#     print(__name__ + f'common: X.shape = {X.shape}')
-#     io.showmem()
-
-#     prints.printbar()
-
-#     # =================================================================
-#     # *** MC ONLY ***
-
-#     if isMC:
-
-#         # @@ MC target definition here @@
-#         cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
-#         Y = TARFUNC(events, entry_start=entry_start, entry_stop=entry_stop)
-#         Y = np.asarray(Y).T
-
-#         print(__name__ + f'.load_root_file: Y.shape = {Y.shape}')
-
-#         # For info
-#         labels1 = ['is_e', 'is_egamma']
-#         aux.count_targets(events=events, ids=labels1, entry_start=entry_start, entry_stop=entry_stop)
-
-#         prints.printbar()
-
-#         # @@ MC filtering done here @@
-#         cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
-#         indmc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-
-#         cprint(__name__ + f'.load_root_file: Prior MC <filterfunc>: {len(X)} events', 'green')
-#         cprint(__name__ + f'.load_root_file: After MC <filterfunc>: {sum(indmc)} events ', 'green')
-#         prints.printbar()
-        
-        
-#         X = X[indmc]
-#         Y = Y[indmc].squeeze() # Remove useless dimension
-#     # =================================================================
-    
-#     # -----------------------------------------------------------------
-#     # @@ Observable cut selections done here @@
-#     cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
-#     cind = CUTFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-#     # -----------------------------------------------------------------
-    
-#     N_before = X.shape[0]
-
-#     ### Select events
-#     X = X[cind]
-#     if isMC: Y = Y[cind]
-
-#     N_after = X.shape[0]
-#     cprint(__name__ + f".load_root_file: Prior <cutfunc> selections: {N_before} events ", 'green')
-#     cprint(__name__ + f".load_root_file: Post  <cutfunc> selections: {N_after} events ({N_after / N_before:.3f})", 'green')
-#     print('')
-#     prints.printbar()
-
-#     # ** REMEMBER TO CLOSE **
-#     file.close()
-
-#     # --------------------------------------------------------------------
-#     ### Datatype conversions
-
-#     X_tensor = None
-#     X_graph  = None
-
-#     if image_on:
-#         X_tensor = graphio.parse_tensor_data(X=X, ids=ids, image_vars=globals()['CMSSW_MVA_IMAGE_VARS'], args=args)
-
-#     if graph_on:
-#         X_graph  = graphio.parse_graph_data_np(X=X, Y=Y, ids=ids, features=globals()[args['imputation_param']['var']])
-
-#     io.showmem()
-
-#     return_dict[procnumber] = {'X': X, 'Y': Y, 'ids': ids, "X_tensor": X_tensor, "X_graph": X_graph, 'N': X.shape[0]}
+    # ----------
+    return {
+        'data': data,
+        'data_kin': data_kin,
+        'data_deps': data_deps,
+        'data_tensor': data_tensor,
+        'data_graph': data_graph
+        }
 

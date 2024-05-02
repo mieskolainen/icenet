@@ -1,36 +1,39 @@
 # Generator level variables
 KINEMATIC_GEN_VARS = [
-  'gen_pt',
-  'gen_eta',
-  'gen_phi',
+    'gen_pt',
+    'gen_eta',
+    'gen_phi',
 ]
 
-# For plots, diagnostics etc.
+# Main kinematic variables
 KINEMATIC_VARS = [
-  'trk_pt',
-  'trk_eta',
-  'trk_phi',
+    'trk_pt',
+    'trk_eta',
+    'trk_phi',
+    'gsf_pt',
+    'gsf_eta',
+    'gsf_phi',
+    'ele_pt',
+    'ele_eta',
+    'ele_phi',
 ]
 
-# For plots, diagnostics etc.
+# Additional variables 
 ADDITIONAL_VARS = [
-    'is_e',
-    'is_mc',
-    'is_egamma',
-    'tag_pt',
-    'tag_eta',
-    'gsf_pt',
-    'has_gsf',
-    'ele_mva_value', # Existing 2019Aug07 BDT model
-    'ele_mva_value_depth10', # Existing 2020Sept15 BDT model
-    #'ele_mva_value_depth15',
+    'is_e','is_mc','is_egamma','is_aod', # Labels
+    'tag_pt','tag_eta',                  # Tag muon kine
+    'has_trk','has_gsf','has_ele',       # Object flags
+    'rho',                               # Proxy for pileup
+    'ele_mva_value',                     # Existing 2019Aug07 BDT score
+    'ele_mva_value_depth10',             # Existing 2020Sept15 BDT score 
 ]
 
 # Use these to test that the (re-weight trained) classifier
 # is independent of these
 UNIT_TEST_ID = [
-  'trk_pt',
-  'trk_eta',
+    'gsf_pt',
+    'gsf_eta',
+    'rho',
 ]
 
 CMSSW_MVA_SCALAR_VARS_ORIG = [
@@ -183,15 +186,26 @@ CMSSW_MVA_GRAPH_VARS = [
     'image_pf_phi',
     'image_pf_p'
 ]
-        
-# These variables are read out from ROOT files
+
+####################
+####################
+####################
+
+# KINEMATIC_VARS are required for processing
+KINEMATIC_VARS += ADDITIONAL_VARS
+
+# CMSSW_MVA_SCALAR_VARS are features used by BDT models
+CMSSW_MVA_SCALAR_VARS = []
+#CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_ORIG
+CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_2019Aug07
+CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_2020Sept15
+CMSSW_MVA_SCALAR_VARS = list(set(CMSSW_MVA_SCALAR_VARS))
+
+# LOAD_VARS are read out from ROOT files, 
 LOAD_VARS  = []
-LOAD_VARS += KINEMATIC_GEN_VARS
+#LOAD_VARS += KINEMATIC_GEN_VARS
 LOAD_VARS += KINEMATIC_VARS
-LOAD_VARS += ADDITIONAL_VARS
-#LOAD_VARS += CMSSW_MVA_SCALAR_VARS_ORIG
-LOAD_VARS += CMSSW_MVA_SCALAR_VARS_2019Aug07
-LOAD_VARS += CMSSW_MVA_SCALAR_VARS_2020Sept15
+LOAD_VARS += CMSSW_MVA_SCALAR_VARS
 #LOAD_VARS += CMSSW_MVA_IMAGE_VARS
 #LOAD_VARS += CMSSW_MVA_GRAPH_VARS
 LOAD_VARS = list(set(LOAD_VARS))

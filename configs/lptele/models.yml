@@ -6,11 +6,11 @@ xgb0:
   label:   '2019Aug07 (retrained)'
   raytune:  'xgb_setup'
   exclude_MVA_vars: ['.*']
-  include_MVA_vars: 'CMSSW_MVA_SCALAR_VARS_2019Aug07'
+  include_MVA_vars: ['2019Aug07.*']
 
   # general parameters
   model_param:
-    num_boost_round: 100    # number of epochs (equal to the number of trees!)
+    num_boost_round: 150 #100    # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'       # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
@@ -18,22 +18,22 @@ xgb0:
 
     # booster parameters
     learning_rate: 0.1
-    gamma: 0.0
+    gamma: 1.67 #0.0
     max_depth: 10
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
 
-    colsample_bytree:  1
-    colsample_bylevel: 1
-    colsample_bynode:  1
+    colsample_bytree:  0.86 #1
+    colsample_bylevel: 0.6 #1
+    colsample_bynode:  0.8 #1
     
     reg_lambda: 2.0       # L2 regularization
-    reg_alpha: 0.0        # L1 regularization
+    reg_alpha: 0.05 #0.0        # L1 regularization
     
     # learning task parameters
     objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['auc']     # for evaluation, 'logloss', 'mlogloss'
+    eval_metric: ['logloss'] #['auc']     # for evaluation, 'logloss', 'mlogloss', 'auc'
 
   plot_trees: False
 
@@ -47,7 +47,7 @@ xgb1:
   label:   '2020Sept15 (retrained)'
   raytune:  'xgb_setup'
   exclude_MVA_vars: ['.*']
-  include_MVA_vars: 'CMSSW_MVA_SCALAR_VARS_2020Sept15'
+  include_MVA_vars: ['2020Sept15.*']
 
   # general parameters
   model_param:

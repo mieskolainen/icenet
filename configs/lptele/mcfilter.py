@@ -38,7 +38,7 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     """
     
     # Fiducial cuts for the tag-side muon trigger object
-    MINPT   = 9.0
+    MINPT   = 7.0
     MAXETA  = 1.5
     
     # Define cuts (syntax accepts: logic ==, >=, <=, <, >, !=, ==, combinators AND and OR,
@@ -46,7 +46,8 @@ def filter_no_egamma(X, ids, xcorr_flow=False):
     cutlist = [f'BOOL@is_egamma == False' ,
                f'tag_pt       > {MINPT}',
                f'ABS@tag_eta < {MAXETA}']
-    
+    #f'(BOOL@is_mc == True AND BOOL@is_e == True) OR (BOOL@is_mc == False AND BOOL@is_e == False)',
+
     # Construct and apply
     cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
     mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)

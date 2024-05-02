@@ -33,3 +33,15 @@ def target_egamma(X, ids, xcorr_flow=False):
 
 # Add alternatives here
 # ...
+
+#def target_data_mc_mix(X, ids, xcorr_flow=False):
+#    """ Classification signal target """
+#
+#    # Define cuts
+#    cutlist = [f'(BOOL@is_mc == True AND BOOL@is_e == True) OR (BOOL@is_mc == False AND BOOL@is_e == False)']
+#
+#    # Construct and apply
+#    cuts, names = stx.construct_columnar_cuts(X=X, ids=ids, cutlist=cutlist)
+#    mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+#
+#    return mask
