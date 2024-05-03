@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.1
+                0.1.0.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -571,7 +571,7 @@
 
 <div class="viewcode-block" id="red">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.red">[docs]</a>
-<span class="k">def</span> <span class="nf">red</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_tag</span><span class="o">=</span><span class="s1">&#39;exclude_MVA_vars&#39;</span><span class="p">,</span> <span class="n">include_tag</span><span class="o">=</span><span class="s1">&#39;include_MVA_vars&#39;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">red</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_tag</span><span class="o">=</span><span class="s1">&#39;exclude_MVA_vars&#39;</span><span class="p">,</span> <span class="n">include_tag</span><span class="o">=</span><span class="s1">&#39;include_MVA_vars&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)</span>
 <span class="sd">    </span>
@@ -603,8 +603,10 @@
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">):</span>
         
         <span class="n">reduced</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Included input variables: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Excluded input variables: </span><span class="si">{</span><span class="n">reduced</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Included input variables: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Excluded input variables: </span><span class="si">{</span><span class="n">reduced</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Using a full set of input variables&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
     
