@@ -101,7 +101,7 @@ def slice_range(start, stop, N):
     return a, b, b-a
 
 
-def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars'):
+def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars', verbose=True):
     """
     Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)
     
@@ -133,8 +133,10 @@ def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='i
     if np.sum(mask) != len(ids):
         
         reduced = set(np.array(ids).tolist()) - set(np.array(ids)[mask].tolist())
-        cprint(__name__ + f'.red: Included input variables: {np.array(ids)[mask]}', 'yellow')
-        cprint(__name__ + f'.red: Excluded input variables: {reduced}', 'red')
+        
+        if verbose:
+            cprint(__name__ + f'.red: Included input variables: {np.array(ids)[mask]}', 'yellow')
+            cprint(__name__ + f'.red: Excluded input variables: {reduced}', 'red')
     else:
         cprint(__name__ + f'.red: Using a full set of input variables', 'red')
     
