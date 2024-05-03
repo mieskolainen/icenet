@@ -1,0 +1,4 @@
+input:
+  class_0:  !include include/qcd.yml
+  class_1:  !include include/signal.yml
+  class_-2: !include include/data.yml

@@ -4,3 +4,4 @@ import configs.eid
 import configs.hgcal
 import configs.peakfit
 import configs.trg
+import configs.brem
