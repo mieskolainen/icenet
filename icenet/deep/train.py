@@ -501,9 +501,8 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     x                = data_trn.x
     y_true           = data_trn.y
     weights          = data_trn.w
-    args['features'] = data_trn.ids
     
-    pred_func = predict.pred_cutset(args=args, param=new_param)
+    pred_func = predict.pred_cutset(ids=data_trn.ids, param=new_param)
     
     # Apply cutset
     y_pred    = pred_func(x)

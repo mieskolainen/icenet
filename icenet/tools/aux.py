@@ -22,6 +22,8 @@ from scipy import stats
 import scipy.special as special
 from scipy import interpolate
 
+from icefit import statstools
+
 
 def weighted_avg_and_std(values, weights):
     """
@@ -99,7 +101,7 @@ def slice_range(start, stop, N):
     return a, b, b-a
 
 
-def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars'):
+def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='include_MVA_vars', verbose=True):
     """
     Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)
     
@@ -131,7 +133,10 @@ def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='i
     if np.sum(mask) != len(ids):
         
         reduced = set(np.array(ids).tolist()) - set(np.array(ids)[mask].tolist())
-        cprint(__name__ + f'.red: Excluded input variables: {reduced}', 'red')
+        
+        if verbose:
+            cprint(__name__ + f'.red: Included input variables: {np.array(ids)[mask]}', 'yellow')
+            cprint(__name__ + f'.red: Excluded input variables: {reduced}', 'red')
     else:
         cprint(__name__ + f'.red: Using a full set of input variables', 'red')
     
@@ -1011,8 +1016,9 @@ class Metric:
         self.fpr        = out['fpr']
         self.tpr        = out['tpr']
         self.thresholds = out['thresholds']
-
-        if num_bootstrap > 0 and type(self.tpr) is not int:
+        
+        # Compute bootstrap
+        if (num_bootstrap is not None and num_bootstrap > 0) and type(self.tpr) is not int:
             
             self.tpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.tpr)))
             self.fpr_bootstrap = (-1)*np.ones((num_bootstrap, len(self.fpr)))
@@ -1022,7 +1028,7 @@ class Metric:
             for i in range(num_bootstrap):
 
                 # ------------------
-                trials = 0
+                trials     = 0
                 max_trials = 10000
                 while True:
                     ind = np.random.choice(range(len(y_true)), size=len(y_true), replace=True)

@@ -48,12 +48,12 @@ FILTER: &FILTER
        {cut: 'GEN_ctau == 100', latex: ['', 'ctau = 100']},
        {cut: 'GEN_ctau == 500', latex: ['', 'ctau = 500']}]
   
-  # +- 5 sigma windows, assuming 1% mass resolution
+  # +- 5 sigma windows, assuming 1% mass resolution ~ 1 sigma
   set[2]:
     expand: 'set'   # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: '1.90  < muonSV_mass_0 && muonSV_mass_0 < 2.10',  latex: ['', 'box(M ~ 2)']},
-       {cut: '4.75  < muonSV_mass_0 && muonSV_mass_0 < 5.25',  latex: ['', 'box(M ~ 5)']},
+      [{cut: '1.90  < muonSV_mass_0 && muonSV_mass_0 < 2.10', latex: ['', 'box(M ~ 2)']},
+       {cut: '4.75  < muonSV_mass_0 && muonSV_mass_0 < 5.25', latex: ['', 'box(M ~ 5)']},
        {cut: '9.50  < muonSV_mass_0 && muonSV_mass_0 < 10.50', latex: ['', 'box(M ~ 10)']},
        {cut: '14.25 < muonSV_mass_0 && muonSV_mass_0 < 15.75', latex: ['', 'box(M ~ 15)']},
        {cut: '19.00 < muonSV_mass_0 && muonSV_mass_0 < 21.00', latex: ['', 'box(M ~ 20)']}]

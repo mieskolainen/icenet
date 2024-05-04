@@ -2,7 +2,6 @@
 #
 # General comments:
 #
-# - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 # - Other imputation methods than 'constant' not natively compatible with re-weighting (-> biased)
 
 rootname: 'eid'
@@ -16,16 +15,9 @@ mva_param: &MVA_INPUT_PARAM
   signal_class: 1                    # Signal class ID
   #DA_class:    -2                   # Domain Adaptation class
   
-  inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS_ORIG' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  #inputvar_jagged: null              # 'MVA_JAGGED_VARS'
-  #jagged_maxdim:
-  #  
-  #  Jet:   4
-  #  Muon:  8
-  #  sv:    4
-  #  cpf:   20
-  #  npf:   10
-
+  inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS_ORIG' # Input variables, implemented under mvavars.py
+  inputvar_image: null               # Image variables, set 'CMSSW_MVA_IMAGE_VARS'
+  
   varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
   varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null               # Not implemented yet
@@ -43,6 +35,7 @@ mva_param: &MVA_INPUT_PARAM
   
   # Graph object construction
   graph_param:
+    num_workers: 1                    # Ray setup for common.py
     global_on: True
     self_loops: True
     directed: False
@@ -97,7 +90,7 @@ genesis_runmode:
   cutfunc:    'cut_standard'          # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
-  pickle_size: 1000                  # Number of entries (events) per pickle file
+  pickle_size: 100000                  # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
@@ -128,7 +121,7 @@ train_runmode:
     # to signal very easily, but it is possible to re-weight signal to background.
     # This is seen by inspecting the re-weighted distributions with small and large statistics.
 
-    dimension: 'pseudo-2D'        # '2D', 'pseudo-2D', '1D'
+    dimension: '2D'               # '2D', 'pseudo-2D', '1D'
     pseudo_type: 'product'        # 'product', 'geometric_mean'
 
     var:  ['trk_pt', 'trk_eta']
@@ -137,7 +130,7 @@ train_runmode:
     binmode:  ['linear', 'linear']         # 'log10' or 'linear' or 'edges' (custom array) binning
     
     # ! Variable, and binning min/max boundaries are both transformed !
-    transform: ['log10', null]         # 'log10', 'sqrt', 'square', null
+    transform: ['log10', null]   # 'log10', 'sqrt', 'square', null
     
     max_reg: 1000.0              # Maximum weight cut-off regularization
 
@@ -154,9 +147,10 @@ train_runmode:
   models:  !include configs/eid/models.yml
   active_models: &ACTIVE_MODELS
 
+    - cut0
     - xgb0
     #- gxgb0
-
+    
     #- dbnf0
     - gnet0
     - gnet1
@@ -166,7 +160,7 @@ train_runmode:
     - flr0
     - lgr0
     #- dmx0
-    - dmlp
+    #- dmlp
     #- cnn0
   
   ##  - xtx0

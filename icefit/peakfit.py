@@ -1247,7 +1247,7 @@ def run_jpsi_tagprobe(inputparam, savepath):
                 for GENTYPE in [data_tag, mc_tag]:
 
                     ### Compute Tag & Probe efficiency
-                    N,N_err       = tagprobe(tree=tree, total_savepath=f'{savepath}/Run{YEAR}/{GENTYPE}/{SYST}')
+                    N,N_err          = tagprobe(tree=tree, total_savepath=f'{savepath}/Run{YEAR}/{GENTYPE}/{SYST}')
                     eff[GENTYPE]     = N['Pass'] / (N['Pass'] + N['Fail'])
                     eff_err[GENTYPE] = statstools.tpratio_taylor(x=N['Pass'], y=N['Fail'], x_err=N_err['Pass'], y_err=N_err['Fail'])
 
@@ -1256,11 +1256,11 @@ def run_jpsi_tagprobe(inputparam, savepath):
                     print(f'N_pass:     {N["Pass"]:0.1f} +- {N_err["Pass"]:0.1f} (signal fit)')
                     print(f'N_fail:     {N["Fail"]:0.1f} +- {N_err["Fail"]:0.1f} (signal fit)')
                     print(f'Efficiency: {eff[GENTYPE]:0.3f} +- {eff_err[GENTYPE]:0.3f} \n')
-
+                    
                 ### Compute scale factor Data / MC
                 scale     = eff[data_tag] / eff[mc_tag]
-                scale_err = statstools.prodratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
-                            sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0, mode='ratio')
+                scale_err = statstools.ratio_eprop(A=eff[data_tag], B=eff[mc_tag], \
+                                sigmaA=eff_err[data_tag], sigmaB=eff_err[mc_tag], sigmaAB=0)
 
                 print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
 
@@ -1269,6 +1269,7 @@ def run_jpsi_tagprobe(inputparam, savepath):
                 filename = f"{total_savepath}/{tree}.pkl"
                 pickle.dump(outdict, open(filename, "wb"))
                 cprint(f'Efficiency and scale factor results saved to: {filename} (pickle)', 'green')
+
     return True
 
 

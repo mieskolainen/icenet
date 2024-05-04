@@ -49,15 +49,15 @@ FILTER: &FILTER
        {cut: 'GEN_ctau == 10',  latex: ['', 'ctau = 10' ]},
        {cut: 'GEN_ctau == 100', latex: ['', 'ctau = 100']}]
   
-  # +- 5 sigma windows, assuming 1% mass resolution
+  # +- 20 sigma windows except last one with +- 5 sigma, assuming 1% mass resolution ~ 1 sigma
   set[2]:
     expand: 'set'  # 'set', 'vetoset' or 'powerset'
     cutset:
-      [{cut: '0.3135 < muonSV_mass_0 && muonSV_mass_0 < 0.3465', latex: ['', 'box(M ~ 0.33)']},
-       {cut: '0.38   < muonSV_mass_0 && muonSV_mass_0 < 0.42',   latex: ['', 'box(M ~ 0.40)']},
-       {cut: '0.6365 < muonSV_mass_0 && muonSV_mass_0 < 0.7035', latex: ['', 'box(M ~ 0.67)']},
-       {cut: '1.2635 < muonSV_mass_0 && muonSV_mass_0 < 1.3965', latex: ['', 'box(M ~ 1.33)']},
-       {cut: '0.95   < muonSV_mass_0 && muonSV_mass_0 < 1.05',   latex: ['', 'box(M ~ 1.00)']},
+      [{cut: '0.264  < muonSV_mass_0 && muonSV_mass_0 < 0.396',  latex: ['', 'box(M ~ 0.33)']},
+       {cut: '0.320  < muonSV_mass_0 && muonSV_mass_0 < 0.480',  latex: ['', 'box(M ~ 0.40)']},
+       {cut: '0.536  < muonSV_mass_0 && muonSV_mass_0 < 0.804',  latex: ['', 'box(M ~ 0.67)']},
+       {cut: '1.064  < muonSV_mass_0 && muonSV_mass_0 < 1.596',  latex: ['', 'box(M ~ 1.33)']},
+       {cut: '0.800  < muonSV_mass_0 && muonSV_mass_0 < 1.200',  latex: ['', 'box(M ~ 1.00)']},
        {cut: '3.1635 < muonSV_mass_0 && muonSV_mass_0 < 3.4965', latex: ['', 'box(M ~ 3.33)']}]
   
   # Final state category cuts

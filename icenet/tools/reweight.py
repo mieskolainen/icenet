@@ -55,7 +55,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12):
         RV = {}
         for var in paramdict.keys():
             if use_ak:
-                RV[var] = ak.to_numpy(x[var]).astype(np.float)
+                RV[var] = ak.to_numpy(x[paramdict[var]]).astype(np.float)
             else:
                 RV[var] = x[:, ids.index(paramdict[var])].astype(np.float)
 

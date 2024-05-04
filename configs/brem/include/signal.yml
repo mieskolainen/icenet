@@ -1,0 +1,9 @@
+# [0]
+SIGNAL: &SIGNAL
+  path: ''
+  files: 'output_signal_10k.root'
+  xs: 1.
+  model_param: null
+  force_xs: false
+  isMC:     true
+  maxevents_scale: 1.

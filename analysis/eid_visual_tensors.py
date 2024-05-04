@@ -56,6 +56,10 @@ def main() :
     
     runmode        = 'train'
     args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    
+    # Force tensor processing on
+    args['inputvar_image'] = 'CMSSW_MVA_IMAGE_VARS'
+    
     predata        = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
     data           = process.process_data(args=args, predata=predata, func_factor=common.splitfactor, mvavars='configs.eid.mvavars', runmode='train')
     
@@ -65,7 +69,7 @@ def main() :
     data        = data['trn']['data']
 
     targetdir = aux.makedir(f'./figs/{args["rootname"]}/{args["config"]}/image/')
-
+    
     
     # --------------------------------------------------------------------
     # NMF factorization

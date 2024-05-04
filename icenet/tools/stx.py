@@ -191,7 +191,6 @@ def set_constructor(cutset, X, ids, veto=False):
     # Turn into matrix
     mask_matrix = np.zeros((len(mask_set), len(mask_set[0])), dtype=np.bool_)
 
-
     # Create description strings
     text_set, path_set = [],[]
 
@@ -365,7 +364,8 @@ def parse_boolean_exptree(instring):
     A boolean expression tree parser.
     
     Args:
-        instring : input string, e.g. "pt > 7.0 AND (x < 2 OR x >= 4)"
+        instring : input string,
+            e.g. "pt > 7.0 AND (x < 2 OR x >= 4)"
     
     Returns:
         A syntax tree as a list of lists
@@ -374,6 +374,11 @@ def parse_boolean_exptree(instring):
         See: https://stackoverflow.com/questions/11133339/
              parsing-a-complex-logical-expression-in-pyparsing-in-a-binary-tree-fashion
     """
+    
+    # Check we don't have single & or single | (need to be &&, ||)
+    for c in ["&", "|"]:
+        if (instring.count(c) % 2) != 0:
+            raise Exception(__name__ + f'.parse_boolean_exptree: Problem with {c}, use only C-style && or ||')
     
     # Functions use internally AND and OR
     instring = instring.replace("&&", "AND")
@@ -424,7 +429,7 @@ def parse_boolean_exptree(instring):
                                 ("OR",  2, pp.opAssoc.LEFT, makeLRlike(2)),
                                 ("AND", 2, pp.opAssoc.LEFT, makeLRlike(2)),
                                 ])
-
+    
     output = expr.parseString(instring)
 
     # Remove excess []

@@ -11,9 +11,6 @@ DATAPATH="./travis-stash/input/icetrg"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
-# Use * or other glob wildcards for filenames
-mkdir "figs/trg/config-[$CONFIG]" -p # for output ascii dump
-
 # tee redirect output to both a file and to screen
 python analysis/trg.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH
 python analysis/trg.py --runmode "train"   $MAX --config $CONFIG --datapath $DATAPATH

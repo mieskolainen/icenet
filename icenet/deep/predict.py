@@ -8,6 +8,8 @@ import torch_geometric
 import pickle
 import copy
 
+from tqdm import tqdm
+
 # xgboost
 import xgboost
 
@@ -22,12 +24,12 @@ from icenet.deep  import optimize
 from icenet.deep  import dbnf
 
 
-def pred_cut(args, param):
+def pred_cut(ids, param):
 
     print(__name__ + f'.pred_cut: Evaluate <{param["label"]}> cut model ...')
 
     # Get feature name variables
-    index = args['features'].index(param['variable'])
+    index = ids.index(param['variable'])
     
     def func_predict(x):
         # Identity
@@ -45,7 +47,7 @@ def pred_cut(args, param):
     
     return func_predict
 
-def pred_cutset(args, param):
+def pred_cutset(ids, param):
 
     print(__name__ + f'.pred_cutset: Evaluate <{param["label"]}> fixed cutset model ...')
     cutstring = param['cutstring']
@@ -56,13 +58,10 @@ def pred_cutset(args, param):
         exec(f"{p} = param['model_param']['{p}']")
     
     # Expand cut string
-    variable = param['variable']
+    variable = param['variable'] # this is needed in memory!
     expr = eval(f'f"{cutstring}"')
-
-    print(f'cutstring expanded: {expr}')
     
-    # Get feature name variables
-    ids = args['features']
+    print(f'cutstring expanded: {expr}')
     
     def func_predict(x):
         y = stx.eval_boolean_syntax(expr=expr, X=x, ids=ids)
@@ -76,7 +75,8 @@ def pred_graph_xgb(args, param, device='cpu'):
     
     graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \
         label=param['graph']['label'], epoch=param['graph']['readmode']).to(device)
-    graph_model.eval() # Turn eval mode one!
+    
+    graph_model.eval() # Turn on eval!
     
     xgb_model   = pickle.load(open(aux.create_model_filename(path=args['modeldir'], \
         label=param['xgb']['label'], epoch=param['xgb']['readmode'], filetype='.dat'), 'rb'))
@@ -128,7 +128,7 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
         loader = torch_geometric.loader.DataLoader(x_in, batch_size=batch_size, shuffle=False)
 
         # Predict in smaller batches not to overflow GPU memory
-        for i, batch in enumerate(loader):
+        for i, batch in tqdm(enumerate(loader)):
             y = model.softpredict(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
             y_tot = copy.deepcopy(y) if (i == 0) else np.concatenate((y_tot, y), axis=0)
         
@@ -145,6 +145,7 @@ def pred_torch_generic(args, param, return_model=False):
     print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    
     model.eval() # ! Turn on eval mode!
     
     def func_predict(x):
@@ -169,6 +170,7 @@ def pred_torch_scalar(args, param, return_model=False):
     print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    
     model.eval() # ! Turn on eval mode!
     
     def func_predict(x):
@@ -187,11 +189,6 @@ def pred_torch_scalar(args, param, return_model=False):
     else:
         return func_predict, model
 
-'''
-def pred_xtx(args, param):
-
-# Not implemented
-'''
 
 def pred_xgb(args, param, feature_names=None, return_model=False):
     
@@ -254,6 +251,10 @@ def pred_flow(args, param, n_dims, return_model=False):
         modelnames.append(f'{param["label"]}_class_{i}')
     
     models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'])
+    
+    # Turn on eval!
+    for i in range(len(models)):
+        models[i].eval()
     
     def func_predict(x):
         return dbnf.predict(x, models)

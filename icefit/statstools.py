@@ -1,5 +1,7 @@
 # Statistical tests and tools
 #
+# pytest icefit/statstools.py -rP
+#
 # m.mieskolainen@imperial.ac.uk, 2023
 
 import numpy as np
@@ -123,6 +125,9 @@ def tpratio_taylor(x,y, x_err,y_err, xy_err=0.0):
 
     r = x/(x+y)
     
+    If x and y are e.g. counts from stat. independent histograms,
+    then xy_err = 0 (~ tag & probe style ratios).
+    
     Args:
         x,y         : values
         x_err,y_err : uncertainties
@@ -139,23 +144,125 @@ def tpratio_taylor(x,y, x_err,y_err, xy_err=0.0):
     return np.sqrt(r2)
 
 
-def prodratio_eprop(A, B, sigmaA, sigmaB, sigmaAB=0, mode='ratio'):
+def prod_eprop(A, B, sigmaA, sigmaB, sigmaAB=0):
     """
-    Error propagation (Taylor expansion) of product A*B or ratio A/B
+    Error propagation (Taylor expansion) of a product A*B
 
     Args:
-        A : Value A 
-        B : Value B
+        A       : Value A 
+        B       : Value B
         sigmaA  : 1 sigma uncertainty on A
         sigmaB  : 1 sigma uncertainty on B
         sigmaAB : Covariance of A,B
-        mode    : 'prod' or 'ratio'
 
     Returns:
-        Uncertainty on A/B 
+        Uncertainty
     """
-    sign = 1 if mode == 'prod' else -1
-    return np.sqrt((A/B)**2*((sigmaA/A)**2 + (sigmaB/B)**2 + sign*2*sigmaAB/(A*B)))
+    f = A * B
+    return np.sqrt(f**2*((sigmaA/A)**2 + (sigmaB/B)**2 + 2*sigmaAB/(A*B)))
+
+
+def ratio_eprop(A, B, sigmaA, sigmaB, sigmaAB=0):
+    """
+    Error propagation (Taylor expansion) of a ratio A/B
+
+    Args:
+        A       : Value A 
+        B       : Value B
+        sigmaA  : 1 sigma uncertainty on A
+        sigmaB  : 1 sigma uncertainty on B
+        sigmaAB : Covariance of A,B
+    
+    Returns:
+        Uncertainty
+    """
+    f = A / B
+    return np.sqrt(f**2*((sigmaA/A)**2 + (sigmaB/B)**2 - 2*sigmaAB/(A*B)))
+
+
+def weighted_binomial_err(b1: float, b2: float, e1: float, e2: float):
+    """
+    Binomial counting efficiency error with weights
+    
+    For the reference, see:
+    https://root.cern/doc/master/TH1_8cxx_source.html#l02962
+    
+    If e1 ~ sqrt(b1) and e2 ~ sqrt(b2), one should recover results of this
+    function by using the proper covariance with:
+    
+    prodratio_eprop(A=b1, B=b2, sigma_A=e1, sigma_B=e2, sigmaAB=b1, mode='ratio)
+    
+    N.B. If b1 == b2, will return 0
+    
+    Args:
+        b1: binomial numerator (e.g. count or sum of weights)
+        b2: binomial denominator
+        e1: error on the numerator (e.g. \sqrt(\sum_i(w_i^2))
+        e2: error on the denominator
+    """
+    if b1 == b2:
+        return 0.0
+    
+    r   = b1 / b2
+    err = np.sqrt(np.abs( ((1.0 - 2.0*r))*e1**2 + (r*e2)**2) / (b2**2))
+    
+    return err
+
+
+def columnar_mask_efficiency(num_mask: np.ndarray, den_mask: np.ndarray,
+                             y_true: np.ndarray, y_target: int, weights: np.ndarray):
+    """
+    Masked columnar selection efficiency with event weights and classes
+    
+    Args:
+        num_mask: numerator mask vector (Nx1, bool)
+        den_mask: denominator mask      (Nx1, bool)
+        y_true:   label vector          (Nx1, int)
+        y_target: target label          (int)
+        weights:  event weights         (Nx1, float)
+        
+    Returns:
+        binomial efficiency, weighted binomial stat. error
+    """
+     
+    w1 = weights[y_true == y_target]*num_mask[y_true == y_target]
+    w2 = weights[y_true == y_target]*den_mask[y_true == y_target]
+    
+    b1 = np.sum(w1)
+    b2 = np.sum(w2)
+    e1 = np.sqrt(np.sum(w1**2))
+    e2 = np.sqrt(np.sum(w2**2))
+    
+    eff     = b1 / b2
+    eff_err = weighted_binomial_err(b1=b1, b2=b2, e1=e1, e2=e2)
+    
+    return eff, eff_err
+
+
+def ADS(s, b, sigma_b, EPS=1e-6):
+    """
+    Asimov discovery significance with background uncertainty
+    https://indico.cern.ch/event/708041/papers/3272129/files/9437-acat19DirectOpti.pdf
+    
+    when sigma_b --> 0, this gives np.sqrt(2*((s+b)*np.log(1.0 + s/b) - s))
+    
+    Args:
+        s:        expected signal count
+        b:        expected background count
+        sigma_b:  error on the background estimate
+        EPS:      regularization constant
+    """
+    if s + b == 0:
+        return 0
+    if b == 0:
+        b = EPS
+    if sigma_b == 0:
+        sigma_b = EPS
+
+    T1 = ((s+b)*(b+sigma_b**2)) / (b**2+(s+b)*sigma_b**2)
+    T2 = 1 + (sigma_b**2*s) / (b*(b+sigma_b**2))
+    
+    return np.sqrt(2*((s+b)*np.log(T1) - b**2/(sigma_b**2) * np.log(T2)))
 
 
 def welch_ttest(X1, X2, s1, s2, n1, n2):
@@ -413,6 +520,35 @@ def test_extreme_npdf():
     print(f' Monte Carlo expectation: <extreme> = {np.mean(maxvals):0.3f}')
 
 
+def test_efficiency_ratio(EPS=1e-6):
+
+    import pytest
+    
+    # Ratio error, where b1 is the numerator (number of successes)
+    # in a binomial ratio and b2 is the denominator (total number of trials)
+    # where we allow both numerator and denominator to fluctuate aka take
+    # here Poisson errors for them.
+    
+    b1 = 5
+    b2 = 20
+    e1 = np.sqrt(b1)
+    e2 = np.sqrt(b2)
+
+    eff       = b1 / b2
+    eff_err_A = weighted_binomial_err(b1=b1, b2=b2, e1=e1, e2=e2)
+    eff_err_B = ratio_eprop(A=b1, B=b2, sigmaA=e1, sigmaB=e2, sigmaAB=b1)
+    eff_err_C = tpratio_taylor(x=b1, y=b2-b1, x_err=e1, y_err=np.sqrt(b2 - b1))
+    
+    print(f'eff = {eff}')
+    print(f'err_eff = {eff_err_A:0.6g} (A)')
+    print(f'err_eff = {eff_err_B:0.6g} (B)')
+    print(f'err_eff = {eff_err_C:0.6g} (C)')
+
+    assert   eff_err_A == pytest.approx(eff_err_B, abs=EPS)
+    assert   eff_err_B == pytest.approx(eff_err_C, abs=EPS)
+    assert   eff_err_A == pytest.approx(eff_err_C, abs=EPS)
+
+
 def test_ratios():
     """
     Test function
@@ -452,13 +588,12 @@ def test_ratios():
         res = 0 if covers(1, ppois95[0], ppois95[1]) else np.min(np.abs(ppois95 - 1))
         print(f'Systematic residual: {res:0.2f}')
         
-        
         # Single sample Poisson tail integral
         ppois = poisson_tail(k1=k_pre[i], k2=k_obs[i])
         print(f'Poisson tail p = {ppois:0.3E} ({p2zscore(ppois):0.2f} sigmas)')
 
         # Error propagation
-        errAB = prodratio_eprop(A=k_pre[i], sigmaA=s_pre[i], B=k_obs[i], sigmaB=s_obs[i])
+        errAB = ratio_eprop(A=k_pre[i], sigmaA=s_pre[i], B=k_obs[i], sigmaB=s_obs[i])
         PRE_over_OBS = k_pre[i] / k_obs[i]
         print(f'  error propagated rel.uncertainty on the ratio: err / (pre/obs) = {errAB / PRE_over_OBS:0.3f}')
 

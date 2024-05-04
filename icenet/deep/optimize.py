@@ -13,6 +13,7 @@ from icenet.deep import deeptools
 from icenet.tools import aux
 from icenet.tools import io
 
+from tqdm import tqdm
 
 class Dataset(torch.utils.data.Dataset):
 
@@ -148,10 +149,10 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         for k in range(len(MI['model'])):
             MI['model'][k].eval()
 
-    for i, batch in enumerate(loader):
-
+    for _, batch in tqdm(enumerate(loader)):
+        
         batch_ = batch2tensor(batch, device)
-
+        
         # -----------------------------------------
         # Torch models
         if type(batch_) is dict:

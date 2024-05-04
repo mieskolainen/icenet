@@ -1,15 +1,14 @@
 # Log-normal density parameters & generation
 #
-# Run tests with: pytest lognormal.py -rP
+# Run with: python lognormal.py
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import optimize
+from scipy.optimize import fsolve
 
-
-def lognormal_param(m, v, inmode='mean', verbose=False):
+def lognormal_param(m, v, match_mode='mean', verbose=True):
     """
     Compute log-normal distribution \mu and \sigma parameters from
     the target mean (or median) m and variance v
@@ -20,40 +19,47 @@ def lognormal_param(m, v, inmode='mean', verbose=False):
     Args:
         m      : mean (or median or mode) value of the target log-normal pdf
         v      : variance value of the target log-normal pdf
-        inmode : input m as 'mean', 'median', or 'mode'
+        match_mode : input m as 'mean', 'median', or 'mode'
     """
-    if   inmode == 'mean':
+    if   match_mode == 'mean':
         """ CLOSED FORM SOLUTION """
         mu    = np.log(m**2/np.sqrt(v + m**2))
         sigma = np.sqrt(np.log(v/m**2 + 1))
 
-    elif inmode == 'median':
+    elif match_mode == 'median':
         """ CLOSED FORM SOLUTION """
         mu    = np.log(m)
         sigma = np.sqrt(np.log((np.sqrt(m**2 + 4*v)/m + 1)/2))
 
-    elif inmode == 'mode':
+    elif match_mode == 'mode':
         """ NUMERICAL SOLUTION """
-        def fun(x):
+        
+        def mode_func(x):
             d = np.array([m - np.exp(x[0] - x[1]), v - (np.exp(x[1]) - 1)*np.exp(2*x[0] + x[1])])
-            return np.sum(d**2)
-
-        sol   = optimize.minimize(fun=fun, x0=[1, 1], method='nelder-mead')
-        mu    = sol['x'][0]
-        sigma = np.sqrt(sol['x'][1])
-
+            return d
+        
+        init_guess = (np.log(m), np.log(1 + np.sqrt(v)/m))
+        sol   = fsolve(mode_func, init_guess)
+        mu    = sol[0]
+        sigma = np.sqrt(sol[1])
+    
+    elif match_mode == 'geometric':
+        """ CLOSED FORM SOLUTION """
+        mu    = np.log(m) # m is median and also geometric mean
+        sigma = np.log(1 + np.sqrt(v)/m) # from log(s_G), where s_G = exp(STD(log(X)))
+    
     else:
-        raise Except('lognormal_param: Unknown inmode')
+        raise Exception(f'lognormal_param: Unknown match_mode {match_mode}')
 
     if verbose:
         print(f'lognormal_param:')
-        print(f'  - Input:     m = {m:0.5f}, v = {v:0.5f}, target = {inmode}')
-        print(f'  - Obtained parameters: mu = {mu:0.5f}, sigma = {sigma:0.5f}')
-
+        print(f'  - Input:     m = {m:0.3f}, v = {v:0.3f}, sqrt[v] = {np.sqrt(v):0.3f}, sqrt[v] / m = {np.sqrt(v)/m:0.3f}, target mode = {match_mode}')
+        print(f'  - Obtained parameters: mu = {mu:0.3f}, sigma = {sigma:0.3f}, exp(sigma) = {np.exp(sigma):0.3f}')
+    
     return mu, sigma
 
 
-def rand_lognormal(m, v, N, inmode='mean'):
+def rand_lognormal(m, v, N, match_mode='mean'):
     """
     Generate random numbers from log-normal density with
     the distribution target mean (or median) m and variance v
@@ -62,131 +68,158 @@ def rand_lognormal(m, v, N, inmode='mean'):
         m      : mean (or median or mode) value of the target log-normal pdf
         v      : variance value of the target log-normal pdf
         N      : number of samples
-        inmode : input m as 'mean', 'median', or 'mode'
+        match_mode : input m as 'mean', 'median', or 'mode'
     """
-    mu,sigma = lognormal_param(m=m, v=v, inmode=inmode)
+    mu,sigma = lognormal_param(m=m, v=v, match_mode=match_mode)
 
     # Standard transform
     y = np.exp(mu + sigma * np.random.randn(N))
 
     return y
 
-
-def rand_powexp(b, sigma, N):
+def rand_powexp(m, std, N):
     """
-    Power+exp type parametrization (positive definite)
+    Power+exp type parametrization for median matching
     
     Args:
-        sigma : standard deviation
+        m     : median target
+        std   : standard deviation target
         N     : number of samples
     """
     theta = np.random.randn(N) # theta ~ exp(-0.5 * sigma^2)
 
-    return b*(1 + sigma)**theta
+    return m*(1 + std/m)**theta
 
+def create_label(X):
+    mean  = np.mean(X)
+    med   = np.median(X)
+    std   = np.std(X)
+    gsd   = np.exp(np.std(np.log(X))) # Geometric standard deviation
+    
+    # Find histogram mode
+    bins = np.linspace(0, 5*med, 300)
+    counts, xval = np.histogram(X, bins)
+    mode = xval[np.argmax(counts)]
+
+    return f'(mean,med,mode) = ({mean:0.1f}, {med:0.1f}, {mode:0.1f}), STD[X] = {std:0.2f}, GSD[X] = {gsd:0.2f}, std/mean = {std/mean:0.1f}, std/med = {std/med:0.1f}, std/mode = {std/mode:0.1f}'
 
 def test_lognormal():
 
     import pytest
 
-    N     = int(1e6)
-    
+    N     = int(1e7)
+
     # Nominal value
-    b0    = 1.5
+    m0    = 1.5
     
     # Different relative uncertainties
-    delta_val = np.array([0.1, 0.4, 1.5])
-
+    delta_val = np.array([0.1, 0.4, 0.8, 1.6])
+    
     # Different input modes
-    modes = ['mean', 'median', 'mode']
-
-    fig, ax = plt.subplots(nrows=len(delta_val), ncols=len(modes), figsize=(14,9))
+    modes  = ['mean', 'median', 'mode', 'geometric']
+    symbol = ['\\bar{{m}}', 'm', '\\tilde{{m}}', 'm']
+    
+    fig, ax = plt.subplots(nrows=len(delta_val), ncols=len(modes), figsize=(20,15))
     for i in range(len(delta_val)):
-        delta = delta_val[i]
+        
+        # log-normal pdf targets
+        delta = delta_val[i] 
+        std   = delta*m0
+        
+        # 2. Generate power-approx formula distributed variables
+        Y  = rand_powexp(m=m0, std=std, N=N)
+        Y_label = create_label(Y)
+        
         for j in range(len(modes)):
 
             # 1. Generate log-normally distributed variables
-            sigma = delta*b0
-            b   = rand_lognormal(m=b0, v=sigma**2, N=N, inmode=modes[j])
-
-            # Computete statistics
-            mean = np.mean(b)
-            med  = np.median(b)
-            std  = np.std(b)
             
-            # Find mode
-            bins = np.linspace(0, 5*b0, 300)
-            counts, xval = np.histogram(b, bins)
-            mode  = xval[np.argmax(counts)]
+            X       = rand_lognormal(m=m0, v=std**2, N=N, match_mode=modes[j])
+            X_label = create_label(X)
 
-            label = f'b_0 = {b0:0.1f}, \delta = {delta:0.2f} :: (mean,med,mode) = ({mean:0.2f}, {med:0.2f}, {mode:0.2f}), std = {std:0.2f}, std/mean = {std/mean:0.2f}, std/med = {std/med:0.2f}, std/mode = {std/mode:0.2f}'
-            print(f'{label} \n')
+            # Compute sample point statistics
+            print(f'** {modes[j]} matching: m_0 = {m0:0.1f}, \delta = {delta:0.2f} **')
+            print(f'{X_label} \n')
 
-            if (i == 0):
-                ax[i,j].set_title(f'<{modes[j]}> as the target $m$')
+            title = f'$({symbol[j]} = {m0:0.1f}, \sqrt{{v}}/{symbol[j]} = {delta:0.1f})$'
+            ax[i,j].set_title(f'<{modes[j]}> matching: {title}', fontsize=9)
 
-            # 2. Generate power-exp distributed variables
-            c  = rand_powexp(b=b0, sigma=sigma, N=N)
-
-            ax[i,j].hist(b, bins, label=f'exact log-N: $m = {b0:0.2f}, \\sqrt{{v}} = {delta:0.2f}$', histtype='step')
-            ax[i,j].hist(c, bins, label=f'approx power: $s = {delta:0.2f}$', histtype='step')
+            # ---------------
             
-            ax[i,j].legend(fontsize=9, loc='lower right')
-            ax[i,j].set_xlim([0, b0*3])
-            ax[i,j].set_xlabel('$x$')
+            bins = np.linspace(0, 5*np.median(X), 200)
+            
+            ax[i,j].hist(X, bins, label=f'E: {X_label}', histtype='step', density=True)
+            ax[i,j].hist(Y, bins, label=f'A: {Y_label}', histtype='step', density=True)
+            
+            ax[i,j].legend(fontsize=4, loc='lower right')
+            ax[i,j].set_xlim([0, m0*2.5])
+            ax[i,j].set_ylim([0, None])
+            
+            if i == len(delta_val) - 1:
+                ax[i,j].set_xlabel('$x$')
 
         print('----------------------------------------------------------')
 
-    plt.savefig('sampling.pdf', bbox_inches='tight')
-    plt.show()
-
+    figname = 'sampling.pdf'
+    print(f'Saving figure: {figname}')
+    plt.savefig(figname, bbox_inches='tight')
+    plt.close()
 
 def test_accuracy():
     """
     Test accuracy made in the power-exp approximation with median = 1
     """
-    def func_s(v, order=1):
+    def expanded_s(v, m, order=1):
 
-        A = np.sqrt(v)
-
+        if order >= 1:
+            A = np.sqrt(v)/m
         if order >= 2:
-            A += v/2
+            A +=  (1/2)*(v/m**2)
         if order >= 3:
-            A += -7*v**(3/2)/12
+            A += -(7/12)*(v**(3/2)/m**3)
         if order >= 4:
-            A += -17*v**2/24
+            A += -(17/24)*(v**2/m**4)
         if order >= 5:
-            A += 163*v**(5/2)/160
+            A +=  (163/160)*(v**(5/2)/m**5)
         if order >= 6:
-            A += 1111*v**3/720
+            A +=  (1111/720)*(v**3/m**6)
         if order >= 7:
-            A += -96487*v**(7/2)/40320
+            A += -(96487/40320)*(v**(7/2)/m**7)
 
-        return A / (np.exp(np.sqrt(np.log(1/2 * (1 + np.sqrt(1 + 4*v))))) - 1)
-
-
-    v = np.linspace(1e-9, 1.5**2, 10000)
+        return A
+    
+    def exact_s(v, m):
+        return np.exp(np.sqrt(np.log(1/2 * (np.sqrt(4*v/m**2 + 1) + 1)))) - 1
+    
+    # Fixed m value
+    m       = 1.5
+    v       = np.linspace(1e-9, m*4, 10000)
     fig, ax = plt.subplots()
-    plt.plot(np.sqrt(v), np.ones(len(v)), color=(0.5,0.5,0.5), ls='--')
+    plt.plot(np.sqrt(v) / m, np.ones(len(v)), color=(0.5,0.5,0.5), ls='--')
 
     for i in range(1,7+1):
         if i % 2:
-            txt = f'$O(v^{{{i:.0f}/2}})$'
+            txt = f'$O(v^{{{i:.0f}/2}} / m^{{{i:.0f}}})$'
         else:
-            txt = f'$O(v^{{{i/2:.0f}}})$'
-        plt.plot(np.sqrt(v), func_s(v=v, order=i), label=f'{txt}')
+            txt = f'$O(v^{{{i/2:.0f}}} / m^{{{i:.0f}}})$'
+        plt.plot(np.sqrt(v) / m, expanded_s(v=v, m=m, order=i) / exact_s(v=v, m=m), label=f'{txt}')
 
-    plt.ylabel('[Expansion of $s$ $|_{near \\;\\; v=0}$] / Exact $s$')
-    plt.xlabel('$\\sqrt{v}$')
+    plt.ylabel('[Expansion of $s$ $|_{near \\;\\; \\sqrt{v}/m=0}$] / Exact $s$')
+    plt.xlabel('$\\sqrt{v} / m$')
 
     plt.legend()
     plt.xlim([0, 1.5])
     plt.ylim([0.8, 1.5])
 
-    plt.savefig('series_approx.pdf', bbox_inches='tight')
-    plt.show()
+    figname = 'series_approx.pdf'
+    print(f'Saving figure: {figname}')
+    plt.savefig(figname, bbox_inches='tight')
+    plt.close()
 
+def main():
+    test_accuracy()
+    test_lognormal()
+    
 
-
-#test_lognormal()
-#test_accuracy()
+if __name__ == "__main__":
+    main()

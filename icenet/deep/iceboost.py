@@ -351,16 +351,16 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     ### *********************************
     
     # Normalize weights to sum to number of events (xgboost library has no scale normalization)
-    w_trn     = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
-    w_val     = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
+    w_trn = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
+    w_val = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
-    X_trn, ids_trn = aux.red(data_trn.x, data_trn.ids, param) # variable reduction
-    dtrain    = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn, feature_names=ids_trn)
+    X_trn, ids_trn = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, verbose=True)  # variable reduction
+    dtrain     = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn, feature_names=ids_trn)
     
-    X_val, ids_val = aux.red(data_val.x, data_val.ids, param) # variable reduction
-    deval     = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val, feature_names=ids_val)
+    X_val, ids_val = aux.red(X=data_val.x, ids=data_val.ids, param=param, verbose=False) # variable reduction
+    deval      = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val, feature_names=ids_val)
     
-    evallist  = [(dtrain, 'train'), (deval, 'eval')]
+    evallist   = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
 
     trn_losses = []
@@ -378,7 +378,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     
     del model_param['num_boost_round']
     # ---------------------------------------
-
+    
     # Boosting iterations
     max_num_epochs = param['model_param']['num_boost_round']
     for epoch in range(max_num_epochs):
@@ -490,7 +490,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             for sort in [True, False]:
                 for importance_type in ['weight', 'gain', 'cover', 'total_gain', 'total_cover']:
                     fig,ax = plots.plot_xgb_importance(model=model, 
-                        tick_label=aux.red(data_trn.x, data_trn.ids, param, 'ids'),
+                        tick_label=aux.red(X=data_trn.x, ids=data_trn.ids, param=param, mode='ids', verbose=False),
                         label=param["label"], importance_type=importance_type, sort=sort)
                     targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
                     plt.savefig(f'{targetdir}/{param["label"]}--type_{importance_type}--sort-{sort}.pdf', bbox_inches='tight');
@@ -500,7 +500,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         if ('plot_trees' in param) and param['plot_trees']:
             try:
                 print(__name__ + f'.train_xgb: Plotting decision trees ...')
-                model.feature_names = aux.red(data_trn.x, data_trn.ids, param, 'ids')
+                model.feature_names = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, mode='ids', verbose=False)
                 for i in tqdm(range(max_num_epochs)):
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso

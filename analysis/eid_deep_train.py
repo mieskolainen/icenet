@@ -1,7 +1,6 @@
 # Electron ID [DEEP BATCHED TRAINING] steering code
 #
-# Mikael Mieskolainen, 2022
-# m.mieskolainen@imperial.ac.uk
+# m.mieskolainen@imperial.ac.uk, 2022
 
 # icenet system paths
 import sys

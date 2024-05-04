@@ -21,4 +21,4 @@ MAX=5000000    # Tune according to maximum CPU RAM available
 python analysis/dqcd.py --runmode genesis  --maxevents $MAX --inputmap mc_map__scenarioA_all.yml --config $CONFIG --datapath $DATAPATH
 python analysis/dqcd.py --runmode train    --maxevents $MAX --inputmap mc_map__scenarioA_all.yml --modeltag scenarioA_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
 python analysis/dqcd.py --runmode eval     --maxevents $MAX --inputmap mc_map__scenarioA_all.yml --modeltag scenarioA_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
-#python analysis/dqcd.py --runmode optimize --maxevents $MAX --inputmap mc_map__scenarioA_all.yml --modeltag scenarioA_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL
+python analysis/dqcd.py --runmode optimize --maxevents $MAX --inputmap mc_map__scenarioA_all.yml --modeltag scenarioA_all --config $CONFIG --datapath $DATAPATH --use_conditional $CONDITIONAL

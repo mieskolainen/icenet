@@ -60,19 +60,30 @@ jobs:
           pytest icenet/tools/stx.py -rP
       
       ## Integration tests
-      - name: Run Deep Learning system integration tests
+      - name: Deep Learning system integration test (clone stash)
         run: |
           git clone https://github.com/mieskolainen/travis-stash.git
-
+      
+      - name: Deep Learning system integration test 1 (trg)
+        run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
-          
+
+      - name: Deep Learning system integration test 2 (hnl)
+        run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_hnl.sh
-          
+
+      - name: Deep Learning system integration test 3 (eid)
+        run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
+      
+      - name: Deep Learning system integration test 4 (eid_deep)
+        run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_deep.sh
+      
+      - name: Deep Learning system integration test 5 (eid_visual)
+        run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_visual.sh
-          
-          
+        
         #  source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --inputfile ./configs/peakfit/tune2.yml
 
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_brk.sh

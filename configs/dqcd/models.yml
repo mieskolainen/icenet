@@ -18,7 +18,7 @@ MAIN_DOMAIN_FILTER: &MAIN_DOMAIN_FILTER
     expand: 'set'    # 'set', 'vetoset' or 'powerset'
     cutset:
       # Latex description is for boolean [0,1] per cut
-      [{cut: 'nMuon > 0', latex: ['', 'nMuon > 0']}]
+      [{cut: 'muonSV_chi2_0 > 0', latex: ['', 'muonSV_chi2_0 > 0']}]
 
 # -----------------------------------------------
 
@@ -43,7 +43,9 @@ DA_DOMAIN_FILTER: &DA_DOMAIN_FILTER
       [{cut: 'muonSV_chi2_0 > 10', latex: ['', 'muonSV_chi2_0 > 10']}]
 
       # J/psi domain
-      # [{cut: '(2.9 < muonSV_mass_0) && (muonSV_mass_0 < 3.3)', latex: ['', '2.9 < M < 3.3']}]
+      #[{cut: '(2.9 < muonSV_mass_0) && (muonSV_mass_0 < 3.3)', latex: ['', '2.9 < M < 3.3']}]
+      
+      # Add Upsilon domain ...
 
 # -----------------------------------------------
 
@@ -224,13 +226,13 @@ xgb01:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb01-NC:
+xgb01-NOJETS:
   train:   'xgb'
   predict: 'xgb_logistic'
-  label:   'XGB-NC'
+  label:   'XGB-NOJETS'
   raytune:  xgb_trial_0
   
-  exclude_MVA_vars: ['MODEL.*', 'muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_.*']
   #include_MVA_vars: ['.*']
   
   # general parameters
@@ -319,7 +321,7 @@ iceboost01-DA:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   plot_trees: False
@@ -374,7 +376,7 @@ iceboost01-DA-NC:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   plot_trees: False
@@ -483,7 +485,7 @@ iceboost01-DA-MI:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
@@ -498,10 +500,10 @@ iceboost01-DA-MI:
 
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost01-DA-MI-NOJETS:
+iceboost01-DA-NOJETS:
   train:   'xgb'
   predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST-DA-MI-NOJETS'
+  label:   'ICEBOOST-DA-NOJETS'
   raytune:  xgb_trial_0
   
   exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_.*']
@@ -541,7 +543,61 @@ iceboost01-DA-MI-NOJETS:
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
-      beta: -0.07
+      beta: -0.08
+      set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
+  
+  plot_trees: False
+
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+# XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+iceboost01-DA-MI-NOJETS:
+  train:   'xgb'
+  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+  label:   'ICEBOOST-DA-MI-NOJETS'
+  raytune:  xgb_trial_0
+  
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet.*']
+  #include_MVA_vars: ['.*']
+  
+  # general parameters
+  model_param:
+    num_boost_round: 150      # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'       # 'auto', 'cpu', 'cuda'
+
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
+    
+    # learning task parameters
+    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+    DA:
+      classes: [0,-2]
+      beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:

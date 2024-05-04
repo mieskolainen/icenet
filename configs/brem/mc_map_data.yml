@@ -1,0 +1,3 @@
+input:
+  class_0:  !include include/data.yml
+  class_1:  !include include/signal.yml
