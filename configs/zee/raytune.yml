@@ -1,0 +1,20 @@
+param:
+
+  #active:         ['xgb1']
+  active:  [null]
+  num_samples:    10  # Trial count parameter
+
+
+setup:
+
+  xgb_trial_0:
+    search_algo: 'HyperOpt'
+
+    search_metric:
+      metric: 'AUC'
+      mode: 'max'
+
+    param:
+      
+      num_boost_round:
+        type: "tune.randint(20, 300)"

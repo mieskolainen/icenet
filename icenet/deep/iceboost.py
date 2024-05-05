@@ -49,16 +49,22 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     """
     Custom binary cross entropy loss with
     domain adaptation (DA) and mutual information (MI) regularization
+    
+    Negative weights are supported via 'out_weights' variable (update it for each train / eval)
     """
     global loss_mode
     global MI_x
     global BCE_param
     global MI_param
     global loss_history
+    global out_weights
     
     device = preds.device
     
-    if weights is None:
+    if  out_weights is not None: # Feed in weights outside
+        w = torch.from_numpy(out_weights)
+        w = w / torch.sum(w)
+    elif weights is None:
         w = torch.ones(len(preds))
         w = w / torch.sum(w)
     else:
@@ -311,13 +317,15 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     global MI_param    
     global loss_mode
     global loss_history
+    global out_weights
     
-    MI_x         = None
-    BCE_param    = None
-    MI_param     = None
-    loss_mode    = None
+    MI_x        = None
+    BCE_param   = None
+    MI_param    = None
+    loss_mode   = None
+    out_weights = None
+    
     loss_history = {}
-    
     loss_history_train = {}
     loss_history_eval  = {}
 
@@ -354,11 +362,23 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     w_trn = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
     w_val = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
+    # ---------------------------------------------------------
+    # Choose weight mode
+    if np.min(w_trn) < 0.0 or np.min(w_val) < 0.0:
+        print(__name__ + f'.train_xgb: Negative weight mode on -- handled via custom loss')
+        out_weights_on = True
+        
+        if 'custom' not in param['model_param']['objective']:
+            raise Exception(__name__ + f'.train_xgb: Need to use custom with negative weights, e.g. "custom:binary_cross_entropy". Change your parameters.')
+    else:
+        out_weights_on = False
+    # ---------------------------------------------------------
+    
     X_trn, ids_trn = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, verbose=True)  # variable reduction
-    dtrain     = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn, feature_names=ids_trn)
+    dtrain     = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)
     
     X_val, ids_val = aux.red(X=data_val.x, ids=data_val.ids, param=param, verbose=False) # variable reduction
-    deval      = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val, feature_names=ids_val)
+    deval      = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val if not out_weights_on else None, feature_names=ids_val)
     
     evallist   = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
@@ -418,12 +438,18 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         if epoch > 0: # Continue from the previous epoch model
             a['xgb_model'] = model
 
-        # Train
+        # ** Train **
+        if out_weights_on:
+            out_weights = copy.deepcopy(w_trn)
+
         loss_mode = 'train'
         model = xgboost.train(**a)
         loss_history_train = copy.deepcopy(loss_history)
         
-        # Validate
+        # ** Validate **
+        if out_weights_on:
+            out_weights = copy.deepcopy(w_val)    
+
         if 'custom' in model_param['objective']:
             loss_mode    = 'eval'
             MI_x         = copy.deepcopy(data_val_MI)
