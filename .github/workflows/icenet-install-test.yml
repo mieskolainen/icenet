@@ -64,23 +64,31 @@ jobs:
         run: |
           git clone https://github.com/mieskolainen/travis-stash.git
       
-      - name: Deep Learning system integration test 1 (trg)
+      - name: Deep Learning system integration test (brem 1)
+        run: |
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem.sh
+      
+      - name: Deep Learning system integration test (brem 2)
+        run: |
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem_reweight.sh
+      
+      - name: Deep Learning system integration test (trg 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
 
-      - name: Deep Learning system integration test 2 (hnl)
+      - name: Deep Learning system integration test (hnl 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_hnl.sh
 
-      - name: Deep Learning system integration test 3 (eid)
+      - name: Deep Learning system integration test (eid 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
       
-      - name: Deep Learning system integration test 4 (eid_deep)
+      - name: Deep Learning system integration test (eid_deep 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_deep.sh
       
-      - name: Deep Learning system integration test 5 (eid_visual)
+      - name: Deep Learning system integration test (eid_visual 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_visual.sh
         

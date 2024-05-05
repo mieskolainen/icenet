@@ -6,13 +6,13 @@ basic:
   plot_unweighted: True
 
 corrmat:
-  active: false
+  active: true
 
 contours: 
   active: false
 
 ROC:
-  active:   true
+  active: true
   num_bootstrap: 0 #200
   xmin: 1.0E-3
 

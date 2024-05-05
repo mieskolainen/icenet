@@ -465,17 +465,17 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         else:
             ## Save
             filename = args['modeldir'] + f'/{param["label"]}_{epoch}'
-            pickle.dump(model, open(filename + '.dat', 'wb'))
+            pickle.dump(model, open(filename + '.dat', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
-        
+
     if not args['__raytune_running__']:
         
         # Plot evolution
         plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
 
         if 'custom' not in model_param['objective']:
-            fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
+            fig,ax = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
                 trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         else:
             
@@ -483,14 +483,14 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             lev = {f'validate: {k}': v for k, v in loss_history_eval.items()}
             
             fig,ax = plots.plot_train_evolution_multi(losses=ltr | lev, trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+        
         plt.savefig(f'{plotdir}/{param["label"]}--evolution.pdf', bbox_inches='tight'); plt.close()
         
         ## Plot feature importance
         if plot_importance:
             for sort in [True, False]:
                 for importance_type in ['weight', 'gain', 'cover', 'total_gain', 'total_cover']:
-                    fig,ax = plots.plot_xgb_importance(model=model, 
-                        tick_label=aux.red(X=data_trn.x, ids=data_trn.ids, param=param, mode='ids', verbose=False),
+                    fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids_trn,
                         label=param["label"], importance_type=importance_type, sort=sort)
                     targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
                     plt.savefig(f'{targetdir}/{param["label"]}--type_{importance_type}--sort-{sort}.pdf', bbox_inches='tight');
@@ -500,7 +500,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         if ('plot_trees' in param) and param['plot_trees']:
             try:
                 print(__name__ + f'.train_xgb: Plotting decision trees ...')
-                model.feature_names = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, mode='ids', verbose=False)
+                model.feature_names = ids_trn # Make it explicit
                 for i in tqdm(range(max_num_epochs)):
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
@@ -508,9 +508,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     plt.savefig(f'{path}/tree-{i}.pdf', bbox_inches='tight'); plt.close()
             except:
                 print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
-        
+
         model.feature_names = None # Set original default ones
 
         return model
-
+    
     return # No return value for raytune

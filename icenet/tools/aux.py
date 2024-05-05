@@ -105,6 +105,8 @@ def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='i
     """
     Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)
     
+    Remember that using python sets() is not necessarily stable over runs ! (do not rely on the order of sets)
+    
     Args:
         X:           data matrix
         ids:         names of columns
@@ -132,7 +134,8 @@ def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='i
     # Variable set is reduced
     if np.sum(mask) != len(ids):
         
-        reduced = set(np.array(ids).tolist()) - set(np.array(ids)[mask].tolist())
+        reduced = list(set(np.array(ids).tolist()) - set(np.array(ids)[mask].tolist()))
+        reduced.sort() # Make it deterministic order
         
         if verbose:
             cprint(__name__ + f'.red: Included input variables: {np.array(ids)[mask]}', 'yellow')
@@ -225,7 +228,7 @@ def parse_vars(items):
     return d
 
 
-def ak2numpy(x, fields, null_value=float(999.0), dtype='float32'):
+def ak2numpy(x, fields, null_value=float(-999.0), dtype='float32'):
     """
     Unzip awkward array to numpy array per column (awkward Record)
     

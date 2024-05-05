@@ -66,7 +66,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         class_id = int(key.split("_")[1])
         proc     = args["input"][key] 
         
-        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple(
+        X[key], Y[key], W[key], ids, INFO[key] = iceroot.read_multiple(
             class_id=class_id,
             process_func=process_root,
             processes=proc,
@@ -161,7 +161,7 @@ def splitfactor(x, y, w, ids, args):
         all_ids=aux.unroll_ak_fields(x=x, order='first'),
         ids=eval('inputvars.' + args['inputvar_scalar'])
         )
-
+    
     # ----------
     # Extract active kinematic variables
     data_kin = None
@@ -175,12 +175,10 @@ def splitfactor(x, y, w, ids, args):
         data_kin.ids   = kinematic_vars
 
     # ----------
-    # Convert "list of tuples" from ak.to_numpy to np.array (2d)
+    # Convert awkward array to 2D numpy array
     if data.x is not None:
-        data.x = ak.to_numpy(data.x)
-        data.x = data.x.tolist()
-        x = map(np.array, data.x)
-        data.x = np.array(list(x))
+        data.x   = aux.ak2numpy(x=data.x, fields=scalar_vars, null_value=args['imputation_param']['fill_value'])
+        data.ids = copy.deepcopy(scalar_vars)
     
     # ----------
     # Unnecessary representations
@@ -192,6 +190,7 @@ def splitfactor(x, y, w, ids, args):
     # ----------
     return {
         'data': data,
+        'data_MI': data_MI,
         'data_kin': data_kin,
         'data_deps': data_deps,
         'data_tensor': data_tensor,

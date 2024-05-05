@@ -788,11 +788,11 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
         
         # Linear and log scale scale (left and right plots)
         for i in range(2):
-
+            
             plt.sca(ax[i])
             if plot_unweighted:
-                plt.stairs(counts,   edges, fill=False, linewidth = linewidth,     linestyle='--')
-            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth+0.5, linestyle='-')
+                plt.stairs(counts,   edges, fill=False, linewidth = linewidth+0.75, linestyle='--') # bigger linewidth first
+            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth, linestyle='-')
             
             if i == 0:
                 if plot_unweighted:
