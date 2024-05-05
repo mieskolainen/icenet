@@ -83,7 +83,7 @@ basic:
   plot_unweighted: False
 
 corrmat:
-  active: False
+  active: True
 
 contours:
   active: False

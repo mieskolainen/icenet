@@ -1,6 +1,5 @@
 # Electron ID steering code
 #
-# Mikael Mieskolainen, 2022
 # m.mieskolainen@imperial.ac.uk
 
 import sys

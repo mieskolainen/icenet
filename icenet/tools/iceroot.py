@@ -102,39 +102,26 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     # Add conditional (theory param) variables
     
     if model_param is not None:
+        
         print(__name__ + f'.read_single: Adding conditional theory (model) parameters')
+        print(model_param)
+        
         for var in model_param.keys():
             
-            value = model_param[var]
-        
-            # Pick uniform random between [a,b] ~ "dequantized" sampling
-            if type(value) == list:
-                if len(value) != 3:
-                    raise Exception(__name__ + f'.read_MC: Input {value} ')
+            value = float(model_param[var]) if model_param[var] is not None else np.nan
             
-                r         = ak.Array(np.random.rand(len(X), 1).astype(np.float32))
-                mva_value = value[1] + (value[2] - value[1]) * r
-                gen_value = value[0]
-        
-            # Pick only the fixed value
-            else:
-                if value is None:
-                    value = np.nan
-                mva_value = value * ak.Array(np.ones((len(X), 1)).astype(np.float32))
-                gen_value = value
-        
-        # Create a new 'record' (column) to ak-array [actual input for MVA]
-        col_name    = f'MODEL_{var}'
-        X[col_name] = mva_value
-        
-        # Store the actual model parameter value
-        col_name    = f'GEN_{var}'
-        X[col_name] = gen_value
+            # Create a new 'record' (column) to ak-array [input for MVA]
+            col_name    = f'MODEL_{var}'
+            X[col_name] = value # Broadcasting happens to all events
+            
+            # A "mirror" copy
+            col_name    = f'GEN_{var}'
+            X[col_name] = value
     
     # This as a last
     ids = ak.fields(X)
-
-    return {'X':X, 'Y':Y, 'W': W, 'ids':ids, 'info':info}
+    
+    return {'X': X, 'Y': Y, 'W': W, 'ids': ids, 'info': info}
 
 
 def read_multiple(process_func, processes, root_path, param, class_id, dtype=None):
@@ -290,9 +277,10 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
     
     load_ids = aux.process_regexp_ids(ids=ids, all_ids=all_ids)
 
-    cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}): \n{all_ids} \n', 'green')    
+    cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}): \n{all_ids} \n', 'green')
+    print('')
     cprint(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
-    
+    print('')
     print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
     
     if   library == 'np':

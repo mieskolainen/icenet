@@ -3,7 +3,7 @@
 xgb0:
   train:   'xgb'
   predict: 'xgb'
-  label:   '2019Aug07 (retrained)'
+  label:   '2019Aug07-(retrained)'
   raytune:  'xgb_setup'
   exclude_MVA_vars: ['.*']
   include_MVA_vars: ['2019Aug07.*']
@@ -44,11 +44,11 @@ xgb0:
 xgb1:
   train:   'xgb'
   predict: 'xgb'
-  label:   '2020Sept15 (retrained)'
+  label:   '2020Sept15-(retrained)'
   raytune:  'xgb_setup'
   exclude_MVA_vars: ['.*']
   include_MVA_vars: ['2020Sept15.*']
-
+  
   # general parameters
   model_param:
     num_boost_round: 100    # number of epochs (equal to the number of trees!)

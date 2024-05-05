@@ -23,9 +23,9 @@ ADDITIONAL_VARS = [
     'is_e','is_mc','is_egamma','is_aod', # Labels
     'tag_pt','tag_eta',                  # Tag muon kine
     'has_trk','has_gsf','has_ele',       # Object flags
-    'rho',                               # Proxy for pileup
-    'ele_mva_value',                     # Existing 2019Aug07 BDT score
-    'ele_mva_value_depth10',             # Existing 2020Sept15 BDT score 
+    'rho',                               # Proxy for pileup 
+    'ele_mva_value_2019Aug07',           # Existing BDT score
+    'ele_mva_value_2020Sept15'           # Existing BDT score
 ]
 
 # Use these to test that the (re-weight trained) classifier
@@ -200,6 +200,7 @@ CMSSW_MVA_SCALAR_VARS = []
 CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_2019Aug07
 CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_2020Sept15
 CMSSW_MVA_SCALAR_VARS = list(set(CMSSW_MVA_SCALAR_VARS))
+CMSSW_MVA_SCALAR_VARS.sort() # ! sort is CRITICAL if using sets -- sets never guaranteed to be run-to-run stable !
 
 # LOAD_VARS are read out from ROOT files, 
 LOAD_VARS  = []
@@ -209,3 +210,4 @@ LOAD_VARS += CMSSW_MVA_SCALAR_VARS
 #LOAD_VARS += CMSSW_MVA_IMAGE_VARS
 #LOAD_VARS += CMSSW_MVA_GRAPH_VARS
 LOAD_VARS = list(set(LOAD_VARS))
+LOAD_VARS.sort() # ! sort is CRITICAL if using sets -- sets never guaranteed to be run-to-run stable !

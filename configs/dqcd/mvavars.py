@@ -272,7 +272,7 @@ MI_VARS = [
   'muonSV_mass_0'  # The leading one
 ]
 
-print(LOAD_VARS)
+#print(LOAD_VARS)
 
 # (regular expressions supported here)
 #LOAD_VARS = ['.+hlt.?', '.?gen.?']

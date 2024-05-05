@@ -66,25 +66,28 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # *** BACKGROUND MC, SIGNAL MC, DOMAIN ADAPTATION ... ***
     
     for key in args["input"].keys(): # input from yamlgen generated yml
-        
+
         class_id = int(key.split("_")[1])
         proc     = args["input"][key] 
-        
-        X[key], Y[key], W[key], ind, INFO[key] = iceroot.read_multiple(class_id=class_id,
+
+        X[key], Y[key], W[key], _, INFO[key] = iceroot.read_multiple(class_id=class_id,
             process_func=process_root, processes=proc, root_path=root_path, param=param)
-    
+
     # =================================================================
     # Sample conditional theory parameters as they are distributed in signal sample
     
-    sig_class = "class_1" # fixed here
-    p = ak.to_numpy(W[sig_class] / ak.sum(W[sig_class])).squeeze() # probability per event entry
-
+    sig_class = f"class_1" # ** HARDCODED DEFINITION **
+    p         = ak.to_numpy(W[sig_class] / ak.sum(W[sig_class])).squeeze() # probability per event entry
+    
+    # We pick all variables at once
+    # (so N-dim random variable N-tuplets are sampled 1-to-1 as in the signal class)
+    var = inputvars.MODEL_VARS
+    
     for key in X.keys(): # Loop over classes
+        
+        # Other classes than signal (e.g. Background ~ 0, DA-data ~ -2)
+        # Signal has already MODEL_ and GEN_ (picked from yaml under under iceroot)
         if key != sig_class:
-            
-            # We pick all variables at once
-            # (so N-dim random variable N-tuplets are sampled 1-to-1 as in signal class)
-            var = inputvars.MODEL_VARS
             
             # Reshape into numpy array
             N = len(X[sig_class])
@@ -100,12 +103,13 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
             
             # Set conditional variables 'MODEL_'
             for i in range(len(var)):
-                X[key][var[i]] = ak.Array(new[:,i])
+                X[key][var[i]] = new[:,i].squeeze().tolist()
             
-            # "Mirror" copy variables to 'GEN_' (for ROC plots etc. in the evaluation stage)
+            # "Mirror" copy variables to 'GEN_', for ROC plots etc. diagnostics in the evaluation stage
             var_new = [s.replace('MODEL', 'GEN') for s in var]
             for i in range(len(var)):
-                X[key][var_new[i]] = ak.Array(new[:,i])
+                X[key][var_new[i]] = new[:,i].squeeze().tolist()
+    
     
     # =================================================================
     # *** Finally combine ***
@@ -125,7 +129,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     unique, counts = np.unique(Y, return_counts=True)
     print(np.asarray((unique, counts)).T)
     
-    return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info': INFO}
+    return {'X':X, 'Y':Y, 'W':W, 'ids': ak.fields(X), 'info': INFO}
 
 
 def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None, **kwargs):
@@ -166,6 +170,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None,
         fmask_np[fmask_np] = cmask # cmask is evaluated for which fmask == True
         
         return fmask_np
+
 
 def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     """
@@ -212,8 +217,9 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
         for var in inputvars.MODEL_VARS:
             try:
                 scalar_vars.remove(var)
-                cprint(__name__ + f'.splitfactor: Removing model conditional var "{var}"" from scalar_vars', 'red')
+                cprint(__name__ + f'.splitfactor: Removing model conditional var "{var}" from scalar_vars', 'red')
             except:
+                cprint(__name__ + f'.splitfactor: Model conditional var "{var}" did not exist in scalar_vars', 'red')
                 continue
     else:
         
@@ -252,6 +258,8 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     # -------------------------------------------------------------------------
     ## ** Custom variables added to collections **
     
+    cprint(__name__ + f".splitfactor: Adding custom muonSV variables ...")
+    
     ## \DeltaR
     data.x['muonSV', 'deltaR'] = \
         analytic.deltaR(x=data.x['muonSV'], eta1='mu1eta', eta2='mu2eta', phi1='mu1phi', phi2='mu2phi')
@@ -267,7 +275,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     jagged_vars.append('muonSV_mass')
     muonsv_vars.append('muonSV_mass')
     
-    print(data.x['muonSV'].fields)
+    cprint(__name__ + f".splitfactor: muonSV.fields = {data.x['muonSV'].fields}", 'yellow')
     
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
@@ -278,6 +286,8 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
         kinematic_vars = aux.process_regexp_ids(all_ids=aux.unroll_ak_fields(x=x, order='first'),
                                                 ids=inputvars.KINEMATIC_VARS)
 
+        print(kinematic_vars)
+        
         data_kin       = copy.deepcopy(data)
         data_kin.x     = aux.ak2numpy(x=data.x, fields=kinematic_vars)
         data_kin.ids   = kinematic_vars

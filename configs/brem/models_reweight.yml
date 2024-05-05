@@ -7,7 +7,7 @@ xgb0:
   raytune:  'xgb_setup'
   # exclude_MVA_vars: ['.*']
   # include_MVA_vars: ['trk_pt', 'trk_eta', 'rho']
-
+  
   # general parameters
   model_param:
     num_boost_round: 100    # number of epochs (equal to the number of trees!)

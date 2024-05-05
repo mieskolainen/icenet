@@ -100,7 +100,7 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
             isinf  = np.any(np.isinf(x))
             isnan  = np.any(np.isnan(x))
 
-            print('[{: >3}]{: >35} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t ({: >10.2E} +- {: >10.2E})   [[{}, {}]]'
+            print('[{: >3}]{: >40} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t ({: >10.2E} +- {: >10.2E})   [[{}, {}]]'
                 .format(j, ids[j], minval, med, maxval, num_unique, mean, std, isinf, isnan))
         except Exception as e:
             print(e)
