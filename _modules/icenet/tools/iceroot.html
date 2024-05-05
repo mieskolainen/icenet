@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.4
+                0.1.0.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -535,17 +535,18 @@
 
     <span class="c1"># -------------------------------------------------</span>
     <span class="c1"># Visible cross-section weights</span>
+    <span class="c1"># (keep float64 to avoid possible precision problems -- conversion to float32 done later)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">force_xs</span><span class="p">:</span>
         <span class="c1"># Sum over W yields --&gt; (eff_acc * xs)</span>
-        <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xs</span> <span class="o">*</span> <span class="n">eff_acc</span><span class="p">)</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xs</span> <span class="o">*</span> <span class="n">eff_acc</span><span class="p">)</span>
     
     <span class="c1"># &#39;force_xs&#39; mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants</span>
     <span class="c1"># to have equal proportions for e.g. theory conditional MVA training.</span>
     <span class="c1"># (then one uses the same input &#39;xs&#39; value for each process in the steering .yaml file)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Sum over W yields --&gt; xs</span>
-        <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span>
-
+        <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span> <span class="o">/</span> <span class="n">N_after</span><span class="p">)</span> <span class="o">*</span> <span class="n">xs</span>
+    
     <span class="c1"># Save statistics information</span>
     <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;yaml&#39;</span><span class="p">:</span>      <span class="n">process</span><span class="p">,</span>
             <span class="s1">&#39;cut_stats&#39;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span>
