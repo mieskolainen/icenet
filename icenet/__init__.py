@@ -3,7 +3,7 @@ import socket
 import os
 import psutil
 
-__version__    = '0.1.0.4'
+__version__    = '0.1.0.5'
 __release__    = 'alpha'
 __date__       = '05/05/2024'
 __author__     = 'm.mieskolainen@imperial.ac.uk'

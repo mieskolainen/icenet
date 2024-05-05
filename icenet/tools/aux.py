@@ -18,6 +18,7 @@ from termcolor import cprint
 
 import sklearn
 from sklearn import metrics
+import scipy
 from scipy import stats
 import scipy.special as special
 from scipy import interpolate
@@ -1029,7 +1030,7 @@ class Metric:
             self.acc_bootstrap = (-1)*np.ones(num_bootstrap)
 
             for i in range(num_bootstrap):
-
+                
                 # ------------------
                 trials     = 0
                 max_trials = 10000
@@ -1077,7 +1078,14 @@ def compute_metrics(class_ids, y_true, y_pred, weights):
     try:
         if  len(class_ids) == 2:
             fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
-            auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
+            
+            # AUC via numerical integration (stable with negative weight events)
+            sorted_index = np.argsort(fpr)
+            fpr_sorted   = np.array(fpr)[sorted_index]
+            tpr_sorted   = np.array(tpr)[sorted_index]
+            auc = scipy.integrate.trapz(y=tpr_sorted, x=fpr_sorted)
+            
+            #auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
             acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)
         else:
             fpr, tpr, thresholds = None, None, None

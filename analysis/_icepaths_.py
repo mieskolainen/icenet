@@ -10,6 +10,7 @@ paths = ['',
 		 '/iceid/',
 		 '/icefit/',
 		 '/icebrem/',
+		 '/icezee/'
         ]
 
 for p in paths:

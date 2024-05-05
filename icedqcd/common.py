@@ -66,10 +66,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # *** BACKGROUND MC, SIGNAL MC, DOMAIN ADAPTATION ... ***
     
     for key in args["input"].keys(): # input from yamlgen generated yml
-
+        
         class_id = int(key.split("_")[1])
         proc     = args["input"][key] 
-
+        
         X[key], Y[key], W[key], _, INFO[key] = iceroot.read_multiple(class_id=class_id,
             process_func=process_root, processes=proc, root_path=root_path, param=param)
 
@@ -77,7 +77,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # Sample conditional theory parameters as they are distributed in signal sample
     
     sig_class = f"class_1" # ** HARDCODED DEFINITION **
-    p         = ak.to_numpy(W[sig_class] / ak.sum(W[sig_class])).squeeze() # probability per event entry
+    
+    # Probability per event entry, float64 needed for precision
+    # See: https://stackoverflow.com/questions/46539431/np-random-choice-probabilities-do-not-sum-to-1
+    p = ak.to_numpy(W[sig_class]).squeeze().astype('float64')
+    p = p / np.sum(p)
     
     # We pick all variables at once
     # (so N-dim random variable N-tuplets are sampled 1-to-1 as in the signal class)
@@ -104,7 +108,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
             # Set conditional variables 'MODEL_'
             for i in range(len(var)):
                 X[key][var[i]] = new[:,i].squeeze().tolist()
-            
+
             # "Mirror" copy variables to 'GEN_', for ROC plots etc. diagnostics in the evaluation stage
             var_new = [s.replace('MODEL', 'GEN') for s in var]
             for i in range(len(var)):

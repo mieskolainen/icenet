@@ -80,17 +80,18 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
 
     # -------------------------------------------------
     # Visible cross-section weights
+    # (keep float64 to avoid possible precision problems -- conversion to float32 done later)
     if not force_xs:
         # Sum over W yields --> (eff_acc * xs)
-        W = (ak.Array(np.ones(N_after, dtype=np.float32)) / N_after) * (xs * eff_acc)
+        W = (ak.Array(np.ones(N_after, dtype=np.float64)) / N_after) * (xs * eff_acc)
     
     # 'force_xs' mode is useful e.g. in training with a mix of signals with different eff x acc, but one wants
     # to have equal proportions for e.g. theory conditional MVA training.
     # (then one uses the same input 'xs' value for each process in the steering .yaml file)
     else:
         # Sum over W yields --> xs
-        W = (ak.Array(np.ones(N_after, dtype=np.float32)) / N_after) * xs
-
+        W = (ak.Array(np.ones(N_after, dtype=np.float64)) / N_after) * xs
+    
     # Save statistics information
     info = {'yaml':      process,
             'cut_stats': stats,
