@@ -58,8 +58,8 @@ def read_cli():
     parser.add_argument("--datasets",        type=str,  default='')
     parser.add_argument("--tag",             type=str,  default='tag0')
     
-    parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS)
-    parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS)
+    parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
+    parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
     parser.add_argument("--use_cache",       type=int,  default=1)
     parser.add_argument("--fastplot",        type=int,  default=0)
     
@@ -268,8 +268,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args['datadir']      = aux.makedir(f'{cwd}/output/{args["rootname"]}')
     
     if runmode != 'genesis':
-        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}')
-        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}')
+        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}--use_conditional__{args["use_conditional"]}')
+        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}--use_conditional__{args["use_conditional"]}')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
     
@@ -492,28 +492,28 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     # Pop out conditional variables if they exist and no conditional training is used
     if args['use_conditional'] == False:
         
-        if ids is None: # Awkward type, ids within X
-            ids_ = X.fields
-        else:
-            ids_ = ids  # Separate fields
-        
         index  = []
         idxvar = []
-        for i in range(len(ids_)):
-            if 'MODEL_' not in ids_[i]:
+        for i in range(len(ids)):
+            if 'MODEL_' not in ids[i]:
                 index.append(i)
-                idxvar.append(ids_[i])
+                idxvar.append(ids[i])
             else:
-                print(__name__ + f'.process_data: Removing conditional variable "{ids_[i]}" (use_conditional == False)')
+                print(__name__ + f'.process_data: Removing conditional variable "{ids[i]}" (use_conditional == False)')
         
         if   isinstance(X, np.ndarray):
-            X = X[:,np.array(index, dtype=int)]
-            ids = [ids[j] for j in index]
+            X   = X[:,np.array(index, dtype=int)]
+            ids = copy.deepcopy(idxvar)
         
         elif isinstance(X, ak.Array):
-            X = X[idxvar]
-            ids = [ids_[j] for j in index]
+            X   = X[idxvar]
+            ids = ak.fields(X)
         
+        else:
+            raise Exception(__name__ + f'.process_data: Unknown X type (should be numpy array or awkward array)')
+    
+    print(__name__ + f'.process_data: ids = {ids}')
+    
     # ----------------------------------------------------------
     
     # Split into training, validation, test
@@ -532,7 +532,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     
     ### Split and factor data
     output = {'info': info}
-
+    
     if   runmode == 'train':
 
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
@@ -551,7 +551,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             
             if args['reweight_mode'] == 'write':
                 cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode == {runmode})', 'green')
-                pickle.dump(pdf, open(fmodel, 'wb'))
+                pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Compute different data representations
         cprint(__name__ + f'.process_data: Compute representations (func_factor)', 'green')
@@ -567,7 +567,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             
             outputfile = args["modeldir"] + f'/imputer.pkl'
             cprint(__name__ + f'.process_data: Saving imputer to: {outputfile}', 'green')
-            pickle.dump(imputer, open(outputfile, 'wb'))
+            pickle.dump(imputer, open(outputfile, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
     elif runmode == 'eval':
         
@@ -586,7 +586,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             
             if args['reweight_mode'] == 'write':
                 cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode = {runmode})', 'green')
-                pickle.dump(pdf, open(fmodel, 'wb'))
+                pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Compute different data representations
         cprint(__name__ + f'.process_data: Compute representations (func_factor)', 'green')
@@ -673,7 +673,7 @@ def train_models(data_trn, data_val, args=None) :
         data_val['data_tensor'] = io.apply_zscore_tensor(data_val['data_tensor'], X_mu_tensor, X_std_tensor)
         
         # Save it for the evaluation
-        pickle.dump([X_mu_tensor, X_std_tensor], open(args["modeldir"] + '/zscore_tensor.pkl', 'wb'))    
+        pickle.dump([X_mu_tensor, X_std_tensor], open(args["modeldir"] + '/zscore_tensor.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)    
     
     # --------------------------------------------------------------------
 
@@ -696,7 +696,7 @@ def train_models(data_trn, data_val, args=None) :
         data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_mu, X_std)
 
         # Save it for the evaluation
-        pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.pkl', 'wb'))
+        pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
@@ -708,7 +708,7 @@ def train_models(data_trn, data_val, args=None) :
         data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_m, X_mad)
 
         # Save it for the evaluation
-        pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.pkl', 'wb'))
+        pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
     
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
 
@@ -1128,7 +1128,7 @@ def evaluate_models(data=None, info=None, args=None):
     targetfile = targetdir + '/eval_results.pkl'
     print(__name__ + f'.evaluate_models: Saving pickle output to:')
     print(f'{targetfile}')
-    pickle.dump(resdict, open(targetfile, 'wb'))
+    pickle.dump(resdict, open(targetfile, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
     
     return
 
