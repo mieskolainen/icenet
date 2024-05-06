@@ -478,6 +478,7 @@
 <span class="kn">import</span> <span class="nn">icenet.deep.train</span> <span class="k">as</span> <span class="nn">train</span>
 <span class="kn">import</span> <span class="nn">icenet.deep.predict</span> <span class="k">as</span> <span class="nn">predict</span>
 
+<span class="kn">from</span> <span class="nn">iceplot</span> <span class="kn">import</span> <span class="n">iceplot</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">stx</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
@@ -1652,7 +1653,8 @@
 <span class="k">def</span> <span class="nf">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span>
     <span class="n">X_kin</span><span class="p">,</span> <span class="n">ids_kin</span><span class="p">,</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">ids_RAW</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    Arbitrary plot wrapper function.</span>
+<span class="sd">    Arbitrary plot steering function.</span>
+<span class="sd">    Add new plot types here, steered from plots.yml</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">global</span> <span class="n">roc_mstats</span>
@@ -1670,9 +1672,148 @@
     <span class="n">y_preds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">y_pred</span><span class="p">))</span>
     
     <span class="c1"># --------------------------------------</span>
+    <span class="c1">### Output score re-weighted observables</span>
+
+    <span class="k">if</span> <span class="s1">&#39;OBS_reweight&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+
+        <span class="k">def</span> <span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">pathlabel</span><span class="p">):</span>
+            
+            <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;label = </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | sublabel = </span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Original weights            </span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_RAW</span><span class="p">))[</span><span class="n">mask</span><span class="p">]</span>
+            
+            <span class="c1"># Transform model output scores according to the function defined</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">))</span>
+            
+            <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;executing: &quot;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+                <span class="n">exec</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            
+            <span class="c1"># Apply event masks</span>
+            <span class="n">s</span>   <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">y_m</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            
+            <span class="c1"># Loop over each observable</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X_RAW</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                
+                <span class="n">XX</span>        <span class="o">=</span> <span class="n">X_RAW</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                
+                <span class="n">nbins</span>     <span class="o">=</span> <span class="mi">50</span>
+                <span class="n">binrange</span>  <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">XX</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">XX</span><span class="p">,</span> <span class="mi">99</span><span class="p">)]</span>
+                <span class="n">bins</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">binrange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">binrange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nbins</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                
+                <span class="c1"># ----------------------------------------------------</span>
+                
+                <span class="n">obs_X</span> <span class="o">=</span> <span class="p">{</span>
+                    
+                    <span class="c1"># Axis limits</span>
+                    <span class="s1">&#39;xlim&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="s1">&#39;ylim&#39;</span>    <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;xlabel&#39;</span>  <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids_RAW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;ylabel&#39;</span>  <span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;Weighted counts&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;units&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;a.u.&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span> <span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;1&#39;</span><span class="p">},</span>
+                    <span class="s1">&#39;label&#39;</span>   <span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;figsize&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mf">3.75</span><span class="p">),</span>
+                    
+                    <span class="c1"># Ratio</span>
+                    <span class="s1">&#39;ylim_ratio&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span>
+
+                    <span class="c1"># Histogramming</span>
+                    <span class="s1">&#39;bins&#39;</span>    <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;density&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    
+                    <span class="c1"># Function to calculate</span>
+                    <span class="s1">&#39;func&#39;</span>    <span class="p">:</span> <span class="kc">None</span>
+                <span class="p">}</span>
+                
+                <span class="n">data_template</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;data&#39;</span>   <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;label&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Data&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;hfunc&#39;</span>  <span class="p">:</span> <span class="s1">&#39;errorbar&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;style&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">errorbar_style</span><span class="p">,</span>
+                    <span class="s1">&#39;obs&#39;</span>    <span class="p">:</span> <span class="n">obs_X</span><span class="p">,</span>
+                    <span class="s1">&#39;hdata&#39;</span>  <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;color&#39;</span>  <span class="p">:</span> <span class="kc">None</span>
+                <span class="p">}</span>
+                
+                <span class="c1"># Data source &lt;-&gt; Observable collections</span>
+                <span class="n">class1</span>    <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># Deep copies</span>
+                <span class="n">class0</span>    <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">class0_ML</span> <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                
+                <span class="n">class1</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                    <span class="s1">&#39;label&#39;</span>  <span class="p">:</span> <span class="s1">&#39;$C_1$&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;hfunc&#39;</span>  <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;style&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
+                    <span class="s1">&#39;color&#39;</span>  <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+                <span class="p">})</span>
+                <span class="n">class0</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                    <span class="s1">&#39;label&#39;</span>  <span class="p">:</span> <span class="s1">&#39;$C_0$&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;hfunc&#39;</span>  <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;style&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
+                    <span class="s1">&#39;color&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">imperial_green</span>
+                <span class="p">})</span>
+                <span class="n">class0_ML</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                    <span class="s1">&#39;label&#39;</span>  <span class="p">:</span> <span class="s1">&#39;$C_0$ (AI)&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;hfunc&#39;</span>  <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;style&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
+                    <span class="s1">&#39;color&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">imperial_dark_red</span>
+                <span class="p">})</span>
+
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">class1</span><span class="p">,</span> <span class="n">class0</span><span class="p">,</span> <span class="n">class0_ML</span><span class="p">]</span>
+                
+                <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">XX</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">XX</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">XX</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">s</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
+                
+                <span class="c1"># Update labels with chi2</span>
+                <span class="n">chi2_0</span><span class="p">,</span> <span class="n">ndf_0</span>       <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">h_data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">chi2_0_AI</span><span class="p">,</span> <span class="n">ndf_0_AI</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">h_data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                
+                <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; | $</span><span class="se">\\</span><span class="s1">chi^2 = </span><span class="si">{</span><span class="n">chi2_0</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1"> \, / \, </span><span class="si">{</span><span class="n">ndf_0</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">chi2_0</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$&#39;</span>
+                <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; | $</span><span class="se">\\</span><span class="s1">chi^2 = </span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1"> \, / \, </span><span class="si">{</span><span class="n">ndf_0_AI</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="o">/</span><span class="n">ndf_0_AI</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$&#39;</span>
+                
+                <span class="c1"># Plot it</span>
+                <span class="n">fig0</span><span class="p">,</span> <span class="n">ax0</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">pathlabel</span><span class="si">}</span><span class="s1">&#39;</span>
+                
+                <span class="n">fig0</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/OBS_reweight_[</span><span class="si">{</span><span class="n">ids_RAW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+                <span class="n">fig0</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/OBS_reweight_[</span><span class="si">{</span><span class="n">ids_RAW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__log.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+                
+                <span class="n">fig1</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/OBS_reweight_[</span><span class="si">{</span><span class="n">ids_RAW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__linear.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+                <span class="n">fig1</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/OBS_reweight_[</span><span class="si">{</span><span class="n">ids_RAW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__linear.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+                
+                <span class="n">fig0</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+                <span class="n">fig1</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="c1"># ----------------------------------------------------</span>
+        
+        <span class="c1"># ** All inclusive **</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="s1">&#39;inclusive&#39;</span><span class="p">,</span> <span class="n">pathlabel</span><span class="o">=</span><span class="s1">&#39;inclusive&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ** Set filtered **</span>
+        <span class="k">if</span> <span class="s1">&#39;set_filter&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">]:</span>
+            
+            <span class="n">filters</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">][</span><span class="s1">&#39;set_filter&#39;</span><span class="p">]</span>
+            <span class="n">mask_powerset</span><span class="p">,</span> <span class="n">text_powerset</span><span class="p">,</span> <span class="n">path_powerset</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">filter_constructor</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mask_powerset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;OBS_reweight: mask[</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s1">] has no events passing -- skip [</span><span class="si">{</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                
+                <span class="n">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:],</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">pathlabel</span><span class="o">=</span><span class="n">path_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+    
+    <span class="c1"># --------------------------------------</span>
     <span class="c1">### ROC plots</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="s1">&#39;ROC&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
 
         <span class="k">def</span> <span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">pathlabel</span><span class="p">):</span>
             
@@ -1704,12 +1845,17 @@
             <span class="n">mask_filterset</span><span class="p">,</span> <span class="n">text_filterset</span><span class="p">,</span> <span class="n">path_filterset</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">filter_constructor</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mask_filterset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ROC: mask[</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s1">] has no events passing -- skip [</span><span class="si">{</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                
                 <span class="n">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">mask_filterset</span><span class="p">[</span><span class="n">m</span><span class="p">,:],</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">text_filterset</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">pathlabel</span><span class="o">=</span><span class="n">path_filterset</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
 
     <span class="c1"># --------------------------------------</span>
     <span class="c1">### ROC binned plots (no filterset selection supported here)</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC_binned&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-
+    <span class="k">if</span> <span class="s1">&#39;ROC_binned&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC_binned&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+        
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="c1"># Loop over plot types</span>
             
             <span class="n">pid</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;plot[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]&#39;</span>
@@ -1751,7 +1897,7 @@
 
     <span class="c1"># ----------------------------------------------------------------</span>
     <span class="c1">### MVA-output 1D-plot</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_output&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="s1">&#39;MVA_output&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_output&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
 
         <span class="k">def</span> <span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">pathlabel</span><span class="p">):</span>
             
@@ -1775,11 +1921,16 @@
             <span class="n">mask_powerset</span><span class="p">,</span> <span class="n">text_powerset</span><span class="p">,</span> <span class="n">path_powerset</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">filter_constructor</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mask_powerset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MVA_output: mask[</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s1">] has no events passing -- skip [</span><span class="si">{</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                
                 <span class="n">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:],</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">pathlabel</span><span class="o">=</span><span class="n">path_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
 
     <span class="c1"># ----------------------------------------------------------------</span>
     <span class="c1">### MVA-output 2D correlation plots</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_2D&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="s1">&#39;MVA_2D&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_2D&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="c1"># Loop over plot types</span>
             
@@ -1832,8 +1983,13 @@
                 <span class="n">mask_powerset</span><span class="p">,</span> <span class="n">text_powerset</span><span class="p">,</span> <span class="n">path_powerset</span> <span class="o">=</span> <span class="n">stx</span><span class="o">.</span><span class="n">filter_constructor</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">)</span>
                 
                 <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mask_powerset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MVA_2D: mask[</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s1">] has no events passing -- skip [</span><span class="si">{</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    
                     <span class="n">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">mask_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">,:],</span> <span class="n">pick_ind</span><span class="o">=</span><span class="n">pick_ind</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">text_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">pathlabel</span><span class="o">=</span><span class="n">path_powerset</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
-            
+    
     <span class="k">return</span> <span class="kc">True</span></div>
 
 

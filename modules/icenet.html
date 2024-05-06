@@ -2443,6 +2443,26 @@ returns the loss. Optional for most optimizers.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.auc_score">
+<span class="sig-name descname"><span class="pre">auc_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fpr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#auc_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.auc_score" title="Link to this definition">¶</a></dt>
+<dd><p>AUC-ROC via numerical intergration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fpr</strong> – false positive rate array</p></li>
+<li><p><strong>tpr</strong> – true positive rate array</p></li>
+</ul>
+</dd>
+</dl>
+<p>Call sort_fpr_tpr before this function for numerical stability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>AUC score</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.bin2int">
 <span class="sig-name descname"><span class="pre">bin2int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#bin2int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.bin2int" title="Link to this definition">¶</a></dt>
 <dd><p>Binary vector to integer.</p>
@@ -2825,6 +2845,12 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 <dd class="field-odd"><p>a,b,b-a</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.sort_fpr_tpr">
+<span class="sig-name descname"><span class="pre">sort_fpr_tpr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fpr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#sort_fpr_tpr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.sort_fpr_tpr" title="Link to this definition">¶</a></dt>
+<dd><p>For numerical stability with negative weighted events</p>
 </dd></dl>
 
 <dl class="py function">
@@ -4174,7 +4200,8 @@ ax:  figure axis</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.plot_XYZ_wrap">
 <span class="sig-name descname"><span class="pre">plot_XYZ_wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_RAW</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#plot_XYZ_wrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.plot_XYZ_wrap" title="Link to this definition">¶</a></dt>
-<dd><p>Arbitrary plot wrapper function.</p>
+<dd><p>Arbitrary plot steering function.
+Add new plot types here, steered from plots.yml</p>
 </dd></dl>
 
 <dl class="py function">
