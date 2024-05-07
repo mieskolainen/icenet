@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.5
+                0.1.0.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -594,21 +594,22 @@
             <span class="n">reg_param</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">MI_param</span><span class="p">)</span>
             <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;ma_eT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;ma_eT&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="c1"># Pick the one</span>
             <span class="c1"># -----------</span>
-
+            
             <span class="c1"># Pick class indices</span>
             <span class="n">cind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">targets</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
 
             <span class="n">X</span>     <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">MI_x</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)[</span><span class="n">cind</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
             <span class="n">Z</span>     <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-            <span class="n">W</span>     <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
+            <span class="n">W</span>     <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span>
             <span class="n">mask</span>  <span class="o">=</span> <span class="n">reg_param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;evt_mask_</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
             
-            <span class="c1"># Total maximum is limited, pick subsample</span>
+            <span class="c1"># Total maximum is limited (for DCORR), pick random subsample</span>
             <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]:</span>
-                <span class="n">X</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]]</span>
-                <span class="n">Z</span>    <span class="o">=</span> <span class="n">Z</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]]</span>
-                <span class="n">W</span>    <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]]</span>
-                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]]</span>
+                <span class="n">r</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">],</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">X</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+                <span class="n">Z</span>    <span class="o">=</span> <span class="n">Z</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+                <span class="n">W</span>    <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[:,</span><span class="n">r</span><span class="p">]</span>
             
             <span class="c1">### Now loop over all filter categories</span>
             <span class="n">N_cat</span>     <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -619,20 +620,20 @@
             
             <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_cat</span><span class="p">):</span>
                 
-                <span class="n">mm_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">m</span><span class="p">,:])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="c1"># Pick index mask</span>
-
+                <span class="c1"># This needs to be done, otherwise torch doesn&#39;t understand indexing!</span>
+                <span class="n">mm_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">m</span><span class="p">,:],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                
                 <span class="c1"># Apply target threshold (e.g. we are interested only in high score region)</span>
                 <span class="c1"># First iterations might not yield any events passing this, &#39;min_count&#39; will take care</span>
                 <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_score&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">mm_</span> <span class="o">=</span> <span class="n">mm_</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_score&#39;</span><span class="p">])</span> 
+                    <span class="n">mm_</span> <span class="o">=</span> <span class="n">mm_</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_score&#39;</span><span class="p">])</span> 
                 
                 <span class="c1"># Minimum number of events per category cutoff</span>
-                <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]:</span>
                     <span class="k">continue</span>
                 
                 <span class="c1">## Non-Linear Distance Correlation</span>
                 <span class="k">if</span>   <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;losstype&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DCORR&#39;</span><span class="p">:</span>
-                    
                     <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">+</span> <span class="n">cortools</span><span class="o">.</span><span class="n">distance_corr_torch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">Z</span><span class="p">[</span><span class="n">mm_</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">mm_</span><span class="p">])</span>
                 
                 <span class="c1">## Linear Pearson Correlation (only for DEBUG)</span>
@@ -702,7 +703,7 @@
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># Track losses</span>
     
-    <span class="n">loss_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Loss[</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">]: sum: </span><span class="si">{</span><span class="n">total_loss</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span> <span class="o">+</span> <span class="n">loss_str</span>
+    <span class="n">loss_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Loss[</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">]: sum: </span><span class="si">{</span><span class="n">track_loss</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span> <span class="o">+</span> <span class="n">loss_str</span>
     <span class="n">cprint</span><span class="p">(</span><span class="n">loss_str</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="n">optimize</span><span class="o">.</span><span class="n">trackloss</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="n">track_loss</span><span class="p">,</span> <span class="n">loss_history</span><span class="o">=</span><span class="n">loss_history</span><span class="p">)</span>
     
