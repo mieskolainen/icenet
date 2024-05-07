@@ -1,5 +1,45 @@
 ## MVA models
 
+# -----------------------------------------------
+# ** Mutual Information regularization **
+MI_REG_PARAM: &MI_REG_PARAM
+  
+  classes: [0]             #  Which classes to use in the regularization
+  
+  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
+  min_count: 32            #  Minimum number of events (per category)
+  max_N: 20000             #  Maximum number of events per function call (use to limit sample size for DCORR)
+  min_score: null          #  Consider only events with MVA output larger than this value (null for None)
+  poisson_weight: False    #  Per category Poisson sqrt(N) weighted loss
+  
+  # ------------------
+  # Neural MI param
+  
+  eval_batch_size: 8192    #  Evaluation batch size (pure memory <-> time tradeoff)
+  alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
+  ma_eT:  [null]     #  EMA tracking values (for each class)
+  
+  y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
+  
+  epochs: 5
+  batch_size: 256          #  if the estimate (network) turns into NaN, try tuning batch size, lr, weight decay ...
+  lr: 1.0e-4
+  weight_decay: 1.0e-2
+  clip_norm: 1.0
+  
+  mlp_dim: [128, 128]
+  batch_norm: False
+  dropout: 0.01
+  noise_std: 0.025
+  activation: 'relu'
+  
+  # -------------------------
+
+  # Comment out for no categories (N.B. dependence structure over inclusive sample != categorical)
+  #set_filter: *MI_DOMAIN_FILTER
+# -----------------------------------------------
+
+
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 xgb0:
@@ -22,7 +62,7 @@ xgb0:
     
     learning_rate: 0.1
     gamma: 1.67
-    max_depth: 10
+    max_depth: 12
     min_child_weight: 1.0
     max_delta_step: 1
     subsample: 1
@@ -31,7 +71,7 @@ xgb0:
     colsample_bylevel: 0.6
     colsample_bynode:  0.8
     
-    reg_lambda: 1.0            # L2 regularization
+    reg_lambda: 2.0            # L2 regularization
     reg_alpha: 0.05            # L1 regularization
     
     # learning task parameters
@@ -44,6 +84,59 @@ xgb0:
       classes: [0,1]
       beta: 1.0
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  plot_trees: False
+  
+  # Read/Write of epochs
+  savemode: 'all'              # 'all', 'latest'
+  readmode: -1                 # -1 is the last saved epoch
+
+iceboost0:
+  train:   'xgb'
+  predict: 'xgb_logistic'
+  label:   'ICEBOOST'
+  raytune:  xgb_trial_0
+  
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  #exclude_MVA_vars: ['.*']
+  
+  # booster parameters
+  model_param:
+    num_boost_round: 200       # number of epochs (equal to the number of trees!)
+    
+    booster: 'gbtree'          # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'        # 'auto', 'cpu', 'cuda'
+    
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 12
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 2.0            # L2 regularization
+    reg_alpha: 0.05            # L1 regularization
+    
+    # learning task parameters
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+
+  MI_param:
+    beta: [0.1]                # Positive for minimizing (for each class in use)
+    <<: *MI_REG_PARAM
   
   plot_trees: False
   
@@ -67,7 +160,7 @@ dmlp0:
   conv_type: 'dmlp'
   model_param:
     mlp_dim: [32, 32]     # hidden layer dimensions
-    activation: 'relu'
+    activation: 'silu'
     batch_norm: False
     dropout: 0.01
   
@@ -83,7 +176,7 @@ dmlp0:
     epochs: 150
     batch_size: 256
     lr: 3.0e-4
-    weight_decay: 0.00001      # L2-regularization
+    weight_decay: 1.0e-5      # L2-regularization
 
   # Scheduler
   scheduler_param:

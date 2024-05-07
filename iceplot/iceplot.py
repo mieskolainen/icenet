@@ -14,7 +14,7 @@ import math
 import copy
 
 
-def chi2_cost(h_mc, h_data):
+def chi2_cost(h_mc, h_data, return_nbins=False):
     """
     Chi2 cost function between two histograms
     """
@@ -24,7 +24,14 @@ def chi2_cost(h_mc, h_data):
     counts_data = h_data.counts * h_data.binscale
     err_data    = h_data.errs   * h_data.binscale
 
-    return np.sum((counts_mc - counts_data)**2 / (err_mc**2 + err_data**2))
+    ind = (counts_data > 0) & (counts_mc > 0)
+    
+    chi2 = np.sum((counts_mc[ind] - counts_data[ind])**2 / (err_mc[ind]**2 + err_data[ind]**2))
+
+    if not return_nbins:
+        return chi2
+    else:
+        return chi2, int(np.sum(ind))    
 
 
 def set_global_style(dpi=120, figsize=(4,3.75), font='serif', font_size=8, legend_fontsize=7, legend_handlelength=1):

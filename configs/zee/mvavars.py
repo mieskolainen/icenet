@@ -1,9 +1,5 @@
 
-KINEMATIC_VARS = [
-  'probe_eta',
-  'probe_pt',
-  'fixedGridRhoAll'  
-]
+KINEMATIC_VARS  = ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
 
 MVA_SCALAR_VARS = [
     'probe_sieie',
@@ -18,8 +14,11 @@ MVA_SCALAR_VARS = [
     'probe_etaWidth',
     'probe_trkSumPtHollowConeDR03',
     'probe_trkSumPtSolidConeDR04',
-    #'probe_pfChargedIso', # not found in data
+    'probe_pfChargedIso',
 ]
 
-LOAD_VARS = KINEMATIC_VARS + MVA_SCALAR_VARS
+MVA_SCALAR_VARS_ALL = MVA_SCALAR_VARS + KINEMATIC_VARS
+LOAD_VARS           = KINEMATIC_VARS + MVA_SCALAR_VARS
 
+#
+MI_VARS = ['probe_eta', 'probe_pt']

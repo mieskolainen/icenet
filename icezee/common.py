@@ -59,7 +59,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     print(f'ids: {frame_mc.keys()}')
     
     # Pre-computed weights (kinematic re-weight x gen event weight x ...)
-    W_MC = frame_mc[['rw_weights']].to_numpy().squeeze()
+    W_MC = frame_mc[['weight']].to_numpy().squeeze()
     W_MC = W_MC / np.sum(W_MC) * len(W_MC)
 
     X_MC = frame_mc[LOAD_VARS].to_numpy()
@@ -80,8 +80,14 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     print(f'Total number of events in file: {len(frame_data)}')
     print(f'ids: {frame_data.keys()}')
     
-    # Unit weighted events for data
-    X_data = frame_data[LOAD_VARS].to_numpy()
+    # ------------------
+    NEW_LOAD_VARS = copy.deepcopy(LOAD_VARS) # Different naming in data
+    for i in range(len(LOAD_VARS)):
+        if LOAD_VARS[i] == 'probe_pfChargedIso':
+            NEW_LOAD_VARS[i] = 'probe_pfChargedIsoPFPV'
+    # ------------------
+    
+    X_data = frame_data[NEW_LOAD_VARS].to_numpy()
     W_data = np.ones(len(X_data))
     Y_data = np.ones(len(X_data)).astype(int)
     
@@ -104,7 +110,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     print(__name__ + f'.load_root_file: Number of events: {len(X)}')
     
     for c in np.unique(Y):      
-        print(__name__ + f'.load_root_file: class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3E}, std(event_weight) = {np.std(W[Y==c]):0.3E}')
+        print(__name__ + f'.load_root_file: class[{c}] weight[mean,std,min,max] = {np.mean(W[Y==c]):0.3E}, {np.std(W[Y==c]):0.3E}, {np.min(W[Y==c]):0.3E}, {np.max(W[Y==c]):0.3E}')
     
     # ** Crucial -- randomize order to avoid problems with other functions **
     rand = np.random.permutation(len(X))
@@ -159,15 +165,17 @@ def splitfactor(x, y, w, ids, args):
     # -------------------------------------------------------------------------
     # Mutual information regularization targets
     
-    #vars    = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.MI_VARS)
-    #data_MI = data[vars].x.astype(np.float32)
     data_MI = None
+    
+    if inputvars.MI_VARS is not None:
+        vars    = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.MI_VARS)
+        data_MI = data[vars].x.astype(np.float32)
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
     
-    vars   = aux.process_regexp_ids(all_ids=data.ids, ids=eval('inputvars.' + args['inputvar_scalar']))
-    data   = data[vars]
-    data.x = data.x.astype(np.float32)
+    vars     = aux.process_regexp_ids(all_ids=data.ids, ids=eval('inputvars.' + args['inputvar_scalar']))
+    data     = data[vars]
+    data.x   = data.x.astype(np.float32)
     
     return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

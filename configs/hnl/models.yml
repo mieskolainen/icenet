@@ -35,16 +35,16 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for DEBUG)
   min_count: 32            #  Minimum number of events (per category)
-  max_N: null              #  Maximum number of events per function call (use to limit sample size)
+  max_N: null              #  Maximum number of events per function call (use to limit sample size for DCORR)
   min_score: null          #  Consider only events with MVA output larger than this value (null for None)
   poisson_weight: True     #  per category Poisson sqrt(N) weighted loss
   
   # ------------------
   # Neural MI param
-
+  
   eval_batch_size: 4096    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  [null]           #  EMA tracking values
+  ma_eT:  [null]           #  EMA tracking values (for each class)
   
   y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
@@ -240,7 +240,7 @@ xgb-MI-min:
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
   MI_param:
-    beta: [2.0]                # Positive for minimizing
+    beta: [2.0]                # Positive for minimizing  (for each class in use)
     <<: *MI_REG_PARAM
   
   plot_trees: False
@@ -297,7 +297,7 @@ xgb-MI-max:
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
   MI_param:
-    beta: [-2.0]       # Negative for maximizing MI
+    beta: [-2.0]       # Negative for maximizing MI  (for each class in use)
     <<: *MI_REG_PARAM
 
   plot_trees: False

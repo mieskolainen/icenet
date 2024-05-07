@@ -13,7 +13,7 @@ mva_param: &MVA_INPUT_PARAM
   signal_class: 1                     # Signal class ID
   #DA_class:    -2                    # Domain Adaptation class
   
-  inputvar_scalar:  'MVA_SCALAR_VARS' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
+  inputvar_scalar:  'MVA_SCALAR_VARS_ALL' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   #inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
   #jagged_maxdim:    6
   
@@ -26,9 +26,9 @@ mva_param: &MVA_INPUT_PARAM
   # Imputation
   imputation_param:
     active: true                      # True / False
-    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
+    var: 'MVA_SCALAR_VARS_ALL'        # Array of variables to be imputated
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: 0                     # For constant imputation
+    fill_value: -99                   # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
     values: null                      # Special values which indicate the need for imputation, if null, then only Inf/Nan
   
@@ -105,10 +105,11 @@ train_runmode:
   models:  !include configs/zee/models.yml
   active_models: &ACTIVE_MODELS
     
+    - iceboost0
     - xgb0
-    - dmlp0
+  #  - dmlp0
   
-
+  
   raytune: !include configs/zee/raytune.yml
 
   # Distillation training

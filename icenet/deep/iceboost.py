@@ -141,21 +141,22 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             reg_param = copy.deepcopy(MI_param)
             reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
             # -----------
-
+            
             # Pick class indices
             cind  = (targets != None) if c == None else (targets == c)
 
             X     = torch.Tensor(MI_x).to(device)[cind].squeeze()
             Z     = preds[cind].squeeze()
-            W     = weights[cind]
+            W     = w[cind]
             mask  = reg_param[f'evt_mask_{loss_mode}'][c]
             
-            # Total maximum is limited, pick subsample
-            if reg_param['max_N'] is not None and X.shape[0] > reg_param['max_N']:
-                X    = X[0:reg_param['max_N']]
-                Z    = Z[0:reg_param['max_N']]
-                W    = W[0:reg_param['max_N']]
-                mask = mask[:,0:reg_param['max_N']]
+            # Total maximum is limited (for DCORR), pick random subsample
+            if reg_param['losstype'] == 'DCORR' and reg_param['max_N'] is not None and X.shape[0] > reg_param['max_N']:
+                r    = np.random.choice(len(X), reg_param['max_N'], replace=False)
+                X    = X[r]
+                Z    = Z[r]
+                W    = W[r]
+                mask = mask[:,r]
             
             ### Now loop over all filter categories
             N_cat     = mask.shape[0]
@@ -166,20 +167,20 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             
             for m in range(N_cat):
                 
-                mm_ = torch.from_numpy(mask[m,:]).to(device) # Pick index mask
-
+                # This needs to be done, otherwise torch doesn't understand indexing!
+                mm_ = np.array(mask[m,:], dtype=bool)
+                
                 # Apply target threshold (e.g. we are interested only in high score region)
                 # First iterations might not yield any events passing this, 'min_count' will take care
                 if reg_param['min_score'] is not None:
-                    mm_ = mm_ & (Z > reg_param['min_score']) 
+                    mm_ = mm_ & (Z.detach().cpu().numpy() > reg_param['min_score']) 
                 
                 # Minimum number of events per category cutoff
-                if reg_param['min_count'] is not None and torch.sum(mm_) < reg_param['min_count']:
+                if reg_param['min_count'] is not None and np.sum(mm_) < reg_param['min_count']:
                     continue
                 
                 ## Non-Linear Distance Correlation
                 if   reg_param['losstype'] == 'DCORR':
-                    
                     value = value + cortools.distance_corr_torch(x=X[mm_], y=Z[mm_], weights=W[mm_])
                 
                 ## Linear Pearson Correlation (only for DEBUG)
@@ -215,7 +216,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                 
                 # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
                 if MI_param['poisson_weight']:
-                    cat_ww = torch.sqrt(torch.sum(mm_))
+                    cat_ww = torch.sqrt(np.sum(mm_))
                 else:
                     cat_ww = 1.0
                 
@@ -249,7 +250,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     # --------------------------------------------------------------------
     # Track losses
     
-    loss_str = f'Loss[{loss_mode}]: sum: {total_loss:0.5f} | ' + loss_str
+    loss_str = f'Loss[{loss_mode}]: sum: {track_loss["sum"]:0.5f} | ' + loss_str
     cprint(loss_str, 'yellow')
     optimize.trackloss(loss=track_loss, loss_history=loss_history)
     

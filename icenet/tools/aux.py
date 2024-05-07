@@ -1061,6 +1061,38 @@ class Metric:
                     self.fpr_bootstrap[i,:] = func(self.tpr)
 
 
+def sort_fpr_tpr(fpr, tpr):
+    """
+    For numerical stability with negative weighted events
+    """
+    fpr = np.clip(fpr, a_min=0.0, a_max=1.0)
+    tpr = np.clip(tpr, a_min=0.0, a_max=1.0)
+    
+    sorted_index = np.argsort(fpr)
+    fpr_sorted   = np.array(fpr)[sorted_index]
+    tpr_sorted   = np.array(tpr)[sorted_index]
+    
+    return fpr_sorted, tpr_sorted
+
+
+def auc_score(fpr, tpr):
+    """
+    AUC-ROC via numerical intergration
+    
+    Args:
+        fpr:  false positive rate array
+        tpr:  true positive rate array
+    
+    Call sort_fpr_tpr before this function for numerical stability.
+    
+    Returns:
+        AUC score
+    """
+    auc = scipy.integrate.trapz(y=tpr, x=fpr)
+
+    return np.clip(auc, a_min=0.0, a_max=1.0)
+
+
 def compute_metrics(class_ids, y_true, y_pred, weights):
 
     acc = -1
@@ -1079,11 +1111,9 @@ def compute_metrics(class_ids, y_true, y_pred, weights):
         if  len(class_ids) == 2:
             fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
             
-            # AUC via numerical integration (stable with negative weight events)
-            sorted_index = np.argsort(fpr)
-            fpr_sorted   = np.array(fpr)[sorted_index]
-            tpr_sorted   = np.array(tpr)[sorted_index]
-            auc = scipy.integrate.trapz(y=tpr_sorted, x=fpr_sorted)
+            # Numerically more stable than scikit roc_auc_score
+            fpr, tpr = sort_fpr_tpr(fpr=fpr, tpr=tpr)
+            auc = auc_score(fpr=fpr, tpr=tpr)
             
             #auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
             acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)

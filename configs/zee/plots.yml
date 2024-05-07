@@ -1,9 +1,30 @@
 # Plot steering
 
 # -----------------------------------------------------------------------
+FINAL_STATE_FILTER: &FINAL_STATE_FILTER
+
+  filter[0]:
+    operator: null    # null (single set), 'cartesian_and', 'cartesian_or'
+    sets: [0]         # input set ids (one or several)
+  
+  # ... more filters here
+
+  # -------------------------------------------------
+
+  set[0]:
+    expand: 'set' # 'set', 'vetoset' or 'powerset' which goes through all boolean vector combinations
+    cutset:
+      # Latex description is for boolean [0,1] per cut
+      [{latex: ['', 'EB'],  cut: '-1.444 < probe_eta && probe_eta < 1.444'},
+       {latex: ['', 'EE-'], cut: '-2.5   < probe_eta && probe_eta < -1.566'},
+       {latex: ['', 'EE+'], cut: '1.566  < probe_eta && probe_eta < 2.5'}]
+  
+  # ... more sets here
+
+# -----------------------------------------------------------------------
 
 basic:
-  active: True
+  active: true
   nbins:  70
   percentile_range: [0.5, 99.5]
   exclude_vals: [null, -999]
@@ -15,11 +36,23 @@ corrmat:
 contours:
   active: false
 
+# Plot ROC curves
 ROC:
   active: true
-  num_bootstrap: 200
+  num_bootstrap: 0
   xmin: 1.0E-4
-  #set_filter: *FINAL_STATE_FILTER
+  set_filter: *FINAL_STATE_FILTER
+
+## Plot 1D histograms of observables re-weighted with the ML model output score s
+OBS_reweight:
+  active: true
+
+  # Commands to execute, such as 's', '1/s', 's/(1-s)', '(1-s)/s' ...
+  func: ['s = np.ones_like(y_pred).astype(np.float32)',
+         's[y==0] = y_pred[y==0] / (1 - np.clip(y_pred[y==0], a_min=1e-3, a_max=1 - 1e-3))',
+         's[y==0] = np.clip(s[y==0], a_min=1e-3, a_max=1e3)']
+  
+  set_filter: *FINAL_STATE_FILTER
 
 
 ## Binned ROC plots can be 1D or 2D (powerset filtering not supported here)
@@ -41,7 +74,7 @@ ROC_binned:
 MVA_output:
   active: true
   edges: 80
-  #set_filter: *FINAL_STATE_FILTER
+  set_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
 # Set filter can be applied only per one plot[i] identifier!

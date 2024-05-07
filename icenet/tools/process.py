@@ -25,6 +25,7 @@ import icenet.deep.iceboost as iceboost
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
+from iceplot import iceplot
 
 from icenet.tools import stx
 from icenet.tools import io
@@ -1167,7 +1168,8 @@ def make_plots(data, args, runmode):
 def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     X_kin, ids_kin, X_RAW, ids_RAW):
     """ 
-    Arbitrary plot wrapper function.
+    Arbitrary plot steering function.
+    Add new plot types here, steered from plots.yml
     """
 
     global roc_mstats
@@ -1185,9 +1187,148 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     y_preds.append(copy.deepcopy(y_pred))
     
     # --------------------------------------
+    ### Output score re-weighted observables
+
+    if 'OBS_reweight' in args['plot_param'] and args['plot_param']['OBS_reweight']['active']:
+
+        def plot_helper(mask, sublabel, pathlabel):
+            
+            cprint(f'label = {label} | sublabel = {sublabel}', 'green')
+            
+            # Original weights            
+            w = weights[mask] if weights is not None else np.ones(len(X_RAW))[mask]
+            
+            # Transform model output scores according to the function defined
+            s = np.ones(len(y_pred))
+            
+            for cmd in args['plot_param']['OBS_reweight']['func']:
+                print(f'executing: "{cmd}"')
+                exec(cmd)
+            
+            # Apply event masks
+            s   = s[mask]
+            y_m = y[mask]
+            
+            # Loop over each observable
+            for i in range(X_RAW.shape[1]):
+                
+                XX        = X_RAW[mask, i]
+                
+                nbins     = 50
+                binrange  = [np.percentile(XX, 1), np.percentile(XX, 99)]
+                bins      = np.linspace(binrange[0], binrange[1], nbins+1)
+                
+                # ----------------------------------------------------
+                
+                obs_X = {
+                    
+                    # Axis limits
+                    'xlim'    : (bins[0], bins[-1]),
+                    'ylim'    : None,
+                    'xlabel'  : f'{ids_RAW[i]}',
+                    'ylabel'  : r'Weighted counts',
+                    'units'   : {'x': r'a.u.', 'y' : r'1'},
+                    'label'   : f'{label}',
+                    'figsize' : (4, 3.75),
+                    
+                    # Ratio
+                    'ylim_ratio' : (0.5, 1.5),
+
+                    # Histogramming
+                    'bins'    : None,
+                    'density' : False,
+                    
+                    # Function to calculate
+                    'func'    : None
+                }
+                
+                data_template = {
+                    'data'   : None,
+                    'weights': None,
+                    'label'  : 'Data',
+                    'hfunc'  : 'errorbar',
+                    'style'  : iceplot.errorbar_style,
+                    'obs'    : obs_X,
+                    'hdata'  : None,
+                    'color'  : None
+                }
+                
+                # Data source <-> Observable collections
+                class1    = data_template.copy() # Deep copies
+                class0    = data_template.copy()
+                class0_ML = data_template.copy()
+                
+                class1.update({
+                    'label'  : '$C_1$',
+                    'hfunc'  : 'hist',
+                    'style'  : iceplot.hist_style_step,
+                    'color'  : (0,0,0)
+                })
+                class0.update({
+                    'label'  : '$C_0$',
+                    'hfunc'  : 'hist',
+                    'style'  : iceplot.hist_style_step,
+                    'color'  : iceplot.imperial_green
+                })
+                class0_ML.update({
+                    'label'  : '$C_0$ (AI)',
+                    'hfunc'  : 'hist',
+                    'style'  : iceplot.hist_style_step,
+                    'color'  : iceplot.imperial_dark_red
+                })
+
+                data = [class1, class0, class0_ML]
+                
+                data[0]['hdata'] = iceplot.hist_obj(XX[y_m == 1], bins=bins, weights=w[y_m == 1])
+                data[1]['hdata'] = iceplot.hist_obj(XX[y_m == 0], bins=bins, weights=w[y_m == 0])
+                data[2]['hdata'] = iceplot.hist_obj(XX[y_m == 0], bins=bins, weights=s[y_m == 0] * w[y_m == 0])
+                
+                # Update labels with chi2
+                chi2_0, ndf_0       = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+                chi2_0_AI, ndf_0_AI = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+                
+                data[1]['label'] += f' | $\\chi^2 = {chi2_0:0.0f} \, / \, {ndf_0} = {chi2_0/ndf_0:0.1f}$'
+                data[2]['label'] += f' | $\\chi^2 = {chi2_0_AI:0.0f} \, / \, {ndf_0_AI} = {chi2_0_AI/ndf_0_AI:0.1f}$'
+                
+                # Plot it
+                fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale='log', ratio_error_plot=True)
+                fig1, ax1 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_error_plot=True)
+                
+                f'{targetdir}/OBS_reweight/{label}/{pathlabel}'
+                
+                fig0.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__log.pdf', bbox_inches='tight')
+                fig0.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__log.png', bbox_inches='tight', dpi=300)
+                
+                fig1.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__linear.pdf', bbox_inches='tight')
+                fig1.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__linear.png', bbox_inches='tight', dpi=300)
+                
+                fig0.clf()
+                fig1.clf()
+                plt.close()
+                # ----------------------------------------------------
+        
+        # ** All inclusive **
+        mask = np.ones(len(y_pred), dtype=bool)
+        plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
+
+        # ** Set filtered **
+        if 'set_filter' in args['plot_param']['OBS_reweight']:
+            
+            filters = args['plot_param']['OBS_reweight']['set_filter']
+            mask_filterset, text_filterset, path_filterset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
+
+            for m in range(mask_filterset.shape[0]):
+                
+                if np.sum(mask_filterset[m,:]) == 0:
+                    cprint(f'OBS_reweight: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                    continue
+                
+                plot_helper(mask=mask_filterset[m,:], sublabel=text_filterset[m], pathlabel=path_filterset[m])
+    
+    # --------------------------------------
     ### ROC plots
 
-    if args['plot_param']['ROC']['active']:
+    if 'ROC' in args['plot_param'] and args['plot_param']['ROC']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
             
@@ -1219,12 +1360,17 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             mask_filterset, text_filterset, path_filterset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
 
             for m in range(mask_filterset.shape[0]):
+                
+                if np.sum(mask_filterset[m,:]) == 0:
+                    cprint(f'ROC: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                    continue
+                
                 plot_helper(mask=mask_filterset[m,:], sublabel=text_filterset[m], pathlabel=path_filterset[m])
 
     # --------------------------------------
     ### ROC binned plots (no filterset selection supported here)
-    if args['plot_param']['ROC_binned']['active']:
-
+    if 'ROC_binned' in args['plot_param'] and args['plot_param']['ROC_binned']['active']:
+        
         for i in range(100): # Loop over plot types
             
             pid = f'plot[{i}]'
@@ -1266,7 +1412,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     # ----------------------------------------------------------------
     ### MVA-output 1D-plot
-    if args['plot_param']['MVA_output']['active']:
+    if 'MVA_output' in args['plot_param'] and args['plot_param']['MVA_output']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
             
@@ -1287,14 +1433,19 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         if 'set_filter' in args['plot_param']['MVA_output']:
 
             filters = args['plot_param']['MVA_output']['set_filter']
-            mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
+            mask_filterset, text_filterset, path_filterset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
 
-            for m in range(mask_powerset.shape[0]):
-                plot_helper(mask=mask_powerset[m,:], sublabel=text_powerset[m], pathlabel=path_powerset[m])
+            for m in range(mask_filterset.shape[0]):
+                
+                if np.sum(mask_filterset[m,:]) == 0:
+                    cprint(f'MVA_output: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                    continue
+                
+                plot_helper(mask=mask_filterset[m,:], sublabel=text_filterset[m], pathlabel=path_filterset[m])
 
     # ----------------------------------------------------------------
     ### MVA-output 2D correlation plots
-    if args['plot_param']['MVA_2D']['active']:
+    if 'MVA_2D' in args['plot_param'] and args['plot_param']['MVA_2D']['active']:
 
         for i in range(100): # Loop over plot types
             
@@ -1344,11 +1495,16 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             if 'set_filter' in args['plot_param']['MVA_2D'][pid]:
                 
                 filters = args['plot_param']['MVA_2D'][pid]['set_filter']
-                mask_powerset, text_powerset, path_powerset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
+                mask_filterset, text_filterset, path_filterset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
                 
-                for m in range(mask_powerset.shape[0]):
-                    plot_helper(mask=mask_powerset[m,:], pick_ind=pick_ind, sublabel=text_powerset[m], pathlabel=path_powerset[m])
-            
+                for m in range(mask_filterset.shape[0]):
+                
+                    if np.sum(mask_filterset[m,:]) == 0:
+                        cprint(f'MVA_2D: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                        continue
+                    
+                    plot_helper(mask=mask_filterset[m,:], pick_ind=pick_ind, sublabel=text_filterset[m], pathlabel=path_filterset[m])
+    
     return True
 
 

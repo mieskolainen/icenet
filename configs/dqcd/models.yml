@@ -89,7 +89,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   losstype: 'DCORR'        # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
   min_count: 32            #  Minimum number of events (per category)
-  max_N: null              #  Maximum number of events per function call (use to limit sample size)
+  max_N: null              #  Maximum number of events per function call (use to limit sample size for DCORR)
   min_score: 0.75          #  Consider only events with MVA output larger than this value (null for None)
   poisson_weight: False    #  Per category Poisson sqrt(N) weighted loss
   
@@ -98,7 +98,7 @@ MI_REG_PARAM: &MI_REG_PARAM
 
   eval_batch_size: 8192    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  [null]           #  EMA tracking values
+  ma_eT:  [null]           #  EMA tracking values (for each class)
   
   y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   

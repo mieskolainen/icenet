@@ -775,16 +775,21 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
     class_ids = np.unique(y.astype(int))
     legends   = []
     
+    min_x =  1e30
+    max_x = -1e30
+    
     # Loop over classes
     for c in class_ids:
-
+        
         # Compute histograms with numpy (we use nbins and range() for speed)
         if plot_unweighted:
-            counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
+            counts, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
         
         counts_w, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=weights[y == c])
-
         mu, std = aux.weighted_avg_and_std(values=X[y == c], weights=weights[y == c])
+        
+        min_x = edges[0]  if edges[0]  < min_x else min_x
+        max_x = edges[-1] if edges[-1] > max_x else max_x
         
         # Linear and log scale scale (left and right plots)
         for i in range(2):
@@ -798,11 +803,13 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
                 if plot_unweighted:
                     legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
                 legends.append(f'$\\mathcal{{C}} = {c}$ [$\\mu={mu:0.2f}, \\sigma={std:0.2f}$]')
-
+    
     ax[0].set_ylabel('[weighted] counts')
     ax[0].set_xlabel(xlabel)
-    ax[1].set_xlabel(xlabel)
+    ax[0].set_ylim([0,None])
+    ax[0].set_xlim([min_x, max_x])
     
+    ax[1].set_xlabel(xlabel)
     ax[1].set_title(title, fontsize=10)
     ax[1].legend(legends, fontsize=8)
     ax[1].set_yscale('log')
