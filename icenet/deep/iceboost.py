@@ -216,7 +216,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                 
                 # Significance N/sqrt(N) = sqrt(N) weights based on Poisson stats
                 if MI_param['poisson_weight']:
-                    cat_ww = torch.sqrt(np.sum(mm_))
+                    cat_ww = np.sqrt(np.sum(mm_))
                 else:
                     cat_ww = 1.0
                 
