@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 import os
 import pandas as pd
 from utils import *
+from tabulate import tabulate
 
 ################################################################################
 # CLI
@@ -21,7 +22,7 @@ print("Command line args:",vars(args))
 # Variables
 
 if args.verbose :
-   print('Features:',columns)
+   print(f'Features: (len={len(columns)})',columns)
    print('Additional:',additional)
    print('Labelling:',labelling)
 
@@ -32,14 +33,21 @@ icenet_base = os.environ['ICEPATH']
 brem_base = f'{icenet_base}/sandbox/brem'
 inputs = f'{brem_base}/inputs'
 outputs = f'{brem_base}/outputs'
-files = [f'{icenet_base}/travis-stash/input/icebrem/output_signal_10k.root']
-print('Input files:', ', '.join(["'{:s}'".format(f) for f in files]))
+files = [
+    f'{icenet_base}/travis-stash/input/icebrem/output_signal_10k.root',
+    # (class label,file)
+    #(1,f'{icenet_base}/travis-stash/input/icebrem/output_signal_10k.root'), 
+    #(0,f'{icenet_base}/travis-stash/input/icebrem/output_qcd_10k.root'),
+    #(0,f'{icenet_base}/travis-stash/input/icebrem/output_data_10k.root'),
+    ]
 df = parse(files,args.nevents,args.verbose)
 
 ################################################################################
 # Preprocessing
 
 df = preprocess(df)
+
+#df.to_pickle("df1.pkl")
 
 # print summary info
 if args.verbose :
@@ -48,12 +56,25 @@ if args.verbose :
                           'display.max_rows',None, 
                           'display.max_columns',None,
                           'display.float_format','{:,.2f}'.format) :
-      print(df.describe(include='all').T)
+
+       # remove event scalars
+       cols = sorted(list(set(df.columns.tolist()) - set(['run','lumi','evt']))) 
+       print(df[cols].describe(include='all').T)
+
+       #pretty=lambda df: tabulate(df,headers='keys',tablefmt='psql') # 'html'
+       #print(pretty(df.describe(include='all').T))
+       print(
+           pd.crosstab(
+               df.is_e,
+               [df.has_gsf,df.has_ele],
+               rownames=['is_e'],
+               colnames=['has_gsf','has_ele'],
+               margins=True))
 
 ################################################################################
 # Reweighting (e.g. by pT,eta)
 
-reweight_features = ['log_trk_pt','trk_eta']
+reweight_features = ['log_trk_pt','trk_eta','rho','dummy'][-2:]
 nbins = args.nbins if args.nbins > 0 else None
 
 # Determine weights and write to file

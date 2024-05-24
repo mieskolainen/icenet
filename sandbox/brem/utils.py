@@ -10,6 +10,7 @@ from sklearn.cluster import MiniBatchKMeans
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve,roc_auc_score
+from sklearn.utils import shuffle
 from matplotlib import pyplot as plt
 from matplotlib.colors import LogNorm
 #from icebrem_utils import roc_curves
@@ -53,7 +54,8 @@ additional = [
     'ele_pt','ele_eta','ele_dr',
     'ele_mva_value_2019Aug07' if idx == 0 else 'ele_mva_value',
     #'ele_mva_value_retrained','ele_mva_value_depth10','ele_mva_value_depth15',
-    'weight','rho', #'evt',
+    'run', 'lumi', 'evt',
+    'weight','rho',
     'tag_pt','tag_eta',
     'gsf_dxy','gsf_dz','gsf_nhits','gsf_chi2red',
 ]
@@ -70,12 +72,21 @@ columns = list(set(columns))
 # Parse files
 
 def parse(files,nevents=-1,verbose=False):
+
+    if isinstance(files[0],str):
+        for i,f in enumerate(files): files[i] = (None,f)
+
     df = None
-    for ifile,file in enumerate(files):
-        tree = uproot.open(file).get('ntuplizer/tree')
+    if verbose: print('Input files:')
+    for ifile,(label,f) in enumerate(files):
+        if verbose: print(f'  #{ifile}: {f} (class label = {label}')
+        tree = uproot.open(f).get('ntuplizer/tree')
         print('Available branches: ',tree.keys())
         tmp = ak.to_dataframe(tree.arrays(columns))
-        if verbose : print(f'ifile={ifile:.0f}, file={file:s}, entries={tmp.shape[0]:.0f}')
+        if   label == 1: tmp['label'] = True
+        elif label == 0: tmp['label'] = False
+        else:            tmp['label'] = tmp['is_e']
+        if verbose : print(f'ifile={ifile:.0f}, file={f:s}, entries={tmp.shape[0]:.0f}')
         df = tmp if ifile == 0 else pd.concat([df,tmp])
         if nevents > 0 and df.shape[0] > nevents :
             df = df.head(nevents)
@@ -88,24 +99,47 @@ def parse(files,nevents=-1,verbose=False):
 
 def preprocess(df) :
 
+    # Filter based on sample label
+    keep = ( (df.label==True) & (df.is_e==True) ) | ( (df.label==False) & (df.is_e==False) )
+    df = df[keep]
+
     # Filter based on tag muon pT and eta
-    tag_muon_pt = 7.0
-    tag_muon_eta = 1.5
-    df = df[(df.tag_pt>tag_muon_pt)&(np.abs(df.tag_eta)<tag_muon_eta)]
+    thr_tag_pt = 7.0
+    thr_tag_eta = 1.5
+
+    keep = (df.tag_pt < -9.999) & (df.tag_eta < -9.999)
+    df = df[keep | ((df.tag_pt>thr_tag_pt)&(np.abs(df.tag_eta)<thr_tag_eta))]
 
     print(
-        f"tag_muon_pt: {tag_muon_pt:.2f}, "\
-        f"tag_muon_eta: {tag_muon_eta:.2f}, "\
+        f"threshold_tag_pt: {thr_tag_pt:.2f}, "\
+        f"threshold_tag_eta: {thr_tag_eta:.2f}, "\
         f"df.shape: {df.shape}")
-
+    
     # Clip and take log of trk_pt
     df['trk_eta'] = df['trk_eta'].clip(lower=-3.) # clip to trk_eta > -3.
     df['trk_pt'] = df['trk_pt'].clip(upper=100.)  # clip trk_pt < 100.
     log_trk_pt = np.log10(df['trk_pt'])
     log_trk_pt[np.isnan(log_trk_pt)] = -1.        # set -ve values to log(trk_pt) = -1.
     df['log_trk_pt'] = log_trk_pt
-    df = df[ (df.has_gsf == True) & (df.has_ele == True) & (df.trk_pt > 1.) & (df.trk_eta.abs() < 2.5) ]
-    
+
+    # uint64 for some event scalars
+    df['run'] = pd.to_numeric(df['run'], errors="coerce").fillna(0).astype('uint64')
+    df['lumi'] = pd.to_numeric(df['lumi'], errors="coerce").fillna(0).astype('uint64')
+    df['evt'] = pd.to_numeric(df['evt'], errors="coerce").fillna(0).astype('uint64')
+
+    # Dummy constant value 
+    df['dummy'] = 0.
+    df['dummy'] = df['dummy'].astype('float32')
+
+    # Filter only electrons, based on pt and eta
+    keep = (df.has_gsf == True) & (df.has_ele == True) & (df.trk_pt > 1.) & (df.trk_eta.abs() < 2.5)
+    df = df[keep]
+
+    # Sort and shuffle
+    df = df[sorted(df.columns.tolist())] # sort cols by headers
+    df = df.sort_values(by=['run','lumi','evt','rho']) # sort rows by scalars
+    df = shuffle(df,random_state=0) # shuffle (if set, deterministic)
+
     return df
 
 ################################################################################
@@ -125,6 +159,8 @@ def extract_weights(
     write=True,
     verbose=False) :
 
+    reweight_features = sorted(reweight_features)
+
     print(f'Accessing files in dir "{base}"...')
     if not os.path.isdir(base) : os.makedirs(base)
     
@@ -143,6 +179,7 @@ def extract_weights(
             #max_no_improvement=None,
             #batch_size=3000,
             #n_jobs=3,
+            random_state=0, # if set, deterministic
             verbose=verbose,
             )
         clusterizer.fit(df[reweight_features])
@@ -196,7 +233,10 @@ def plot_weights(
 
     print(f'Producing plots in directory "{base}"...')
     if not os.path.isdir(base) : os.makedirs(base)
-    
+
+    if len(reweight_features) == 1:
+        reweight_features.append('dummy')
+
     x_feature = reweight_features[0]
     y_feature = reweight_features[1]
 
@@ -207,7 +247,7 @@ def plot_weights(
     y_min,y_max = df[y_feature].min()-0.3, df[y_feature].max()+0.3
     xx,yy = np.meshgrid(np.arange(x_min,x_max,mesh_size,dtype=np.float32),
                         np.arange(y_min,y_max,mesh_size,dtype=np.float32))
-
+    
     print(f'Evaluate clusterizer for chosen binning...')
     cluster = clusterizer.predict(np.c_[xx.ravel(),yy.ravel()]) # Evaluate (for each point in the mesh)
 
