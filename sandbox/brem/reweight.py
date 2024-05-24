@@ -74,7 +74,12 @@ if args.verbose :
 ################################################################################
 # Reweighting (e.g. by pT,eta)
 
-reweight_features = ['log_trk_pt','trk_eta','rho','dummy'][-2:]
+reweight_features = [
+    ['log_trk_pt','trk_eta'],
+    ['log_gsf_pt','gsf_eta'],
+    ['rho','dummy'],
+    ][0]
+
 nbins = args.nbins if args.nbins > 0 else None
 
 # Determine weights and write to file

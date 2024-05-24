@@ -119,8 +119,15 @@ def preprocess(df) :
     df['trk_eta'] = df['trk_eta'].clip(lower=-3.) # clip to trk_eta > -3.
     df['trk_pt'] = df['trk_pt'].clip(upper=100.)  # clip trk_pt < 100.
     log_trk_pt = np.log10(df['trk_pt'])
-    log_trk_pt[np.isnan(log_trk_pt)] = -1.        # set -ve values to log(trk_pt) = -1.
+    log_trk_pt[np.isnan(log_trk_pt)] = -1.
     df['log_trk_pt'] = log_trk_pt
+
+    # Clip and take log of trk_pt
+    df['gsf_eta'] = df['gsf_eta'].clip(lower=-3.) # clip to gsf_eta > -3.
+    df['gsf_pt'] = df['gsf_pt'].clip(upper=100.)  # clip gsf_pt < 100.
+    log_gsf_pt = np.log10(df['gsf_pt'])
+    log_gsf_pt[np.isnan(log_gsf_pt)] = -1.
+    df['log_gsf_pt'] = log_gsf_pt
 
     # uint64 for some event scalars
     df['run'] = pd.to_numeric(df['run'], errors="coerce").fillna(0).astype('uint64')
@@ -158,8 +165,6 @@ def extract_weights(
     filename='weights',
     write=True,
     verbose=False) :
-
-    reweight_features = sorted(reweight_features)
 
     print(f'Accessing files in dir "{base}"...')
     if not os.path.isdir(base) : os.makedirs(base)
@@ -450,7 +455,6 @@ def roc_curves(
         'val':{'label':None,'score':None,'vars':None,'weight':None},
         },
     reweight_features = ['log_trk_pt','trk_eta'],
-    transform = [ lambda x: x, lambda x: 0.-np.abs(x) ],
     title='test',
     base='.',
     verbose=False) :
@@ -502,14 +506,20 @@ def roc_curves(
         plt.plot(fpr,tpr,label=f'Validation (AUC={auc:5.3f})')
 
     # ROC for each (transformed) variable
-    for func,var in zip(transform,reweight_features):
+    for var in reweight_features:
+
+        # transform
+        if 'eta' in var:
+            eta = dct['val']['vars'][var]
+            dct['val']['vars'][var] = 0.-np.abs(eta)
+
         fpr,tpr,thresholds = roc_curve(
             y_true=dct['val']['label'],
-            y_score=func(dct['val']['vars'][var]),
+            y_score=dct['val']['vars'][var],
             sample_weight=dct['val']['weight'])
         auc = roc_auc_score(
             dct['val']['label'],
-            func(dct['val']['vars'][var]),
+            dct['val']['vars'][var],
             sample_weight=dct['val']['weight'])
         plt.plot(fpr,tpr,label=f'{var} (AUC={auc:5.3f})')
       
