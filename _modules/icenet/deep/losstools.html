@@ -13,7 +13,7 @@
   <![endif]-->
   
         <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.6
+                0.1.0.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -46,12 +46,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-deprecated">Pre-installed CUDA paths (DEPRECATED)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-experimental">Pre-installed CUDA paths (EXPERIMENTAL)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#c-library-versions">C-library versions</a></li>
 </ul>
@@ -59,11 +59,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#basic-design-principles">Basic design principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#yaml-configuration-files">YAML-configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#oracle-grid-execution">Oracle Grid execution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#folder-structure">Folder structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#ml-algorithms-and-models">ML-algorithms and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#ai-algorithms-and-models">AI-algorithms and models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#advanced-ml-training-technology">Advanced ML-training technology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#automated-selectors-and-combinatorics-for-distributions">Automated selectors and combinatorics for distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#sun-grid-engine-sge-htcondor-execution">Sun Grid Engine (SGE) / HTCondor execution</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/markup.html">Markup</a></li>
@@ -131,8 +131,34 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.deploy">icedqcd.deploy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.create_ID_label"><code class="docutils literal notranslate"><span class="pre">create_ID_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.f2s"><code class="docutils literal notranslate"><span class="pre">f2s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.generate_cartesian_param"><code class="docutils literal notranslate"><span class="pre">generate_cartesian_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.get_predictor"><code class="docutils literal notranslate"><span class="pre">get_predictor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.process_data"><code class="docutils literal notranslate"><span class="pre">process_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.zscore_normalization"><code class="docutils literal notranslate"><span class="pre">zscore_normalization()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.limits">icedqcd.limits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.create_limit_plots_vector"><code class="docutils literal notranslate"><span class="pre">create_limit_plots_vector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.create_limit_tables"><code class="docutils literal notranslate"><span class="pre">create_limit_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.find_limits"><code class="docutils literal notranslate"><span class="pre">find_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.limit_wrapper_dict"><code class="docutils literal notranslate"><span class="pre">limit_wrapper_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.plot_brazil"><code class="docutils literal notranslate"><span class="pre">plot_brazil()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.run_limits_vector"><code class="docutils literal notranslate"><span class="pre">run_limits_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.optimize">icedqcd.optimize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.find_filter"><code class="docutils literal notranslate"><span class="pre">find_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.func_binormal"><code class="docutils literal notranslate"><span class="pre">func_binormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.func_binormal2"><code class="docutils literal notranslate"><span class="pre">func_binormal2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.optimize_selection"><code class="docutils literal notranslate"><span class="pre">optimize_selection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.plot_ROC_fit"><code class="docutils literal notranslate"><span class="pre">plot_ROC_fit()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -143,6 +169,13 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.ABCD_eq"><code class="docutils literal notranslate"><span class="pre">ABCD_eq()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.ABCD_err"><code class="docutils literal notranslate"><span class="pre">ABCD_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.test_abcd"><code class="docutils literal notranslate"><span class="pre">test_abcd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.commutator">icefit.commutator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.crv"><code class="docutils literal notranslate"><span class="pre">crv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.selection_A"><code class="docutils literal notranslate"><span class="pre">selection_A()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.selection_B"><code class="docutils literal notranslate"><span class="pre">selection_B()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a><ul>
@@ -167,11 +200,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.test_gaussian"><code class="docutils literal notranslate"><span class="pre">test_gaussian()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.dequantize">icefit.dequantize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.U"><code class="docutils literal notranslate"><span class="pre">U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.compute_ind"><code class="docutils literal notranslate"><span class="pre">compute_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.construct_icdf"><code class="docutils literal notranslate"><span class="pre">construct_icdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.fast_loop"><code class="docutils literal notranslate"><span class="pre">fast_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.iDQF"><code class="docutils literal notranslate"><span class="pre">iDQF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.em">icefit.em</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.EM_frac"><code class="docutils literal notranslate"><span class="pre">EM_frac()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.gausspdf"><code class="docutils literal notranslate"><span class="pre">gausspdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.mixture_nll"><code class="docutils literal notranslate"><span class="pre">mixture_nll()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.test_EM"><code class="docutils literal notranslate"><span class="pre">test_EM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.icelimit">icefit.icelimit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.CL_single"><code class="docutils literal notranslate"><span class="pre">CL_single()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.CL_single_asymptotic"><code class="docutils literal notranslate"><span class="pre">CL_single_asymptotic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.CL_single_compute"><code class="docutils literal notranslate"><span class="pre">CL_single_compute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.LL_splusb"><code class="docutils literal notranslate"><span class="pre">LL_splusb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.asymptotic_uncertainty_CLs"><code class="docutils literal notranslate"><span class="pre">asymptotic_uncertainty_CLs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.convolve_systematics"><code class="docutils literal notranslate"><span class="pre">convolve_systematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.test_limits_unit_test"><code class="docutils literal notranslate"><span class="pre">test_limits_unit_test()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a><ul>
@@ -192,6 +244,16 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.rand_powexp"><code class="docutils literal notranslate"><span class="pre">rand_powexp()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.test_accuracy"><code class="docutils literal notranslate"><span class="pre">test_accuracy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.test_lognormal"><code class="docutils literal notranslate"><span class="pre">test_lognormal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mantissa">icefit.mantissa</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.bits2digits"><code class="docutils literal notranslate"><span class="pre">bits2digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.digits2bits"><code class="docutils literal notranslate"><span class="pre">digits2bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.plots"><code class="docutils literal notranslate"><span class="pre">plots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.reduce_mantissa_bits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.reduce_mantissa_digits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.round_sig"><code class="docutils literal notranslate"><span class="pre">round_sig()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
@@ -347,10 +409,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.fastkan">icenet.deep.fastkan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.lzmlp">icenet.deep.lzmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
@@ -368,8 +432,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
@@ -377,6 +441,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -467,7 +532,7 @@
 
 <div class="viewcode-block" id="loss_wrapper">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.loss_wrapper">[docs]</a>
-<span class="k">def</span> <span class="nf">loss_wrapper</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">loss_wrapper</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A wrapper function to loss functions</span>
 <span class="sd">    </span>
@@ -493,50 +558,116 @@
         <span class="n">weights</span>      <span class="o">=</span> <span class="kc">None</span> <span class="c1"># TBD. Could re-compute a new set of edge weights </span>
     <span class="c1"># --------------------------------------------</span>
     
-    <span class="k">def</span> <span class="nf">MI_helper</span><span class="p">(</span><span class="n">log_phat</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">MI_helper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+        <span class="c1"># Mutual Information regularization</span>
         <span class="k">if</span> <span class="n">MI</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-            <span class="n">Z</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_phat</span><span class="p">[:,</span> <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;y_dim&#39;</span><span class="p">]])</span>  <span class="c1"># Classifier output</span>
+            
+            <span class="c1"># Model output</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>    
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:,</span> <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;y_dim&#39;</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">output</span>
+            
             <span class="k">return</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;MI x $</span><span class="se">\\</span><span class="s1">beta = </span><span class="si">{</span><span class="n">MI</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">:</span> <span class="n">MI_loss</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="n">MI</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
     
-    <span class="k">if</span>  <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cross_entropy&#39;</span><span class="p">:</span>
-        <span class="n">log_phat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">LZ_helper</span><span class="p">():</span>
+        <span class="c1"># Lipschitz continuity regularization</span>
+        <span class="k">if</span> <span class="s1">&#39;lipschitz_beta&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lipschitz_beta&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">LZ_loss</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lipschitz_beta&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">get_lipschitz_loss</span><span class="p">()</span>
+            <span class="n">LZ</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;LZ x $</span><span class="se">\\</span><span class="s2">beta = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;lipschitz_beta&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="n">LZ_loss</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LZ</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">LZ</span>
+    
+    <span class="k">if</span>     <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary_cross_entropy&#39;</span><span class="p">:</span>
+        
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">loss</span>   <span class="o">=</span> <span class="n">BCE_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="c1"># Logit magnitude L1-regularization</span>
+        <span class="k">if</span> <span class="s1">&#39;logit_L1_beta&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;logit_L1_beta&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">L1_loss</span> <span class="o">=</span> <span class="n">LOGIT_L1_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">logit_beta</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;logit_L1_beta&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+            <span class="n">LRL1</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;LRL1 x $</span><span class="se">\\</span><span class="s2">lambda = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;logit_L1_beta&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="n">L1_loss</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LRL1</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># Logit magnitude L2-regularization</span>
+        <span class="k">if</span> <span class="s1">&#39;logit_L2_beta&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;logit_L2_beta&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">L2_loss</span> <span class="o">=</span> <span class="n">LOGIT_L2_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">logit_beta</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;logit_L2_beta&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+            <span class="n">LRL2</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;LRL2 x $</span><span class="se">\\</span><span class="s2">lambda = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;logit_L2_beta&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="n">L2_loss</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LRL2</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;BCE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">LRL1</span><span class="p">,</span> <span class="o">**</span><span class="n">LRL2</span><span class="p">,</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">))}</span>
+    
+    <span class="k">elif</span>  <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary_LQ&#39;</span><span class="p">:</span>
+        
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">LQ_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;LQ&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">))}</span>
+    
+    <span class="k">elif</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MSE&#39;</span><span class="p">:</span>
+        
+        <span class="n">y_hat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="n">MSE_loss</span><span class="p">(</span><span class="n">y_hat</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;MSE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">y_hat</span><span class="p">)}</span>
+    
+    <span class="k">elif</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MSE_prob&#39;</span><span class="p">:</span>
+        
+        <span class="n">y_hat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="n">MSE_loss</span><span class="p">(</span><span class="n">y_hat</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;MSE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">y_hat</span><span class="p">)}</span>
+    
+    <span class="k">elif</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MAE&#39;</span><span class="p">:</span>
+        
+        <span class="n">y_hat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="n">MSE_loss</span><span class="p">(</span><span class="n">y_hat</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;MAE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">y_hat</span><span class="p">)}</span>
+    
+    <span class="k">elif</span>  <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cross_entropy&#39;</span><span class="p">:</span>
+        
+        <span class="n">log_phat</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">num_classes</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="o">=</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
         
-        <span class="c1"># This can handle scalar y values in [0,1]</span>
+        <span class="c1"># This can handle scalar y (target) values in [0,1]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">loss</span> <span class="o">=</span> <span class="n">binary_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat_0</span><span class="o">=</span><span class="n">log_phat</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">log_phat_1</span><span class="o">=</span><span class="n">log_phat</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-
-        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">log_phat</span><span class="p">)}</span>
-
+        
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_phat</span><span class="p">))}</span>
+    
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cross_entropy_with_DA&#39;</span><span class="p">:</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">x_DA</span>     <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward_with_DA</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="n">log_phat</span>    <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>    <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">log_phat_DA</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">x_DA</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-
+        
         <span class="c1"># https://arxiv.org/abs/1409.7495</span>
         <span class="n">CE_loss</span>    <span class="o">=</span> <span class="n">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="o">=</span><span class="n">log_phat</span><span class="p">,</span>    <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>    <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-        <span class="n">CE_DA_loss</span> <span class="o">=</span> <span class="n">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="o">=</span><span class="n">log_phat_DA</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_DA</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights_DA</span><span class="p">)</span>
+        <span class="n">CE_DA_loss</span> <span class="o">=</span> <span class="n">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="o">=</span><span class="n">log_phat_DA</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_DA</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w_DA</span><span class="p">)</span>
 
-        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CE&#39;</span><span class="p">:</span> <span class="n">CE_loss</span><span class="p">,</span> <span class="s1">&#39;DA&#39;</span><span class="p">:</span> <span class="n">CE_DA_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">log_phat</span><span class="p">)}</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CE&#39;</span><span class="p">:</span> <span class="n">CE_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="s1">&#39;DA&#39;</span><span class="p">:</span> <span class="n">CE_DA_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_phat</span><span class="p">))}</span>
 
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;logit_norm_cross_entropy&#39;</span><span class="p">:</span>
         <span class="n">logit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">loss</span>  <span class="o">=</span> <span class="n">multiclass_logit_norm_loss</span><span class="p">(</span><span class="n">logit</span><span class="o">=</span><span class="n">logit</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;temperature&#39;</span><span class="p">])</span>
         
-        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;LNCE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">log_phat</span><span class="p">)}</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;LNCE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_phat</span><span class="p">))}</span>
 
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;focal_entropy&#39;</span><span class="p">:</span>
-        <span class="n">log_phat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">softpredict</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">))</span>
+        <span class="n">log_phat</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">multiclass_focal_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="o">=</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span>
         
-        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;FE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">log_phat</span><span class="p">)}</span>
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;FE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_phat</span><span class="p">))}</span>
 
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;VAE_background_only&#39;</span><span class="p">:</span>
         <span class="n">B_ind</span>    <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Use only background to train</span>
@@ -548,8 +679,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">loss</span> <span class="o">=</span> <span class="n">log_loss</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;KL_RECO&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">}</span>
-        
+        <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;VAE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span><span class="o">**</span><span class="n">LZ_helper</span><span class="p">()}</span>
+    
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.loss_wrapper: Error with an unknown lossfunc </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -601,19 +732,110 @@
 
 
 
+<div class="viewcode-block" id="LQ_loss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.LQ_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">LQ_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    L_q loss</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">1.0</span></div>
+
+
+
+<div class="viewcode-block" id="LOGIT_L1_loss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.LOGIT_L1_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">LOGIT_L1_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">logit_beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logit magnitude L1-regularization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span>    <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">weights</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">logit_beta</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="LOGIT_L2_loss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.LOGIT_L2_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">LOGIT_L2_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">logit_beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logit magnitude L2-regularization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span>    <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">weights</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">logit_beta</span> <span class="o">*</span> <span class="n">logits</span><span class="o">**</span><span class="mi">2</span>
+    
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="BCE_loss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.BCE_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">BCE_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Binary Cross Entropy loss</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span>   <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">weights</span>
+    
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+    <span class="n">loss</span>      <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">criterion</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    
+
+<div class="viewcode-block" id="MSE_loss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.MSE_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">MSE_loss</span><span class="p">(</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mean squared error loss</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">weights</span>
+
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">w</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_hat</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="MAE_loss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.MAE_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">MAE_loss</span><span class="p">(</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mean absolute error loss</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">weights</span>
+    
+    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">w</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y_hat</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
 <div class="viewcode-block" id="binary_cross_entropy_logprob">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.binary_cross_entropy_logprob">[docs]</a>
 <span class="k">def</span> <span class="nf">binary_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat_0</span><span class="p">,</span> <span class="n">log_phat_1</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Per instance weighted binary cross entropy loss (y can be a scalar between [0,1])</span>
 <span class="sd">    (negative log-likelihood)</span>
-<span class="sd">    </span>
-<span class="sd">    Numerically more stable version.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">weights</span>
 
     <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">w</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">log_phat_1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">log_phat_0</span><span class="p">)</span>
 
@@ -651,6 +873,7 @@
     <span class="k">return</span> <span class="n">y</span></div>
 
 
+
 <div class="viewcode-block" id="multiclass_logit_norm_loss">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.multiclass_logit_norm_loss">[docs]</a>
 <span class="k">def</span> <span class="nf">multiclass_logit_norm_loss</span><span class="p">(</span><span class="n">logit</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
@@ -659,9 +882,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">norms</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">logit</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
     <span class="n">logit_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">logit</span><span class="p">,</span> <span class="n">norms</span><span class="p">)</span> <span class="o">/</span> <span class="n">t</span>
-    <span class="n">log_phat</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logit_norm</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Numerically more stable than pure softmax</span>
+    <span class="n">log_phat</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logit_norm</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">multiclass_cross_entropy_logprob</span><span class="p">(</span><span class="n">log_phat</span><span class="o">=</span><span class="n">log_phat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="multiclass_cross_entropy_logprob">
@@ -670,8 +894,6 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Per instance weighted cross entropy loss</span>
 <span class="sd">    (negative log-likelihood)</span>
-<span class="sd">    </span>
-<span class="sd">    Numerically more stable version.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">)</span>
@@ -686,28 +908,6 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="multiclass_cross_entropy">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.multiclass_cross_entropy">[docs]</a>
-<span class="k">def</span> <span class="nf">multiclass_cross_entropy</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Per instance weighted cross entropy loss</span>
-<span class="sd">    (negative log-likelihood)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
-
-    <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
-
-    <span class="c1"># Protection</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span> <span class="n">y</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">))</span> <span class="o">*</span> <span class="n">w</span>
-    
-    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="multiclass_focal_entropy_logprob">
@@ -731,26 +931,6 @@
         <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="multiclass_focal_entropy">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.multiclass_focal_entropy">[docs]</a>
-<span class="k">def</span> <span class="nf">multiclass_focal_entropy</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">)</span> <span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Per instance weighted &#39;focal entropy loss&#39;</span>
-<span class="sd">    https://arxiv.org/pdf/1708.02002.pdf</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
-
-    <span class="n">y</span>    <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">y</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">phat</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">EPS</span><span class="p">))</span> <span class="o">*</span> <span class="n">w</span>
-
-    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
-
 
 <div class="viewcode-block" id="log_sum_exp">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.log_sum_exp">[docs]</a>
@@ -766,54 +946,6 @@
     <span class="k">return</span> <span class="n">y</span></div>
 
 
-
-<span class="k">class</span> <span class="nc">_ECELoss</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The Expected Calibration Error of a model.</span>
-<span class="sd">    </span>
-<span class="sd">    In each bin, compute the confidence gap:</span>
-<span class="sd">    bin_gap = | avg_confidence_in_bin - accuracy_in_bin |</span>
-<span class="sd">    Return a weighted average of the gaps, based on the number of samples in each bin.</span>
-<span class="sd">    </span>
-<span class="sd">    Reference: Naeini et al.</span>
-<span class="sd">    &quot;Obtaining Well Calibrated Probabilities Using Bayesian Binning.&quot; (2015)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            n_bins: number of confidence interval bins (int)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">_ECELoss</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="n">bin_bounds</span>      <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bin_lowers</span> <span class="o">=</span> <span class="n">bin_bounds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bin_uppers</span> <span class="o">=</span> <span class="n">bin_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            logits: network output logits (not softmax probabilities)</span>
-<span class="sd">            labels: ground truth labels</span>
-<span class="sd">            t:      temperature parameter</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            ece value</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">probs</span>      <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="o">/</span><span class="n">t</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">conf</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">acc</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-        <span class="n">ece</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">logits</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-
-        <span class="c1"># Compute |confidence - accuracy| in each bin</span>
-        <span class="k">for</span> <span class="n">bin_lower</span><span class="p">,</span> <span class="n">bin_upper</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bin_lowers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_uppers</span><span class="p">):</span>
-
-            <span class="n">in_bin</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="n">bin_lower</span><span class="o">.</span><span class="n">item</span><span class="p">())</span> <span class="o">*</span> <span class="n">conf</span><span class="o">.</span><span class="n">le</span><span class="p">(</span><span class="n">bin_upper</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-            <span class="n">prop_in_bin</span> <span class="o">=</span> <span class="n">in_bin</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="n">prop_in_bin</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">acc_in_bin</span> <span class="o">=</span> <span class="n">acc</span><span class="p">[</span><span class="n">in_bin</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-                <span class="n">avg_conf_in_bin</span> <span class="o">=</span> <span class="n">conf</span><span class="p">[</span><span class="n">in_bin</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-                <span class="n">ece</span> <span class="o">+=</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">avg_conf_in_bin</span> <span class="o">-</span> <span class="n">acc_in_bin</span><span class="p">)</span> <span class="o">*</span> <span class="n">prop_in_bin</span>
-
-        <span class="k">return</span> <span class="n">ece</span>
 </pre></div>
 
            </div>

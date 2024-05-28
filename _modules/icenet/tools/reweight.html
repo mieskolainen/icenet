@@ -13,7 +13,7 @@
   <![endif]-->
   
         <script src="../../../_static/documentation_options.js?v=1f169f65"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.6
+                0.1.0.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -46,12 +46,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-deprecated">Pre-installed CUDA paths (DEPRECATED)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#pre-installed-cuda-paths-experimental">Pre-installed CUDA paths (EXPERIMENTAL)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#c-library-versions">C-library versions</a></li>
 </ul>
@@ -59,11 +59,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/introduction.html">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#basic-design-principles">Basic design principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#yaml-configuration-files">YAML-configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#oracle-grid-execution">Oracle Grid execution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#folder-structure">Folder structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#ml-algorithms-and-models">ML-algorithms and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#ai-algorithms-and-models">AI-algorithms and models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#advanced-ml-training-technology">Advanced ML-training technology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#automated-selectors-and-combinatorics-for-distributions">Automated selectors and combinatorics for distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/introduction.html#sun-grid-engine-sge-htcondor-execution">Sun Grid Engine (SGE) / HTCondor execution</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notes/markup.html">Markup</a></li>
@@ -131,8 +131,34 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.deploy">icedqcd.deploy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.create_ID_label"><code class="docutils literal notranslate"><span class="pre">create_ID_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.f2s"><code class="docutils literal notranslate"><span class="pre">f2s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.generate_cartesian_param"><code class="docutils literal notranslate"><span class="pre">generate_cartesian_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.get_predictor"><code class="docutils literal notranslate"><span class="pre">get_predictor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.process_data"><code class="docutils literal notranslate"><span class="pre">process_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.deploy.zscore_normalization"><code class="docutils literal notranslate"><span class="pre">zscore_normalization()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.limits">icedqcd.limits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.create_limit_plots_vector"><code class="docutils literal notranslate"><span class="pre">create_limit_plots_vector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.create_limit_tables"><code class="docutils literal notranslate"><span class="pre">create_limit_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.find_limits"><code class="docutils literal notranslate"><span class="pre">find_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.limit_wrapper_dict"><code class="docutils literal notranslate"><span class="pre">limit_wrapper_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.plot_brazil"><code class="docutils literal notranslate"><span class="pre">plot_brazil()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.limits.run_limits_vector"><code class="docutils literal notranslate"><span class="pre">run_limits_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icedqcd.html#module-icedqcd.optimize">icedqcd.optimize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.find_filter"><code class="docutils literal notranslate"><span class="pre">find_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.func_binormal"><code class="docutils literal notranslate"><span class="pre">func_binormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.func_binormal2"><code class="docutils literal notranslate"><span class="pre">func_binormal2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.optimize_selection"><code class="docutils literal notranslate"><span class="pre">optimize_selection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icedqcd.html#icedqcd.optimize.plot_ROC_fit"><code class="docutils literal notranslate"><span class="pre">plot_ROC_fit()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -143,6 +169,13 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.ABCD_eq"><code class="docutils literal notranslate"><span class="pre">ABCD_eq()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.ABCD_err"><code class="docutils literal notranslate"><span class="pre">ABCD_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.abcd.test_abcd"><code class="docutils literal notranslate"><span class="pre">test_abcd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.commutator">icefit.commutator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.crv"><code class="docutils literal notranslate"><span class="pre">crv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.selection_A"><code class="docutils literal notranslate"><span class="pre">selection_A()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.commutator.selection_B"><code class="docutils literal notranslate"><span class="pre">selection_B()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a><ul>
@@ -167,11 +200,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.cortools.test_gaussian"><code class="docutils literal notranslate"><span class="pre">test_gaussian()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.dequantize">icefit.dequantize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.U"><code class="docutils literal notranslate"><span class="pre">U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.compute_ind"><code class="docutils literal notranslate"><span class="pre">compute_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.construct_icdf"><code class="docutils literal notranslate"><span class="pre">construct_icdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.fast_loop"><code class="docutils literal notranslate"><span class="pre">fast_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.iDQF"><code class="docutils literal notranslate"><span class="pre">iDQF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.dequantize.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.em">icefit.em</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.EM_frac"><code class="docutils literal notranslate"><span class="pre">EM_frac()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.gausspdf"><code class="docutils literal notranslate"><span class="pre">gausspdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.mixture_nll"><code class="docutils literal notranslate"><span class="pre">mixture_nll()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.em.test_EM"><code class="docutils literal notranslate"><span class="pre">test_EM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.icelimit">icefit.icelimit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.CL_single"><code class="docutils literal notranslate"><span class="pre">CL_single()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.CL_single_asymptotic"><code class="docutils literal notranslate"><span class="pre">CL_single_asymptotic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.CL_single_compute"><code class="docutils literal notranslate"><span class="pre">CL_single_compute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.LL_splusb"><code class="docutils literal notranslate"><span class="pre">LL_splusb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.asymptotic_uncertainty_CLs"><code class="docutils literal notranslate"><span class="pre">asymptotic_uncertainty_CLs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.convolve_systematics"><code class="docutils literal notranslate"><span class="pre">convolve_systematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.icelimit.test_limits_unit_test"><code class="docutils literal notranslate"><span class="pre">test_limits_unit_test()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a><ul>
@@ -192,6 +244,16 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.rand_powexp"><code class="docutils literal notranslate"><span class="pre">rand_powexp()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.test_accuracy"><code class="docutils literal notranslate"><span class="pre">test_accuracy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.lognormal.test_lognormal"><code class="docutils literal notranslate"><span class="pre">test_lognormal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mantissa">icefit.mantissa</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.bits2digits"><code class="docutils literal notranslate"><span class="pre">bits2digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.digits2bits"><code class="docutils literal notranslate"><span class="pre">digits2bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.plots"><code class="docutils literal notranslate"><span class="pre">plots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.reduce_mantissa_bits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.reduce_mantissa_digits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icefit.html#icefit.mantissa.round_sig"><code class="docutils literal notranslate"><span class="pre">round_sig()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
@@ -347,10 +409,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.fastkan">icenet.deep.fastkan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.lzmlp">icenet.deep.lzmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
@@ -368,8 +432,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
@@ -377,6 +441,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -457,31 +522,409 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
-
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">prettytable</span> <span class="kn">import</span> <span class="n">PrettyTable</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">iceboost</span>
 
 
+<div class="viewcode-block" id="rw_transform_with_logits">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.rw_transform_with_logits">[docs]</a>
+<span class="k">def</span> <span class="nf">rw_transform_with_logits</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">absMax</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AI/Deep reweighting transform with logits input</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        prob: probabilities</span>
+<span class="sd">        mode: operation mode</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        transformed values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">exp_</span>     <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span>
+        <span class="n">sigmoid_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span>
+        <span class="n">logits</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="o">-</span><span class="n">absMax</span><span class="p">,</span> <span class="n">absMax</span><span class="p">)</span> <span class="c1"># Protect to not overflow exp</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">exp_</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span>
+        <span class="n">sigmoid_</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">sigmoid</span>
+        <span class="n">logits</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="o">-</span><span class="n">absMax</span><span class="p">,</span> <span class="n">absMax</span><span class="p">)</span>
+    
+    <span class="k">if</span>   <span class="n">mode</span>  <span class="o">==</span> <span class="s1">&#39;LR&#39;</span><span class="p">:</span>                <span class="c1"># LR trick</span>
+        <span class="k">return</span> <span class="n">exp_</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;inverse-LR&#39;</span><span class="p">:</span>         <span class="c1"># Inverse LR trick</span>
+        <span class="k">return</span> <span class="n">exp_</span><span class="p">(</span><span class="o">-</span><span class="n">logits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;DeepEfficiency&#39;</span><span class="p">:</span>     <span class="c1"># https://arxiv.org/abs/1809.06101</span>
+        <span class="k">return</span> <span class="n">exp_</span><span class="p">(</span><span class="o">-</span><span class="n">logits</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>             <span class="c1"># Direct</span>
+        <span class="k">return</span> <span class="n">sigmoid_</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;identity&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.reweight_transform_with_logits: Unknown operation mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="rw_transform">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.rw_transform">[docs]</a>
+<span class="k">def</span> <span class="nf">rw_transform</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AI/Deep reweighting transform</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        phat: estimated probabilities</span>
+<span class="sd">        mode: operation mode</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        transformed values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">phat</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">phat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">EPS</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">phat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">phat</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">EPS</span><span class="p">)</span>
+    
+    <span class="k">if</span>   <span class="n">mode</span>  <span class="o">==</span> <span class="s1">&#39;LR&#39;</span><span class="p">:</span>                   <span class="c1"># LR trick</span>
+        <span class="k">return</span> <span class="n">phat</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">phat</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;inverse-LR&#39;</span><span class="p">:</span>            <span class="c1"># Inverse LR trick</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">phat</span><span class="p">)</span> <span class="o">/</span> <span class="n">phat</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;DeepEfficiency&#39;</span><span class="p">:</span>        <span class="c1"># https://arxiv.org/abs/1809.06101</span>
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">phat</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>                <span class="c1"># Direct</span>
+        <span class="k">return</span> <span class="n">phat</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;identity&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">phat</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">phat</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">phat</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.reweight_transform: Unknown operation mode </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="histogram_helper">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.histogram_helper">[docs]</a>
+<span class="k">def</span> <span class="nf">histogram_helper</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">EPS</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function for histogram based reweighting</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">class_ids</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+    <span class="n">reference_class</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span>
+    
+    <span class="n">diff_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;diff_param&#39;</span><span class="p">]</span>
+    <span class="n">h_args</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;diff_param&#39;</span><span class="p">][</span><span class="s1">&#39;hist_param&#39;</span><span class="p">]</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference (target) class: &lt;</span><span class="si">{</span><span class="n">reference_class</span><span class="si">}</span><span class="s2">&gt; | Found classes: </span><span class="si">{</span><span class="n">class_ids</span><span class="si">}</span><span class="s2"> from y&quot;</span><span class="p">)</span>
+    
+    <span class="c1">### Collect re-weighting variables</span>
+    <span class="n">RV</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+            <span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">var</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    
+    <span class="c1">### Pre-transform</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+        
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;transform&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;edges&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.compute_ND_reweights: Cannot transform &quot;edges&quot; type&#39;</span><span class="p">)</span>
+        
+        <span class="n">d</span> <span class="o">=</span> <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        
+        <span class="k">if</span>   <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;log10&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Variable </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1"> &lt; 0 (in </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">}</span><span class="s1"> elements) in log10 -- truncating to zero&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Transform values</span>
+            <span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
+
+            <span class="c1"># Transform bins</span>
+            <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
+            <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">:</span>
+            
+            <span class="c1"># Values</span>
+            <span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
+
+            <span class="c1"># Bins</span>
+            <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
+            <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;square&#39;</span><span class="p">:</span>
+            
+            <span class="c1"># Values</span>
+            <span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+
+            <span class="c1"># Bins</span>
+            <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.compute_ND_reweights: Unknown pre-transform&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Binning setup</span>
+    <span class="n">binedges</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+        
+        <span class="n">d</span> <span class="o">=</span> <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        
+        <span class="k">if</span>   <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+            <span class="n">binedges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;log10&#39;</span><span class="p">:</span>
+            <span class="n">binedges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">EPS</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            
+        <span class="k">elif</span> <span class="n">h_args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;edges&#39;</span><span class="p">:</span>
+            <span class="n">binedges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;: Unknown re-weight binning mode&#39;</span><span class="p">)</span>
+    
+    <span class="n">rwparam</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;y&#39;</span><span class="p">:</span>               <span class="n">y</span><span class="p">,</span>
+        <span class="s1">&#39;reference_class&#39;</span><span class="p">:</span> <span class="n">reference_class</span><span class="p">,</span>
+        <span class="s1">&#39;max_reg&#39;</span><span class="p">:</span>         <span class="n">h_args</span><span class="p">[</span><span class="s1">&#39;max_reg&#39;</span><span class="p">]</span>
+    <span class="p">}</span>
+
+    <span class="c1">### Compute 2D-PDFs for each class</span>
+    <span class="k">if</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;2D&#39;</span><span class="p">:</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: 2D re-weighting with: [</span><span class="si">{</span><span class="n">variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">variables</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">] ...&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
+            <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
+                
+                <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1"># Feed in the input weights !</span>
+
+                <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_2D_hist</span><span class="p">(</span><span class="n">X_A</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ind</span><span class="p">],</span> <span class="n">X_B</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ind</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> \
+                    <span class="n">binedges_A</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">binedges_B</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span>
+            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;class_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_ids</span>
+        
+        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
+        
+    <span class="c1">### Compute factorized 1D x 1D product</span>
+    <span class="k">elif</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;pseudo-ND&#39;</span><span class="p">:</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: pseudo-ND (2D for now) re-weighting with: [</span><span class="si">{</span><span class="n">variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">variables</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">] ...&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
+            <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
+                
+                <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1"># Feed in the input weights !</span>
+                
+                <span class="n">pdf_0</span> <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ind</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">pdf_1</span> <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ind</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                
+                <span class="k">if</span>   <span class="n">h_args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;geometric_mean&#39;</span><span class="p">:</span>
+                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_0</span><span class="p">,</span> <span class="n">pdf_1</span><span class="p">))</span> <span class="c1"># (A,B) order gives normal matrix indexing</span>
+                <span class="k">elif</span> <span class="n">h_args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;product&#39;</span><span class="p">:</span>
+                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_0</span><span class="p">,</span> <span class="n">pdf_1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Unknown &lt;pseudo_type&gt;&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Normalize to discrete density</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+            
+            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span>
+            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;class_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_ids</span>
+        
+        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
+
+    <span class="c1">### Compute 1D-PDFs for each class</span>
+    <span class="k">elif</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1D&#39;</span><span class="p">:</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: 1D re-weighting with: </span><span class="si">{</span><span class="n">variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> ...&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
+            <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1"># Feed in the input weights !</span>
+                <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ind</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;class_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_ids</span>
+        
+        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Unsupported dimensionality mode &lt;</span><span class="si">{</span><span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt;&quot;</span><span class="p">)</span>
+
+    <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;vars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">variables</span>
+    
+    <span class="k">return</span> <span class="n">weights_doublet</span><span class="p">,</span> <span class="n">pdf</span></div>
+
+
+
+<div class="viewcode-block" id="map_xyw">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.map_xyw">[docs]</a>
+<span class="k">def</span> <span class="nf">map_xyw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="nb">vars</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For AIRW</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Source and Target collected</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">reference_class</span><span class="p">)</span>
+    
+    <span class="n">new_data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="nb">vars</span><span class="p">)</span>
+    
+    <span class="c1"># ----------------------------</span>
+    <span class="c1"># Change labels to (0,1)</span>
+    <span class="n">y_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">y_new</span><span class="p">[</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y_new</span><span class="p">[</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">reference_class</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>                
+    
+    <span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y_new</span> <span class="c1"># !</span>
+    <span class="c1"># ----------------------------</span>
+    
+    <span class="c1"># Equalize class balance for the training</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_new</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">new_data</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">new_data</span></div>
+
+
+
+<div class="viewcode-block" id="AIRW_helper">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.AIRW_helper">[docs]</a>
+<span class="k">def</span> <span class="nf">AIRW_helper</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">w_val</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function for ML based reweighting</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">class_ids</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+    <span class="n">reference_class</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span>
+    
+    <span class="n">ID</span>        <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;diff_param&#39;</span><span class="p">][</span><span class="s1">&#39;ML_param&#39;</span><span class="p">][</span><span class="s1">&#39;active_model&#39;</span><span class="p">]</span>
+    <span class="n">param</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
+    <span class="n">diff_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;diff_param&#39;</span><span class="p">]</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># ----------------------------------------</span>
+    <span class="c1"># Conversions and pick variables of interest</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+        <span class="n">x</span>     <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">variables</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_val</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">x_val</span><span class="p">[</span><span class="n">variables</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">io</span><span class="o">.</span><span class="n">index_list</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">variables</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_val</span> <span class="o">=</span> <span class="n">x_val</span><span class="p">[:,</span> <span class="n">io</span><span class="o">.</span><span class="n">index_list</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">variables</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="c1"># ----------------------------------------</span>
+    
+    <span class="c1"># Train model per class pair</span>
+    <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        
+        <span class="n">pdf</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="n">ID</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;vars&#39;</span><span class="p">:</span> <span class="n">variables</span><span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">reference_class</span><span class="p">:</span>
+                
+                <span class="n">data_trn</span> <span class="o">=</span> <span class="n">map_xyw</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">)</span> 
+                <span class="n">data_val</span> <span class="o">=</span> <span class="n">map_xyw</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_val</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w_val</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">)</span>
+                
+                <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data_trn&#39;</span><span class="p">:</span>    <span class="n">data_trn</span><span class="p">,</span>
+                          <span class="s1">&#39;data_val&#39;</span><span class="p">:</span>    <span class="n">data_val</span><span class="p">,</span>
+                          <span class="s1">&#39;args&#39;</span><span class="p">:</span>        <span class="n">args</span><span class="p">,</span>
+                          <span class="s1">&#39;data_trn_MI&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="s1">&#39;data_val_MI&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="s1">&#39;param&#39;</span><span class="p">:</span>       <span class="n">param</span><span class="p">}</span>
+
+                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceboost</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+    
+    <span class="c1"># ------------------------------------------------</span>
+    <span class="c1">## Now apply the model</span>
+    <span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">predict</span>
+    
+    <span class="n">param</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">]</span>
+    <span class="n">wnew</span>  <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.AIRW_helper: Applying AIRW reweighter to class </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb&#39;</span><span class="p">:</span>
+            <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_xgb</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb_logistic&#39;</span><span class="p">:</span>
+            <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_xgb_logistic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unsupported model -- &quot;predict&quot; should be &quot;xgb&quot; or &quot;xgb_logistic&quot;&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># -----------------------------------------------</span>
+        <span class="c1"># Predict for events of this class</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+        <span class="n">p</span>   <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+
+        <span class="c1"># Turn into a likelihood ratio to obtain the reweight factor</span>
+        <span class="n">p</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">a_min</span> <span class="o">=</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">a_max</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">)</span>
+        <span class="n">LR</span>  <span class="o">=</span> <span class="n">p</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span>
+        
+        <span class="c1"># Apply maximum weight regularization</span>
+        <span class="n">LR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">LR</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;ML_param&#39;</span><span class="p">][</span><span class="s1">&#39;max_reg&#39;</span><span class="p">])</span>
+        
+        <span class="c1"># Apply to weights</span>
+        <span class="n">wnew</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">wnew</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">*</span> <span class="n">LR</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">LR</span>
+        <span class="c1"># -----------------------------------------------</span>
+    
+    <span class="c1"># Transform weights into weights doublet</span>
+    <span class="n">weights_doublet</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+        <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">wnew</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">weights_doublet</span><span class="p">,</span> <span class="n">pdf</span></div>
+
+
+    
 <div class="viewcode-block" id="compute_ND_reweights">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.compute_ND_reweights">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">compute_ND_reweights</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">x_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute N-dim reweighting coefficients (currently 2D or 1D supported)</span>
+<span class="sd">    Compute N-dim reweighting coefficients</span>
+<span class="sd">    </span>
+<span class="sd">    Supports &#39;ML&#39; (ND), &#39;pseudo-ND&#39; (1D x 1D ... x 1D), &#39;2D&#39;, &#39;1D&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    For &#39;args&#39; dictionary structure, see steering cards.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        x    : training sample input</span>
 <span class="sd">        y    : training sample (class) labels</span>
 <span class="sd">        w    : training sample weights</span>
 <span class="sd">        ids  : variable names of columns of x</span>
-<span class="sd">        pdf  : pre-computed pdfs</span>
+<span class="sd">        pdf  : pre-computed pdfs (default None)</span>
 <span class="sd">        args : reweighting parameters in a dictionary</span>
-<span class="sd">    </span>
+<span class="sd">       </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        weights : 1D-array of re-weights</span>
+<span class="sd">        pdf     : computed pdfs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">use_ak</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="k">else</span> <span class="kc">False</span>
     
     <span class="k">if</span> <span class="n">use_ak</span><span class="p">:</span>
@@ -490,195 +933,72 @@
     
     <span class="n">class_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
     
-    <span class="n">args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="c1"># Make sure we make a copy, because we modify args here</span>
-
-    <span class="c1"># Compute event-by-event weights</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;differential&#39;</span><span class="p">]:</span>
+    <span class="c1"># Make sure we make a copy, because we modify args here</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    
+    <span class="c1">## Differential reweighting</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;differential&#39;</span><span class="p">]:</span>
         
-        <span class="c1">### Construct parameter names</span>
-        <span class="n">paramdict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">])):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">varname</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">paramdict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">varname</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">break</span>    
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Differential reweighting&#39;</span><span class="p">)</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; | Found classes: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> from y&quot;</span><span class="p">)</span>
-        
-        <span class="c1">### Collect re-weighting variables</span>
-        <span class="n">RV</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">paramdict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">use_ak</span><span class="p">:</span>
-                <span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">paramdict</span><span class="p">[</span><span class="n">var</span><span class="p">]])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">paramdict</span><span class="p">[</span><span class="n">var</span><span class="p">])]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-
-        <span class="c1">### Pre-transform</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">paramdict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">mode</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;transform&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span>
+        <span class="c1"># Histogram based</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;diff_param&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;ML&#39;</span><span class="p">:</span>
             
-            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span> <span class="o">==</span> <span class="s1">&#39;edges&#39;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.compute_ND_reweights: Cannot transform &quot;edges&quot; type&#39;</span><span class="p">)</span>
-            
-            <span class="n">d</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span>
-            
-            <span class="k">if</span>   <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;log10&#39;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
-                    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Variable </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1"> &lt; 0 (in </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">}</span><span class="s1"> elements) in log10 -- truncating to zero&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">weights_doublet</span><span class="p">,</span> <span class="n">pdf</span> <span class="o">=</span> <span class="n">histogram_helper</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span>
+                                                    <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>      
 
-                <span class="c1"># Transform values</span>
-                <span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
-
-                <span class="c1"># Transform bins</span>
-                <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
-                <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
-            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">:</span>
-
-                <span class="c1"># Values</span>
-                <span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
-
-                <span class="c1"># Bins</span>
-                <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
-                <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                
-            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;square&#39;</span><span class="p">:</span>
-
-                <span class="c1"># Values</span>
-                <span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
-
-                <span class="c1"># Bins</span>
-                <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
-                <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
-
-            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.compute_ND_reweights: Unknown pre-transform&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Binning setup</span>
-        <span class="n">binedges</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">paramdict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            
-            <span class="n">d</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;bins&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span>
-            
-            <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
-                <span class="n">binedges</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-
-            <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span> <span class="o">==</span> <span class="s1">&#39;log10&#39;</span><span class="p">:</span>
-                <span class="n">binedges</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">EPS</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-                
-            <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;binmode&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="p">)]</span> <span class="o">==</span> <span class="s1">&#39;edges&#39;</span><span class="p">:</span>
-                <span class="n">binedges</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;: Unknown re-weight binning mode&#39;</span><span class="p">)</span>
-        
-        <span class="n">rwparam</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;y&#39;</span><span class="p">:</span>               <span class="n">y</span><span class="p">,</span>
-            <span class="s1">&#39;reference_class&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">],</span>
-            <span class="s1">&#39;max_reg&#39;</span><span class="p">:</span>         <span class="n">args</span><span class="p">[</span><span class="s1">&#39;max_reg&#39;</span><span class="p">]</span>
-        <span class="p">}</span>
-
-        <span class="c1">### Compute 2D-PDFs for each class</span>
-        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;dimension&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;2D&#39;</span><span class="p">:</span>
-            
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: 2D re-weighting using variables: </span><span class="si">{</span><span class="n">paramdict</span><span class="si">}</span><span class="s1"> ...&#39;</span><span class="p">)</span>
-            
-            <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
-                <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
-                    
-                    <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1"># Feed in the input weights</span>
-
-                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_2D_hist</span><span class="p">(</span><span class="n">X_A</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">X_B</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> \
-                        <span class="n">binedges_A</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">],</span> <span class="n">binedges_B</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">])</span>
-
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">]</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;class_ids&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">class_ids</span>
-            
-            <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">],</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
-            
-        <span class="c1">### Compute geometric mean factorized 1D x 1D product</span>
-        <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;dimension&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;pseudo-2D&#39;</span><span class="p">:</span>
-            
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: pseudo-2D re-weighting using variables: </span><span class="si">{</span><span class="n">paramdict</span><span class="si">}</span><span class="s1"> ...&#39;</span><span class="p">)</span>
-            
-            <span class="c1">#if len(binedges[&#39;0&#39;]) != len(binedges[&#39;1&#39;]):</span>
-            <span class="c1">#    raise Exception(__name__ + f&#39;.compute_ND_reweights: Error: &lt;pseudo-2D&gt; requires same number of bins for both variables&#39;)</span>
-
-            <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
-                <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
-                    
-                    <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1"># Feed in the input weights</span>
-
-                    <span class="n">pdf_0</span>  <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">])</span>
-                    <span class="n">pdf_1</span>  <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">])</span>
-                    
-                    <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;geometric_mean&#39;</span><span class="p">:</span>
-                        <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_0</span><span class="p">,</span> <span class="n">pdf_1</span><span class="p">))</span> <span class="c1"># (A,B) order gives normal matrix indexing</span>
-                    <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pseudo_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;product&#39;</span><span class="p">:</span>
-                        <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">pdf_0</span><span class="p">,</span> <span class="n">pdf_1</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Unknown &lt;pseudo_type&gt;&#39;</span><span class="p">)</span>
-
-                    <span class="c1"># Normalize to discrete density</span>
-                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
-
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_0&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">]</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_1&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;class_ids&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">class_ids</span>
-
-            <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweightcoeff2D</span><span class="p">(</span><span class="n">X_A</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">],</span> <span class="n">X_B</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
-
-        <span class="c1">### Compute 1D-PDFs for each class</span>
-        <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;dimension&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1D&#39;</span><span class="p">:</span>
-            
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: 1D re-weighting using variable </span><span class="si">{</span><span class="n">paramdict</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">paramdict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]]</span><span class="si">}</span><span class="s1"> ...&#39;</span><span class="p">)</span>
-            
-            <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Not given by user</span>
-                <span class="n">pdf</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
-                    <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1"># Feed in the input weights</span>
-                    <span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf_1D_hist</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">RV</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">][</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span> <span class="n">binedges</span><span class="o">=</span><span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">])</span>
-
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">binedges</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">]</span>
-                <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;class_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_ids</span>
-            
-            <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">reweightcoeff1D</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">RV</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">],</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="o">**</span><span class="n">rwparam</span><span class="p">)</span>
+        <span class="c1"># ML-model based</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Unsupported dimensionality mode &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;dimension&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
+            <span class="n">weights_doublet</span><span class="p">,</span> <span class="n">pdf</span> <span class="o">=</span> <span class="n">AIRW_helper</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">pdf</span><span class="o">=</span><span class="n">pdf</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                                    <span class="n">x_val</span><span class="o">=</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="o">=</span><span class="n">y_val</span><span class="p">,</span> <span class="n">w_val</span><span class="o">=</span><span class="n">w_val</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+        
+        <span class="c1"># Renormalize integral (sum) to the event counts per class</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">ind</span><span class="p">])</span>
+            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
     
     <span class="c1"># No differential re-weighting    </span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; | Found classes </span><span class="si">{</span><span class="n">class_ids</span><span class="si">}</span><span class="s2"> from y&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: No differential reweighting&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.compute_ND_reweights: Reference (target) class: &lt;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt; | Found classes </span><span class="si">{</span><span class="n">class_ids</span><span class="si">}</span><span class="s2"> from y&quot;</span><span class="p">)</span>
         <span class="n">weights_doublet</span> <span class="o">=</span> <span class="p">{}</span>
         
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
-            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-            <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span> <span class="c1"># Feed in the input weights</span>
+            <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>                   <span class="c1"># init with zeros</span>
+            <span class="n">sample_weights</span>     <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span>  <span class="c1"># Feed in the input weights</span>
             <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_weights</span>
 
+    <span class="c1"># -------------------------------------------------</span>
+    
     <span class="c1">### Apply class balance equalizing weight</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;equal_frac&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;equal_frac&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
         <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Compute_ND_reweights: Equalizing class fractions&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="o">=</span><span class="n">weights_doublet</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reference_class&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">weights_doublet</span> <span class="o">=</span> <span class="n">balanceweights</span><span class="p">(</span><span class="n">weights_doublet</span><span class="o">=</span><span class="n">weights_doublet</span><span class="p">,</span>
+                                         <span class="n">reference_class</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;reference_class&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 
     <span class="c1">### Finally map back to 1D-array</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">+</span> <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
-
-    <span class="c1">### Compute the sum of weights per class for the output print</span>
-    <span class="n">frac</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">sums</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
-        <span class="n">frac</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">sums</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Output sum[y == c] = </span><span class="si">{</span><span class="n">frac</span><span class="si">}</span><span class="s1"> || sum[weights[y == c]] = </span><span class="si">{</span><span class="n">sums</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">class_ids</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="c1">### Compute diagnostics</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">PrettyTable</span><span class="p">([</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;events&quot;</span><span class="p">,</span> <span class="s2">&quot;sum(w)&quot;</span><span class="p">,</span> <span class="s2">&quot;mean(w)&quot;</span><span class="p">,</span> <span class="s2">&quot;std(w)&quot;</span><span class="p">,</span> <span class="s2">&quot;min(w)&quot;</span><span class="p">,</span> <span class="s2">&quot;Q5(w)&quot;</span><span class="p">,</span> <span class="s2">&quot;Q95(w)&quot;</span><span class="p">,</span> <span class="s2">&quot;max(w)&quot;</span><span class="p">])</span> 
+    
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="w">  </span><span class="mi">5</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="w"> </span><span class="mi">95</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">use_ak</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span> <span class="n">pdf</span>
@@ -750,8 +1070,8 @@
     
     <span class="c1"># Weight each class against the reference class</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
-        <span class="n">inds_0</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X_A</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_0&#39;</span><span class="p">])</span> <span class="c1"># variable 0</span>
-        <span class="n">inds_1</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X_B</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges_1&#39;</span><span class="p">])</span> <span class="c1"># variable 1</span>
+        <span class="n">inds_0</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X_A</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># variable 0</span>
+        <span class="n">inds_1</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">x2ind</span><span class="p">(</span><span class="n">X_B</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">],</span> <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;binedges&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># variable 1</span>
         <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reference_class</span><span class="p">:</span>
             <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="n">reference_class</span><span class="p">][</span><span class="n">inds_0</span><span class="p">,</span> <span class="n">inds_1</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pdf</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">inds_0</span><span class="p">,</span> <span class="n">inds_1</span><span class="p">],</span> <span class="n">a_min</span><span class="o">=</span><span class="n">EPS</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

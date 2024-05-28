@@ -13,7 +13,7 @@
   <![endif]-->
   
         <script src="../../_static/documentation_options.js?v=1f169f65"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.6
+                0.1.0.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -46,12 +46,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../notes/installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#pre-installed-cuda-paths-deprecated">Pre-installed CUDA paths (DEPRECATED)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#pre-installed-cuda-paths-experimental">Pre-installed CUDA paths (EXPERIMENTAL)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#c-library-versions">C-library versions</a></li>
 </ul>
@@ -59,11 +59,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../notes/introduction.html">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#basic-design-principles">Basic design principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#yaml-configuration-files">YAML-configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#oracle-grid-execution">Oracle Grid execution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#folder-structure">Folder structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#ml-algorithms-and-models">ML-algorithms and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#ai-algorithms-and-models">AI-algorithms and models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#advanced-ml-training-technology">Advanced ML-training technology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#automated-selectors-and-combinatorics-for-distributions">Automated selectors and combinatorics for distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#sun-grid-engine-sge-htcondor-execution">Sun Grid Engine (SGE) / HTCondor execution</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../notes/markup.html">Markup</a></li>
@@ -131,8 +131,34 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.deploy">icedqcd.deploy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.create_ID_label"><code class="docutils literal notranslate"><span class="pre">create_ID_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.f2s"><code class="docutils literal notranslate"><span class="pre">f2s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.generate_cartesian_param"><code class="docutils literal notranslate"><span class="pre">generate_cartesian_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.get_predictor"><code class="docutils literal notranslate"><span class="pre">get_predictor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.process_data"><code class="docutils literal notranslate"><span class="pre">process_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.zscore_normalization"><code class="docutils literal notranslate"><span class="pre">zscore_normalization()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.limits">icedqcd.limits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.create_limit_plots_vector"><code class="docutils literal notranslate"><span class="pre">create_limit_plots_vector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.create_limit_tables"><code class="docutils literal notranslate"><span class="pre">create_limit_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.find_limits"><code class="docutils literal notranslate"><span class="pre">find_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.limit_wrapper_dict"><code class="docutils literal notranslate"><span class="pre">limit_wrapper_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.plot_brazil"><code class="docutils literal notranslate"><span class="pre">plot_brazil()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.run_limits_vector"><code class="docutils literal notranslate"><span class="pre">run_limits_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.optimize">icedqcd.optimize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.find_filter"><code class="docutils literal notranslate"><span class="pre">find_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.func_binormal"><code class="docutils literal notranslate"><span class="pre">func_binormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.func_binormal2"><code class="docutils literal notranslate"><span class="pre">func_binormal2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.optimize_selection"><code class="docutils literal notranslate"><span class="pre">optimize_selection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.plot_ROC_fit"><code class="docutils literal notranslate"><span class="pre">plot_ROC_fit()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -143,6 +169,13 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.abcd.ABCD_eq"><code class="docutils literal notranslate"><span class="pre">ABCD_eq()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.abcd.ABCD_err"><code class="docutils literal notranslate"><span class="pre">ABCD_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.abcd.test_abcd"><code class="docutils literal notranslate"><span class="pre">test_abcd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.commutator">icefit.commutator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.crv"><code class="docutils literal notranslate"><span class="pre">crv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.selection_A"><code class="docutils literal notranslate"><span class="pre">selection_A()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.selection_B"><code class="docutils literal notranslate"><span class="pre">selection_B()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a><ul>
@@ -167,11 +200,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.test_gaussian"><code class="docutils literal notranslate"><span class="pre">test_gaussian()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.dequantize">icefit.dequantize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.U"><code class="docutils literal notranslate"><span class="pre">U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.compute_ind"><code class="docutils literal notranslate"><span class="pre">compute_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.construct_icdf"><code class="docutils literal notranslate"><span class="pre">construct_icdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.fast_loop"><code class="docutils literal notranslate"><span class="pre">fast_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.iDQF"><code class="docutils literal notranslate"><span class="pre">iDQF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.em">icefit.em</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.EM_frac"><code class="docutils literal notranslate"><span class="pre">EM_frac()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.gausspdf"><code class="docutils literal notranslate"><span class="pre">gausspdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.mixture_nll"><code class="docutils literal notranslate"><span class="pre">mixture_nll()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.test_EM"><code class="docutils literal notranslate"><span class="pre">test_EM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.icelimit">icefit.icelimit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.CL_single"><code class="docutils literal notranslate"><span class="pre">CL_single()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.CL_single_asymptotic"><code class="docutils literal notranslate"><span class="pre">CL_single_asymptotic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.CL_single_compute"><code class="docutils literal notranslate"><span class="pre">CL_single_compute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.LL_splusb"><code class="docutils literal notranslate"><span class="pre">LL_splusb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.asymptotic_uncertainty_CLs"><code class="docutils literal notranslate"><span class="pre">asymptotic_uncertainty_CLs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.convolve_systematics"><code class="docutils literal notranslate"><span class="pre">convolve_systematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.test_limits_unit_test"><code class="docutils literal notranslate"><span class="pre">test_limits_unit_test()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a><ul>
@@ -192,6 +244,16 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.rand_powexp"><code class="docutils literal notranslate"><span class="pre">rand_powexp()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.test_accuracy"><code class="docutils literal notranslate"><span class="pre">test_accuracy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.test_lognormal"><code class="docutils literal notranslate"><span class="pre">test_lognormal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mantissa">icefit.mantissa</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.bits2digits"><code class="docutils literal notranslate"><span class="pre">bits2digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.digits2bits"><code class="docutils literal notranslate"><span class="pre">digits2bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.plots"><code class="docutils literal notranslate"><span class="pre">plots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.reduce_mantissa_bits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.reduce_mantissa_digits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.round_sig"><code class="docutils literal notranslate"><span class="pre">round_sig()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
@@ -347,10 +409,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.fastkan">icenet.deep.fastkan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.lzmlp">icenet.deep.lzmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
@@ -368,8 +432,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
@@ -377,6 +441,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -642,8 +707,8 @@
 <div class="viewcode-block" id="tick_creator">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.tick_creator">[docs]</a>
 <span class="k">def</span> <span class="nf">tick_creator</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xtick_step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ytick_step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylim_ratio</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span>
-        <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minorticks_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ytick_ratio_step</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
-        <span class="n">labelsize_ratio</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minorticks_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ytick_ratio_step</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">labelsize_ratio</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Axis tick constructor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -682,7 +747,7 @@
 <div class="viewcode-block" id="create_axes">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.create_axes">[docs]</a>
 <span class="k">def</span> <span class="nf">create_axes</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Counts&#39;</span><span class="p">,</span> <span class="n">ylabel_ratio</span><span class="o">=</span><span class="s1">&#39;Ratio&#39;</span><span class="p">,</span>
-    <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Axes creator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -877,14 +942,15 @@
 <div class="viewcode-block" id="superplot">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.superplot">[docs]</a>
 <span class="k">def</span> <span class="nf">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">observable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
-    <span class="n">legend_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_properties</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">},</span> <span class="n">bottom_PRC</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+    <span class="n">legend_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_properties</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">},</span> <span class="n">bottom_PRC</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Superposition (overlaid) plotting</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">observable</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">observable</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;obs&#39;</span><span class="p">]</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="n">observable</span><span class="p">)</span>
-
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">observable</span><span class="p">)</span>
+    
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">create_axes</span><span class="p">(</span><span class="o">**</span><span class="n">observable</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="n">ratio_plot</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">color</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
@@ -1002,7 +1068,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">ceiling_count</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">observables</span><span class="o">.</span><span class="n">ylim</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">observable</span><span class="o">.</span><span class="n">ylim</span><span class="p">)</span>
     <span class="c1"># --------------------------------------------------------------------    </span>
 
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>

@@ -101,6 +101,14 @@ icenet.deep.dmlp
     :undoc-members:
 
 
+icenet.deep.fastkan
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.fastkan
+    :members:
+    :undoc-members:
+
+
 icenet.deep.gcnn
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -129,6 +137,14 @@ icenet.deep.losstools
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.losstools
+    :members:
+    :undoc-members:
+
+
+icenet.deep.lzmlp
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.lzmlp
     :members:
     :undoc-members:
 
@@ -231,17 +247,19 @@ icenet.tools
 Tool and auxiliary functions.
 
 
-icenet.tools.aux
-~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: icenet.tools.aux
-    :members:
-    :undoc-members:
 
 icenet.tools.aux_torch
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.tools.aux_torch
+    :members:
+    :undoc-members:
+
+
+icenet.tools.aux
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.tools.aux
     :members:
     :undoc-members:
 
@@ -298,6 +316,14 @@ icenet.tools.process
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.tools.process
+    :members:
+    :undoc-members:
+
+
+icenet.tools.raytools
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.tools.raytools
     :members:
     :undoc-members:
 

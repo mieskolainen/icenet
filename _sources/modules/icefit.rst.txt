@@ -11,6 +11,14 @@ icefit.abcd
     :undoc-members:
 
 
+icefit.commutator
+---------------------
+
+.. automodule:: icefit.commutator
+    :members:
+    :undoc-members:
+
+
 icefit.cortools
 ---------------------
 
@@ -19,10 +27,26 @@ icefit.cortools
     :undoc-members:
 
 
+icefit.dequantize
+---------------------
+
+.. automodule:: icefit.dequantize
+    :members:
+    :undoc-members:
+
+
 icefit.em
 ---------------------
 
 .. automodule:: icefit.em
+    :members:
+    :undoc-members:
+
+
+icefit.icelimit
+---------------------
+
+.. automodule:: icefit.icelimit
     :members:
     :undoc-members:
 
@@ -39,6 +63,14 @@ icefit.lognormal
 ---------------------
 
 .. automodule:: icefit.lognormal
+    :members:
+    :undoc-members:
+
+
+icefit.mantissa
+---------------------
+
+.. automodule:: icefit.mantissa
     :members:
     :undoc-members:
 

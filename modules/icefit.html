@@ -14,7 +14,7 @@
   <![endif]-->
   
         <script src="../_static/documentation_options.js?v=1f169f65"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -35,7 +35,7 @@
             
           </a>
               <div class="version">
-                0.1.0.6
+                0.1.0.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -49,12 +49,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pre-installed-cuda-paths-deprecated">Pre-installed CUDA paths (DEPRECATED)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#pre-installed-cuda-paths-experimental">Pre-installed CUDA paths (EXPERIMENTAL)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#possible-problems">Possible problems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#grid-engine-gpu-job-submission">Grid engine GPU job submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#c-library-versions">C-library versions</a></li>
 </ul>
@@ -62,11 +62,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../notes/introduction.html">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#basic-design-principles">Basic design principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#yaml-configuration-files">YAML-configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#oracle-grid-execution">Oracle Grid execution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#folder-structure">Folder structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#ml-algorithms-and-models">ML-algorithms and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#ai-algorithms-and-models">AI-algorithms and models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#advanced-ml-training-technology">Advanced ML-training technology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#automated-selectors-and-combinatorics-for-distributions">Automated selectors and combinatorics for distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/introduction.html#sun-grid-engine-sge-htcondor-execution">Sun Grid Engine (SGE) / HTCondor execution</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../notes/markup.html">Markup</a></li>
@@ -134,8 +134,34 @@
 <li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.deploy">icedqcd.deploy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.create_ID_label"><code class="docutils literal notranslate"><span class="pre">create_ID_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.f2s"><code class="docutils literal notranslate"><span class="pre">f2s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.generate_cartesian_param"><code class="docutils literal notranslate"><span class="pre">generate_cartesian_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.get_predictor"><code class="docutils literal notranslate"><span class="pre">get_predictor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.process_data"><code class="docutils literal notranslate"><span class="pre">process_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.zscore_normalization"><code class="docutils literal notranslate"><span class="pre">zscore_normalization()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.limits">icedqcd.limits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.limits.create_limit_plots_vector"><code class="docutils literal notranslate"><span class="pre">create_limit_plots_vector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.limits.create_limit_tables"><code class="docutils literal notranslate"><span class="pre">create_limit_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.limits.find_limits"><code class="docutils literal notranslate"><span class="pre">find_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.limits.limit_wrapper_dict"><code class="docutils literal notranslate"><span class="pre">limit_wrapper_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.limits.plot_brazil"><code class="docutils literal notranslate"><span class="pre">plot_brazil()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.limits.run_limits_vector"><code class="docutils literal notranslate"><span class="pre">run_limits_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.optimize">icedqcd.optimize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.optimize.find_filter"><code class="docutils literal notranslate"><span class="pre">find_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.optimize.func_binormal"><code class="docutils literal notranslate"><span class="pre">func_binormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.optimize.func_binormal2"><code class="docutils literal notranslate"><span class="pre">func_binormal2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.optimize.optimize_selection"><code class="docutils literal notranslate"><span class="pre">optimize_selection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.optimize.plot_ROC_fit"><code class="docutils literal notranslate"><span class="pre">plot_ROC_fit()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -146,6 +172,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.abcd.ABCD_eq"><code class="docutils literal notranslate"><span class="pre">ABCD_eq()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.abcd.ABCD_err"><code class="docutils literal notranslate"><span class="pre">ABCD_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.abcd.test_abcd"><code class="docutils literal notranslate"><span class="pre">test_abcd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.commutator">icefit.commutator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.commutator.crv"><code class="docutils literal notranslate"><span class="pre">crv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.commutator.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.commutator.selection_A"><code class="docutils literal notranslate"><span class="pre">selection_A()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.commutator.selection_B"><code class="docutils literal notranslate"><span class="pre">selection_B()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.cortools">icefit.cortools</a><ul>
@@ -170,11 +203,30 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.cortools.test_gaussian"><code class="docutils literal notranslate"><span class="pre">test_gaussian()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.dequantize">icefit.dequantize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.dequantize.U"><code class="docutils literal notranslate"><span class="pre">U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.dequantize.compute_ind"><code class="docutils literal notranslate"><span class="pre">compute_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.dequantize.construct_icdf"><code class="docutils literal notranslate"><span class="pre">construct_icdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.dequantize.fast_loop"><code class="docutils literal notranslate"><span class="pre">fast_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.dequantize.iDQF"><code class="docutils literal notranslate"><span class="pre">iDQF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.dequantize.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.em">icefit.em</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.em.EM_frac"><code class="docutils literal notranslate"><span class="pre">EM_frac()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.em.gausspdf"><code class="docutils literal notranslate"><span class="pre">gausspdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.em.mixture_nll"><code class="docutils literal notranslate"><span class="pre">mixture_nll()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.em.test_EM"><code class="docutils literal notranslate"><span class="pre">test_EM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.icelimit">icefit.icelimit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.CL_single"><code class="docutils literal notranslate"><span class="pre">CL_single()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.CL_single_asymptotic"><code class="docutils literal notranslate"><span class="pre">CL_single_asymptotic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.CL_single_compute"><code class="docutils literal notranslate"><span class="pre">CL_single_compute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.LL_splusb"><code class="docutils literal notranslate"><span class="pre">LL_splusb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.asymptotic_uncertainty_CLs"><code class="docutils literal notranslate"><span class="pre">asymptotic_uncertainty_CLs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.convolve_systematics"><code class="docutils literal notranslate"><span class="pre">convolve_systematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.test_limits_unit_test"><code class="docutils literal notranslate"><span class="pre">test_limits_unit_test()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.jacobian">icefit.jacobian</a><ul>
@@ -195,6 +247,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.rand_powexp"><code class="docutils literal notranslate"><span class="pre">rand_powexp()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.test_accuracy"><code class="docutils literal notranslate"><span class="pre">test_accuracy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.lognormal.test_lognormal"><code class="docutils literal notranslate"><span class="pre">test_lognormal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.mantissa">icefit.mantissa</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.mantissa.bits2digits"><code class="docutils literal notranslate"><span class="pre">bits2digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.mantissa.digits2bits"><code class="docutils literal notranslate"><span class="pre">digits2bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.mantissa.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.mantissa.plots"><code class="docutils literal notranslate"><span class="pre">plots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.mantissa.reduce_mantissa_bits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.mantissa.reduce_mantissa_digits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.mantissa.round_sig"><code class="docutils literal notranslate"><span class="pre">round_sig()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.mine">icefit.mine</a><ul>
@@ -350,10 +412,12 @@
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.fastkan">icenet.deep.fastkan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.lzmlp">icenet.deep.lzmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
@@ -371,8 +435,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-tools">icenet.tools</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
@@ -380,6 +444,7 @@
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
 </ul>
@@ -472,7 +537,7 @@
 <li><p><strong>mu</strong> – Free parameters of the likelihood function</p></li>
 <li><p><strong>mu_B</strong> – Free parameters of the likelihood function</p></li>
 <li><p><strong>mu_D</strong> – Free parameters of the likelihood function</p></li>
-<li><p><strong>parameters</strong><strong>)</strong> (<em>(</em><em>N.B. here number</em><em> of </em><em>measurements == number</em><em> of </em><em>free</em>) – </p></li>
+<li><p><strong>parameters</strong><strong>)</strong> (<em>(</em><em>N.B. here number</em><em> of </em><em>measurements == number</em><em> of </em><em>free</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -530,6 +595,31 @@
 <dt class="sig sig-object py" id="icefit.abcd.test_abcd">
 <span class="sig-name descname"><span class="pre">test_abcd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/abcd.html#test_abcd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.abcd.test_abcd" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</section>
+<section id="module-icefit.commutator">
+<span id="icefit-commutator"></span><h2>icefit.commutator<a class="headerlink" href="#module-icefit.commutator" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.commutator.crv">
+<span class="sig-name descname"><span class="pre">crv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_L</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/commutator.html#crv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.commutator.crv" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.commutator.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/commutator.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.commutator.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.commutator.selection_A">
+<span class="sig-name descname"><span class="pre">selection_A</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_CUT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/commutator.html#selection_A"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.commutator.selection_A" title="Link to this definition">¶</a></dt>
+<dd><p>Per event: Cut on Y and then get the min(X) object</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.commutator.selection_B">
+<span class="sig-name descname"><span class="pre">selection_B</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_CUT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/commutator.html#selection_B"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.commutator.selection_B" title="Link to this definition">¶</a></dt>
+<dd><p>Per event: Get the min(X) object and then cut on Y</p>
+</dd></dl>
 
 </section>
 <section id="module-icefit.cortools">
@@ -679,7 +769,7 @@ using a correlation coefficient rho.</p>
 Pattern Recognition Letters, 2012.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>scott_bin</strong><strong>(</strong><strong>)</strong> (<em>See</em>) – </p>
+<dd class="field-odd"><p><strong>scott_bin</strong><strong>(</strong><strong>)</strong> (<em>See</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -692,7 +782,7 @@ for Joint Entropy Estimation Using Mean Square Error Minimization.”
 Pattern Recognition Letters, 2018.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>scott_bin</strong><strong>(</strong><strong>)</strong> (<em>See</em>) – </p>
+<dd class="field-odd"><p><strong>scott_bin</strong><strong>(</strong><strong>)</strong> (<em>See</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -853,6 +943,59 @@ Multivariate Density Estimation: Theory, Practice, and Visualization – 2D-Gaus
 </dd></dl>
 
 </section>
+<section id="module-icefit.dequantize">
+<span id="icefit-dequantize"></span><h2>icefit.dequantize<a class="headerlink" href="#module-icefit.dequantize" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.dequantize.U">
+<span class="sig-name descname"><span class="pre">U</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/dequantize.html#U"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.dequantize.U" title="Link to this definition">¶</a></dt>
+<dd><p>Uniform random numbers between [a,b]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.dequantize.compute_ind">
+<span class="sig-name descname"><span class="pre">compute_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/dequantize.html#compute_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.dequantize.compute_ind" title="Link to this definition">¶</a></dt>
+<dd><p>Index association helper</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.dequantize.construct_icdf">
+<span class="sig-name descname"><span class="pre">construct_icdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cubic'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/dequantize.html#construct_icdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.dequantize.construct_icdf" title="Link to this definition">¶</a></dt>
+<dd><p>Construct inverse CDF</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.dequantize.fast_loop">
+<span class="sig-name descname"><span class="pre">fast_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_buffer:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deq:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta=&lt;class</span> <span class="pre">'numpy.ndarray'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_ind=&lt;class</span> <span class="pre">'numpy.ndarray'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/dequantize.html#fast_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.dequantize.fast_loop" title="Link to this definition">¶</a></dt>
+<dd><p>Fast loop function used by iDQF</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.dequantize.iDQF">
+<span class="sig-name descname"><span class="pre">iDQF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cubic'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/dequantize.html#iDQF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.dequantize.iDQF" title="Link to this definition">¶</a></dt>
+<dd><p>Dequantization via inverse CDF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – data sample array (1D)</p></li>
+<li><p><strong>theta</strong> – (theoretical) quantized pdf x-values, if None, discrete pdf is estimated from x</p></li>
+<li><p><strong>pvals</strong> – (theoretical) quantized pdf y-values, -||-</p></li>
+<li><p><strong>N_buffer</strong> – technical buffer size</p></li>
+<li><p><strong>n_interp</strong> – number of interpolation points</p></li>
+<li><p><strong>kind</strong> – interpolation type, e.g. ‘linear’, ‘cubic’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dequantized x values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.dequantize.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/dequantize.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.dequantize.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
 <section id="module-icefit.em">
 <span id="icefit-em"></span><h2>icefit.em<a class="headerlink" href="#module-icefit.em" title="Link to this heading">¶</a></h2>
 <dl class="py function">
@@ -908,6 +1051,158 @@ Multivariate Density Estimation: Theory, Practice, and Visualization – 2D-Gaus
 <dt class="sig sig-object py" id="icefit.em.test_EM">
 <span class="sig-name descname"><span class="pre">test_EM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/em.html#test_EM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.em.test_EM" title="Link to this definition">¶</a></dt>
 <dd><p>Test function to test EM iteration</p>
+</dd></dl>
+
+</section>
+<section id="module-icefit.icelimit">
+<span id="icefit-icelimit"></span><h2>icefit.icelimit<a class="headerlink" href="#module-icefit.icelimit" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.icelimit.CL_single">
+<span class="sig-name descname"><span class="pre">CL_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_hypothesis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_expected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_toys_pdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_syst_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_syst_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_syst_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_syst_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_CLs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/icelimit.html#CL_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.icelimit.CL_single" title="Link to this definition">¶</a></dt>
+<dd><p>One tailed signal upper limits using “toy” Monte Carlo.</p>
+<p>A single channel counting experiment case with “quasi-Bayesian” style systematics
+convoluted in via MC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu</strong> – Signal strength parameter</p></li>
+<li><p><strong>s_hypothesis</strong> – Number of predicted signal events (with mu = 1)</p></li>
+<li><p><strong>bg_expected</strong> – Number of expected background events</p></li>
+<li><p><strong>observed</strong> – Number of observed events</p></li>
+<li><p><strong>num_toys_pdf</strong> – Number of MC samples to construct PDFs</p></li>
+<li><p><strong>use_CLs</strong> – Return “CLs” type limits</p></li>
+<li><p><strong>(</strong><strong>s</strong><strong>)</strong><strong>bg_syst_error</strong> – Systematic error on estimated (signal) background</p></li>
+<li><p><strong>(</strong><strong>s</strong><strong>)</strong><strong>bg_error_type</strong> – Systematic uncertainty perturbation type (flat, normal, log-normal)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>p-value</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>For the “CLs” approach motivation, see: A. Read, “Presentation of search results: the CLs technique”
+<a class="reference external" href="https://en.wikipedia.org/wiki/CLs_method_(particle_physics">https://en.wikipedia.org/wiki/CLs_method_(particle_physics</a>)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.icelimit.CL_single_asymptotic">
+<span class="sig-name descname"><span class="pre">CL_single_asymptotic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_hypothesis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_expected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/icelimit.html#CL_single_asymptotic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.icelimit.CL_single_asymptotic" title="Link to this definition">¶</a></dt>
+<dd><p>One tailed signal upper limits using asymptotic (Gaussian) approximation.</p>
+<p>A single channel counting experiment case (without systematics –&gt; requires profile likelihood)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu</strong> – Signal strength parameter</p></li>
+<li><p><strong>s_hypothesis</strong> – Number of predicted signal events (with mu = 1)</p></li>
+<li><p><strong>bg_expected</strong> – Number of expected background events</p></li>
+<li><p><strong>observed</strong> – Number of observed events</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>p-value</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Cowan et al, “Asymptotic formulae for likelihood-based tests of new physics”,
+<a class="reference external" href="https://arxiv.org/abs/1007.1727">https://arxiv.org/abs/1007.1727</a></p>
+<dl class="simple">
+<dt><a class="reference external" href="https://indico.cern.ch/event/126652/contributions/1343592/">https://indico.cern.ch/event/126652/contributions/1343592/</a></dt><dd><p>attachments/80222/115004/Frequentist_Limit_Recommendation.pdf</p>
+</dd>
+</dl>
+<p><a class="reference external" href="https://arxiv.org/abs/2102.04275">https://arxiv.org/abs/2102.04275</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.icelimit.CL_single_compute">
+<span class="sig-name descname"><span class="pre">CL_single_compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s_hypothesis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_expected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_syst_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_syst_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'toys'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_toys_pdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_toys_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1e-05,</span> <span class="pre">10000.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'golden'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/icelimit.html#CL_single_compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.icelimit.CL_single_compute" title="Link to this definition">¶</a></dt>
+<dd><p>Main solver function for the upper limit computation on the signal strength parameter mu.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s_hypothesis</strong> – expected signal count (with mu = 1)</p></li>
+<li><p><strong>bg_expected</strong> – expected background count</p></li>
+<li><p><strong>observed</strong> – observed event count, if None then observed = bg_expected</p></li>
+<li><p><strong>method</strong> – ‘toys’ or ‘asymptotic’</p></li>
+<li><p><strong>num_toys</strong> – number of MC samples for toys</p></li>
+<li><p><strong>alpha</strong> – confidence level for the upper limit (e.g. 0.05 ~ CL95 upper limits)</p></li>
+<li><p><strong>s_syst_error</strong> – systematic error size on signal</p></li>
+<li><p><strong>bg_syst_error</strong> – systematic error size on background</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Optimization args:</dt><dd><p>mu_bounds:        bounds on mu-value to obey
+mu_init:          initial value
+max_restart:      maximum number of restarts
+func_tol:         quadratic loss tolerance
+optimize_method:  method to use for the optimization, ‘brent’ or ‘golden’
+maxiter:          maximum number of iterations</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>upper limits [-2 sigma, 1 sigma, median, +1 sigma, +2 sigma] at the level alpha</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.icelimit.LL_splusb">
+<span class="sig-name descname"><span class="pre">LL_splusb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/icelimit.html#LL_splusb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.icelimit.LL_splusb" title="Link to this definition">¶</a></dt>
+<dd><p>Single channel Poisson log-likelihood</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – counts</p></li>
+<li><p><strong>s</strong> – expected signal count (mean)</p></li>
+<li><p><strong>b</strong> – expected background count (mean)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.icelimit.asymptotic_uncertainty_CLs">
+<span class="sig-name descname"><span class="pre">asymptotic_uncertainty_CLs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu_up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/icelimit.html#asymptotic_uncertainty_CLs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.icelimit.asymptotic_uncertainty_CLs" title="Link to this definition">¶</a></dt>
+<dd><p>Asymptotic (Asimov) +-N sigma values around median expected
+N = 0 gives the median.</p>
+<p>Type “CLs”, keeps the minus sigma tail on positive side of mu.
+See reference: “Frequentist_Limit_Recommendation.pdf”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu_up</strong> – iteratively solved median expected upper limit value</p></li>
+<li><p><strong>q</strong> – test statistic value corresponding to mu_up</p></li>
+<li><p><strong>alpha</strong> – confidence level at which mu_up was extracted</p></li>
+<li><p><strong>N</strong> – array of sigmas e.g. [-2,-1,0,1,2]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.icelimit.convolve_systematics">
+<span class="sig-name descname"><span class="pre">convolve_systematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syst_error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_toys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log-normal-mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/icelimit.html#convolve_systematics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.icelimit.convolve_systematics" title="Link to this definition">¶</a></dt>
+<dd><p>Produce an array of distribution convoluted values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – expected count value</p></li>
+<li><p><strong>syst_error</strong> – error size (e.g. standard deviation)</p></li>
+<li><p><strong>num_toys</strong> – number of MC samples</p></li>
+<li><p><strong>error_type</strong> – type of distribution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array of counts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.icelimit.test_limits_unit_test">
+<span class="sig-name descname"><span class="pre">test_limits_unit_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/icelimit.html#test_limits_unit_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.icelimit.test_limits_unit_test" title="Link to this definition">¶</a></dt>
+<dd><p>Simple unit tests</p>
 </dd></dl>
 
 </section>
@@ -1056,6 +1351,61 @@ the distribution target mean (or median) m and variance v</p>
 <dd></dd></dl>
 
 </section>
+<section id="module-icefit.mantissa">
+<span id="icefit-mantissa"></span><h2>icefit.mantissa<a class="headerlink" href="#module-icefit.mantissa" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mantissa.bits2digits">
+<span class="sig-name descname"><span class="pre">bits2digits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/icefit/mantissa.html#bits2digits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mantissa.bits2digits" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mantissa.digits2bits">
+<span class="sig-name descname"><span class="pre">digits2bits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/icefit/mantissa.html#digits2bits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mantissa.digits2bits" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mantissa.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mantissa.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mantissa.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mantissa.plots">
+<span class="sig-name descname"><span class="pre">plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xhat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dquant_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mantissa_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mantissa.html#plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mantissa.plots" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mantissa.reduce_mantissa_bits">
+<span class="sig-name descname"><span class="pre">reduce_mantissa_bits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manbits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mantissa.html#reduce_mantissa_bits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mantissa.reduce_mantissa_bits" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – floating point numbers in an array</p></li>
+<li><p><strong>manbits</strong> – number of leading bits for the mantissa</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mantissa.reduce_mantissa_digits">
+<span class="sig-name descname"><span class="pre">reduce_mantissa_digits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mandigits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mantissa.html#reduce_mantissa_digits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mantissa.reduce_mantissa_digits" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – floating point numbers in an array</p></li>
+<li><p><strong>mandigits</strong> – number of digits precision in the mantissa</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.mantissa.round_sig">
+<span class="sig-name descname"><span class="pre">round_sig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mantissa.html#round_sig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mantissa.round_sig" title="Link to this definition">¶</a></dt>
+<dd><p>Round to significant figures</p>
+</dd></dl>
+
+</section>
 <section id="module-icefit.mine">
 <span id="icefit-mine"></span><h2>icefit.mine<a class="headerlink" href="#module-icefit.mine" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -1067,7 +1417,7 @@ mlp_dim:    mlp inner dimensionality</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="icefit.mine.MINENet.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/mine.html#MINENet.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.mine.MINENet.forward" title="Link to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
+<dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1177,7 +1527,7 @@ model</p>
 <dd><p>Train the network estimator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>estimate</strong><strong>(</strong><strong>)</strong> (<em>See</em>) – </p>
+<dd class="field-odd"><p><strong>estimate</strong><strong>(</strong><strong>)</strong> (<em>See</em>)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>mutual information estimates per iteration</p>
