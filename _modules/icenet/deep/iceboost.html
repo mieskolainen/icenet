@@ -706,12 +706,12 @@
         
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">MI_param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">]:</span>
             
-            <span class="n">mask</span>  <span class="o">=</span> <span class="n">reg_param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;evt_mask_</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
-            
             <span class="c1"># -----------</span>
             <span class="n">reg_param</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">MI_param</span><span class="p">)</span>
             <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;ma_eT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;ma_eT&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="c1"># Pick the one</span>
             <span class="c1"># -----------</span>
+            
+            <span class="n">mask</span>  <span class="o">=</span> <span class="n">reg_param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;evt_mask_</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
             
             <span class="c1"># Pick class indices</span>
             <span class="n">cind</span>  <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">targets</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
