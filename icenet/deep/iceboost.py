@@ -587,14 +587,15 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
         
         if use_custom:
-            fig,ax = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'eval': val_losses},
-                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
-        else:
-            
             ltr = {f'train: {k}': v for k, v in loss_history_train.items()}
             lev = {f'eval:  {k}': v for k, v in loss_history_eval.items()}
             
             fig,ax = plots.plot_train_evolution_multi(losses=ltr | lev, trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+        
+        # Standard
+        else:
+            fig,ax = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'eval': val_losses},
+                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         
         plt.savefig(f'{plotdir}/{param["label"]}--evolution.pdf', bbox_inches='tight'); plt.close()
         
