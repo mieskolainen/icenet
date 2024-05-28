@@ -1,6 +1,6 @@
 # Electron ID [DEEP BATCHED TRAINING] steering code
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2024
 
 # icenet system paths
 import sys
@@ -10,23 +10,12 @@ sys.path.append(".")
 import matplotlib
 matplotlib.use('Agg')
 
-import uproot
-import math
 import numpy as np
 import torch
 import torch_geometric
 from matplotlib import pyplot as plt
 
-import argparse
-import pprint
-import os
-import datetime
-import json
-import yaml
-
-import pickle
 import sys
-import copy
 from termcolor import cprint
 
 # icenet
@@ -47,7 +36,7 @@ import icenet.deep as deep
 # iceid
 from iceid import common
 from iceid import graphio
-from configs.eid.mvavars import *
+from configs.eid.mvavars import * # global import
 
 
 def get_model(gdata, args, param):
@@ -137,8 +126,7 @@ def main():
 
     visited    = False
     N_epochs   = args['batch_train_param']['epochs']
-    block_size = args['batch_train_param']['blocksize']
-
+    
     ### Over each global epoch
     for epoch in range(N_epochs):
 
@@ -199,21 +187,23 @@ def main():
                 for ID in model.keys():
                     cprint(__name__ + f' Training model <{ID}>', 'green')
 
-                    train_loader     = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
-                    test_loader      = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
+                    train_loader    = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
+                    validate_loader = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
                     
                     # Train
-                    loss             = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
+                    loss = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
-                    # Evaluate
-                    trn_acc, trn_AUC = deep.optimize.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
-                    val_acc, val_AUC = deep.optimize.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
+                    # Validate
+                    _, trn_acc, trn_AUC        = deep.optimize.test(name='train', model=model[ID], loader=train_loader,    device=device[ID], opt_param=param[ID]['opt_param'])
+                    val_loss, val_acc, val_AUC = deep.optimize.test(name='eval',  model=model[ID], loader=validate_loader, device=device[ID], opt_param=param[ID]['opt_param'], compute_loss=True)
                     
                     scheduler[ID].step()
                     
-                    print(f"[epoch: {epoch+1:03d}/{N_epochs:03d} | file: {f+1}/{len(root_files)} | block: {block+1}/{N_blocks} | "
-                        f"train loss: {deep.optimize.printloss(loss)} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC) | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | lr = {scheduler[ID].get_last_lr()}")
-                    
+                    print(f"Epoch: {epoch+1:03d} / {N_epochs:03d} | file: {f+1} / {len(root_files)} | block: {block+1} / {N_blocks}]")
+                    print(f"[train] loss: {deep.optimize.printloss(loss)} | acc: {trn_acc:.4f} | AUC: {trn_AUC:.4f}")
+                    print(f"[eval]  loss: {deep.optimize.printloss(val_loss)} | acc: {val_acc:.4f} | AUC: {val_AUC:.4f}")
+                    print(f"lr = {scheduler[ID].get_last_lr()}")
+
         ## Save each model per global epoch
         for ID in model.keys():
             checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
