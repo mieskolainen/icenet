@@ -4,7 +4,7 @@
 
 rootname: 'zee'
 rngseed: 123456                       # Fixed seed for training data mixing
-inputvars: 'mvavars'                  # Main file input description python file
+inputvars: 'mvavars_EB'               # Main file input description python file
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
@@ -13,7 +13,7 @@ mva_param: &MVA_INPUT_PARAM
   signal_class: 1                     # Signal class ID
   #DA_class:    -2                    # Domain Adaptation class
   
-  inputvar_scalar: 'MVA_SCALAR_VARS_EB'  # Input variables, implemented under mvavars.py
+  inputvar_scalar: 'MVA_SCALAR_VARS'  # Input variables, implemented under mvavars.py
   
   varnorm: 'zscore-weighted'          # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   
@@ -33,7 +33,6 @@ genesis_runmode:
   
   maxevents:  null
   inputmap:   null
-  inputvars: 'mvavars_EB'             # Input description python file
   
   mcfile:     ['MC_*_EB.parquet']
   datafile:   ['Data_*_EB.parquet']

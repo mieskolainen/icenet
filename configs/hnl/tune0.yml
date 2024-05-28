@@ -55,7 +55,6 @@ genesis_runmode:
 
   maxevents:  null
   inputmap:   null #"mc_input.yml"
-  inputvars: 'mvavars'                # Input description python file
   
   mcfile:     ['bdt_df_2016.parquet']
   datafile:   null

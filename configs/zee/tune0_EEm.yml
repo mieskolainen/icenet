@@ -33,7 +33,6 @@ genesis_runmode:
   
   maxevents:  null
   inputmap:   null
-  inputvars: 'mvavars'                # Input description python file
   
   mcfile:     ['MC_*_EEm.parquet']
   datafile:   ['Data_*_EEm.parquet']
