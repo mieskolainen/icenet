@@ -35,12 +35,7 @@ class MLGR(nn.Module):
         
         x = self.layer1(x)
         return x
-
-    def forward(self,x):
-        
-        x = self.mlp(x)
-        return x
-
+    
     def softpredict(self,x) :
         """ Softmax probability
         """
