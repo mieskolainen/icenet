@@ -40,6 +40,9 @@ def distance_corr_torch(x: torch.Tensor, y: torch.Tensor, weights: torch.Tensor=
     """
     N = x.shape[0]
 
+    if weights is not None:
+        print(__name__ + f'.distance_corr_torch: Warning: weights not supported currently!')
+    
     def double_centering(D):
         
         row_means = D.mean(dim=0, keepdim=True) # [1 x N]

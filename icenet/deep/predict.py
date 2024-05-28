@@ -37,7 +37,7 @@ def pred_cut(ids, param):
             return param['sign'] * x[...,index]
         # Transform via sigmoid from R -> [0,1]
         elif param['transform'] == 'sigmoid':
-            return 1 / (1 + np.exp(param['sign'] * x[...,index]))
+            return aux.sigmoid(param['sign'] * x[...,index])
         # Numpy function, e.g. np.abs, np.tanh ...
         elif 'np.' in param['transform']:
             cmd = "param['sign'] * " + param['transform'] + f"(x[...,index])"
@@ -129,7 +129,12 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
 
         # Predict in smaller batches not to overflow GPU memory
         for i, batch in tqdm(enumerate(loader)):
-            y = model.softpredict(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
+            
+            if 'raw_logit' in param:
+                y = model.forward(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
+            else:
+                y = model.softpredict(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
+            
             y_tot = copy.deepcopy(y) if (i == 0) else np.concatenate((y_tot, y), axis=0)
         
         return y_tot
@@ -157,7 +162,10 @@ def pred_torch_generic(args, param, return_model=False):
             for key in x_in.keys():
                 x_in[key] = x_in[key].to(device)
         
-        return model.softpredict(x_in)[:, args['signal_class']].detach().cpu().numpy()
+        if 'raw_logit' in param:
+            return model.forward(x_in)[:, args['signal_class']].detach().cpu().numpy()
+        else:
+            return model.softpredict(x_in)[:, args['signal_class']].detach().cpu().numpy()
     
     if return_model == False:
         return func_predict
@@ -182,7 +190,10 @@ def pred_torch_scalar(args, param, return_model=False):
             for key in x_in.keys():
                 x_in[key] = x_in[key].to(device)
         
-        return model.softpredict(x_in).detach().cpu().numpy()
+        if 'raw_logit' in param:
+            return model.forward(x_in).squeeze().detach().cpu().numpy()
+        else:
+            return model.softpredict(x_in).squeeze().detach().cpu().numpy()
     
     if return_model == False:
         return func_predict
@@ -193,8 +204,8 @@ def pred_torch_scalar(args, param, return_model=False):
 def pred_xgb(args, param, feature_names=None, return_model=False):
     
     print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
-    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model = pickle.load(open(filename, 'rb'))
+    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
+    model    = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
         pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
@@ -210,8 +221,8 @@ def pred_xgb(args, param, feature_names=None, return_model=False):
 def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
     
     print(__name__ + f'.pred_xgb_scalar: Evaluate <{param["label"]}> model ...')
-    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model = pickle.load(open(filename, 'rb'))
+    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
+    model    = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
         pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
@@ -224,14 +235,18 @@ def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
 
 
 def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
+    """
+    Same as pred_xgb_scalar but a sigmoid function applied
+    """
     
     print(__name__ + f'.pred_xgb_logistic: Evaluate <{param["label"]}> model ...')
-    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model = pickle.load(open(filename, 'rb'))
+    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
+    model    = pickle.load(open(filename, 'rb'))
     
     def func_predict(x):
-        # Apply sigmoid function    
-        return 1 / (1 + np.exp(- model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))))
+        
+        logits = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))   
+        return aux.sigmoid(logits)
     
     if return_model == False:
         return func_predict

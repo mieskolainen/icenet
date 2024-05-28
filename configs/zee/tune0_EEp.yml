@@ -1,8 +1,8 @@
-# HNL tune0.yml
+# ZEE tune0.yml
 #
 # -------------------------------------------------------------------
 
-rootname: 'hnl'
+rootname: 'zee'
 rngseed: 123456                       # Fixed seed for training data mixing
 inputvars: 'mvavars'                  # Main file input description python file
 
@@ -11,62 +11,41 @@ mva_param: &MVA_INPUT_PARAM
   use_conditional: false              # Conditional (theory parametric) input
   primary_classes: [0,1]              # Primary class IDs in MVA (train, ROC etc.)
   signal_class: 1                     # Signal class ID
-  #DA_class:    -2                     # Domain Adaptation class
+  #DA_class:    -2                    # Domain Adaptation class
   
-  inputvar_scalar:  'MVA_SCALAR_VARS' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  #inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
-  #jagged_maxdim:    6
+  inputvar_scalar: 'MVA_SCALAR_VARS'  # Input variables, implemented under mvavars.py
   
-  varnorm: null                       # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
-  #varnorm_tensor: 'zscore'           # Tensor variable normalization
-  #varnorm_graph: null                # Not implemented yet
+  varnorm: 'zscore-weighted'          # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   
-  frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
+  frac: [0.6, 0.1, 0.3]               # Train vs validate/test split fraction
   
   # Imputation
   imputation_param:
     active: true                      # True / False
-    var: 'MVA_SCALAR_VARS'            # Array of variables to be imputated
+    var: null                         # Array of variables to be imputated, null for all
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: -99                   # For constant imputation
+    fill_value: 0                     # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
     values: null                      # Special values which indicate the need for imputation, if null, then only Inf/Nan
-  
-  # # Graph object construction
-  # graph_param:
-  #   global_on: True
-  #   self_loops: True
-  #   directed: False
-  #   coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
-
-  # # ** Image tensor object construction **
-  # image_param:
-
-  #   # See the corresponding construction under common.py
-  #   channels: 2                 # 1,2,...
-
-  #   # bin-edges
-  #   eta_bins: []
-  #   phi_bins: []
-
 
 # ----------------------------------------------------
 genesis_runmode:
-
+  
   maxevents:  null
-  inputmap:   null #"mc_input.yml"
+  inputmap:   null
   inputvars: 'mvavars'                # Input description python file
   
-  mcfile:     ['bdt_df_2016.parquet']
-  datafile:   null
-  tree_name:  null                    # 'ntuplizer/tree'
+  mcfile:     ['MC_*_EEp.parquet']
+  datafile:   ['Data_*_EEp.parquet']
   
+  tree_name:  null                    # 'ntuplizer/tree'
+
   targetfunc: null                    # Training target,    implemented under mctargets.py
-  filterfunc: 'filter_standard'       # Training filtering, implemented under mcfilter.py
-  cutfunc:    'cut_fiducial'          # Basic cuts,         implemented under cuts.py
+  filterfunc: 'filter_nofilter'       # Training filtering, implemented under mcfilter.py
+  cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
-  pickle_size: 10000                  # Number of entries (events) per pickle file
+  pickle_size: 1000000                # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
@@ -79,20 +58,39 @@ train_runmode:
 
   ## Reweighting setup
   reweight: true
-  reweight_mode: 'write'          # 'write', 'load'
+  reweight_mode: 'write'              # 'write', 'load'
   reweight_file: 'reweight_train.pkl' # differential reweighting model file
   
   reweight_param: &REWEIGHT_PARAM
 
-    equal_frac: true              # Equalize integrated class fractions
-    differential: false           # Differential reweighting
-    reference_class: 0
+    equal_frac: true                  # Equalize integrated class fractions
+    differential: true                # Differential reweighting
+    reference_class: 1                # Re-weight target class id
+    
+    # Differential reweighting param
+    diff_param:
+      
+      maxevents: null                      # Maximum number of events for the PDF construction
+      var:  ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
+      type: 'ML'                           # 'ML', 'pseudo-ND', '2D', '1D'
+      
+      hist_param:
 
-    # ---------------------
-    # Differential param
-    # For example, see /trg/tune0.yml
+        pseudo_type: 'product'             # 'product', 'geometric_mean'
+        
+        bins:  [[-3.1, 3.1, 50], [0.0001, 50.0, 50], [1.0, 60, 50]] # Make sure the bounds cover the phase space
+        binmode:  ['linear', 'linear', 'linear']     # 'log10' or 'linear' or 'edges' (custom array) binning
 
-
+        # ! Variable, and binning min/max boundaries are both transformed !
+        transform: ['log10', null, null]   # 'log10', 'sqrt', 'square', null
+        
+        max_reg: 1000.0                    # Maximum weight cut-off regularization
+      
+      ML_param:
+        active_model: xgb3Drw              # Under models.yml
+        max_reg:      1000.0               # Maximum weight cut-off regularization
+  
+  
   ## Outlier protection in the training
   outlier_param:
     algo: 'truncate'   # algorithm: 'truncate', null
@@ -102,27 +100,21 @@ train_runmode:
     truncate_weights: True # Truncate outlier event weights
     process_validate: True # Protect also validation sample
   
+
   # ** Activate models here **
   # Give all models some unique identifier and label
-  models:  !include configs/hnl/models.yml
+  models:  !include configs/zee/models.yml
   active_models: &ACTIVE_MODELS
-    
-    #- xgb-MI-max
-    #- dmlp-MI-max
 
-    - xgb-MI-min
-    - dmlp-MI-min
-    
+    - iceboost_plus
+    - iceboost0
     - xgb0
+    
+    - fastkan0
+    - lzmlp0
     - dmlp0
-    
-    - xgb0-red
-    - dmlp0-red
-    
-    - cut0
-    - cut1
   
-  raytune: !include configs/hnl/raytune.yml
+  raytune: !include configs/zee/raytune.yml
 
   # Distillation training
   # -- the order must be compatible with the causal order in 'active_models'
@@ -157,9 +149,9 @@ eval_runmode:
 
   reweight_param: *REWEIGHT_PARAM
 
-  models:  !include configs/hnl/models.yml
+  models:  !include configs/zee/models.yml
   active_models: *ACTIVE_MODELS
 
 # ----------------------------------------------------
-plot_param: !include configs/hnl/plots.yml
+plot_param: !include configs/zee/plots.yml
 

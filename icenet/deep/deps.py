@@ -84,12 +84,13 @@ class PEN1_mean(nn.Module):
 class DEPS(nn.Module):
     """ Permutation equivariant networks.
     """
-    def __init__(self, D, z_dim, phi_layers=3, rho_layers=3, C=2, pool='max', dropout=0.5):
+    def __init__(self, D, C, z_dim, out_dim=None, phi_layers=3, rho_layers=3, pool='max', dropout=0.1, **kwargs):
         """
         Args:
             D:        Input dimension
-            z_dim:    Latent dimension
             C:        Number of classes
+            z_dim:    Latent dimension
+            out_dim:  Output dimension
             pool:     Pooling operation type: 'max','mean' or 'max1','mean1' (multi dimensional or single)
             dimtype:  'multi' or 'single'
             dropout:  Dropout regularization
@@ -101,13 +102,18 @@ class DEPS(nn.Module):
         self.C       = C
         self.dropout = dropout
         
+        if out_dim is None:
+            self.out_dim = C
+        else:
+            self.out_dim = out_dim
+        
         phi_channels = [D]
         for i in range(phi_layers - 1): phi_channels.append(z_dim)
         phi_channels.append(z_dim)
 
         rho_channels = [z_dim]
         for i in range(rho_layers - 1): rho_channels.append(z_dim)
-        rho_channels.append(C)
+        rho_channels.append(self.out_dim)
 
         if   pool == 'max':
             accumulator = PEN_max
@@ -155,14 +161,20 @@ class DEPS(nn.Module):
         x = self.rho(x)
         return x
     
-    # Returns softmax probability
     def softpredict(self,x) :
-        #if self.training:
-        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        #else:
-        return F.softmax(self.forward(x), dim=-1)
+        """ Softmax probability
+        """
+        
+        if self.out_dim > 1:
+            return F.softmax(self.forward(x), dim=-1)
+        else:
+            return torch.sigmoid(self.forward(x))
     
-    # Return class
     def binarypredict(self,x) :
-        prob = list(self.softpredict(x).detach().numpy())
-        return np.argmax(prob, axis=1)
+        """ Return maximum probability class
+        """
+        if self.out_dim > 1:
+            prob = list(self.softpredict(x).detach().numpy())
+            return np.argmax(prob, axis=1)
+        else:
+            return np.round(self.softpredict(x).detach().numpy()).astype(int)

@@ -21,7 +21,7 @@ class XgboostObjective():
         self.skip_hessian = skip_hessian
         self.flatten_grad = flatten_grad
     
-        print(__name__ + f'.__init__: Using device: {device}')
+        print(__name__ + f'.__init__: Using device: {device} | skip_hessian = {skip_hessian}')
     
     def __call__(self, preds: np.ndarray, targets: xgboost.DMatrix):
 
@@ -58,14 +58,15 @@ class XgboostObjective():
         # Diagonal elements of the Hessian matrix
         grad2 = torch.ones_like(grad1)
         if not self.skip_hessian:
+            print('Computing Hessian ...')
             for i in tqdm(range(len(preds))): # Can be very slow
                 grad2_i  = torch.autograd.grad(grad1[i], preds, retain_graph=True)[0]
                 grad2[i] = grad2_i[i]
-
+        
         grad1, grad2 = grad1.detach().cpu().numpy(), grad2.detach().cpu().numpy()
-
+        
         if self.flatten_grad:
-            grad1, grad2 = grad1.flatten("F"), grad2.flatten()
+            grad1, grad2 = grad1.flatten("F"), grad2.flatten("F")
         
         return grad1, grad2
         

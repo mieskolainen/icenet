@@ -46,66 +46,106 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
 
     LOAD_VARS = inputvars.LOAD_VARS
     
+    if maxevents is None:
+        maxevents = int(1e10)
+        cprint(__name__ + f'.load_root_file: "maxevents" is None, set {maxevents}', 'yellow')
     
-    # =================================================================
+    
+    # -------------------------------------------------------------------------
     # *** MC ***
     
-    mc_file  = f'{root_path}/{args["mcfile"]}'
-    print(__name__ + f'.load_root_file: {mc_file}')
+    frames = []
     
-    frame_mc = pd.read_parquet(mc_file)
+    mcfiles = io.glob_expand_files(datasets=args["mcfile"], datapath=root_path)
     
-    print(f'Total number of events in file: {len(frame_mc)}')
-    print(f'ids: {frame_mc.keys()}')
+    for f in mcfiles:
+        new_frame = copy.deepcopy(pd.read_parquet(f))
+        frames.append(new_frame)
+        cprint(__name__ + f'.load_root_file: {f} | N = {len(new_frame)}', 'yellow')
+        ids = list(new_frame.keys()); ids.sort()
+        print(ids)
     
-    # Pre-computed weights (kinematic re-weight x gen event weight x ...)
-    W_MC = frame_mc[['weight']].to_numpy().squeeze()
-    W_MC = W_MC / np.sum(W_MC) * len(W_MC)
-
+    frame_mc = pd.concat(frames)
+    
+    print(f'Total number of events: {len(frame_mc):0.1E}')
+    
     X_MC = frame_mc[LOAD_VARS].to_numpy()
+    
+    ## Pre-computed weights (kinematic re-weight x gen event weight x ...)
+    """
+    W_MC    = frame_mc[['weight']].to_numpy().squeeze()
+    W_MC_rw = frame_mc[['rw_weights']].to_numpy().squeeze()
+    W_MC    = W_MC / W_MC_rw # Extract out raw "gen" weights
+    W_MC    = W_MC / np.sum(W_MC) * len(W_MC)
+    """
+    
+    # Use all events with weight 1
+    W_MC = np.ones(len(X_MC))
+    
+    # Label = 0
     Y_MC = np.zeros(len(X_MC)).astype(int)
+    
+    # ** Drop negative weight events **
+    """
+    ind  = W_MC < 0
+    if np.sum(ind) > 0:
+        cprint(__name__ + f'.load_root_file: Dropping negative weight events ({np.sum(ind)/len(ind):0.3f})', 'red')
+        W_MC = W_MC[~ind] # Boolean NOT
+        X_MC = X_MC[~ind]
+        Y_MC = Y_MC[~ind]
+    """
     
     print(f'X_MC.shape = {X_MC.shape}')
     print(f'W_MC.shape = {W_MC.shape}')
     
     
-    # =================================================================
+    # -------------------------------------------------------------------------
     # *** Data ***
     
-    data_file  = f'{root_path}/{args["datafile"]}'
-    print(__name__ + f'.load_root_file: {data_file}')
+    frames = []
     
-    frame_data = pd.read_parquet(data_file)
+    datafiles = io.glob_expand_files(datasets=args["datafile"], datapath=root_path)
     
-    print(f'Total number of events in file: {len(frame_data)}')
-    print(f'ids: {frame_data.keys()}')
+    for f in datafiles:
+        new_frame = copy.deepcopy(pd.read_parquet(f))
+        frames.append(new_frame)
+        cprint(__name__ + f'.load_root_file: {f} | N = {len(new_frame)}', 'yellow')
+        ids = list(new_frame.keys()); ids.sort()
+        print(ids)
     
-    # ------------------
-    NEW_LOAD_VARS = copy.deepcopy(LOAD_VARS) # Different naming in data
+    frame_data = pd.concat(frames)
+    
+    print(f'Total number of events: {len(frame_data):0.1E}')
+    
+    # -------------------------------------------------------------------------
+    # ** Special treatment -- different naming in data **
+    NEW_LOAD_VARS = copy.deepcopy(LOAD_VARS)
     for i in range(len(LOAD_VARS)):
         if LOAD_VARS[i] == 'probe_pfChargedIso':
+            cprint(f'Changing variable {LOAD_VARS[i]} name in data', 'red')
             NEW_LOAD_VARS[i] = 'probe_pfChargedIsoPFPV'
-    # ------------------
+    # -------------------------------------------------------------------------
     
     X_data = frame_data[NEW_LOAD_VARS].to_numpy()
     W_data = np.ones(len(X_data))
+    
+    # Label = 1
     Y_data = np.ones(len(X_data)).astype(int)
     
     print(f'X_data.shape = {X_data.shape}')
     print(f'W_data.shape = {W_data.shape}')
     
     
-    # =================================================================
-    # Combine
+    # -------------------------------------------------------------------------
+    # Combine MC and Data samples
     
     X   = np.vstack((X_MC, X_data))
     W   = np.concatenate((W_MC, W_data))
     Y   = np.concatenate((Y_MC, Y_data))
     ids = LOAD_VARS
     
-    # =================================================================
     
-    
+    # -------------------------------------------------------------------------
     ## Print some diagnostics
     print(__name__ + f'.load_root_file: Number of events: {len(X)}')
     
@@ -117,9 +157,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     X    = X[rand].squeeze() # Squeeze removes additional [] dimension
     Y    = Y[rand].squeeze()
     W    = W[rand].squeeze()
-
+    
     # Apply maxevents cutoff
-    maxevents = np.min([args['maxevents'], len(X)])
+    maxevents = np.min([maxevents, len(X)])
     print(__name__ + f'.load_root_file: Applying maxevents cutoff {maxevents}')
     X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
     
@@ -171,11 +211,41 @@ def splitfactor(x, y, w, ids, args):
         vars    = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.MI_VARS)
         data_MI = data[vars].x.astype(np.float32)
     
-    # --------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     ### Finally pick active scalar variables out
     
-    vars     = aux.process_regexp_ids(all_ids=data.ids, ids=eval('inputvars.' + args['inputvar_scalar']))
-    data     = data[vars]
-    data.x   = data.x.astype(np.float32)
+    vars   = aux.process_regexp_ids(all_ids=data.ids, ids=eval('inputvars.' + args['inputvar_scalar']))
+    data   = data[vars]
+    data.x = data.x.astype(np.float32)
+    
+    # -------------------------------------------------------------------------
+    ### ** DEBUG TEST -- special transform for "zero-inflated" variables **
+    """
+    special_var = ['probe_esEffSigmaRR',
+                   'probe_pfChargedIso',
+                   'probe_ecalPFClusterIso',
+                   'probe_trkSumPtHollowConeDR03',
+                   'probe_trkSumPtSolidConeDR04']
+    
+    # Thresholds
+    dT          = [0.1, 0.1, 0.1, 0.1, 0.1]
+    
+    for i, v in enumerate(special_var):
+        
+        try:
+            ind = data.find_ind(v)
+        except:
+            cprint(__name__ + f'.splitfactor: Could not find variable "{v}" -- continue', 'red')
+        
+        cprint(__name__ + f'.splitfactor: Pre-transforming variable "{v}" with dT < {dT[i]}', 'magenta')
+        
+        mask              = np.abs(data.x[:,ind] < dT[i])
+        data.x[mask, ind] = np.random.triangular(left=-1, mode=-0.75, right=dT[i], size=np.sum(mask))
+        data.x[:,ind]     = np.log1p(data.x[:,ind] + 1)
+        
+        # Change the variable name
+        data.ids[ind] = f'DQL__{v}'
+    """
+    # -------------------------------------------------------------------------
     
     return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

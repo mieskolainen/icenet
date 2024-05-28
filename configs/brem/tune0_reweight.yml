@@ -19,7 +19,7 @@ mva_param: &MVA_INPUT_PARAM
   inputvar_scalar: 'UNIT_TEST_ID'     # Input variables, implemented under mvavars.py
   inputvar_image: null                # Image variables, set 'CMSSW_MVA_IMAGE_VARS'
 
-  varnorm: null                       # Variable normalization: 'zscore', 'madscore', null
+  varnorm: null                       # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   varnorm_tensor: null                # Tensor variable normalization
   #varnorm_graph: null                # Not implemented yet
   
@@ -63,41 +63,54 @@ train_runmode:
   reweight_file: 'reweight_train.pkl' # differential reweighting model file
 
   reweight_param: &REWEIGHT_PARAM
-
-    maxevents: 100000             # Maximum number of events for the PDF construction
+    
     equal_frac: true              # Equalize integrated class fractions
     differential: true            # Differential reweighting
-    
-    reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
+    reference_class: 0            # Reference (target) class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
     
     # -----------------------------
+    # Differential reweighting
 
     # Note about asymmetry: Keep the reference class as 0 == background, because signal
     # MC has much longer tail over pt. Thus, it is not possible to re-weight background
     # to signal very easily, but it is possible to re-weight signal to background.
     # This is seen by inspecting the re-weighted distributions with small and large statistics.
 
-    dimension: 'pseudo-2D' # '2D', 'pseudo-2D', '1D'
-    pseudo_type: 'product' # 'product', 'geometric_mean'
+    diff_param:
 
-    var:  ['gsf_pt', 'gsf_eta']
-    bins:  [[0.1, 20.0, 20], [-2.5, 2.5, 20]] # Make sure the bounds cover the phase space
-    binmode:  ['log10', 'linear']             # 'log10' or 'linear' or 'edges' (custom array) binning
-    transform: [null, null]                   # 'log10', 'sqrt', 'square', null
+      maxevents: 100000                           # Maximum number of events for the PDF construction
+      var:  ['gsf_pt', 'gsf_eta']
+  #   var:  ['gsf_pt', 'gsf_eta', 'rho']
+      type: '2D'                                  # 'ML', 'pseudo-ND', '2D', '1D'
+      
+      hist_param:
 
-#    var:  ['gsf_pt', 'gsf_eta', 'rho']
-#    bins:  [[0.1, 20.0, 20], [-2.5, 2.5, 20], [0, 30, 30]] # Make sure the bounds cover the phase space
-#    binmode:  ['log10', 'linear', 'linear'] # 'log10' or 'linear' or 'edges' (custom array) binning
-#    transform: [null, null, null]           # 'log10', 'sqrt', 'square', null
+        pseudo_type: 'product'                    # 'product', 'geometric_mean'
 
-    max_reg: 10.0 # Maximum weight cut-off regularization
+        bins:  [[0.1, 20.0, 20], [-2.5, 2.5, 20]] # Make sure the bounds cover the phase space
+        binmode:  ['log10', 'linear']             # 'log10' or 'linear' or 'edges' (custom array) binning
+        transform: [null, null]                   # 'log10', 'sqrt', 'square', null
+        
+    #   bins:  [[0.1, 20.0, 20], [-2.5, 2.5, 20], [0, 30, 30]] # Make sure the bounds cover the phase space
+    #   binmode:  ['log10', 'linear', 'linear']   # 'log10' or 'linear' or 'edges' (custom array) binning
+    #   transform: [null, null, null]             # 'log10', 'sqrt', 'square', null
 
+        max_reg: 10.0 # Maximum weight cut-off regularization
+      
+      ML_param:
+        active_model: xgb3Drw               # Under models.yml
+        max_reg:      10.0                  # Maximum weight cut-off regularization
+  
 
   ## Outlier protection in the training
   outlier_param:
     algo: 'truncate'   # algorithm: 'truncate', null
     qmin: 0.01         # in [0,100] 
     qmax: 99.9         # in [0,100]
+
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
+  
 
   # ** Activate models here **
   # Give all models some unique identifier and label

@@ -77,14 +77,14 @@ def compute_reweight(root_files, num_events, args):
     index        = 0 # Use the first file by default
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
-    entry_stop = np.min([args['reweight_param']['maxevents'], num_events[index]])
+    entry_stop = np.min([args['reweight_param']['diff_param']['maxevents'], num_events[index]])
     predata    = common.load_root_file(root_path=[root_files[index]], ids=None, entry_stop=entry_stop, args=args, library='np')
     
 
     X,Y,W,ids  = predata['X'],predata['Y'],predata['W'],predata['ids']
 
     # Compute re-weights
-    _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args['reweight_param'])
+    _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args)
 
     return pdf, X, Y, W, ids
 
@@ -179,9 +179,9 @@ def main():
                     # =========================================================================
                     # COMPUTE RE-WEIGHTS
                     
-                    trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=ids, args=args['reweight_param'])
-                    val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=ids, args=args['reweight_param'])
-
+                    trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=ids, args=args)
+                    val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=ids, args=args)
+                    
                     # =========================================================================
                     ### Parse data into graphs
                     

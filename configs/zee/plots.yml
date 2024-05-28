@@ -31,8 +31,9 @@ basic:
   plot_unweighted: True
 
 corrmat:
-  active: false
+  active: true
 
+# MVA output score over pairwise pairwise observables
 contours:
   active: false
 
@@ -41,18 +42,40 @@ ROC:
   active: true
   num_bootstrap: 0
   xmin: 1.0E-4
-  set_filter: *FINAL_STATE_FILTER
+  #set_filter: *FINAL_STATE_FILTER
 
-## Plot 1D histograms of observables re-weighted with the ML model output score s
+## Plot 1D histograms of observables re-weighted with the ML model output score f
 OBS_reweight:
-  active: true
-
-  # Commands to execute, such as 's', '1/s', 's/(1-s)', '(1-s)/s' ...
-  func: ['s = np.ones_like(y_pred).astype(np.float32)',
-         's[y==0] = y_pred[y==0] / (1 - np.clip(y_pred[y==0], a_min=1e-3, a_max=1 - 1e-3))',
-         's[y==0] = np.clip(s[y==0], a_min=1e-3, a_max=1e3)']
   
-  set_filter: *FINAL_STATE_FILTER
+  active: true
+  
+  # Operation mode
+  transform_mode: 'LR'    # 'LR' [f / (1 - f)],
+                          # 'inverse-LR' [(1 - f) / f],
+                          # 'DeepEfficiency' [1 / f],
+                          # 'direct' [f],
+                          # 'identity' [1]
+  
+  # Class IDs
+  C0: 0                   # <-- AI weights applied to this class
+  C1: 1
+  
+  # Regularization
+  EPS:  1.0E-8            # Technical
+  maxW: 300               # Maximum ML weight cutoff
+  
+  # Renormalize weights (set null for no renormalization)
+  renorm_origin: 1        # Reference class for the final weight sum
+  
+  # Temperature values
+  tau_values: [0.9, 0.95, 1.0, 1.05, 1.1]
+  
+  var: ['.*']   # RegExp supported
+  #var: ['probe_eta', 'probe_pt', 'fixedGridRhoAll', 'probe_mvaID', 'probe_trkSumPtSolidConeDR04']
+  
+  edges: {'nbin': 50, 'q': [0.01, 0.99], 'space': 'linear'}
+
+  #set_filter: *FINAL_STATE_FILTER
 
 
 ## Binned ROC plots can be 1D or 2D (powerset filtering not supported here)
@@ -68,40 +91,40 @@ ROC_binned:
   #plot[1]:
   #  var:   ['x_hlt_eta', 'x_hlt_pt']
   #  edges: [[-1.5, -1.15, -0.75, 0.0, 0.75, 1.15, 1.5],
-  #        [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
+  #          [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 10000]]
 
 ## MVA output density (1D)
 MVA_output:
   active: true
   edges: 80
-  set_filter: *FINAL_STATE_FILTER
+  #set_filter: *FINAL_STATE_FILTER
 
 ## (MVA output x external variable) density (2D)
 # Set filter can be applied only per one plot[i] identifier!
 MVA_2D:
   active: false
-
+  
   plot[0]:
-    var:   ['tagger_score']
-    edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
-            {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
+    var:   ['.*'] # RegExp supported
+    edges: [{'nbin': 50, 'q': [0.0,  1.0],  'space': 'linear'},
+            {'nbin': 50, 'q': [0.0,  0.95], 'space': 'linear'}]
     density: True
-
-    #set_filter: *FINAL_STATE_FILTER
-    
-    # -----------------------------
-    # Powerset correlation plot parameters
-    xlim:
-      # For each class [[lower, upper], ... [lower, upper]
-      pearson:     [[-0.15, 0.30], [-0.15, 0.30]]
-      abs_pearson: [[0.0, 0.30],   [0.0, 0.30]]
-      disco:       [[0.0, 0.30],   [0.0, 0.30]]
-      MI:          [[0.0, 0.12],   [0.0, 0.12]]
-    # -----------------------------
   
   #plot[1]:
-  #  var:   ['.?hlt_pms2.?'] # RegExp supported
-  #  edges: [{'nbin': 50, 'minmax': [0.0, 1.0], 'space': 'linear'},
-  #          {'nbin': 50, 'q': [0.0, 0.95],     'space': 'log10'}]
+  #  var:   ['tagger_score']
+  #  edges: [{'nbin': 50, 'q': [0.0001, 0.9999],  'space': 'linear'},
+  #          {'nbin': 50, 'minmax': [0.0, 1.0],   'space': 'linear'}]
   #  density: True
+  #
+  #  #set_filter: *FINAL_STATE_FILTER
+  #  
+  #  # -----------------------------
+  #  # Powerset correlation plot parameters
+  #  xlim:
+  #    # For each class [[lower, upper], ... [lower, upper]
+  #    pearson:     [[-0.15, 0.30], [-0.15, 0.30]]
+  #    abs_pearson: [[0.0, 0.30],   [0.0, 0.30]]
+  #    disco:       [[0.0, 0.30],   [0.0, 0.30]]
+  #    MI:          [[0.0, 0.12],   [0.0, 0.12]]
+  #  # -----------------------------
   

@@ -84,6 +84,9 @@ train_runmode:
     qmin:  0.001     # in [0,100] 
     qmax: 99.99      # in [0,100]
 
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
+
 
 # ----------------------------------------------------
 eval_runmode:

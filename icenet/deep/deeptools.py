@@ -7,6 +7,19 @@ import torch
 import torch.nn as nn
 
 
+class Multiply(nn.Module):
+    """
+    Multiplication with a non-learnable constant alpha
+    """
+    def __init__(self, alpha):
+        super().__init__()
+        self.alpha =  alpha
+    
+    def forward(self, x):
+        x = torch.mul(x, self.alpha)
+        return x
+
+
 def grad_norm(module: nn.Module):
     """
     Compute the total (Frobenius) norm for the gradients of a torch network

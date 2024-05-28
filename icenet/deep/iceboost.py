@@ -16,9 +16,11 @@ import pickle
 from icenet.tools import stx
 from icenet.tools import aux
 from icenet.tools import plots
+from icenet.tools import reweight
 
 from icenet.deep import autogradxgb
 from icenet.deep import optimize
+from icenet.deep import tempscale
 
 from icefit import mine, cortools
 
@@ -45,6 +47,21 @@ def _hinge_loss(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tenso
     
     return loss.sum() * len(preds)
 
+
+def BCE_loss_with_logits(input: torch.Tensor, target: torch.Tensor, weights: torch.Tensor = None):
+    """
+    Numerically stable BCE loss with logits
+    https://medium.com/@sahilcarterr/why-nn-bcewithlogitsloss-numerically-stable-6a04f3052967
+    """
+    max_val = (-input).clamp_min(0)
+    loss    = (1 - target).mul(input).add(max_val).add((-max_val).exp().add((-input - max_val).exp()).log())
+
+    if weights is not None:
+        loss.mul_(weights)
+    
+    return loss
+
+
 def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-12):
     """
     Custom binary cross entropy loss with
@@ -56,9 +73,9 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     global MI_x
     global BCE_param
     global MI_param
-    global loss_history
+    global track_loss
     global out_weights
-    
+
     device = preds.device
     
     if  out_weights is not None: # Feed in weights outside
@@ -78,18 +95,41 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     loss_str   = ''
     
     # --------------------------------------------------------------------
-    ## Sigmoid
-    phat = torch.clip(1 / (1 + torch.exp(-preds)), min=EPS, max=1-EPS)
-    
     ## Binary Cross Entropy terms
+    
     BCE_loss = torch.tensor(0.0).to(device)
     
     for key in BCE_param.keys():
-        param = BCE_param[key]
-            
+        
+        w_this = w.clone()
+        
+        param  = BCE_param[key]
+        
         # Set labels
         t0 = (targets == param['classes'][0])
         t1 = (targets == param['classes'][1])
+        
+        # Check that there are some events
+        if torch.sum(t0) < 1:
+            print(__name__  + f": BCE[{key}] No events from class [{param['classes'][0]}] - skip loss term")
+            continue
+        
+        if torch.sum(t1) < 1:
+            print(__name__  + f": BCE[{key}] No events from class [{param['classes'][1]}] - skip loss term")
+            continue
+        
+        # Now re-weight the target(s) based on the model predictions
+        # (a specific type of regularization -- experimental)
+        if 'AIRW' in param:
+            
+            for i in param['AIRW']['classes']:
+                
+                t_i     = (targets == param['AIRW']['classes'][i])
+                RW_mode = param['AIRW']['RW_modes'][i]
+                
+                # Multiply existing weights
+                p_map        = reweight.rw_transform_with_logits(preds[t_i], mode=RW_mode)
+                w_this[t_i] *= p_map
         
         targets_CE = targets.clone()
         targets_CE[t0] = 0
@@ -100,29 +140,37 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
         mask1 = param[f'evt_mask_{loss_mode}'][param['classes'][1]]
         N_cat = mask0.shape[0]
         
-        loss = torch.tensor(0.0).to(device)
+        loss  = torch.tensor(0.0).to(device)
         
         for m in range(N_cat):
             
-            m0   = torch.tensor(mask0[m,:], dtype=torch.bool).to(device) # Pick index mask
-            m1   = torch.tensor(mask1[m,:], dtype=torch.bool).to(device)
+            # Pick 0-1 hot index mask
+            m0     = torch.tensor(mask0[m,:], dtype=torch.int32).to(device)
+            m1     = torch.tensor(mask1[m,:], dtype=torch.int32).to(device)
+            wfinal = torch.zeros_like(w).to(device) # ! important to init with zeros
             
-            wnew = torch.zeros_like(w).to(device) # ! important
-            
-            wnew[t0] = m0 * w[t0]; wnew[t0] = wnew[t0] / torch.sum(wnew[t0])
-            wnew[t1] = m1 * w[t1]; wnew[t1] = wnew[t1] / torch.sum(wnew[t1])
-            wnew     = wnew / torch.sum(wnew)
+            # Event weights
+            wfinal[t0] = m0 * w_this[t0]; wfinal[t0] = wfinal[t0] / torch.sum(wfinal[t0])
+            wfinal[t1] = m1 * w_this[t1]; wfinal[t1] = wfinal[t1] / torch.sum(wfinal[t1])
+            wfinal     = wfinal / torch.sum(wfinal)
             
             # BCE
-            CE   = - wnew * ((1-targets_CE)*torch.log(1-phat) + targets_CE*torch.log(phat))
+            CE   = BCE_loss_with_logits(input=preds, target=targets_CE, weights=wfinal)
             loss = loss + CE
-
+        
         loss     = param["beta"] * loss.sum()        
         BCE_loss = BCE_loss + loss
         
         txt = f'{key} [$\\beta$ = {param["beta"]}]'
         track_loss[txt] = loss.item()
         loss_str       += f'{txt} = {loss.item():0.5f} | '
+    
+    # ------------
+    # Temperature post-calibration
+    if loss_mode == 'eval':
+        
+        ts = tempscale.LogitsWithTemperature(mode='binary', device=device)
+        ts.set_temperature(logits=preds, labels=targets.to(torch.float32), weights=weights)
     
     # --------------------------------------------------------------------
     ## MI Regularization
@@ -142,13 +190,15 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             reg_param['ma_eT'] = reg_param['ma_eT'][k] # Pick the one
             # -----------
             
+            mask  = reg_param[f'evt_mask_{loss_mode}'][c]
+            
             # Pick class indices
             cind  = (targets != None) if c == None else (targets == c)
 
+            # Map predictions to [0,1]
+            Z     = torch.clip(torch.sigmoid(preds[cind]).squeeze(), EPS, 1-EPS)
             X     = torch.Tensor(MI_x).to(device)[cind].squeeze()
-            Z     = preds[cind].squeeze()
             W     = w[cind]
-            mask  = reg_param[f'evt_mask_{loss_mode}'][c]
             
             # Total maximum is limited (for DCORR), pick random subsample
             if reg_param['losstype'] == 'DCORR' and reg_param['max_N'] is not None and X.shape[0] > reg_param['max_N']:
@@ -177,6 +227,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                 
                 # Minimum number of events per category cutoff
                 if reg_param['min_count'] is not None and np.sum(mm_) < reg_param['min_count']:
+                    cprint(__name__ + f'MI_reg: {np.sum(mm_)} < reg_param["min_count"] = {reg_param["min_count"]}', 'red')
                     continue
                 
                 ## Non-Linear Distance Correlation
@@ -247,13 +298,9 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     total_loss        = BCE_loss + MI_loss
     track_loss['sum'] = total_loss.item()
     
-    # --------------------------------------------------------------------
-    # Track losses
-    
+    # Print
     loss_str = f'Loss[{loss_mode}]: sum: {track_loss["sum"]:0.5f} | ' + loss_str
     cprint(loss_str, 'yellow')
-    optimize.trackloss(loss=track_loss, loss_history=loss_history)
-    
     # --------------------------------------------------------------------
     
     # Scale finally to the total number of events (to conform with xgboost internal convention)
@@ -290,7 +337,7 @@ def create_filters(param, data_trn, data_val):
             
             # All inclusive
             else:
-                mask = np.ones((1, len(data.x[cind,...])), dtype=int)
+                mask = np.ones((1, len(data.x[cind,...])), dtype=bool)
                 text = ['inclusive']
             
             stx.print_stats(mask=mask, text=text)
@@ -317,16 +364,15 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     global BCE_param
     global MI_param    
     global loss_mode
-    global loss_history
+    global track_loss
     global out_weights
-    
+
     MI_x        = None
     BCE_param   = None
     MI_param    = None
     loss_mode   = None
     out_weights = None
     
-    loss_history = {}
     loss_history_train = {}
     loss_history_eval  = {}
 
@@ -356,34 +402,30 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     param['model_param'] = aux.replace_param(default=param['model_param'], raytune=config['params'])
+
+    # Activate custom-loss mode
+    use_custom = True if 'custom' in param['model_param']['objective'] else False
     
     ### *********************************
     
-    # Normalize weights to sum to number of events (xgboost library has no scale normalization)
+    # Normalize weights to sum to the number of events (xgboost library has no scale normalization)
     w_trn = data_trn.w / np.sum(data_trn.w) * data_trn.w.shape[0]
     w_val = data_val.w / np.sum(data_val.w) * data_val.w.shape[0]
 
     # ---------------------------------------------------------
     # Choose weight mode
     if np.min(w_trn) < 0.0 or np.min(w_val) < 0.0:
-        print(__name__ + f'.train_xgb: Negative weight mode on -- handled via custom loss')
+        print(__name__ + f'.train_xgb: Negative weights in the sample -- handled via custom loss')
         out_weights_on = True
         
-        if 'custom' not in param['model_param']['objective']:
+        if use_custom:
             raise Exception(__name__ + f'.train_xgb: Need to use custom with negative weights, e.g. "custom:binary_cross_entropy". Change your parameters.')
     else:
         out_weights_on = False
     # ---------------------------------------------------------
     
-    X_trn, ids_trn = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, verbose=True)  # variable reduction
-    dtrain     = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)
-    
-    X_val, ids_val = aux.red(X=data_val.x, ids=data_val.ids, param=param, verbose=False) # variable reduction
-    deval      = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val if not out_weights_on else None, feature_names=ids_val)
-    
-    evallist   = [(dtrain, 'train'), (deval, 'eval')]
     print(param)
-
+    
     trn_losses = []
     val_losses = []
     
@@ -401,9 +443,25 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     # ---------------------------------------
     
     # Boosting iterations
-    max_num_epochs = param['model_param']['num_boost_round']
-    for epoch in range(max_num_epochs):
+    num_epochs = param['model_param']['num_boost_round']
+    
+    # Prepare input
+    X_trn, ids_trn = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, verbose=True)  # variable reduction
+    X_val, ids_val = aux.red(X=data_val.x, ids=data_val.ids, param=param, verbose=False) # variable reduction
+    
+    for epoch in range(1, num_epochs+1):
 
+        # Create input xgboost frames
+        dtrain = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)    
+        deval  = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val if not out_weights_on else None, feature_names=ids_val)
+        
+        ## What to evaluate
+        if epoch == 1 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+            evallist = [(dtrain, 'train'), (deval, 'eval')]
+        else:
+            evallist = [(dtrain, 'train')]
+        
+        ## Prepare parameters
         results = dict()
         
         a = {'params':          copy.deepcopy(model_param),
@@ -412,102 +470,129 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
              'evals':           evallist,
              'evals_result':    results,
              'verbose_eval':    False}
-
-        # == Custom loss ==
-        if 'custom' in model_param['objective']:
+        
+        # ==============================================
+        ## Train
+        
+        if use_custom:
             
             strs   = model_param['objective'].split(':')
             device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
 
             # !
-            MI_x         = copy.deepcopy(data_trn_MI)
-            loss_history = copy.deepcopy(loss_history_train)
+            loss_mode = 'train'
+            MI_x      = copy.deepcopy(data_trn_MI)
             
             if strs[1] == 'binary_cross_entropy':
                 
-                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, skip_hessian=True, device=device)
+                if len(strs) == 3 and 'hessian' in strs[2]:
+                    print('Using Hessian with custom loss')
+                    skip_hessian = False
+                else:
+                    skip_hessian = True
+
+                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, skip_hessian=skip_hessian, device=device)
                 a['params']['disable_default_eval_metric'] = 1
             
             else:
                 raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]}')
-
+            
             #!
             del a['params']['eval_metric']
             del a['params']['objective']
         # -----------------
 
-        if epoch > 0: # Continue from the previous epoch model
+        if epoch > 1: # Continue from the previous epoch model
             a['xgb_model'] = model
 
-        # ** Train **
         if out_weights_on:
             out_weights = copy.deepcopy(w_trn)
 
-        loss_mode = 'train'
         model = xgboost.train(**a)
-        loss_history_train = copy.deepcopy(loss_history)
         
-        # ** Validate **
-        if out_weights_on:
-            out_weights = copy.deepcopy(w_val)    
-
-        if 'custom' in model_param['objective']:
-            loss_mode    = 'eval'
-            MI_x         = copy.deepcopy(data_val_MI)
-            loss_history = copy.deepcopy(loss_history_eval)
+        if use_custom:
+            track_loss_train = copy.deepcopy(track_loss) # track_loss from custom loss
+        else:
+            train_loss = results['train'][model_param['eval_metric'][0]][0]
+        
+        # ==============================================
+        ## Validate
+        if epoch == 1 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
             
-            # Loss history is updated inside the loss
-            loss              = a['obj'](preds=model.predict(deval), targets=deval)[1] / len(data_val.x)
-            loss_history_eval = copy.deepcopy(loss_history)
+            # ------- AUC values ------
+            if len(args['primary_classes']) >= 2:
+                
+                preds_train = model.predict(dtrain)
+                if len(preds_train.shape) > 1: preds_train = preds_train[:, args['signal_class']]
+                metrics_train = aux.Metric(y_true=data_trn.y, y_pred=preds_train, weights=w_trn, class_ids=args['primary_classes'], hist=False, verbose=True)
+                
+                preds_eval = model.predict(deval)
+                if len(preds_eval.shape) > 1: preds_eval = preds_eval[:, args['signal_class']]
+                metrics_eval = aux.Metric(y_true=data_val.y, y_pred=preds_eval, weights=w_val, class_ids=args['primary_classes'], hist=False, verbose=True)
         
-        # ------ Loss values ------
-        if 'custom' in model_param['objective']:
-            trn_losses.append(loss_history_train['sum'][-1])
+            # ------- Loss values ------
+            if use_custom:
+                if out_weights_on:
+                    out_weights = copy.deepcopy(w_val)    
+                
+                # !
+                loss_mode = 'eval'
+                MI_x      = copy.deepcopy(data_val_MI)
+                
+                a['obj'](preds=preds_eval, targets=deval)[1] / len(data_val.x)
+                track_loss_eval = copy.deepcopy(track_loss)  # track_loss from custom loss
+            
+            else:
+                eval_loss = results['eval'][model_param['eval_metric'][0]][0] # Collect the value
+        
+        # ==============================================
+        # Collect values
+        if use_custom:
+            optimize.trackloss(loss=track_loss_train, loss_history=loss_history_train)
+            optimize.trackloss(loss=track_loss_eval,  loss_history=loss_history_eval)
+
+            trn_losses.append(loss_history_train['sum'][-1]) # For raytune
             val_losses.append(loss_history_eval['sum'][-1])
         else:
-            trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
-            val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
-        # -------------------------
+            trn_losses.append(train_loss)
+            val_losses.append(eval_loss)    
         
-        # ------- AUC values ------
+        if len(args['primary_classes']) >= 2:
+            
+            trn_aucs.append(metrics_train.auc)
+            val_aucs.append(metrics_eval.auc)
+        # ==============================================
         
-        pred = model.predict(dtrain)
-        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
-        metrics = aux.Metric(y_true=data_trn.y, y_pred=pred, weights=w_trn, class_ids=args['primary_classes'], hist=False, verbose=True)
-        trn_aucs.append(metrics.auc)
+        print(__name__ + f'.train_xgb [{param["label"]}] Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
-        pred = model.predict(deval)
-        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
-        metrics = aux.Metric(y_true=data_val.y, y_pred=pred, weights=w_val, class_ids=args['primary_classes'], hist=False, verbose=True)
-        val_aucs.append(metrics.auc)
-        # -------------------------
-        
-        print(__name__ + f'.train_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
-        
-        if args['__raytune_running__']:
-            #with tune.checkpoint_dir(epoch) as checkpoint_dir:
-            #    path = os.path.join(checkpoint_dir, "checkpoint")
-            #    pickle.dump(model, open(path, 'wb'))
-            ray.train.report({'loss': trn_losses[-1], 'AUC': val_aucs[-1]})
-        else:
-            ## Save
+        if not args['__raytune_running__']:
+            
+            ## Save the model
             filename = args['modeldir'] + f'/{param["label"]}_{epoch}'
             pickle.dump(model, open(filename + '.dat', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
 
+    # Report only once after all boost iterations
+    # otherwise early stopping may happen due to scheduler as with neural net epochs
+    if args['__raytune_running__']:
+        #with tune.checkpoint_dir(epoch) as checkpoint_dir:
+        #    path = os.path.join(checkpoint_dir, "checkpoint")
+        #    pickle.dump(model, open(path, 'wb'))
+        ray.train.report({'loss': trn_losses[-1], 'AUC': val_aucs[-1]})
+
     if not args['__raytune_running__']:
         
         # Plot evolution
         plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
-
-        if 'custom' not in model_param['objective']:
-            fig,ax = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
+        
+        if use_custom:
+            fig,ax = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'eval': val_losses},
                 trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         else:
             
-            ltr = {f'train:    {k}': v for k, v in loss_history_train.items()}
-            lev = {f'validate: {k}': v for k, v in loss_history_eval.items()}
+            ltr = {f'train: {k}': v for k, v in loss_history_train.items()}
+            lev = {f'eval:  {k}': v for k, v in loss_history_eval.items()}
             
             fig,ax = plots.plot_train_evolution_multi(losses=ltr | lev, trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
         
@@ -528,16 +613,16 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             try:
                 print(__name__ + f'.train_xgb: Plotting decision trees ...')
                 model.feature_names = ids_trn # Make it explicit
-                for i in tqdm(range(max_num_epochs)):
+                for i in tqdm(range(num_epochs)):
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
                     path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
                     plt.savefig(f'{path}/tree-{i}.pdf', bbox_inches='tight'); plt.close()
             except:
                 print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
-
-        model.feature_names = None # Set original default ones
-
+        
+        #model.feature_names = None # Set original default ones
+        
         return model
     
     return # No return value for raytune

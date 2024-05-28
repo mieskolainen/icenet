@@ -36,7 +36,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for DEBUG)
   min_count: 32            #  Minimum number of events (per category)
   max_N: null              #  Maximum number of events per function call (use to limit sample size for DCORR)
-  min_score: null          #  Consider only events with MVA output larger than this value (null for None)
+  min_score: null          #  Consider only events with MVA output [0,1] larger than this value (null for None)
   poisson_weight: True     #  per category Poisson sqrt(N) weighted loss
   
   # ------------------
@@ -144,7 +144,7 @@ xgb0:
   plot_trees: False
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -189,7 +189,7 @@ xgb0-red:
   plot_trees: False
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -246,7 +246,7 @@ xgb-MI-min:
   plot_trees: False
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -303,7 +303,7 @@ xgb-MI-max:
   plot_trees: False
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -331,7 +331,7 @@ dmlp0:
     gamma: 2                   # focal_entropy exponent
     temperature: 1             # logit norm temperature
     
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -348,10 +348,12 @@ dmlp0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
+  eval_batch_size: 4096
 
+  
 # Deep MLP
 dmlp0-red:
   train:   'torch_generic'
@@ -377,7 +379,7 @@ dmlp0-red:
     gamma: 2                   # focal_entropy exponent
     temperature: 1             # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -394,8 +396,11 @@ dmlp0-red:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
+
 
 # Deep MLP
 dmlp-MI-min:
@@ -421,7 +426,7 @@ dmlp-MI-min:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -444,8 +449,10 @@ dmlp-MI-min:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Deep MLP
@@ -472,7 +479,7 @@ dmlp-MI-max:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -495,5 +502,7 @@ dmlp-MI-max:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096

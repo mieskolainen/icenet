@@ -79,8 +79,8 @@ class Decoder(nn.Module):
 class VAE(nn.Module):
     def __init__(self, D, latent_dim, hidden_dim,
             encoder_bn=True, encoder_act='relu', encoder_dropout=0.0, decoder_bn=False, decoder_act='relu', decoder_dropout=0.0,
-            reco_prob='Gaussian', kl_prob='Gaussian', anomaly_score='KL_RECO', C=None):
-
+            reco_prob='Gaussian', kl_prob='Gaussian', anomaly_score='KL_RECO', C=None, **kwargs):
+        
         super(VAE, self).__init__()
         
         self.D             = D
@@ -88,7 +88,7 @@ class VAE(nn.Module):
         self.reco_prob     = reco_prob
         self.kl_prob       = kl_prob
         self.anomaly_score = anomaly_score
-
+        
         self.encoder = VariationalEncoder(D=D, hidden_dim=hidden_dim, latent_dim=latent_dim,
             activation=encoder_act, batch_norm=encoder_bn, dropout=encoder_dropout)
         self.decoder = Decoder(latent_dim=latent_dim, hidden_dim=hidden_dim,

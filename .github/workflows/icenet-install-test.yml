@@ -1,6 +1,6 @@
 # Github actions CI (continous integration) setup.
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 name: icenet-install-test
 
@@ -16,11 +16,10 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10.10'
+          python-version: '3.10.11'
       
       ## Install GPU tools
-      # conda install -c nvidia cudatoolkit==11.7.0 cudnn==8.4.1.50
-      # conda install -c conda-forge cudatoolkit-dev==11.7.0
+      # conda install -c conda-forge cudatoolkit==11.8.0 cudatoolkit-dev==11.8.0 cudnn=8.9.7.29
       
       # Install conda packages
       
@@ -84,6 +83,10 @@ jobs:
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
       
+      - name: Deep Learning system integration test (zee 1)
+        run: |
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_zee.sh
+      
       - name: Deep Learning system integration test (eid_deep 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_deep.sh
@@ -93,7 +96,7 @@ jobs:
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_visual.sh
         
         #  source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --inputfile ./configs/peakfit/tune2.yml
-
+        
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_brk.sh
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_dqcd_vector_train.sh
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_hgcal_cnd.sh

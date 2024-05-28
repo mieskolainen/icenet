@@ -8,6 +8,7 @@ import awkward as ak
 import re
 import time
 import datetime
+import torch
 
 import numba
 import copy
@@ -25,6 +26,33 @@ from scipy import interpolate
 
 from icefit import statstools
 
+def inverse_sigmoid(p, EPS=1E-9):
+    """
+    Stable inverse sigmoid function
+    """
+    x = np.clip(p, a_min=EPS, a_max=1.0 - EPS) 
+    
+    return np.log(x) - np.log(1 - x)
+
+def _positive_sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def _negative_sigmoid(x):
+    exp = np.exp(x) # Cache exp for speed
+    return exp / (exp + 1)
+
+def sigmoid(x):
+    """
+    Stable sigmoid function
+    """
+    positive = (x >= 0)
+    negative = ~positive
+    
+    result = np.empty_like(x)
+    result[positive] = _positive_sigmoid(x[positive])
+    result[negative] = _negative_sigmoid(x[negative])
+
+    return result
 
 def weighted_avg_and_std(values, weights):
     """
@@ -804,8 +832,8 @@ def binaryvec2int(X):
         # double because we may have over 63 bits
         Y = np.zeros(X.shape[0], dtype=np.double)
     else:
-        Y = np.zeros(X.shape[0], dtype=np.int)
-
+        Y = np.zeros(X.shape[0], dtype=np.int64)
+    
     for i in range(len(Y)):
         Y[i] = bin2int(X[i,:])
     return Y
@@ -1049,14 +1077,14 @@ class Metric:
                 out = compute_metrics(class_ids=self.class_ids, y_true=y_true[ind], y_pred=y_pred[ind], weights=ww)
                 
                 if out['auc'] > 0:
-
+                    
                     self.auc_bootstrap[i] = out['auc']
                     self.acc_bootstrap[i] = out['acc']
 
                     # Interpolate ROC-curve (re-sample to match the non-bootstrapped x-axis)
                     func = interpolate.interp1d(out['fpr'], out['tpr'], 'linear')
                     self.tpr_bootstrap[i,:] = func(self.fpr)
-
+                    
                     func = interpolate.interp1d(out['tpr'], out['fpr'], 'linear')
                     self.fpr_bootstrap[i,:] = func(self.tpr)
 
@@ -1068,7 +1096,7 @@ def sort_fpr_tpr(fpr, tpr):
     fpr = np.clip(fpr, a_min=0.0, a_max=1.0)
     tpr = np.clip(tpr, a_min=0.0, a_max=1.0)
     
-    sorted_index = np.argsort(fpr)
+    sorted_index = np.argsort(fpr) # x-axis needs to be monotonic
     fpr_sorted   = np.array(fpr)[sorted_index]
     tpr_sorted   = np.array(tpr)[sorted_index]
     
@@ -1111,8 +1139,10 @@ def compute_metrics(class_ids, y_true, y_pred, weights):
         if  len(class_ids) == 2:
             fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
             
-            # Numerically more stable than scikit roc_auc_score
-            fpr, tpr = sort_fpr_tpr(fpr=fpr, tpr=tpr)
+            if np.min(weights < 0): # Protect
+                fpr, tpr = sort_fpr_tpr(fpr=fpr, tpr=tpr)
+            
+            # By integration
             auc = auc_score(fpr=fpr, tpr=tpr)
             
             #auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)

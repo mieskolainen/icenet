@@ -1,20 +1,53 @@
 param:
 
-  #active:         ['xgb1']
-  active:  [null]
-  num_samples:    10  # Trial count parameter
-
+  active: [null]
+  #active:  ['iceboost0']
+  num_samples:    1000  # Trial count parameter
 
 setup:
 
-  xgb_trial_0:
-    search_algo: 'HyperOpt'
+  xgb_setup_0:
 
+    search_algo: 'Optuna'
+    
     search_metric:
-      metric: 'AUC'
-      mode: 'max'
-
+      metric: 'loss'   # 'AUC' or 'loss'
+      mode: 'min'     # 'max', 'min'
+    
     param:
       
       num_boost_round:
-        type: "tune.randint(20, 300)"
+        type: "tune.choice([600])"
+
+      ## Tree parameters
+      max_depth:
+        type: "tune.choice([15,16,17])" # Between [0, inf) Default 6
+      
+      ## Regularization
+      reg_lambda: # Smoothness
+        type: "tune.uniform(0.0, 5.0)"  # Between [0, inf) Default 1.0
+
+      reg_alpha: # Sparsity
+        type: "tune.uniform(0.0, 0.5)"  # Between [0, inf) Default 0.0
+
+      ## Tree splitting
+      min_child_weight:
+        type: "tune.uniform(0.0, 2.0)"  # Between [0, inf) Default 1.0
+      
+      gamma:
+        type: "tune.uniform(0.0, 2.0)"  # Between [0,inf) Default 1.0
+      
+      max_delta_step:
+        type: "tune.uniform(0.0, 10.0)"  # Between [0, inf) Default 0
+
+      #subsample:
+      #  type: "tune.uniform(0.5, 1)"   # Between [0, 1] # Default 1
+
+      colsample_bytree:
+        type: "tune.uniform(0.3, 1.0)"  # Between [0,1], default 1
+
+      colsample_bylevel:
+        type: "tune.uniform(0.3, 1.0)"  # Between [0,1], default 1
+
+      colsample_bynode:
+        type: "tune.uniform(0.3, 1.0)"  # Between [0,1], default 1

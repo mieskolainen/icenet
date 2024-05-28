@@ -12,7 +12,7 @@ from icenet.tools import aux_torch
 from icefit import mine
 
 
-def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA=None, MI=None, EPS=1e-12):
+def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None, MI=None, EPS=1e-12):
     """
     A wrapper function to loss functions
     
@@ -38,50 +38,116 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         weights      = None # TBD. Could re-compute a new set of edge weights 
     # --------------------------------------------
     
-    def MI_helper(log_phat):
+    def MI_helper(output):
+        # Mutual Information regularization
         if MI is not None:
             X = MI['x'].float()
-            Z = torch.exp(log_phat[:, MI['y_dim']])  # Classifier output
+            
+            # Model output
+            if len(output.shape) > 1:    
+                Z = output[:, MI['y_dim']]
+            else:
+                Z = output
+            
             return {f'MI x $\\beta = {MI["beta"]}$': MI_loss(X=X, Z=Z, weights=weights, MI=MI, y=y)}
         else:
             return {}
     
-    if  param['lossfunc'] == 'cross_entropy':
-        log_phat = torch.log(torch.clip(model.softpredict(x), min=EPS))
+    def LZ_helper():
+        # Lipschitz continuity regularization
+        if 'lipschitz_beta' in param and param['lipschitz_beta'] > 0:
+            LZ_loss = param['lipschitz_beta'] * model.get_lipschitz_loss()
+            LZ = {f"LZ x $\\beta = {param['lipschitz_beta']}$": LZ_loss}
+        else:
+            LZ = {}
+        return LZ
+    
+    if     param['lossfunc'] == 'binary_cross_entropy':
+        
+        logits = model.forward(x).squeeze()
+        loss   = BCE_loss(logits=logits, y=y, weights=weights)
+        
+        # Logit magnitude L1-regularization
+        if 'logit_L1_beta' in param and param['logit_L1_beta'] > 0:
+            L1_loss = LOGIT_L1_loss(logits=logits, logit_beta=param['logit_L1_beta'], weights=weights)
+            LRL1 = {f"LRL1 x $\\lambda = {param['logit_L1_beta']}$": L1_loss}
+        else:
+            LRL1 = {}
+        
+        # Logit magnitude L2-regularization
+        if 'logit_L2_beta' in param and param['logit_L2_beta'] > 0:
+            L2_loss = LOGIT_L2_loss(logits=logits, logit_beta=param['logit_L2_beta'], weights=weights)
+            LRL2 = {f"LRL2 x $\\lambda = {param['logit_L2_beta']}$": L2_loss}
+        else:
+            LRL2 = {}
+        
+        loss = {'BCE': loss, **LZ_helper(), **LRL1, **LRL2, **MI_helper(torch.sigmoid(logits))}
+    
+    elif  param['lossfunc'] == 'binary_LQ':
+        
+        logits = model.forward(x).squeeze()
+        loss = LQ_loss(logits=logits, y=y, weights=weights)
+        
+        loss = {'LQ': loss, **LZ_helper(), **MI_helper(torch.sigmoid(logits))}
+    
+    elif   param['lossfunc'] == 'MSE':
+        
+        y_hat = model.forward(x).squeeze()
+        loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
+        
+        loss  = {'MSE': loss, **LZ_helper(), **MI_helper(y_hat)}
+    
+    elif   param['lossfunc'] == 'MSE_prob':
+        
+        y_hat = model.softpredict(x).squeeze()
+        loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
+        
+        loss  = {'MSE': loss, **LZ_helper(), **MI_helper(y_hat)}
+    
+    elif   param['lossfunc'] == 'MAE':
+        
+        y_hat = model.forward(x).squeeze()
+        loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
+        
+        loss  = {'MAE': loss, **LZ_helper(), **MI_helper(y_hat)}
+    
+    elif  param['lossfunc'] == 'cross_entropy':
+        
+        log_phat = F.log_softmax(model.forward(x), dim=-1)
         
         if num_classes > 2:
             loss = multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
         
-        # This can handle scalar y values in [0,1]
+        # This can handle scalar y (target) values in [0,1]
         else:
             loss = binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
-
-        loss  = {'CE': loss, **MI_helper(log_phat)}
-
+        
+        loss  = {'CE': loss, **LZ_helper(), **MI_helper(torch.exp(log_phat))}
+    
     elif param['lossfunc'] == 'cross_entropy_with_DA':
 
         x, x_DA     = model.forward_with_DA(x)
 
         log_phat    = F.log_softmax(x,    dim=-1)
         log_phat_DA = F.log_softmax(x_DA, dim=-1)
-
+        
         # https://arxiv.org/abs/1409.7495
         CE_loss    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
-        CE_DA_loss = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=weights_DA)
+        CE_DA_loss = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=w_DA)
 
-        loss  = {'CE': CE_loss, 'DA': CE_DA_loss, **MI_helper(log_phat)}
+        loss  = {'CE': CE_loss, **LZ_helper(), 'DA': CE_DA_loss, **MI_helper(torch.exp(log_phat))}
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         logit = model.forward(x)
         loss  = multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
-        loss  = {'LNCE': loss, **MI_helper(log_phat)}
+        loss  = {'LNCE': loss, **LZ_helper(), **MI_helper(torch.exp(log_phat))}
 
     elif param['lossfunc'] == 'focal_entropy':
-        log_phat = torch.log(torch.clip(model.softpredict(x), min=EPS))
+        log_phat = F.log_softmax(model.forward(x), dim=-1)
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
-        loss  = {'FE': loss, **MI_helper(log_phat)}
+        loss  = {'FE': loss, **LZ_helper(), **MI_helper(torch.exp(log_phat))}
 
     elif param['lossfunc'] == 'VAE_background_only':
         B_ind    = (y == 0) # Use only background to train
@@ -93,8 +159,8 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, weights_DA
         else:
             loss = log_loss.mean(dim=0)
 
-        loss  = {'KL_RECO': loss}
-        
+        loss  = {'VAE': loss,**LZ_helper()}
+    
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
 
@@ -142,17 +208,90 @@ def MI_loss(X, Z, weights, MI, y):
     return loss
 
 
+def LQ_loss(logits, y, weights=None):
+    """
+    L_q loss
+    """
+    return 1.0
+
+
+def LOGIT_L1_loss(logits, logit_beta=1.0, weights=None):
+    """
+    Logit magnitude L1-regularization
+    """
+    w    = 1.0 if weights is None else weights
+    loss = w * logit_beta * torch.abs(logits)
+    
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / logits.shape[0]
+
+
+def LOGIT_L2_loss(logits, logit_beta=1.0, weights=None):
+    """
+    Logit magnitude L2-regularization
+    """
+    w    = 1.0 if weights is None else weights
+    loss = w * logit_beta * logits**2
+    
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / logits.shape[0]
+
+
+def BCE_loss(logits, y, weights=None):
+    """
+    Binary Cross Entropy loss
+    """
+    w   = 1.0 if weights is None else weights
+    
+    criterion = nn.BCEWithLogitsLoss(reduction='none')
+    loss      = w * criterion(logits, y.float())
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
+    
+
+def MSE_loss(y_hat, y, weights=None):
+    """
+    Mean squared error loss
+    """
+    
+    w = 1.0 if weights is None else weights
+
+    loss = - w * (y_hat - y)**2
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
+
+
+def MAE_loss(y_hat, y, weights=None):
+    """
+    Mean absolute error loss
+    """
+    
+    w = 1.0 if weights is None else weights
+    
+    loss = - w * torch.abs(y_hat - y)
+
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
+
+
 def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
     """ 
     Per instance weighted binary cross entropy loss (y can be a scalar between [0,1])
     (negative log-likelihood)
-    
-    Numerically more stable version.
     """
-    if weights is None:
-        w = 1.0
-    else:
-        w = weights
+    w = 1.0 if weights is None else weights
 
     loss = - w * (y*log_phat_1 + (1 - y) * log_phat_0)
 
@@ -183,22 +322,22 @@ def log_softmax(x, dim=-1):
     y = x - log_z
     return y
 
+
 def multiclass_logit_norm_loss(logit, y, num_classes, weights=None, t=1.0, EPS=1e-7):
     """
     https://arxiv.org/abs/2205.09310
     """
     norms = torch.clip(torch.norm(logit, p=2, dim=-1, keepdim=True), min=EPS)
     logit_norm = torch.div(logit, norms) / t
-    log_phat = F.log_softmax(logit_norm, dim=-1) # Numerically more stable than pure softmax
+    log_phat = F.log_softmax(logit_norm, dim=-1)
     
     return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
+
 
 def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
     """ 
     Per instance weighted cross entropy loss
     (negative log-likelihood)
-    
-    Numerically more stable version.
     """
     if weights is not None:
         w = aux_torch.weight2onehot(weights=weights, y=y, num_classes=num_classes)
@@ -213,25 +352,6 @@ def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
     else:
         return loss.sum() / y.shape[0]
 
-def multiclass_cross_entropy(phat, y, num_classes, weights=None, EPS=1e-12):
-    """
-    Per instance weighted cross entropy loss
-    (negative log-likelihood)
-    """
-    if weights is not None:
-        w = aux_torch.weight2onehot(weights=weights, y=y, num_classes=num_classes)
-    else:
-        w = 1.0
-
-    y = F.one_hot(y, num_classes)
-
-    # Protection
-    loss = - y*torch.log(torch.clip(phat, min=EPS)) * w
-    
-    if weights is not None:
-        return loss.sum() / torch.sum(weights)
-    else:
-        return loss.sum() / y.shape[0]
 
 def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=None) :
     """
@@ -251,23 +371,6 @@ def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=No
     else:
         return loss.sum() / y.shape[0]
 
-def multiclass_focal_entropy(phat, y, num_classes, gamma, weights=None, EPS=1e-12) :
-    """
-    Per instance weighted 'focal entropy loss'
-    https://arxiv.org/pdf/1708.02002.pdf
-    """
-    if weights is not None:
-        w = aux_torch.weight2onehot(weights=weights, y=y, num_classes=num_classes)
-    else:
-        w = 1.0
-
-    y    = F.one_hot(y, num_classes)
-    loss = -y * torch.pow(1 - phat, gamma) * torch.log(torch.clip(phat, min=EPS)) * w
-
-    if weights is not None:
-        return loss.sum() / torch.sum(weights)
-    else:
-        return loss.sum() / y.shape[0]
 
 def log_sum_exp(x):
     """ 
@@ -280,51 +383,3 @@ def log_sum_exp(x):
     # y.size() = [N, ], no need to squeeze()
     return y
 
-
-class _ECELoss(nn.Module):
-    """
-    The Expected Calibration Error of a model.
-    
-    In each bin, compute the confidence gap:
-    bin_gap = | avg_confidence_in_bin - accuracy_in_bin |
-    Return a weighted average of the gaps, based on the number of samples in each bin.
-    
-    Reference: Naeini et al.
-    "Obtaining Well Calibrated Probabilities Using Bayesian Binning." (2015)
-    """
-    def __init__(self, n_bins=15):
-        """
-        Args:
-            n_bins: number of confidence interval bins (int)
-        """
-        super(_ECELoss, self).__init__()
-        bin_bounds      = torch.linspace(0, 1, n_bins + 1)
-        self.bin_lowers = bin_bounds[:-1]
-        self.bin_uppers = bin_bounds[1:]
-
-    def forward(self, logits, labels, t=1.0):
-        """
-        Args:
-            logits: network output logits (not softmax probabilities)
-            labels: ground truth labels
-            t:      temperature parameter
-        Returns:
-            ece value
-        """
-        probs      = F.softmax(logits/t, dim=1)
-        conf, pred = torch.max(probs, 1)
-        acc = pred.eq(labels)
-        ece = torch.zeros(1, device=logits.device)
-
-        # Compute |confidence - accuracy| in each bin
-        for bin_lower, bin_upper in zip(self.bin_lowers, self.bin_uppers):
-
-            in_bin = conf.gt(bin_lower.item()) * conf.le(bin_upper.item())
-            prop_in_bin = in_bin.float().mean()
-
-            if prop_in_bin.item() > 0:
-                acc_in_bin = acc[in_bin].float().mean()
-                avg_conf_in_bin = conf[in_bin].mean()
-                ece += torch.abs(avg_conf_in_bin - acc_in_bin) * prop_in_bin
-
-        return ece

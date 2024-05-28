@@ -10,13 +10,17 @@ import gc
 from pprint import pprint
 from termcolor import colored, cprint
 import copy
-
+from prettytable import PrettyTable
+import multiprocessing
+import time
 from tqdm import tqdm
 
 from iceplot import iceplot
 from icefit import statstools
-from icenet.tools import aux
 from icefit import cortools
+
+from icenet.tools import aux
+from icenet.tools import reweight
 
 
 def binengine(bindef, x):
@@ -63,12 +67,12 @@ def binengine(bindef, x):
 
     # Automatic with quantiles
     elif type(bindef) is dict and 'q' in bindef:
-        return mylinspace(minval=np.percentile(x, 100*bindef['q'][0]), maxval=np.percentile(x, 100*bindef['q'][1]), nbin=bindef['nbin'] + 1)
+        return mylinspace(minval=np.percentile(x, 100*bindef['q'][0]), maxval=np.percentile(x, 100*bindef['q'][1]), nbin=bindef['nbin'])
 
     # Automatic with boundaries
     elif type(bindef) is dict and 'minmax' in bindef:
-        return mylinspace(minval=bindef['minmax'][0], maxval=bindef['minmax'][1], nbin=bindef['nbin'] + 1)
-
+        return mylinspace(minval=bindef['minmax'][0], maxval=bindef['minmax'][1], nbin=bindef['nbin'])
+    
     else:
         raise Exception(__name__ + f'.bin_processor: Unknown binning description in {bindef}')
 
@@ -176,9 +180,15 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     fig,ax = plt.subplots(1,2, figsize=(10, 7.5))
     
+    # How many loss terms
+    N_terms = 0
     for key in losses.keys():
-        if (key == 'sum') and (len(losses.keys()) == 2):
-            continue # Do not plot sum if only one loss term
+        if 'eval' in key:
+            N_terms += 1
+    
+    for key in losses.keys():
+        if ('sum' in key) and (N_terms == 2):
+            continue # Do not plot sum if only sum made of one term
         ax[0].plot(losses[key], label=key)
     
     ax[0].set_xlabel('k (epoch)')
@@ -372,38 +382,58 @@ def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, edges=80,
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in class_ids]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ ($\\Sigma_w = {np.sum(weights[y == k]):0.1f}$)' for k in class_ids]
     else:
         classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in class_ids]
+    
+    # Handle logits vs probabilities
+    if np.min(y_pred) < 0 or np.max(y_pred) > 1:
+        logit = y_pred
+        prob  = aux.sigmoid(logit)
+    else:
+        prob  = y_pred
+        logit = aux.inverse_sigmoid(prob)        
+    
+    # Plot both
+    for mode in ['logit', 'prob']:
+        
+        # Over classes
+        fig,ax = plt.subplots()
+        
+        for k in class_ids:
+            ind = (y == k)
 
-    # Over classes
-    fig,ax = plt.subplots()
-    
-    for k in class_ids:
-        ind = (y == k)
-
-        w = weights[ind] if weights is not None else None
-        x = y_pred[ind]
-
-        hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=edges, x=x), weights=w,
-            density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
-    
-    plt.legend(classlegs, loc='upper center')
-    plt.xlabel('MVA output $f(\\mathbf{{x}})$')
-    plt.ylabel('density')
-    plt.title(f'{label}', fontsize=9)
-    
-    for scale in ['linear', 'log']:
-        ax.set_yscale(scale)
-        outputdir = aux.makedir(f'{path}')
-        savepath  = f'{outputdir}/MVA-output--{scale}.pdf'
-        plt.savefig(savepath, bbox_inches='tight')
-        cprint(__name__ + f'.density_MVA_wclass: Saved: "{savepath}"', 'green')
-    
-    # --------        
-    fig.clf()
-    plt.close()
-    gc.collect()
+            w = weights[ind] if weights is not None else None
+            
+            if mode == 'logit':
+                x = logit[ind]
+            else:
+                x = prob[ind]
+            
+            hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=edges, x=x), weights=w,
+                density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
+        
+        plt.legend(classlegs, loc='upper center', fontsize=7)
+        plt.xlabel(f'MVA output $f(\\mathbf{{x}})$ [{mode}]')
+        plt.ylabel('density')
+        plt.title(f'{label}', fontsize=9)
+        
+        for scale in ['linear', 'log']:
+            try:
+                ax.set_yscale(scale)
+                outputdir = aux.makedir(f'{path}')
+                savepath  = f'{outputdir}/MVA-output__{mode}__{scale}.pdf'
+                plt.savefig(savepath, bbox_inches='tight')
+                cprint(__name__ + f'.density_MVA_wclass: Saved: "{savepath}"', 'green')
+            except Exception as e:
+                cprint(e, 'red')
+                cprint(__name__ + f'.density_MVA_wclass: Plotting failed for {label} -- continue', 'red')
+                continue
+        
+        # --------        
+        fig.clf()
+        plt.close(fig)
+        gc.collect()
 
 
 def plot_correlation_comparison(corr_mstats, targetdir, xlim=None):
@@ -727,37 +757,86 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
     return fig, ax
 
 
+def multiprocess_plot_wrapper(p):
+    """
+    Multiprocessing wrapper
+    """
+    i = p['i']
+    
+    # Exclude special values
+    ind = np.ones(len(p['X']), dtype=bool)
+    for k in range(len(p['exclude_vals'])):
+        ind = np.logical_and(ind, (p['X'][:,i] != p['exclude_vals'][k]))
+
+    plotvar(x                = p['X'][ind,i],
+            y                = p['y'][ind],
+            weights          = p['weights'][ind],
+            var              = p['ids'][i],
+            nbins            = p['nbins'],
+            percentile_range = p['percentile_range'],
+            title            = p['title'],
+            targetdir        = p['targetdir'],
+            plot_unweighted  = p['plot_unweighted'])
+
+
 def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
              exclude_vals=[None], plot_unweighted=True, title = '', targetdir = '.'):
-    """ Plot all variables.
     """
-    print(__name__ + f'.plotvars: Creating plots ...')
-    for i in tqdm(range(X.shape[1])):
-        x = X[:,i]
-
-        # Exclude special values
-        ind = np.ones(len(x), dtype=bool)
-        for k in range(len(exclude_vals)):
-            ind = np.logical_and(ind, (x != exclude_vals[k]))
-
-        plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins,
-                percentile_range=percentile_range, title=title, targetdir=targetdir,
-                plot_unweighted=plot_unweighted)
+    Plot all variables.
+    """
+    
+    print(__name__ + f'.plotvars: Creating plots | exclude_vals = {exclude_vals} ...')
+    
+    # Chunked loop [parallel processing]
+    param = {
+        'i':                None,
+        'X':                None,
+        'y':                None,
+        'weights':          None,
+        'ids':              ids,
+        'nbins':            nbins,
+        'percentile_range': percentile_range,
+        'exclude_vals':     exclude_vals,
+        'plot_unweighted':  plot_unweighted,
+        'title':            title,
+        'targetdir':        targetdir
+    }
+    
+    # Create parameter dictionaries for each process
+    paramlist = []
+    for i in range(X.shape[1]):
+        paramlist.append(copy.deepcopy(param)) 
+        paramlist[-1]['i'] = i 
+        paramlist[-1]['X'] = X # big numpy arrays should share the memory (i.e. no copy of X)
+        paramlist[-1]['y'] = y
+        paramlist[-1]['weights'] = weights
+    
+    # Start multiprocessing
+    cprint(__name__ + f'.plotvars: Multiprocessing {X.shape[1]} plots', 'yellow')
+    
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2)
+    tic  = time.time()
+    pool.map(multiprocess_plot_wrapper, paramlist)
+    pool.close() # no more tasks
+    pool.join()  # wrap up current tasks
+    
+    toc  = time.time()
+    print(f'Took {toc-tic:0.2f} sec')
 
 
 def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
             plot_unweighted=True, title='', targetdir='.'):
-    """ Plot a single variable.
+    """
+    Plot a single variable.
     """
     try:
         binrange = (np.percentile(x, percentile_range[0]), np.percentile(x, percentile_range[1]))
         
         fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights,
                                         title=title, xlabel=var, plot_unweighted=plot_unweighted)
-        plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
-        
+        plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')    
         fig.clf()
-        plt.close()
+        plt.close(fig)
         gc.collect()
     
     except Exception as e:
@@ -767,8 +846,9 @@ def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
 
 def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5,
                          plot_unweighted=True):
-    """ Here plot pure event counts
-        so we see that also integrated class fractions are equalized (or not) after weighting!
+    """
+    Here plot pure event counts
+    so we see that also integrated class fractions are equalized (or not) after weighting!
     """
 
     fig,ax    = plt.subplots(1, 2, figsize = (10, 4.25))
@@ -850,11 +930,14 @@ def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetd
         label = f'all' if (len(class_ids) == 1) else f'class_{k}'
 
         # Compute correlation matrix
+        tic = time.time()
         w = weights[y==k] if weights is not None else None
         C = statstools.correlation_matrix(X=X[y==k,:], weights=w)
         C[np.abs(C) < round_threshold] = np.nan
         C *= 100
-        
+        toc = time.time()
+        print(__name__ + f'.plot_correlations: Computing C-matrix (took {toc-tic:0.2f} sec)')
+
         # Compute suitable figsize
         size = np.ceil(C.shape[0] / 3)
         
@@ -870,9 +953,15 @@ def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetd
             cb = plt.colorbar()
 
         if targetdir is not None:
-            fname = targetdir + f'{label}-correlation-matrix.pdf'
-            print(__name__ + f'.plot_correlations: Saved: "{fname}"')
-            plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
+            tic = time.time()
+            if X.shape[1] <= 100: # Not too many dimensions --> pdf OK
+                fname = targetdir + f'{label}-correlation-matrix.pdf'
+                plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
+            else:
+                fname = targetdir + f'{label}-correlation-matrix.png'
+                plt.savefig(fname=fname, pad_inches=0.2, dpi=300, bbox_inches='tight')
+            toc = time.time()
+            print(__name__ + f'.plot_correlations: Saved: "{fname} (took {toc-tic:0.2f} sec)"')
 
     return figs, axs
 
@@ -1243,3 +1332,202 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
     plt.title(f'[{label}]')
     
     return fig, ax
+
+
+def table_writer(filename, label, sublabel, tau, chi2_table, print_to_screen=False):
+    """
+    Helper function to write a chi2 table to a file
+    """
+    with open(filename, "a") as text_file:
+        
+        text_file.write(f'category: {sublabel} | AI model: {label} | tau: {tau:0.2f}')
+        text_file.write('\n')
+        text_file.write(chi2_table.get_string())
+        text_file.write('\n')
+        text_file.write('\n')
+        if print_to_screen:
+            cprint(chi2_table, 'magenta')
+            print('')
+
+
+def plot_AIRW(X, y, ids, weights, y_pred, mask, pick_ind,
+              label, sublabel, param, tau=1.0, targetdir=None):
+    """
+    Plot AI based reweighting results
+    
+    """
+    
+    cprint(f'label = {label} | sublabel = {sublabel} | tau = {tau}', 'green')
+    
+    dir = aux.makedir(f'{targetdir}/{label}/{sublabel}')
+    
+    # Pick events within cut mask            
+    W_m = copy.deepcopy(weights[mask]) if weights is not None else np.ones(len(X))[mask]
+    y_m = copy.deepcopy(y[mask])
+    
+    # ---------------------------------------------------
+    ## 1. Transform model output scores to AI weights
+    
+    EPS   = param['EPS']
+    maxW  = param['maxW']
+    C0    = param['C0']
+    C1    = param['C1']
+    RN_ID = param['renorm_origin']
+    
+    # Handle logits vs probabilities
+    min_y_pred = np.min(y_pred)
+    max_y_pred = np.max(y_pred)
+    if min_y_pred < 0 or max_y_pred > 1:
+        print(__name__ + f'.plot_AIRW: Detected raw logit output [{min_y_pred}, {max_y_pred}] from the model')
+        logits = y_pred[mask][y_m == C0] / tau
+        #prob  = aux.sigmoid(logits)
+    else:
+        print(__name__ + f'.plot_AIRW: Detected probability output [{min_y_pred}, {max_y_pred}] from the model')
+        logits = aux.inverse_sigmoid(p = y_pred[mask][y_m == C0], EPS=EPS) / tau
+        #prob  = aux.sigmoid(logits)
+    
+    mode = param['transform_mode']
+    
+    # Get re-weighting transform weights
+    AIw0 = reweight.rw_transform_with_logits(logits=logits, mode=mode)
+    
+    # Cut-off regularize anomalous high weights before event weights
+    AIw0 = np.clip(AIw0, a_min=0.0, a_max=maxW)
+    
+    # Apply multiplicatively to event weights (which can be negative)
+    AIw0 = AIw0 * W_m[y_m == C0]
+    
+    # ---------------------------------------------------
+    ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
+    
+    if RN_ID is not None:
+        cprint(__name__ + f'.plot_AIRW: Renormalizing with class [{RN_ID}] weight sum', 'yellow')
+        
+        sum_before = AIw0.sum()
+        print(f'Sum before: {sum_before:0.1f}')
+        
+        AIw0 /= np.sum(AIw0)              # Normalize
+        AIw0 *= np.sum(W_m[y_m == RN_ID]) # Scale
+        
+        sum_after = AIw0.sum()
+        print(f'Sum after:  {sum_after:0.1f} (after / before = {sum_after/sum_before:0.2f})')
+        print('')
+    # ---------------------------------------------------
+    
+    total_ndf     = 0.0
+    total_chi2    = 0.0
+    total_chi2_AI = 0.0
+    
+    local_dir     = aux.makedir(dir + f'/tau_{tau:0.2f}')
+    chi2_table    = PrettyTable(["observable", "ndf", "chi2 / ndf", "(AI) chi2 / ndf"]) 
+    
+    # Loop over each observable
+    for running_index,i in tqdm(enumerate(pick_ind)):
+        
+        X_m  = copy.deepcopy(X[mask, i])
+        bins = binengine(bindef=param['edges'], x=X_m)
+        
+        # ----------------------------------------------------
+        
+        obs_X = {
+            
+            # Axis limits
+            'xlim'    : (bins[0], bins[-1]),
+            'ylim'    : None,
+            'xlabel'  : f'{ids[i]}',
+            'ylabel'  : r'Weighted counts',
+            'units'   : {'x': r'a.u.', 'y' : r'1'},
+            'label'   : f'{label}',
+            'figsize' : (4, 3.75),
+            
+            # Ratio
+            'ylim_ratio' : (0.75, 1.25),
+            
+            # Histogramming
+            'bins'    : None,
+            'density' : False,
+            
+            # Function to calculate
+            'func'    : None
+        }
+        
+        data_template = {
+            'data'   : None,
+            'weights': None,
+            'label'  : 'Data',
+            'hfunc'  : 'errorbar',
+            'style'  : iceplot.errorbar_style,
+            'obs'    : obs_X,
+            'hdata'  : None,
+            'color'  : None
+        }
+        
+        # Data source <-> Observable collections
+        class1    = data_template.copy() # Deep copies
+        class0    = data_template.copy()
+        class0_ML = data_template.copy()
+        
+        class1.update({
+            'label' : '$C_1$',
+            'hfunc' : 'hist',
+            'style' : iceplot.hist_style_step,
+            'color' : (0,0,0)
+        })
+        class0.update({
+            'label' : '$C_0$',
+            'hfunc' : 'hist',
+            'style' : iceplot.hist_style_step,
+            'color' : iceplot.imperial_green
+        })
+        class0_ML.update({
+            'label' : '$C_0$ (AI)',
+            'hfunc' : 'hist',
+            'style' : iceplot.hist_style_step,
+            'color' : iceplot.imperial_dark_red
+        })
+
+        data = [class1, class0, class0_ML]
+        
+        data[0]['hdata'] = iceplot.hist_obj(X_m[y_m == C1], bins=bins, weights=W_m[y_m == C1])
+        data[1]['hdata'] = iceplot.hist_obj(X_m[y_m == C0], bins=bins, weights=W_m[y_m == C0])
+        data[2]['hdata'] = iceplot.hist_obj(X_m[y_m == C0], bins=bins, weights=AIw0)
+        
+        # Update labels with chi2
+        chi2_0, ndf_0       = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+        chi2_0_AI, ndf_0_AI = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+        
+        data[1]['label'] += f' | $\\chi^2 = {chi2_0:0.0f} \, / \, {ndf_0} = {chi2_0/ndf_0:0.1f}$'
+        data[2]['label'] += f' | $\\chi^2 = {chi2_0_AI:0.0f} \, / \, {ndf_0_AI} = {chi2_0_AI/ndf_0_AI:0.1f}$'
+        
+        # Pretty table                
+        total_ndf     += ndf_0
+        total_chi2    += chi2_0
+        total_chi2_AI += chi2_0_AI
+        
+        divider = True if running_index == len(pick_ind) - 1 else False
+        chi2_table.add_row([ids[i], f'{ndf_0}', f'{chi2_0/ndf_0:0.1f}', f'{chi2_0_AI/ndf_0:0.1f}'], divider=divider)
+        # --------------------
+        
+        # Plot it
+        fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale='log', ratio_error_plot=True)
+        fig1, ax1 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_error_plot=True)
+        
+        fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.pdf', bbox_inches='tight')
+        fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.png', bbox_inches='tight', dpi=300)
+        
+        fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.pdf', bbox_inches='tight')
+        fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.png', bbox_inches='tight', dpi=300)
+        
+        fig0.clf()
+        fig1.clf()
+        plt.close('all')
+    
+    chi2_table.add_row(['total', f'{total_ndf}', f'{total_chi2/total_ndf:0.1f}', f'{total_chi2_AI/total_ndf:0.1f}'])
+    
+    # -----------------------------------------------
+    filename = local_dir + f"/chi2.log"
+    open(filename, 'w').close() # Clear content
+    table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table, print_to_screen=True)
+    # -----------------------------------------------
+    
+    return chi2_table

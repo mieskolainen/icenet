@@ -160,8 +160,8 @@ def set_axis_ticks(ax, ticks, dim='x'):
         ax.set_yticklabels(list(map(str, ticks)))
 
 def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.5, 1.5),
-        ratio_plot=True, minorticks_on=True, ytick_ratio_step=0.25, labelsize=9,
-        labelsize_ratio=8, **kwargs) :
+        ratio_plot=True, minorticks_on=True, ytick_ratio_step=0.25, labelsize=8,
+        labelsize_ratio=7, **kwargs) :
     """ Axis tick constructor.
     """
 
@@ -197,7 +197,7 @@ def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.5, 1.5),
     return ax
 
 def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
-    xlim=(0,1), ylim=None, ratio_plot=True, figsize=(5,4), fontsize=9, units={'x': '', 'y': ''}, **kwargs):
+    xlim=(0,1), ylim=None, ratio_plot=True, figsize=(5,4), fontsize=8, units={'x': '', 'y': ''}, **kwargs):
     """ Axes creator.
     """
     
@@ -359,14 +359,15 @@ def hist_filled_error(ax, bins, cbins, y, err, color, **kwargs):
 
 
 def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_error_plot=True, \
-    legend_counts=False, color=None, legend_properties={'fontsize': 7}, bottom_PRC=5, EPS=1E-12):
+    legend_counts=False, color=None, legend_properties={'fontsize': 7}, bottom_PRC=5, EPS=1E-12, verbose=False):
     """ Superposition (overlaid) plotting
     """
     if observable == None:
         observable = data[0]['obs']
     
-    print(observable)
-
+    if verbose:
+        print(observable)
+    
     fig, ax = create_axes(**observable, ratio_plot=ratio_plot)
 
     if color == None:
@@ -484,7 +485,7 @@ def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_err
         else:
             ax[0].set_ylim([0, ceiling_count * 1.5])
     else:
-        ax[0].set_ylim(observables.ylim)
+        ax[0].set_ylim(observable.ylim)
     # --------------------------------------------------------------------    
 
     return fig, ax

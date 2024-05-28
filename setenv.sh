@@ -29,11 +29,52 @@ else
     export GRID_ID=0
     export GRID_NODES=1
 
-    # Sun Grid Engine array job environment variables
+    ## Sun Grid Engine array job environment variables
     if [ ${SGE_TASK_ID} ]
     then
-        export GRID_ID=$(expr ${SGE_TASK_ID} - 1)
+        echo "Detected Sun Grid Engine (SGE) grid job"
+        export GRID_ID=$(expr ${SGE_TASK_ID} - 1) # - 1
         export GRID_NODES=${SGE_TASK_LAST}
+    fi
+
+    ## For HTCondor, create two environment variables
+    # in the main steering job and read in those in my_script.sh
+    # and define corresponding HTC_PROCESS_ID and HTC_QUEUE_SIZE environment
+    # variables.
+    
+    # ----------------------------------------------
+    # Example HTCondor 'array.job' file
+    # ----------------------------------------------
+    # 
+    # executable  = my_script.sh
+    # arguments   = "$(PROCESS) 10"
+    # output      = my_script.$(CLUSTER).$(PROCESS).out
+    # error       = my_script.$(CLUSTER).$(PROCESS).error
+    # log         = my_script.$(CLUSTER).$(PROCESS).log
+    # +MaxRuntime = 6500
+    # queue 10
+    # ----------------------------------------------
+
+    # ----------------------------------------------
+    # Example 'my_script.sh' file
+    # ----------------------------------------------
+    # 
+    # export HTC_PROCESS_ID=$1
+    # export HTC_QUEUE_SIZE=$2
+    # 
+    # ... init conda ...
+    # 
+    # conda activate icenet
+    # source setenv.sh
+    # 
+    # ... more logic ...
+    # ----------------------------------------------
+    
+    if [ ${HTC_PROCESS_ID} ]
+    then
+        echo "Detected HTCondor (HTC) grid job"
+        export GRID_ID=${HTC_PROCESS_ID}
+        export GRID_NODES=${HTC_QUEUE_SIZE}
     fi
 
     CWD=`pwd`

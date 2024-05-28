@@ -5,6 +5,7 @@
 import numpy as np
 import psutil
 from typing import List
+from prettytable import PrettyTable
 
 from termcolor import colored, cprint
 from icenet.tools import aux
@@ -70,18 +71,28 @@ def print_flow(flow):
 
 
 def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
-    """ Print in a format (# samples x # dimensions)
+    """ Print statistics of X
+    
+    Args:
+        X            : array (n x dim)
+        ids          : variable names (dim)
+        W            : event weights
+        exclude_vals : exclude special values from the stats
+    
+    Returns:
+        prettyprint table of stats
     """
-
+    
     print('\n')
     print(__name__ + f'.print_variables:')
 
     print(f'Excluding values: {exclude_vals}')
-    print('[i] variable_name : [min, med, max] [#unique]   mean +- std   [[isinf, isnan]]')
+    
+    table = PrettyTable(["i", "variable", "min", "Q5", "med", "Q95", "max", "# unique", "mean", "std", "#Inf", "#NaN"]) 
     
     for j in range(len(ids)):
         try:
-            x   = np.array(X[:,j], dtype=np.float).squeeze()
+            x   = np.array(X[:,j], dtype=np.float32).squeeze()
             ind = np.ones(len(x), dtype=bool)
             
             if exclude_vals is not None:
@@ -92,19 +103,27 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
             x = x[ind]
 
             minval     = np.min(x)
+            Q5         = np.percentile(x,5)
             med        = np.median(x)
+            Q95        = np.percentile(x,95)
             maxval     = np.max(x)
-            mean,std   = aux.weighted_avg_and_std(values=x, weights=W[ind])
+            
+            if W is not None:
+                mean,std = aux.weighted_avg_and_std(values=x, weights=W[ind])
+            else:
+                mean,std = np.mean(x), np.std(x) 
             num_unique = len(np.unique(x))
+            
+            isinf  = np.sum(np.isinf(x))
+            isnan  = np.sum(np.isnan(x))
 
-            isinf  = np.any(np.isinf(x))
-            isnan  = np.any(np.isnan(x))
+            table.add_row([f'{j}', f'{ids[j]}', f'{minval:10.2E}', f'{Q5:10.2E}', f'{med:10.2E}', f'{Q95:10.2E}', f'{maxval:10.2E}', f'{num_unique}', f'{mean:10.2E}', f'{std:10.2E}', f'{isinf}', f'{isnan}'])
 
-            print('[{: >3}]{: >40} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t ({: >10.2E} +- {: >10.2E})   [[{}, {}]]'
-                .format(j, ids[j], minval, med, maxval, num_unique, mean, std, isinf, isnan))
         except Exception as e:
             print(e)
             print(f'[{j: >3}] Cannot print variable "{ids[j]}" (probably non-scalar type)')
-
+    
+    print(table)
     print('\n')
 
+    return table

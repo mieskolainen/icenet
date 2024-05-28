@@ -20,7 +20,7 @@ mva_param: &MVA_INPUT_PARAM
   #inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
   #jagged_maxdim:    6
   
-  varnorm: null                      # Variable normalization: 'zscore', 'madscore', null
+  varnorm: null                      # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   #varnorm_tensor: 'zscore'          # Tensor variable normalization
   #varnorm_graph: null               # Not implemented yet
   
@@ -93,12 +93,13 @@ train_runmode:
 
   reweight_param: &REWEIGHT_PARAM
 
-    maxevents: 100000              # Maximum number of events for the PDF construction
     equal_frac: true               # Equalize integrated class fractions
     differential: false            # Differential reweighting
     reference_class: 0             # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
     
-    # see /trg/tune0.yml
+    # ---------------------
+    # Differential param
+    # For example, see /trg/tune0.yml
 
 
   ## Outlier protection in the training
@@ -106,6 +107,9 @@ train_runmode:
     algo: null         # algorithm: 'truncate', null
     qmin: 0.01         # in [0,100] 
     qmax: 99.9         # in [0,100]
+
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
 
 
   # ** Activate models here **

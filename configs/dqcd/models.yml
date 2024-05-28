@@ -90,7 +90,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   losstype: 'DCORR'        # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
   min_count: 32            #  Minimum number of events (per category)
   max_N: null              #  Maximum number of events per function call (use to limit sample size for DCORR)
-  min_score: 0.75          #  Consider only events with MVA output larger than this value (null for None)
+  min_score: 0.75          #  Consider only events with MVA output [0,1] larger than this value (null for None)
   poisson_weight: False    #  Per category Poisson sqrt(N) weighted loss
   
   # ------------------
@@ -220,7 +220,7 @@ xgb01:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -272,7 +272,7 @@ xgb01-NOJETS:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -327,7 +327,7 @@ iceboost01-DA:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -382,7 +382,7 @@ iceboost01-DA-NC:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -437,7 +437,7 @@ iceboost01-MI:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 # XGBoost
@@ -495,7 +495,7 @@ iceboost01-DA-MI:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 # XGBoost
@@ -549,7 +549,7 @@ iceboost01-DA-NOJETS:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 # XGBoost
@@ -607,7 +607,7 @@ iceboost01-DA-MI-NOJETS:
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 # -----------------------------------------------------------------------------
@@ -637,8 +637,8 @@ lgr0:
     epochs: 150
     batch_size: 196
     lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
+    weight_decay: 1.0e-2       # L2-regularization
+  
   # Scheduler
   scheduler_param:
     step_size: 200
@@ -651,8 +651,10 @@ lgr0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
+  evalmode: 'all'               # 'all', 'latest'
   readmode: -1                  # -1 is the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Permutation Equivariant Network
@@ -677,13 +679,13 @@ deps:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
     
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs:  200
     batch_size:  128
     lr: 1.0e-3
-    weight_decay: 0.0001       # L2-regularization
+    weight_decay: 1.0e-2       # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -691,11 +693,13 @@ deps:
     gamma: 0.1
     
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 16
   
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
+  evalmode: 'all'               # 'all', 'latest'
   readmode: -1                  # -1 is the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Deep MAXOUT network
@@ -718,13 +722,13 @@ dmx0:
     gamma: 2                   # focal_entropy exponent
     temperature: 1             # logit norm temperature
 
-    optimizer: 'Adam'          # Adam, AdamW
+    optimizer: 'AdamW'          # Adam, AdamW
     clip_norm: 1.0
 
     epochs: 200
     batch_size: 128
     lr: 1.0e-3
-    weight_decay: 0.00001      # L2-regularization
+    weight_decay: 1.0e-2       # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -732,51 +736,12 @@ dmx0:
     gamma: 0.1
     
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
+  num_workers: 16
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
-# Deep MAXOUT network
-dmx1:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'MAXO-LNCE'
-  raytune:  null
-
-  # Model parameter
-  conv_type: 'maxo'
-  model_param:
-    num_units: 8
-    neurons:  50
-    dropout:  0.1
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-    
-    optimizer: 'Adam'         # Adam, AdamW
-    clip_norm: 1.0
-
-    epochs: 200
-    batch_size: 128
-    lr: 1.0e-3
-    weight_decay: 0.00001     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # -1 is the last saved epoch
 
 # Deep MLP
 dmlp:
@@ -791,7 +756,7 @@ dmlp:
     mlp_dim: [64, 64, 64]     # hidden layer dimensions
     activation: 'relu'
     batch_norm: False
-    dropout: 0.1
+    dropout: 0.0
   
   # Optimization
   opt_param:  
@@ -799,13 +764,13 @@ dmlp:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 200
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.0000      # L2-regularization
+    batch_size: 256
+    lr: 1.0e-4
+    weight_decay: 1.0e-3      # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -813,11 +778,13 @@ dmlp:
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
+  num_workers: 16
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Variational Autoencoder
@@ -855,13 +822,13 @@ vae0:
     gamma: 2                        # focal_entropy exponent
     temperature: 1                  # logit norm temperature
     
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 200
     batch_size: 256
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
+    lr: 3.0e-4
+    weight_decay: 1.0e-3       # L2-regularization
 
   # Mutual information regularization
   #MI_reg_param:
@@ -876,58 +843,14 @@ vae0:
     gamma: 0.1
 
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
+  num_workers: 16
 
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
+  evalmode: 'all'               # 'all', 'latest'
   readmode: -1                  # -1 is the last saved epoch
 
+  eval_batch_size: 512
 
-# Deep Normalizing Flow
-dbnf0:
-  train:   'flow'
-  predict: 'torch_flow'
-  label:   'DBNF'
-  raytune:  null
-
-  # Gradient descent
-  opt_param:
-    lossfunc: 'flow_logpx'
-    optimizer: 'Adam'
-    clip_norm: 0.1
-    
-    epochs: 100
-    batch_size: 512           # Keep it high!
-    lr: 1.0e-3
-    weight_decay: 0.0         # L2-regularization
-    polyak: 0.998
-
-    start_epoch: 0
-
-  # Learning rate reduction on plateau
-  scheduler_param:  
-    factor:  0.1
-    patience: 20
-    cooldown: 10
-    min_lr: 0.0005
-    early_stopping: 100
-
-  # Model structure
-  model_param:  
-    flows: 10                 # number of flow blocks
-    layers: 0                 # intermediate layers in a flow block
-    hidden_dim: 10            # 
-    residual: 'gated'         # choises 'none', 'normal', 'gated'
-    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
-  
-  modelname: 'null'
-  tensorboard: 'tensorboard'
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
 
 # Graph net
 gnet1:
@@ -969,13 +892,13 @@ gnet1:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 150
     batch_size: 128
     lr: 3.0e-4
-    weight_decay:  0.0        # L2-regularization
+    weight_decay:  1.0e-4        # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -983,11 +906,13 @@ gnet1:
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
+  num_workers: 16
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -1030,13 +955,13 @@ gnet2:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 150
     batch_size: 128
     lr: 3.0e-4
-    weight_decay:  0.0      # L2-regularization
+    weight_decay:  1.0e-4      # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -1044,11 +969,13 @@ gnet2:
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
+  num_workers: 16
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -1091,13 +1018,13 @@ gnet3:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 150
     batch_size: 128
     lr: 3.0e-4
-    weight_decay:  0.0        # L2-regularization
+    weight_decay:  1.0e-4        # L2-regularization
 
   # Scheduler
   scheduler_param:
@@ -1105,8 +1032,11 @@ gnet3:
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
+  num_workers: 16
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
+

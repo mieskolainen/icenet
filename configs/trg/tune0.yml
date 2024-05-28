@@ -17,7 +17,7 @@ mva_param: &MVA_INPUT_PARAM
   #inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
   #jagged_maxdim:    6
   
-  varnorm: null                       # Variable normalization: 'zscore', 'madscore', null
+  varnorm: null                       # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   #varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null                # Not implemented yet
   
@@ -83,38 +83,51 @@ train_runmode:
   
   reweight_param: &REWEIGHT_PARAM
 
-    maxevents: 100000             # Maximum number of events for the PDF construction
     equal_frac: true              # Equalize integrated class fractions
     differential: true            # Differential reweighting
-    reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ...
+    reference_class: 0            # Reference (target) class: 0 = (background), 1 = (signal), 2 = (another class) ...
     
     # ---------------------
+    # Different reweighting
     
     # Note about asymmetry: Keep the reference class as 0 == background, because signal
     # MC has much longer tail over pt. Thus, it is not possible to re-weight background
     # to signal very easily, but it is possible to re-weight signal to background.
     # This is seen by inspecting the re-weighted distributions with small and large statistics.
 
-    dimension: '2D'                # '2D', 'pseudo-2D', '1D'
-    pseudo_type: 'product'         # 'product', 'geometric_mean'
-    
-    var:   ['x_hlt_pt', 'x_hlt_eta']
+    diff_param:
 
-    # Make sure the bounds cover the phase space
-    bins:  [[0.001, 100.0, 150], [-3.1, 3.1, 150]]
-    binmode: ['linear', 'linear']  # 'log10', 'linear' or 'edges' for custom array based binning
-    
-    # ! Variable, and binning min/max boundaries are both transformed !
-    transform: ['log10', null]     # 'log10', 'sqrt', 'square', null
+      maxevents: 100000                    # Maximum number of events for the PDF construction
+      var:   ['x_hlt_pt', 'x_hlt_eta']
+      type: '2D'                           # 'ML', 'pseudo-ND', '2D', '1D'
+      
+      hist_param:
 
-    max_reg: 10000.0               # Maximum weight cut-off regularization
+        pseudo_type: 'product'         # 'product', 'geometric_mean'
 
+        # Make sure the bounds cover the phase space
+        bins:  [[0.001, 100.0, 150], [-3.1, 3.1, 150]]
+        binmode: ['linear', 'linear']  # 'log10', 'linear' or 'edges' for custom array based binning
+        
+        # ! Variable, and binning min/max boundaries are both transformed !
+        transform: ['log10', null]     # 'log10', 'sqrt', 'square', null
+
+        max_reg: 10000.0               # Maximum weight cut-off regularization
+      
+      ML_param:
+        active_model: xgb3Drw              # Under models.yml
+        max_reg:      1000.0               # Maximum weight cut-off regularization
+        
 
   ## Outlier protection in the training
   outlier_param:
     algo: 'truncate'   # algorithm: 'truncate', null
     qmin: 0.01         # in [0,100] 
     qmax: 99.9         # in [0,100]
+
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
+  
 
   # ** Activate models here **
   # Give all models some unique identifier and label

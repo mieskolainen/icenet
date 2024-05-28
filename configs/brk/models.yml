@@ -34,12 +34,12 @@ xgb:
     
     # learning task parameters
     objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
-    eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
-    
+    eval_metric: ['mlogloss']   # for evaluation, 'logloss', 'mlogloss'
+  
   plot_trees: False
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -81,8 +81,10 @@ maxo:
   num_workers: 1
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Permutation Equivariant Network
@@ -125,5 +127,7 @@ deps:
   num_workers: 1
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096

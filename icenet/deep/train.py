@@ -23,14 +23,15 @@ from icenet.tools import aux_torch
 from icenet.tools import plots
 from icenet.deep  import optimize, predict
 
-from icenet.deep  import deps
 from icenet.algo  import flr
-from icenet.deep  import bnaf
+from icenet.deep  import deps
 from icenet.deep  import mlgr
 from icenet.deep  import maxo
 from icenet.deep  import dmlp
+from icenet.deep  import lzmlp
 from icenet.deep  import dbnf
 from icenet.deep  import vae
+from icenet.deep  import fastkan
 
 from icenet.deep  import cnn
 from icenet.deep  import graph
@@ -64,8 +65,8 @@ def getgenericmodel(conv_type, netparam):
         model = mlgr.MLGR(**netparam)
     elif conv_type == 'dmlp':
         model = dmlp.DMLP(**netparam)
-    #elif conv_type == 'dndt':
-    #    model = dev_dndt.DNDT(**netparam)
+    elif conv_type == 'lzmlp':
+        model = lzmlp.LZMLP(**netparam)
     elif conv_type == 'deps':
         model = deps.DEPS(**netparam)
     elif conv_type == 'maxo':
@@ -76,6 +77,8 @@ def getgenericmodel(conv_type, netparam):
         model = cnn.CNN_MAXO(**netparam)       
     elif conv_type == 'vae':
         model = vae.VAE(**netparam) 
+    elif conv_type == 'fastkan':
+        model = fastkan.FastKAN(**netparam) 
     else:
         raise Exception(__name__ + f'.getgenericmodel: Unknown network <conv_type> = {conv_type}')
 
@@ -91,11 +94,7 @@ def getgraphmodel(conv_type, netparam):
 
     print(conv_type)
     print(netparam)
-    """
-    if conv_type == 'NN':
-        model = graph.NNNet(**netparam)
-    else:
-    """
+    
     model = graph.GNNGeneric(conv_type=conv_type, **netparam)
     
     print(model)
@@ -108,8 +107,9 @@ def getgenericparam(param, D, num_classes, config={}):
     Construct generic torch network parameters
     """
     netparam = {
-        'C'    : int(num_classes),
-        'D'    : int(D)
+        'C'       : int(num_classes),
+        'D'       : int(D),
+        'out_dim' : param['out_dim'] if 'out_dim' in param else None
     }
 
     # Add model hyperparameter keys
@@ -118,6 +118,7 @@ def getgenericparam(param, D, num_classes, config={}):
             netparam[key] = config[key] if key in config.keys() else param['model_param'][key]
 
     return netparam, param['conv_type']
+
 
 def getgraphparam(data_trn, num_classes, param, config={}):
     """
@@ -137,19 +138,20 @@ def getgraphparam(data_trn, num_classes, param, config={}):
         num_global_features = len(data_trn[0].u)
     except:
         num_global_features = 0
-
+    
     netparam = {
-        'c_dim' : int(num_classes),
-        'd_dim' : int(num_node_features),
-        'e_dim' : int(num_edge_features),
-        'u_dim' : int(num_global_features)
+        'C'       : int(num_classes),
+        'd_dim'   : int(num_node_features),
+        'e_dim'   : int(num_edge_features),
+        'u_dim'   : int(num_global_features),
+        'out_dim' : param['out_dim'] if 'out_dim' in param else None
     }
 
     # Add model hyperparameter keys
     if param['model_param'] is not None:
         for key in param['model_param'].keys():
             netparam[key] = config[key] if key in config.keys() else param['model_param'][key]
-
+    
     return netparam, param['conv_type']
 
 def raytune_main(inputs, train_func=None):
@@ -227,9 +229,9 @@ def raytune_main(inputs, train_func=None):
     best_result = results.get_best_result(metric=metric, mode=mode)
     
     print('-----------------')
-    cprint(__name__ + f'.raytune_main: Best result config: \n\n{best_result.config}',  'yellow')
+    cprint(__name__ + f'.raytune_main: Best result config: \n\n{best_result.config}',  'green')
     print('')
-    cprint(__name__ + f'.raytune_main: Best result metrics:\n\n{best_result.metrics}', 'yellow')
+    cprint(__name__ + f'.raytune_main: Best result metrics:\n\n{best_result.metrics}', 'green')
     print('-----------------')
     
     # Set the best config, training functions will update the parameters
@@ -243,12 +245,10 @@ def raytune_main(inputs, train_func=None):
     return best_trained_model
 
 
-def torch_loop(model, train_loader, test_loader, args, param, config={'params': {}}, save_period=1):
+def torch_loop(model, train_loader, test_loader, args, param, config={'params': {}}, ids=None):
     """
     Main training loop for all torch based models
     """
-
-    DA_active = True if (hasattr(model, 'DA_active') and model.DA_active) else False
     
     trn_aucs  = []
     val_aucs  = []
@@ -274,11 +274,13 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     
     # --------------------------------------------------------------------
     ## Mutual information regularization
-    if 'MI_reg_param' in param:
-
+    if 'MI_param' in param:
+        
+        cprint(__name__ + f'.torch_loop: Using MI regularization', 'yellow')
+        
         # Create network and set parameters
-        MI         = copy.deepcopy(param['MI_reg_param']) # ! important
-        input_size = param['MI_reg_param']['x_dim']
+        MI         = copy.deepcopy(param['MI_param']) # ! important
+        input_size = param['MI_param']['x_dim']
 
         y_dim      = MI['y_dim']
         if   y_dim is None:
@@ -288,8 +290,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         elif type(y_dim) is list:
             input_size += len(y_dim)
 
-        MI['model']     = []
-        MI['MI_lb']     = []
+        MI['model'] = []
+        MI['MI_lb'] = []
 
         print(__name__ + f'.torch_loop: MINE estimator input_size: {input_size}')
         
@@ -299,7 +301,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             MI_model.train() # !
 
             MI['model'].append(MI_model)
-
+        
         all_parameters = list()
         for k in range(len(MI['classes'])):
             all_parameters += list(MI['model'][k].parameters())
@@ -312,29 +314,39 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     # Training loop
     loss_history = {}
 
-    for epoch in range(opt_param['epochs']):
+    for epoch in range(1, opt_param['epochs']+1):
 
         if MI is not None: # Reset diagnostics
             MI['MI_lb'] = np.zeros(len(MI['classes']))
-
-        loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
-
-        if (epoch % save_period) == 0 or args['__raytune_running__']:
-            train_acc, train_auc       = optimize.test(model=model, loader=train_loader, optimizer=optimizer, device=device)
-            validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  optimizer=optimizer, device=device)
         
-        ## Save values
+        loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
+        
+        if epoch == 1 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+            _, train_acc, train_auc                   = optimize.test(name='train', model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
+            validate_loss, validate_acc, validate_auc = optimize.test(name='eval',  model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
+
+            # Temperature calibration
+            try:
+                from icenet.deep import tempscale
+                tt = tempscale.ModelWithTemperature(model=model, device=device, mode='softmax' if model.out_dim > 1 else 'binary')
+                tt.set_temperature(valid_loader=test_loader)
+            except Exception as e:
+                print(e)
+                print('Could not evaluate temperature scaling -- skip')
+        
+        ## ** Save values **
         optimize.trackloss(loss=loss, loss_history=loss_history)
+        optimize.trackloss(loss=validate_loss, loss_history=loss_history)
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
-
+        
         print(__name__)
-        print(f'.torch_loop: Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Loss: {optimize.printloss(loss)} Train: {train_acc:.4f} (acc), {train_auc:.4f} (AUC) | Validate: {validate_acc:.4f} (acc), {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}')
+        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}', 'yellow')
         if MI is not None:
             print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f}')
             for k in range(len(MI['classes'])):
                 print(f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
-
+        
         # Update scheduler
         scheduler.step()
         
@@ -354,9 +366,9 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             ray.train.report({'loss': loss.item(), 'AUC': validate_auc})
         else:
             ## Save
-            checkpoint = {'model': model, 'state_dict': model.state_dict()}
+            checkpoint = {'model': model, 'state_dict': model.state_dict(), 'ids': ids}
             torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
-
+    
     if not args['__raytune_running__']:
         
         # Plot evolution
@@ -369,7 +381,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     return # No return value for raytune
 
 
-def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=None, param=None, y_soft=None, save_period=5):
+def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=None, param=None, y_soft=None):
     """
     Train graph neural networks
     
@@ -399,8 +411,8 @@ def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=
             data_trn[i].y = y_soft[i]
 
     # Data loaders
-    train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=opt_param['batch_size'], shuffle=True)
-    test_loader  = torch_geometric.loader.DataLoader(data_val, batch_size=512, shuffle=False)
+    train_loader = torch_geometric.loader.DataLoader(data_trn, batch_size=opt_param['batch_size'],  shuffle=True)
+    test_loader  = torch_geometric.loader.DataLoader(data_val, batch_size=param['eval_batch_size'], shuffle=True)
     
     return torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
                 args=args, param=param, config=config)
@@ -409,7 +421,7 @@ def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=
 def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
     trn_weights=None, val_weights=None, X_trn_2D=None, X_val_2D=None, args=None, param=None, 
     Y_trn_DA=None, trn_weights_DA=None, Y_val_DA=None, val_weights_DA=None, y_soft=None, 
-    data_trn_MI=None, data_val_MI=None, config={'params': {}}):
+    data_trn_MI=None, data_val_MI=None, ids=None, config={'params': {}}):
     """
     Train generic neural model [R^d x (2D) -> output]
     
@@ -428,12 +440,12 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
                 data_trn_MI=data_trn_MI, data_val_MI=data_val_MI)
     
     # Set MI-regularization X-dimension
-    if 'MI_reg_param' in param:
-        if 'x_dim' not in param['MI_reg_param']:
-            param['MI_reg_param']['x_dim'] = data_trn_MI.shape[1]
+    if 'MI_param' in param:
+        if 'x_dim' not in param['MI_param']:
+            param['MI_param']['x_dim'] = data_trn_MI.shape[1]
     
     return torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
-                args=args, param=param, config=config)
+                args=args, param=param, config=config, ids=ids)
 
 
 def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights, val_weights, param, args, 
@@ -469,14 +481,19 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param    = aux.replace_param(default=param['opt_param'], raytune=config['params'])
     
-    params = {'batch_size'  : opt_param['batch_size'],
-              'shuffle'     : True,
-              'num_workers' : param['num_workers'],
-              'pin_memory'  : True}
+    params_train = {'batch_size'  : opt_param['batch_size'],
+                    'shuffle'     : True,
+                    'num_workers' : param['num_workers'],
+                    'pin_memory'  : True}
     
-    train_loader = torch.utils.data.DataLoader(training_set,   **params)
-    test_loader  = torch.utils.data.DataLoader(validation_set, **params)
-
+    params_test  = {'batch_size'  : param['eval_batch_size'],
+                    'shuffle'     : True,
+                    'num_workers' : param['num_workers'],
+                    'pin_memory'  : True}
+    
+    train_loader = torch.utils.data.DataLoader(training_set,   **params_train)
+    test_loader  = torch.utils.data.DataLoader(validation_set, **params_test)
+    
     return model, train_loader, test_loader
 
 
@@ -708,8 +725,8 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     # ---------------------------------------
 
     # Boosting iterations
-    max_num_epochs = param['xgb']['model_param']['num_boost_round']
-    for epoch in range(max_num_epochs):
+    num_epochs = param['xgb']['model_param']['num_boost_round']
+    for epoch in range(1, num_epochs+1):
         
         results = dict()
         
@@ -720,22 +737,24 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
              'evals_result':    results,
              'verbose_eval':    False}
 
-        if epoch > 0: # Continue from the previous epoch model
+        if epoch > 1: # Continue from the previous epoch model
             a['xgb_model'] = model
 
         # Train it
         model = xgboost.train(**a)
         
-        # AUC
-        pred    = model.predict(dtrain)
-        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
-        metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, class_ids=args['primary_classes'], hist=False, verbose=True)
-        trn_aucs.append(metrics.auc)
+        if len(args['primary_classes']) >= 2:
+            
+            # AUC
+            pred    = model.predict(dtrain)
+            if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
+            metrics = aux.Metric(y_true=y_trn, y_pred=pred, weights=w_trn, class_ids=args['primary_classes'], hist=False, verbose=True)
+            trn_aucs.append(metrics.auc)
 
-        pred    = model.predict(deval)
-        if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
-        metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, class_ids=args['primary_classes'], hist=False, verbose=True)
-        val_aucs.append(metrics.auc)
+            pred    = model.predict(deval)
+            if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
+            metrics = aux.Metric(y_true=y_val, y_pred=pred, weights=w_val, class_ids=args['primary_classes'], hist=False, verbose=True)
+            val_aucs.append(metrics.auc)
 
         # Loss
         trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
@@ -744,7 +763,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         ## Save
         pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.dat", 'wb'))
         
-        print(__name__ + f'.train_graph_xgb: Tree {epoch+1:03d}/{max_num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+        print(__name__ + f'.train_graph_xgb: Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
     
     # ------------------------------------------------------------------------------
     # Plot evolution
@@ -773,7 +792,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         try:
             print(__name__ + f'.train_graph_xgb: Plotting decision trees ...')
             model.feature_names = ids
-            for i in tqdm(range(max_num_epochs)):
+            for i in tqdm(range(num_epochs)):
                 xgboost.plot_tree(model, num_trees=i)
                 fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
                 path = aux.makedir(f'{targetdir}/trees_{param["label"]}')

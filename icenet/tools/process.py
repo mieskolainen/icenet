@@ -8,6 +8,7 @@ import awkward as ak
 import gc
 import torch
 import torch_geometric
+from prettytable import PrettyTable
 
 import copy
 from tqdm import tqdm
@@ -269,8 +270,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args['datadir']      = aux.makedir(f'{cwd}/output/{args["rootname"]}')
     
     if runmode != 'genesis':
-        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}--use_conditional__{args["use_conditional"]}')
-        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}--use_conditional__{args["use_conditional"]}')
+        conditional_tag  = f'--use_conditional__{args["use_conditional"]}' if args["use_conditional"] else ""
+        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}{conditional_tag}')
+        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}{conditional_tag}')
     
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
     
@@ -328,18 +330,16 @@ def generic_flow(rootname, func_loader, func_factor):
         
     if runmode == 'train':
         
-        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids,
-                               exclude_vals=[args['imputation_param']['fill_value']])
+        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
         make_plots(data=data['trn'], args=args, runmode=runmode)
         train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 
     if runmode == 'eval':
 
-        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids,
-                               exclude_vals=[args['imputation_param']['fill_value']])
+        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
         make_plots(data=data['tst'], args=args, runmode=runmode)
         evaluate_models(data=data['tst'], info=data['info'], args=args)
-
+    
     return args, runmode
 
 
@@ -366,7 +366,7 @@ def read_data(args, func_loader, runmode):
         # func_loader does the multifile processing
         load_args = {'entry_start': 0, 'entry_stop': None, 'maxevents': args['maxevents'], 'args': args}
         predata   = func_loader(root_path=args['root_files'], **load_args)
-
+        
         X    = predata['X']
         Y    = predata['Y']
         W    = predata['W']
@@ -389,6 +389,7 @@ def read_data(args, func_loader, runmode):
     else:
         
         if runmode == "genesis": # Genesis mode does not need this
+            cprint(__name__ + f'.read_data: "genesis" already done and the cache files are ready.', 'green')
             return
         
         num_files = io.count_files_in_dir(cache_directory)
@@ -528,7 +529,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         if var is not None:
             impute_vars = getattr(module, var)
         else:
-            impute_vars = None
+            impute_vars = None # All chosen
     # ----------------------------------------------------------
     
     ### Split and factor data
@@ -547,8 +548,8 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             else:
                 pdf = None # Compute it now
             
-            trn.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args['reweight_param'])
-            val.w,_    = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args['reweight_param'])
+            trn.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args, x_val=val.x, y_val=val.y, w_val=val.w)
+            val.w,_    = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
             
             if args['reweight_mode'] == 'write':
                 cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode == {runmode})', 'green')
@@ -583,7 +584,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             else:
                 pdf = None # Compute it now
             
-            tst.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args['reweight_param'])
+            tst.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
             
             if args['reweight_mode'] == 'write':
                 cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode = {runmode})', 'green')
@@ -601,7 +602,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             cprint(__name__ + f'.process_data: Loading imputer from: {inputfile}', 'green')
             imputer = pickle.load(open(inputfile, 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
-    
+        
     io.showmem()
     
     return output
@@ -631,7 +632,7 @@ def impute_datasets(data, args, features=None, imputer=None):
         
         special_values = args['values'] # possible special values
         cprint(__name__ + f'.impute_datasets: Imputing data for special values {special_values} in variables {features}', 'yellow')
-
+        
         # Parameters
         param = {
             "dim":        dim,
@@ -643,17 +644,21 @@ def impute_datasets(data, args, features=None, imputer=None):
         }
         
         data.x, imputer = io.impute_data(X=data.x, imputer=imputer, **param)
-        
+
     else:
         cprint(__name__ + f'.impute_datasets: Imputing data for Inf/Nan in variables {features}', 'yellow')
 
-        # No other imputation, but fix spurious NaN / Inf
-        data.x[np.logical_not(np.isfinite(data.x[:, dim]))] = args['fill_value']
+        for j in dim:        
+            mask  = np.logical_not(np.isfinite(data.x[:,j]))
+            found = np.sum(mask)
+            if found > 0:
+                data.x[mask, j] = args['fill_value']    
+                cprint(__name__ + f'.impute_datasets: Column {j} Number of {found} ({found/len(data.x):0.3E}) NaN/Inf found in [{data.ids[j]}]', 'red')
     
     return data, imputer
 
 
-def train_models(data_trn, data_val, args=None) :
+def train_models(data_trn, data_val, args=None):
     """
     Train ML/AI models wrapper with pre-processing.
     
@@ -664,6 +669,10 @@ def train_models(data_trn, data_val, args=None) :
         Saves trained models to disk
     """
 
+    cprint(__name__ + f'.train_models: ', 'yellow')
+    print('')
+    
+    
     # @@ Tensor normalization @@
     if data_trn['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
             
@@ -674,45 +683,105 @@ def train_models(data_trn, data_val, args=None) :
         data_val['data_tensor'] = io.apply_zscore_tensor(data_val['data_tensor'], X_mu_tensor, X_std_tensor)
         
         # Save it for the evaluation
-        pickle.dump([X_mu_tensor, X_std_tensor], open(args["modeldir"] + '/zscore_tensor.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)    
+        pickle.dump({'X_mu_tensor': X_mu_tensor, 'X_std_tensor': X_std_tensor}, open(args["modeldir"] + '/zscore_tensor.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)    
     
     # --------------------------------------------------------------------
-
+    
     # @@ Truncate outliers (component by component) from the training set @@
     if args['outlier_param']['algo'] == 'truncate' :
+        
+        print(__name__ + f'.train_models: Truncating outlier variable values with {args["outlier_param"]}')
+        
         for j in range(data_trn['data'].x.shape[1]):
-
+            
+            # Train sample
             minval = np.percentile(data_trn['data'].x[:,j], args['outlier_param']['qmin'])
             maxval = np.percentile(data_trn['data'].x[:,j], args['outlier_param']['qmax'])
 
             data_trn['data'].x[data_trn['data'].x[:,j] < minval, j] = minval
             data_trn['data'].x[data_trn['data'].x[:,j] > maxval, j] = maxval
-    
-    # @@ Variable normalization @@
-    if   args['varnorm'] == 'zscore' :
 
-        print('\nZ-score normalizing variables ...')
-        X_mu, X_std = io.calc_zscore(data_trn['data'].x)
+            # -----
+            
+            # Validation sample
+            if args['outlier_param']['process_validate']:
+                minval = np.percentile(data_val['data'].x[:,j], args['outlier_param']['qmin'])
+                maxval = np.percentile(data_val['data'].x[:,j], args['outlier_param']['qmax'])
+
+                data_val['data'].x[data_val['data'].x[:,j] < minval, j] = minval
+                data_val['data'].x[data_val['data'].x[:,j] > maxval, j] = maxval
+
+        # Same for anomalous event weights
+        if data_trn['data'].w is not None and args['outlier_param']['truncate_weights']:
+            
+            print(__name__ + f'.train_models: Truncating outlier event weights with {args["outlier_param"]}')
+
+            # Train sample
+            minval = np.percentile(data_trn['data'].w, args['outlier_param']['qmin'])
+            maxval = np.percentile(data_trn['data'].w, args['outlier_param']['qmax'])
+
+            print(__name__ + f'.train_models: Before: min event weight: {minval} | max event weight: {maxval}')
+
+            # -----
+            
+            # Validation sample
+            data_trn['data'].w[data_trn['data'].w < minval] = minval
+            data_trn['data'].w[data_trn['data'].w > maxval] = maxval
+            
+            minval = np.percentile(data_trn['data'].w, args['outlier_param']['qmin'])
+            maxval = np.percentile(data_trn['data'].w, args['outlier_param']['qmax'])
+
+            print(__name__ + f'.train_models: After:  min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
+            
+            # Validation sample
+            if args['outlier_param']['process_validate']:
+                
+                minval = np.percentile(data_val['data'].w, args['outlier_param']['qmin'])
+                maxval = np.percentile(data_val['data'].w, args['outlier_param']['qmax'])
+
+                print(__name__ + f'.train_models: Before: min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
+
+                data_val['data'].w[data_val['data'].w < minval] = minval
+                data_val['data'].w[data_val['data'].w > maxval] = maxval
+
+        else:
+            print(__name__ + f'.train_models: Not truncating outlier event weights {args["outlier_param"]}')
+    
+    # -------------------------------------------------------------
+    # @@ Variable normalization @@
+    if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
+        
+        cprint('\nZ-score normalizing variables ...', 'magenta')
+        
+        if  args['varnorm'] == 'zscore-weighted':
+            cprint('Using events weights with Z-score ["zscore-weighted"]', 'green')
+            X_mu, X_std = io.calc_zscore(X=data_trn['data'].x, weights=data_trn['data'].w)
+        else:
+            cprint('Not using event weights with Z-score [to activate use "zscore-weighted"]', 'green')
+            X_mu, X_std = io.calc_zscore(X=data_trn['data'].x)
+
         data_trn['data'].x  = io.apply_zscore(data_trn['data'].x, X_mu, X_std)
         data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_mu, X_std)
 
         # Save it for the evaluation
-        pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump({'X_mu': X_mu, 'X_std': X_std, 'ids': data_trn['data'].ids}, open(args['modeldir'] + '/zscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
-        prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w)
 
     elif args['varnorm'] == 'madscore' :
-
-        print('\nMAD-score normalizing variables ...')
-        X_m, X_mad  = io.calc_madscore(data_trn['data'].x)
-        data_trn['data'].x  = io.apply_zscore(data_trn['data'].x, X_m, X_mad)
-        data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_m, X_mad)
+        
+        cprint('\nMAD-score normalizing variables ...', 'magenta')
+        X_m, X_mad         = io.calc_madscore(data_trn['data'].x)
+        
+        data_trn['data'].x = io.apply_zscore(data_trn['data'].x, X_m, X_mad)
+        data_val['data'].x = io.apply_zscore(data_val['data'].x, X_m, X_mad)
 
         # Save it for the evaluation
-        pickle.dump([X_m, X_mad], open(args['modeldir'] + '/madscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
-    
-        prints.print_variables(data_trn['data'].x, data_trn['data'].ids)
+        pickle.dump({'X_m': X_m, 'X_mad': X_mad, 'ids': data_trn['data'].ids}, open(args['modeldir'] + '/madscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+        
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w)
 
+    # -------------------------------------------------------------
 
     def set_distillation_drain(ID, param, inputs, dtype='torch'):
         if 'distillation' in args and args['distillation']['drains'] is not None:
@@ -736,134 +805,141 @@ def train_models(data_trn, data_val, args=None) :
         param = args['models'][ID]
         print(f'Training <{ID}> | {param} \n')
 
-        ## Different model
-        if   param['train'] == 'torch_graph':
+        try:
             
-            inputs = {'data_trn': data_trn['data_graph'],
-                      'data_val': data_val['data_graph'],
-                      'args':     args,
-                      'param':    param}
-            
-            set_distillation_drain(ID=ID, param=param, inputs=inputs)
+            ## Different model
+            if   param['train'] == 'torch_graph':
+                
+                inputs = {'data_trn': data_trn['data_graph'],
+                        'data_val': data_val['data_graph'],
+                        'args':     args,
+                        'param':    param}
+                
+                set_distillation_drain(ID=ID, param=param, inputs=inputs)
 
-            if ID in args['raytune']['param']['active']:
-                model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
+                if ID in args['raytune']['param']['active']:
+                    model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
+                else:
+                    model = train.train_torch_graph(**inputs)
+            
+            elif param['train'] == 'xgb':
+
+                inputs = {'data_trn':    data_trn['data'],
+                        'data_val':    data_val['data'],
+                        'args':        args,
+                        'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
+                        'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
+                        'param':       param}
+                
+                set_distillation_drain(ID=ID, param=param, inputs=inputs, dtype='numpy')
+                
+                if ID in args['raytune']['param']['active']:
+                    model = train.raytune_main(inputs=inputs, train_func=iceboost.train_xgb)
+                else:
+                    model = iceboost.train_xgb(**inputs)
+
+            elif param['train'] == 'torch_deps':
+                
+                inputs = {'X_trn':       torch.tensor(data_trn['data_deps'].x, dtype=torch.float),
+                        'Y_trn':       torch.tensor(data_trn['data'].y,      dtype=torch.long),
+                        'X_val':       torch.tensor(data_val['data_deps'].x, dtype=torch.float),
+                        'Y_val':       torch.tensor(data_val['data'].y,      dtype=torch.long),
+                        'X_trn_2D':    None,
+                        'X_val_2D':    None,
+                        'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
+                        'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
+                        'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
+                        'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
+                        'args':        args,
+                        'param':       param,
+                        'ids':         data_trn['data_deps'].ids}
+                
+                set_distillation_drain(ID=ID, param=param, inputs=inputs)
+
+                if ID in args['raytune']['param']['active']:
+                    model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
+                else:
+                    model = train.train_torch_generic(**inputs)        
+
+            elif param['train'] == 'torch_generic':
+                
+                inputs = {'X_trn':       torch.tensor(aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X'), dtype=torch.float),
+                        'Y_trn':       torch.tensor(data_trn['data'].y, dtype=torch.long),
+                        'X_val':       torch.tensor(aux.red(data_val['data'].x, data_val['data'].ids, param, 'X'), dtype=torch.float),
+                        'Y_val':       torch.tensor(data_val['data'].y, dtype=torch.long),
+                        'X_trn_2D':    None if data_trn['data_tensor'] is None else torch.tensor(data_trn['data_tensor'], dtype=torch.float),
+                        'X_val_2D':    None if data_val['data_tensor'] is None else torch.tensor(data_val['data_tensor'], dtype=torch.float),
+                        'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
+                        'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
+                        'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
+                        'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
+                        'args':        args,
+                        'param':       param,
+                        'ids':         data_trn['data'].ids}
+
+                set_distillation_drain(ID=ID, param=param, inputs=inputs)
+
+                if ID in args['raytune']['param']['active']:
+                    model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
+                else:
+                    model = train.train_torch_generic(**inputs)
+            
+            elif param['train'] == 'graph_xgb':
+
+                inputs = {'y_soft': None}
+                set_distillation_drain(ID=ID, param=param, inputs=inputs)
+                
+                train.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
+                    trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'],
+                    feature_names=data_trn['data'].ids)  
+            
+            elif param['train'] == 'flr':
+                train.train_flr(data_trn=data_trn['data'], args=args, param=param)
+
+            elif param['train'] == 'flow':
+                train.train_flow(data_trn=data_trn['data'], data_val=data_val['data'], args=args, param=param)
+
+            elif param['train'] == 'cut':
+                None
+            
+            elif param['train'] == 'cutset':
+
+                inputs = {'data_trn':    data_trn['data'],
+                        'data_val':    data_val['data'],
+                        'args':        args,
+                        'param':       param}
+                
+                if ID in args['raytune']['param']['active']:
+                    model = train.raytune_main(inputs=inputs, train_func=train.train_cutset)
+                else:
+                    model = train.train_cutset(**inputs)
+
             else:
-                model = train.train_torch_graph(**inputs)
-        
-        elif param['train'] == 'xgb':
+                raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
 
-            inputs = {'data_trn':    data_trn['data'],
-                      'data_val':    data_val['data'],
-                      'args':        args,
-                      'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                      'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
-                      'param':       param}
-            
-            set_distillation_drain(ID=ID, param=param, inputs=inputs, dtype='numpy')
-            
-            if ID in args['raytune']['param']['active']:
-                model = train.raytune_main(inputs=inputs, train_func=iceboost.train_xgb)
-            else:
-                model = iceboost.train_xgb(**inputs)
+            # --------------------------------------------------------
+            # If distillation
+            if 'distillation' in args and ID == args['distillation']['source']:
+                
+                if len(args['primary_classes']) != 2:
+                    raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
+                
+                cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
 
-        elif param['train'] == 'torch_deps':
-            
-            inputs = {'X_trn':       torch.tensor(data_trn['data_deps'].x, dtype=torch.float),
-                      'Y_trn':       torch.tensor(data_trn['data'].y,      dtype=torch.long),
-                      'X_val':       torch.tensor(data_val['data_deps'].x, dtype=torch.float),
-                      'Y_val':       torch.tensor(data_val['data'].y,      dtype=torch.long),
-                      'X_trn_2D':    None,
-                      'X_val_2D':    None,
-                      'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
-                      'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
-                      'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                      'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
-                      'args':        args,
-                      'param':       param}
-            
-            set_distillation_drain(ID=ID, param=param, inputs=inputs)
+                if   param['train'] == 'xgb':
+                    XX, XX_ids = aux.red(data_trn['data'].x, data_trn['data'].ids, param)
+                    y_soft = model.predict(xgboost.DMatrix(data=XX, feature_names=XX_ids))
+                    if len(y_soft.shape) > 1: y_soft = y_soft[:, args['signalclass']]
+                
+                elif param['train'] == 'torch_graph':
+                    y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
+                else:
+                    raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
+            # --------------------------------------------------------
 
-            if ID in args['raytune']['param']['active']:
-                model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
-            else:
-                model = train.train_torch_generic(**inputs)        
-
-        elif param['train'] == 'torch_generic':
-            
-            inputs = {'X_trn':       torch.tensor(aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X'), dtype=torch.float),
-                      'Y_trn':       torch.tensor(data_trn['data'].y, dtype=torch.long),
-                      'X_val':       torch.tensor(aux.red(data_val['data'].x, data_val['data'].ids, param, 'X'), dtype=torch.float),
-                      'Y_val':       torch.tensor(data_val['data'].y, dtype=torch.long),
-                      'X_trn_2D':    None if data_trn['data_tensor'] is None else torch.tensor(data_trn['data_tensor'], dtype=torch.float),
-                      'X_val_2D':    None if data_val['data_tensor'] is None else torch.tensor(data_val['data_tensor'], dtype=torch.float),
-                      'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
-                      'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
-                      'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                      'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
-                      'args':  args,
-                      'param': param}
-
-            set_distillation_drain(ID=ID, param=param, inputs=inputs)
-
-            if ID in args['raytune']['param']['active']:
-                model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
-            else:
-                model = train.train_torch_generic(**inputs)
-
-        elif param['train'] == 'graph_xgb':
-
-            inputs = {'y_soft': None}
-            set_distillation_drain(ID=ID, param=param, inputs=inputs)
-            
-            train.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
-                trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'],
-                feature_names=data_trn['data'].ids)  
-        
-        elif param['train'] == 'flr':
-            train.train_flr(data_trn=data_trn['data'], args=args, param=param)
-
-        elif param['train'] == 'flow':
-            train.train_flow(data_trn=data_trn['data'], data_val=data_val['data'], args=args, param=param)
-
-        elif param['train'] == 'cut':
-            None
-        
-        elif param['train'] == 'cutset':
-
-            inputs = {'data_trn':    data_trn['data'],
-                      'data_val':    data_val['data'],
-                      'args':        args,
-                      'param':       param}
-            
-            if ID in args['raytune']['param']['active']:
-                model = train.raytune_main(inputs=inputs, train_func=train.train_cutset)
-            else:
-                model = train.train_cutset(**inputs)
-
-        else:
-            raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
-
-        # --------------------------------------------------------
-        # If distillation
-        if 'distillation' in args and ID == args['distillation']['source']:
-            
-            if len(args['primary_classes']) != 2:
-                raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
-            
-            cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
-
-            if   param['train'] == 'xgb':
-                XX, XX_ids = aux.red(data_trn['data'].x, data_trn['data'].ids, param)
-                y_soft = model.predict(xgboost.DMatrix(data=XX, feature_names=XX_ids))
-                if len(y_soft.shape) > 1: y_soft = y_soft[:, args['signalclass']]
-            
-            elif param['train'] == 'torch_graph':
-                y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
-            else:
-                raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
-        # --------------------------------------------------------
-
+        except KeyboardInterrupt:
+            cprint(__name__ + f'.train_models: CTRL+C catched -- continue with the next model', 'red')
+    
     cprint(__name__ + f'.train_models: [done]', 'yellow')
     
     return
@@ -880,9 +956,8 @@ def evaluate_models(data=None, info=None, args=None):
         Saves evaluation plots to the disk
     """
 
-    print(__name__ + ".evaluate_models: Evaluating models")
+    cprint(__name__ + f'.evaluate_models: ', 'yellow')
     print('')
-    
     
     # -----------------------------
     # ** GLOBALS **
@@ -965,7 +1040,7 @@ def evaluate_models(data=None, info=None, args=None):
     if data['data_deps'] is not None:
         X_deps  = data['data_deps'].x
     
-    X_kin    = None
+    X_kin  = None
     ids_kin = None
     if data['data_kin'] is not None:
         X_kin   = data['data_kin'].x
@@ -975,24 +1050,37 @@ def evaluate_models(data=None, info=None, args=None):
     try:
         ### Tensor variable normalization
         if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
-
-            print('\nZ-score normalizing tensor variables ...')
-            X_mu_tensor, X_std_tensor = pickle.load(open(args["modeldir"] + '/zscore_tensor.pkl', 'rb'))
+            
+            cprint('\nZ-score normalizing tensor variables ...', 'magenta')
+            Z_data = pickle.load(open(args["modeldir"] + '/zscore_tensor.pkl', 'rb'))
+            X_mu_tensor  = Z_data['X_mu_tensor']
+            X_std_tensor = Z_data['X_std_tensor']
+            
             X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
-        
-        ### Variable normalization
-        if   args['varnorm'] == 'zscore':
 
-            print('\nZ-score normalizing variables ...')
-            X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
+        ### Variable normalization
+        if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
+            
+            cprint('\nZ-score normalizing variables ...', 'magenta')
+            Z_data = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
+            X_mu   = Z_data['X_mu']
+            X_std  = Z_data['X_std']
+            
             X = io.apply_zscore(X, X_mu, X_std)
+            
+            prints.print_variables(X, ids, weights)
 
         elif args['varnorm'] == 'madscore':
-
-            print('\nMAD-score normalizing variables ...')
-            X_m, X_mad = pickle.load(open(args["modeldir"] + '/madscore.pkl', 'rb'))
+            
+            cprint('\nMAD-score normalizing variables ...', 'magenta')
+            Z_data = pickle.load(open(args["modeldir"] + '/madscore.pkl', 'rb'))
+            X_m    = Z_data['X_m']
+            X_mad  = Z_data['X_mad']
+            
             X = io.apply_madscore(X, X_m, X_mad)
-
+            
+            prints.print_variables(X, ids, weights)
+            
     except:
         cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
     
@@ -1003,15 +1091,15 @@ def evaluate_models(data=None, info=None, args=None):
 
     if X_2D is not None:
         X_2D_ptr   = torch.from_numpy(X_2D).type(torch.FloatTensor)
-        
+    
     if X_deps is not None:
         X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
-        
+    
 
     # ====================================================================
     # **  MAIN LOOP OVER MODELS **
     #
-
+    
     for i in range(len(args['active_models'])):
         
         ID    = args['active_models'][i]
@@ -1031,6 +1119,15 @@ def evaluate_models(data=None, info=None, args=None):
 
         elif param['predict'] == 'xgb_logistic':
             func_predict = predict.pred_xgb_logistic(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
+            
+            if args['plot_param']['contours']['active']:
+                plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
+                    targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
+            
+            plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
+        
+        elif param['predict'] == 'xgb_scalar':
+            func_predict = predict.pred_xgb_scalar(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
             
             if args['plot_param']['contours']['active']:
                 plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
@@ -1190,127 +1287,30 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     ### Output score re-weighted observables
 
     if 'OBS_reweight' in args['plot_param'] and args['plot_param']['OBS_reweight']['active']:
-
-        def plot_helper(mask, sublabel, pathlabel):
-            
-            cprint(f'label = {label} | sublabel = {sublabel}', 'green')
-            
-            # Original weights            
-            w = weights[mask] if weights is not None else np.ones(len(X_RAW))[mask]
-            
-            # Transform model output scores according to the function defined
-            s = np.ones(len(y_pred))
-            
-            for cmd in args['plot_param']['OBS_reweight']['func']:
-                print(f'executing: "{cmd}"')
-                exec(cmd)
-            
-            # Apply event masks
-            s   = s[mask]
-            y_m = y[mask]
-            
-            # Loop over each observable
-            for i in range(X_RAW.shape[1]):
-                
-                XX        = X_RAW[mask, i]
-                
-                nbins     = 50
-                binrange  = [np.percentile(XX, 1), np.percentile(XX, 99)]
-                bins      = np.linspace(binrange[0], binrange[1], nbins+1)
-                
-                # ----------------------------------------------------
-                
-                obs_X = {
-                    
-                    # Axis limits
-                    'xlim'    : (bins[0], bins[-1]),
-                    'ylim'    : None,
-                    'xlabel'  : f'{ids_RAW[i]}',
-                    'ylabel'  : r'Weighted counts',
-                    'units'   : {'x': r'a.u.', 'y' : r'1'},
-                    'label'   : f'{label}',
-                    'figsize' : (4, 3.75),
-                    
-                    # Ratio
-                    'ylim_ratio' : (0.5, 1.5),
-
-                    # Histogramming
-                    'bins'    : None,
-                    'density' : False,
-                    
-                    # Function to calculate
-                    'func'    : None
-                }
-                
-                data_template = {
-                    'data'   : None,
-                    'weights': None,
-                    'label'  : 'Data',
-                    'hfunc'  : 'errorbar',
-                    'style'  : iceplot.errorbar_style,
-                    'obs'    : obs_X,
-                    'hdata'  : None,
-                    'color'  : None
-                }
-                
-                # Data source <-> Observable collections
-                class1    = data_template.copy() # Deep copies
-                class0    = data_template.copy()
-                class0_ML = data_template.copy()
-                
-                class1.update({
-                    'label'  : '$C_1$',
-                    'hfunc'  : 'hist',
-                    'style'  : iceplot.hist_style_step,
-                    'color'  : (0,0,0)
-                })
-                class0.update({
-                    'label'  : '$C_0$',
-                    'hfunc'  : 'hist',
-                    'style'  : iceplot.hist_style_step,
-                    'color'  : iceplot.imperial_green
-                })
-                class0_ML.update({
-                    'label'  : '$C_0$ (AI)',
-                    'hfunc'  : 'hist',
-                    'style'  : iceplot.hist_style_step,
-                    'color'  : iceplot.imperial_dark_red
-                })
-
-                data = [class1, class0, class0_ML]
-                
-                data[0]['hdata'] = iceplot.hist_obj(XX[y_m == 1], bins=bins, weights=w[y_m == 1])
-                data[1]['hdata'] = iceplot.hist_obj(XX[y_m == 0], bins=bins, weights=w[y_m == 0])
-                data[2]['hdata'] = iceplot.hist_obj(XX[y_m == 0], bins=bins, weights=s[y_m == 0] * w[y_m == 0])
-                
-                # Update labels with chi2
-                chi2_0, ndf_0       = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
-                chi2_0_AI, ndf_0_AI = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
-                
-                data[1]['label'] += f' | $\\chi^2 = {chi2_0:0.0f} \, / \, {ndf_0} = {chi2_0/ndf_0:0.1f}$'
-                data[2]['label'] += f' | $\\chi^2 = {chi2_0_AI:0.0f} \, / \, {ndf_0_AI} = {chi2_0_AI/ndf_0_AI:0.1f}$'
-                
-                # Plot it
-                fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale='log', ratio_error_plot=True)
-                fig1, ax1 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_error_plot=True)
-                
-                f'{targetdir}/OBS_reweight/{label}/{pathlabel}'
-                
-                fig0.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__log.pdf', bbox_inches='tight')
-                fig0.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__log.png', bbox_inches='tight', dpi=300)
-                
-                fig1.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__linear.pdf', bbox_inches='tight')
-                fig1.savefig(aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}') + f'/OBS_reweight_[{ids_RAW[i]}]__linear.png', bbox_inches='tight', dpi=300)
-                
-                fig0.clf()
-                fig1.clf()
-                plt.close()
-                # ----------------------------------------------------
+        
+        var_names = aux.process_regexp_ids(all_ids=ids_RAW, ids=args['plot_param']['OBS_reweight']['var'])
+        pick_ind  = np.array(np.where(np.isin(ids_RAW, var_names))[0], dtype=int)
+        
+        # -----------------------------------------------
         
         # ** All inclusive **
         mask = np.ones(len(y_pred), dtype=bool)
-        plot_helper(mask=mask, sublabel='inclusive', pathlabel='inclusive')
-
+        
+        ## Plot over different temperature values
+        sublabel = 'inclusive'
+        dir      = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
+        filename = dir + "/chi2_summary.log"
+        open(filename, 'w').close() # Clear content
+        
+        for tau in args['plot_param']['OBS_reweight']['tau_values']:
+            
+            chi2_table = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
+                                         mask=mask, pick_ind=pick_ind, label=label, sublabel=sublabel,
+                                         param=args['plot_param']['OBS_reweight'], tau=tau,
+                                         targetdir=targetdir + '/OBS_reweight')
+            
+            plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
+        
         # ** Set filtered **
         if 'set_filter' in args['plot_param']['OBS_reweight']:
             
@@ -1323,11 +1323,27 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                     cprint(f'OBS_reweight: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
                     continue
                 
-                plot_helper(mask=mask_filterset[m,:], sublabel=text_filterset[m], pathlabel=path_filterset[m])
+                ## Plot over different temperature values
+                sublabel = text_filterset[m]
+                dir      = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
+                filename = dir + "/chi2_summary.log"
+                open(filename, 'w').close() # Clear content
+                
+                for tau in args['plot_param']['OBS_reweight']['tau_values']:
+                    
+                    mask = mask_filterset[m,:]
+                    
+                    chi2_table = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
+                                         mask=mask, pick_ind=pick_ind, label=label, sublabel=sublabel,
+                                         param=args['plot_param']['OBS_reweight'], tau=tau,
+                                         targetdir=targetdir + '/OBS_reweight')
+                    
+                    plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
+    
     
     # --------------------------------------
     ### ROC plots
-
+    
     if 'ROC' in args['plot_param'] and args['plot_param']['ROC']['active']:
 
         def plot_helper(mask, sublabel, pathlabel):
@@ -1589,7 +1605,7 @@ def plot_XYZ_multiple_models(targetdir, args):
                 var   = args['plot_param']['ROC_binned'][pid]['var']
                 edges = args['plot_param']['ROC_binned'][pid]['edges']
             else:
-                break # No more plots 
+                break # No more plots
             
             if len(var) == 1: # 1D
                 

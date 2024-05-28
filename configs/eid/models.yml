@@ -74,9 +74,11 @@ gxgb0:
     num_workers: 4
     
     # Read/Write of epochs
-    savemode: 'all'              # 'all', 'latest'
+    evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
     readmode: -1                 # -1 is the last saved epoch
 
+    eval_batch_size: 512
+  
   # ** XGBOOST **
   xgb:
     train:   'xgb'
@@ -114,7 +116,7 @@ gxgb0:
     plot_trees: False
     
     # Read/Write of epochs
-    savemode: 'all'                  # 'all', 'latest'
+    evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
     readmode: -1                     # -1 is the last saved epoch
 
 
@@ -175,8 +177,10 @@ gnet0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -236,8 +240,10 @@ gnet1:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -297,8 +303,10 @@ gnet2:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -358,8 +366,10 @@ gnet3:
   num_workers: 4
   
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Factorized Likelihood Ratio
@@ -407,12 +417,12 @@ xgb0:
     
     # learning task parameters
     objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']     # for evaluation, 'mlogloss'
+    eval_metric: ['logloss']      # for evaluation, 'logloss', 'mlogloss'
 
   plot_trees: False
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -454,8 +464,10 @@ dmlp:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Logistic Regression (convex model = global optimum guarantee)
@@ -494,8 +506,10 @@ lgr0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Convolutional Neural Net + MAXOUT MLP
@@ -540,8 +554,10 @@ cnn0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Deep MAXOUT network
@@ -581,8 +597,10 @@ dmx0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Deep Normalizing Flow
@@ -628,5 +646,7 @@ dbnf0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096

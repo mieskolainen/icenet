@@ -13,52 +13,31 @@ mva_param: &MVA_INPUT_PARAM
   signal_class: 1                     # Signal class ID
   #DA_class:    -2                    # Domain Adaptation class
   
-  inputvar_scalar:  'MVA_SCALAR_VARS_ALL' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  #inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
-  #jagged_maxdim:    6
+  inputvar_scalar: 'MVA_SCALAR_VARS'  # Input variables, implemented under mvavars.py
   
-  varnorm: null                       # Variable normalization: 'zscore', 'madscore', null
-  #varnorm_tensor: 'zscore'           # Tensor variable normalization
-  #varnorm_graph: null                # Not implemented yet
+  varnorm: 'zscore-weighted'          # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   
   frac: [0.6, 0.1, 0.3]               # Train vs validate/test split fraction
   
   # Imputation
   imputation_param:
     active: true                      # True / False
-    var: 'MVA_SCALAR_VARS_ALL'        # Array of variables to be imputated
+    var: null                         # Array of variables to be imputated, null for all
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: -99                   # For constant imputation
+    fill_value: 0                     # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
     values: null                      # Special values which indicate the need for imputation, if null, then only Inf/Nan
-  
-  # # Graph object construction
-  # graph_param:
-  #   global_on: True
-  #   self_loops: True
-  #   directed: False
-  #   coord: 'pxpypze'                 # 'ptetaphim', 'pxpypze'
-
-  # # ** Image tensor object construction **
-  # image_param:
-
-  #   # See the corresponding construction under common.py
-  #   channels: 2                 # 1,2,...
-
-  #   # bin-edges
-  #   eta_bins: []
-  #   phi_bins: []
-
 
 # ----------------------------------------------------
 genesis_runmode:
   
   maxevents:  null
-  inputmap:   null #"mc_input.yml"
+  inputmap:   null
   inputvars: 'mvavars'                # Input description python file
   
-  mcfile:     'hepml_EEp_pteta_after_rho_train/MC.parquet'
-  datafile:   'files/Data_train_EEp.parquet'
+  mcfile:     ['MC_*_EEm.parquet']
+  datafile:   ['Data_*_EEm.parquet']
+  
   tree_name:  null                    # 'ntuplizer/tree'
 
   targetfunc: null                    # Training target,    implemented under mctargets.py
@@ -66,7 +45,7 @@ genesis_runmode:
   cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
-  pickle_size: 100000                 # Number of entries (events) per pickle file
+  pickle_size: 1000000                # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
@@ -79,36 +58,61 @@ train_runmode:
 
   ## Reweighting setup
   reweight: true
-  reweight_mode: 'write'          # 'write', 'load'
+  reweight_mode: 'write'              # 'write', 'load'
   reweight_file: 'reweight_train.pkl' # differential reweighting model file
   
   reweight_param: &REWEIGHT_PARAM
 
-    maxevents: 100000             # Maximum number of events for the PDF construction
-    equal_frac: true              # Equalize integrated class fractions
-    differential: false           # Differential reweighting
-    reference_class: 0
-
-    # ---------------------
+    equal_frac: true                  # Equalize integrated class fractions
+    differential: true                # Differential reweighting
+    reference_class: 1                # Re-weight target class id
     
-    # see /trg/tune0.yml
+    # Differential reweighting param
+    diff_param:
+      
+      maxevents: null                      # Maximum number of events for the PDF construction
+      var:  ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
+      type: 'ML'                           # 'ML', 'pseudo-ND', '2D', '1D'
+      
+      hist_param:
 
+        pseudo_type: 'product'             # 'product', 'geometric_mean'
+        
+        bins:  [[-3.1, 3.1, 50], [0.0001, 50.0, 50], [1.0, 60, 50]] # Make sure the bounds cover the phase space
+        binmode:  ['linear', 'linear', 'linear']     # 'log10' or 'linear' or 'edges' (custom array) binning
 
+        # ! Variable, and binning min/max boundaries are both transformed !
+        transform: ['log10', null, null]   # 'log10', 'sqrt', 'square', null
+        
+        max_reg: 1000.0                    # Maximum weight cut-off regularization
+      
+      ML_param:
+        active_model: xgb3Drw              # Under models.yml
+        max_reg:      1000.0               # Maximum weight cut-off regularization
+  
+  
   ## Outlier protection in the training
   outlier_param:
     algo: 'truncate'   # algorithm: 'truncate', null
     qmin: 0.01         # in [0,100] 
     qmax: 99.9         # in [0,100]
 
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
+  
+
   # ** Activate models here **
   # Give all models some unique identifier and label
   models:  !include configs/zee/models.yml
   active_models: &ACTIVE_MODELS
-    
+
+    - iceboost_plus
     - iceboost0
     - xgb0
-  #  - dmlp0
-  
+    
+    - fastkan0
+    - lzmlp0
+    - dmlp0
   
   raytune: !include configs/zee/raytune.yml
 

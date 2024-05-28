@@ -3,16 +3,20 @@
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import List
+
+from icenet.deep.deeptools import Multiply
+
 
 def get_act(act: str):
     """
     Returns torch activation function
     
     Args:
-        act:  activation function 'relu', 'tanh', 'silu', 'elu
+        act:  activation function type
     """
     if   act == 'relu':
         return nn.ReLU()
@@ -22,6 +26,10 @@ def get_act(act: str):
         return nn.SiLU()
     elif act == 'elu':
         return nn.ELU()
+    elif act == 'gelu':
+        return nn.GELU()
+    elif act == 'softplus':
+        return nn.Softplus()
     else:
         raise Exception(f'Uknown act "{act}" chosen')
 
@@ -104,17 +112,23 @@ def MLP_ALL_ACT(layers: List[int], activation: str='relu', batch_norm: bool=Fals
 
 class DMLP(nn.Module):
 
-    def __init__(self, D, C, mlp_dim = [128, 64], activation='relu', batch_norm=True, dropout=0.0):
+    def __init__(self, D, C, out_dim=None, mlp_dim = [128, 64], activation='relu', batch_norm=True, dropout=0.0, last_tanh=False, last_tanh_scale=10.0, **kwargs):
         """
         Args:
             D       : Input dimension
+            C       : Number of classes
             mlp_dim : hidden layer dimensions (array)
-            C       : Output dimension
+            out_dim : Output dimension
         """
         super(DMLP,self).__init__()
 
         self.D = D
         self.C = C
+        
+        if out_dim is None:
+            self.out_dim = C
+        else:
+            self.out_dim = out_dim
         
         # Add input dimension
         layers = [D]
@@ -124,10 +138,15 @@ class DMLP(nn.Module):
             layers.append(mlp_dim[i])
 
         # Add output dimension
-        layers.append(C)
+        layers.append(self.out_dim)
         
         self.mlp = MLP(layers, activation=activation, batch_norm=batch_norm, dropout=dropout)
-
+        
+        # Add extra final squeezing activation and post-scale aka "soft clipping"
+        if last_tanh:
+            self.mlp.add_module("tanh",  nn.Tanh())
+            self.mlp.add_module("scale", Multiply(last_tanh_scale))
+    
     def forward(self,x):
         
         x = self.mlp(x)
@@ -136,13 +155,17 @@ class DMLP(nn.Module):
     def softpredict(self,x) :
         """ Softmax probability
         """
-        #if self.training:
-        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        #else:
-        return F.softmax(self.forward(x), dim=-1)
-
+        
+        if self.out_dim > 1:
+            return F.softmax(self.forward(x), dim=-1)
+        else:
+            return torch.sigmoid(self.forward(x))
+    
     def binarypredict(self,x) :
         """ Return maximum probability class
         """
-        prob = list(self.softpredict(x).detach().numpy())
-        return np.argmax(prob, axis=1)
+        if self.out_dim > 1:
+            prob = list(self.softpredict(x).detach().numpy())
+            return np.argmax(prob, axis=1)
+        else:
+            return np.round(self.softpredict(x).detach().numpy()).astype(int)

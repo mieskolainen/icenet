@@ -5,7 +5,7 @@
 #
 # log det X^{-1} = log(det X)^{-1} = -log det X
 #
-#
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import torch
 import math

@@ -1,51 +1,12 @@
 ## MVA models
 
-# -----------------------------------------------
-# ** Mutual Information regularization **
-MI_REG_PARAM: &MI_REG_PARAM
-  
-  classes: [0]             #  Which classes to use in the regularization
-  
-  losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
-  min_count: 32            #  Minimum number of events (per category)
-  max_N: 20000             #  Maximum number of events per function call (use to limit sample size for DCORR)
-  min_score: null          #  Consider only events with MVA output larger than this value (null for None)
-  poisson_weight: False    #  Per category Poisson sqrt(N) weighted loss
-  
-  # ------------------
-  # Neural MI param
-  
-  eval_batch_size: 8192    #  Evaluation batch size (pure memory <-> time tradeoff)
-  alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  [null]     #  EMA tracking values (for each class)
-  
-  y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
-  
-  epochs: 5
-  batch_size: 256          #  if the estimate (network) turns into NaN, try tuning batch size, lr, weight decay ...
-  lr: 1.0e-4
-  weight_decay: 1.0e-2
-  clip_norm: 1.0
-  
-  mlp_dim: [128, 128]
-  batch_norm: False
-  dropout: 0.01
-  noise_std: 0.025
-  activation: 'relu'
-  
-  # -------------------------
-
-  # Comment out for no categories (N.B. dependence structure over inclusive sample != categorical)
-  #set_filter: *MI_DOMAIN_FILTER
-# -----------------------------------------------
-
-
-# XGBoost
+# "Stage 1" model
+#
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb0:
+xgb3Drw:
   train:   'xgb'
   predict: 'xgb_logistic'
-  label:   'XGB'
+  label:   'XGB3DRW'
   raytune:  xgb_trial_0
   
   # ** Custom set of variables **
@@ -54,25 +15,25 @@ xgb0:
   
   # booster parameters
   model_param:
-    num_boost_round: 200       # number of epochs (equal to the number of trees!)
+    num_boost_round: 300      # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'       # 'auto', 'cpu', 'cuda'
     
     learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 12
+    gamma: 1.5
+    max_depth: 15
     min_child_weight: 1.0
-    max_delta_step: 1
+    max_delta_step: 1.0
     subsample: 1
 
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
+    colsample_bytree:  1.0
+    colsample_bylevel: 1.0
+    colsample_bynode:  1.0
     
-    reg_lambda: 2.0            # L2 regularization
-    reg_alpha: 0.05            # L1 regularization
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
     objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
@@ -88,14 +49,20 @@ xgb0:
   plot_trees: False
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
+  evalmode: 25                  # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                  # -1 is the last saved epoch
 
-iceboost0:
+
+# ------------------------------------------------
+# "Stage 2" models
+
+# Plain XGBoost
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+xgb0:
   train:   'xgb'
-  predict: 'xgb_logistic'
-  label:   'ICEBOOST'
-  raytune:  xgb_trial_0
+  predict: 'xgb_scalar'
+  label:   'XGB'
+  raytune:  xgb_setup_0
   
   # ** Custom set of variables **
   #include_MVA_vars: ['.*']
@@ -103,25 +70,70 @@ iceboost0:
   
   # booster parameters
   model_param:
-    num_boost_round: 200       # number of epochs (equal to the number of trees!)
+    num_boost_round: 400        # number of epochs (equal to the number of trees!)
     
-    booster: 'gbtree'          # 'gbtree' (default), 'dart' (dropout boosting)
+    booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'        # 'auto', 'cpu', 'cuda'
+    device:      'auto'         # 'auto', 'cpu', 'cuda'
     
     learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 12
+    gamma: 1.5
+    max_depth: 20
     min_child_weight: 1.0
-    max_delta_step: 1
+    max_delta_step: 1.0
     subsample: 1
 
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
+    colsample_bytree:  0.9
+    colsample_bylevel: 0.9
+    colsample_bynode:  0.9
     
-    reg_lambda: 2.0            # L2 regularization
-    reg_alpha: 0.05            # L1 regularization
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
+    
+    # learning task parameters
+    objective: 'binary:logistic'  # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']      # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  plot_trees: False
+  
+  # Read/Write of epochs
+  evalmode: 25                    # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                    # -1 is the last saved epoch
+
+
+# ICEBOOST with custom loss
+# 
+iceboost0:
+  train:   'xgb'
+  predict: 'xgb_logistic'
+  label:   'ICEBOOST'
+  raytune:  xgb_setup_0
+  
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  #exclude_MVA_vars: ['.*']
+  
+  # booster parameters
+  model_param:
+    num_boost_round: 400        # number of epochs (equal to the number of trees!)
+    
+    booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'         # 'auto', 'cpu', 'cuda'
+    
+    learning_rate: 0.1
+    gamma: 1.5
+    max_depth: 20
+    min_child_weight: 1.0
+    max_delta_step: 1.0
+    subsample: 1
+
+    colsample_bytree:  0.9
+    colsample_bylevel: 0.9
+    colsample_bynode:  0.9
+    
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
     objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
@@ -133,22 +145,206 @@ iceboost0:
       classes: [0,1]
       beta: 1.0
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-
-  MI_param:
-    beta: [0.1]                # Positive for minimizing (for each class in use)
-    <<: *MI_REG_PARAM
   
   plot_trees: False
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 25                  # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                  # -1 is the last saved epoch
+
+
+# ICEBOOST with an additional re-weighting in-the-loop regularization
+# 
+iceboost_plus:
+  train:   'xgb'
+  predict: 'xgb_scalar'
+  label:   'ICEBOOST-PLUS'
+  raytune:  xgb_setup_0
+  
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  #exclude_MVA_vars: ['.*']
+  
+  # booster parameters
+  model_param:
+    num_boost_round: 400        # number of epochs (equal to the number of trees!)
+    
+    booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'         # 'auto', 'cpu', 'cuda'
+    
+    learning_rate: 0.1
+    gamma: 1.5
+    max_depth: 20
+    min_child_weight: 1.0
+    max_delta_step: 1.0
+    subsample: 1
+
+    colsample_bytree:  0.9
+    colsample_bylevel: 0.9
+    colsample_bynode:  0.9
+    
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
+    
+    # learning task parameters
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      
+      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+    
+    flat:
+      classes: [0,1]
+      beta: 0.01
+      AIRW:
+        classes:  [0]      # One (or two) classes
+        RW_modes: ['LR']   # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct', 'identity'
+
+      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  #MI_param:
+  #  beta: [0.1]                 # Positive for minimizing (for each class in use)
+  #  <<: *MI_REG_PARAM
+  
+  plot_trees: False
+
+  # Read/Write of epochs
+  evalmode: 25                  # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                  # -1 is the last saved epoch
+
+
+## Lipschitz MLP
+#
+lzmlp0:
+  train:   'torch_generic'
+  predict: 'torch_scalar'
+  raw_logit: true               # Return raw logits
+
+  label:   'LZMLP'
+  raytune:  null
+  
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  #exclude_MVA_vars: ['.*']
+  
+  # Model
+  conv_type: 'lzmlp'
+  out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
+
+  model_param:
+    mlp_dim: [64, 64, 64]             # hidden layer dimensions
+    activation: 'relu'
+    batch_norm: False                 # batch_norm & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
+    dropout: 0
+    last_tanh: True                   # Extra tanh layer
+    last_tanh_scale: 10.0             # Scale after tanh()
+  
+  # Optimization
+  opt_param:  
+    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lipschitz_beta:    5.0e-5         # lipschitz regularization (use with 'lzmlp')
+    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
+    logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
+
+    #gamma: 2                         # focal_entropy "exponent"
+    #temperature: 1                   # logit_norm_cross_entropy "temperature"
+    
+    optimizer: 'AdamW'
+    clip_norm: 1.0
+    
+    epochs: 300
+    batch_size: 2048
+    lr: 1.0e-4
+    weight_decay: 1.0e-4       # L2-regularization
+  
+  # Scheduler
+  scheduler_param:
+    step_size: 200             # Number of epochs for drop
+    gamma: 0.1
+  
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 16
+  
+  # Read/Write of epochs
+  evalmode: 10                 # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+  
+  eval_batch_size: 4096
+
+## FastKAN
+#
+fastkan0:
+  train:   'torch_generic'
+  predict: 'torch_scalar'
+  raw_logit: true               # Return raw logits
+
+  label:   'FASTKAN'
+  raytune:  null
+  
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  #exclude_MVA_vars: ['.*']
+  
+  # Model
+  conv_type: 'fastkan'
+  out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
+
+  model_param:
+    grid_min: -2.0                    # Activation learning param
+    grid_max:  2.0                    # 
+    num_grids:   8                    # 
+    mlp_dim: [32, 32, 32]             # hidden layer dimensions
+    use_base_update: False            # Use "base MLP" in addition
+    
+    last_tanh: True                   # Extra tanh layer
+    last_tanh_scale: 10.0             # Scale after tanh()
+
+  # Optimization
+  opt_param:  
+    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    #lipshitz_beta:    1.0e-4         # Lipshitz regularization (use with 'lzmlp')
+    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
+    logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
+
+    #gamma: 2                         # focal_entropy "exponent"
+    #temperature: 1                   # logit_norm_cross_entropy "temperature"
+    
+    optimizer: 'AdamW'
+    clip_norm: 1.0
+    
+    epochs: 300
+    batch_size: 2048
+    lr: 1.0e-4
+    weight_decay: 1.0e-4       # L2-regularization
+  
+  # Scheduler
+  scheduler_param:
+    step_size: 200             # Number of epochs for drop
+    gamma: 0.1
+  
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 16
+  
+  # Read/Write of epochs
+  evalmode: 10                 # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                 # -1 is the last saved epoch
+  
+  eval_batch_size: 4096
 
 
-# Deep MLP
+## Deep MLP
+#
 dmlp0:
   train:   'torch_generic'
-  predict: 'torch_vector'
+  predict: 'torch_scalar'
+  raw_logit: true               # Return raw logits
+
   label:   'DMLP'
   raytune:  null
   
@@ -158,35 +354,43 @@ dmlp0:
   
   # Model
   conv_type: 'dmlp'
+  out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
+
   model_param:
-    mlp_dim: [32, 32]     # hidden layer dimensions
-    activation: 'silu'
-    batch_norm: False
-    dropout: 0.01
+    mlp_dim: [64, 64, 64]             # hidden layer dimensions
+    activation: 'relu'
+    batch_norm: False                 # batch_norm & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
+    dropout: 0
+    last_tanh: True                   # Extra tanh layer
+    last_tanh_scale: 10.0             # Scale after tanh()
   
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy'  # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                   # focal_entropy exponent
-    temperature: 1             # logit norm temperature
+    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ lambda * torch.sum(|logits|)
+    logit_L2_beta: 5.0e-3             # logit norm reg. ~ lambda * torch.sum(logits**2)
+
+    #gamma: 2                         # focal_entropy "exponent"
+    #temperature: 1                   # logit_norm_cross_entropy "temperature"
     
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 150
-    batch_size: 256
-    lr: 3.0e-4
-    weight_decay: 1.0e-5      # L2-regularization
-
+    epochs: 300
+    batch_size: 2048
+    lr: 1.0e-4
+    weight_decay: 1.0e-4       # L2-regularization
+  
   # Scheduler
   scheduler_param:
-    step_size: 250             # Number of epochs for drop
+    step_size: 200             # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
+  num_workers: 16
+  
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 10                 # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
-
+  
+  eval_batch_size: 4096
