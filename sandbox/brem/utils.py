@@ -172,7 +172,8 @@ def extract_weights(
     # Remove filename suffix, if any
     filename = filename.split(".")[0]
 
-    if nbins == None: nbins = int( len(df.index) / 1000. )
+    if nbins == None: nbins = int( len(df.index) / 100. ) # an average of 100 counts (S+B) per bin
+    print(f'Attempting to cluster {len(df.index)} entries into {nbins} bins ...')
     
     # Determine clusters
     print('Obtaining clusterizer model...')
@@ -201,14 +202,21 @@ def extract_weights(
     print('Obtaining weights...')
     dct = {'weights':{},'counts':{},'features':[]}
     if write == True:
-        for cluster,group in df.groupby('cluster') :
+        groups = df.groupby('cluster')
+        n_sig_tot = 0
+        n_bkg_tot = 0
+        for cluster,group in groups :
             n_sig = group.is_e.sum()
             n_bkg = np.invert(group.is_e).sum()
             if n_sig == 0 : RuntimeError(f'Bin {cluster} has no signal events, reduce the number of bins!')
             if n_bkg == 0 : RuntimeError(f'Bin {cluster} has no bkgd events, reduce the number of bins!')
             dct['weights'][int(cluster)] = float(n_bkg)/float(n_sig) if n_sig > 0 else 1.
             dct['counts'][int(cluster)] = float(min(n_sig,n_bkg))
+            n_sig_tot += n_sig
+            n_bkg_tot += n_bkg
+            print(cluster,n_sig,n_bkg,n_sig+n_bkg,len(group))
         dct['features'] = reweight_features
+        print(n_sig_tot,n_bkg_tot,n_sig_tot+n_bkg_tot,len(df.index))
         with open(f'{base}/{filename}.json','w') as f : json.dump(dct,f)
         print(f'Written weights to file "{base}/{filename}.json"')
     else:
@@ -269,7 +277,7 @@ def plot_weights(
         cmap=plt.cm.tab10, # plt.cm.Paired,
         aspect='auto', 
         origin='lower')
-    plt.title('Binning')
+    plt.title('binning')
     plt.xlim(x_min,x_max)
     plt.ylim(y_min,y_max)
     plt.xlabel(x_feature)
@@ -291,7 +299,7 @@ def plot_weights(
         norm=LogNorm(vmin=max(min(weights.values()),1.e-4),vmax=min(max(weights.values()),1.e4)),
         aspect='auto', 
         origin='lower')
-    plt.title('Weights')
+    plt.title('weights')
     plt.xlim(x_min,x_max)
     plt.ylim(y_min,y_max)
     plt.xlabel(x_feature)
@@ -314,7 +322,7 @@ def plot_weights(
         norm=LogNorm(vmin=0.1,vmax=max(counts.values())),
         aspect='auto', 
         origin='lower')
-    plt.title('Counts')
+    plt.title('min(counts(sig,bkgd))')
     plt.xlim(x_min,x_max)
     plt.ylim(y_min,y_max)
     plt.xlabel(x_feature)
@@ -333,7 +341,7 @@ def plot_weights(
     bins = np.logspace(np.log(xmin),np.log(xmax),100)
     entries,_,_ = plt.hist(df['weight'],bins,histtype='stepfilled')
     plt.title('')
-    plt.xlabel('Weight')
+    plt.xlabel('weight')
     plt.ylabel('a.u.')
     plt.xlim(xmin,xmax)
     plt.ylim(0.3,entries.max()*3.)
@@ -353,7 +361,7 @@ def plot_weights(
     bins = np.linspace(xmin,float(xmax),xmax)
     entries,_,_ = plt.hist(values,bins,histtype='stepfilled')
     plt.title('')
-    plt.xlabel('Counts')
+    plt.xlabel('min(counts(sig,bkgd))')
     plt.ylabel('a.u.')
     plt.xlim(xmin,xmax)
     plt.ylim(0.,entries.max()*1.1) #0.3,entries.max()*3.)
@@ -510,8 +518,11 @@ def roc_curves(
 
         # transform
         if 'eta' in var:
-            eta = dct['val']['vars'][var]
-            dct['val']['vars'][var] = 0.-np.abs(eta)
+            tmp = dct['val']['vars'][var]
+            dct['val']['vars'][var] = 0.-np.abs(tmp) # more than abs(var)
+        if 'rho' in var:
+            tmp = dct['val']['vars'][var]
+            dct['val']['vars'][var] = 0.-tmp # less than var
 
         fpr,tpr,thresholds = roc_curve(
             y_true=dct['val']['label'],

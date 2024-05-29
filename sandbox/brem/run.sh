@@ -1,1 +1,1 @@
-python reweight.py --nbins=100 --verbose
+python reweight.py --verbose

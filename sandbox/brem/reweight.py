@@ -34,11 +34,11 @@ brem_base = f'{icenet_base}/sandbox/brem'
 inputs = f'{brem_base}/inputs'
 outputs = f'{brem_base}/outputs'
 files = [
-    f'{icenet_base}/travis-stash/input/icebrem/output_signal_10k.root',
+    #f'{icenet_base}/travis-stash/input/icebrem/output_signal_10k.root',
     # (class label,file)
-    #(1,f'{icenet_base}/travis-stash/input/icebrem/output_signal_10k.root'), 
+    (1,f'{icenet_base}/travis-stash/input/icebrem/output_signal_10k.root'), 
     #(0,f'{icenet_base}/travis-stash/input/icebrem/output_qcd_10k.root'),
-    #(0,f'{icenet_base}/travis-stash/input/icebrem/output_data_10k.root'),
+    (0,f'{icenet_base}/travis-stash/input/icebrem/output_data_10k.root'),
     ]
 df = parse(files,args.nevents,args.verbose)
 
@@ -78,7 +78,8 @@ reweight_features = [
     ['log_trk_pt','trk_eta'],
     ['log_gsf_pt','gsf_eta'],
     ['rho','dummy'],
-    ][0]
+    ['log_trk_pt','rho'],
+     ][0]
 
 nbins = args.nbins if args.nbins > 0 else None
 
