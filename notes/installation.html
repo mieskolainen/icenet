@@ -564,12 +564,9 @@ export TMPDIR=&lt;PATH_WITH_SPACE&gt;/tmp
 <p>Execute</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:mieskolainen/icenet.git &amp;&amp; cd icenet
 
-# Create environment
-conda create -y --name icenet -c conda-forge python==3.10.11 cmake==3.26.4 gxx_linux-64==11.3.0 sysroot_linux-64==2.28
+# Create the environment
+conda env create -f environment.yml
 conda activate icenet
-
-# Install cudatoolkit and cudnn
-conda install -c conda-forge cudatoolkit==11.8.0 cudnn==8.9.7.29 cudatoolkit-dev==11.7.0
 
 # Install dependencies with pip
 pip install -r requirements.txt
