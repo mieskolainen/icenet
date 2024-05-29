@@ -1350,20 +1350,15 @@ def table_writer(filename, label, sublabel, tau, chi2_table, print_to_screen=Fal
             print('')
 
 
-def plot_AIRW(X, y, ids, weights, y_pred, mask, pick_ind,
+def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
               label, sublabel, param, tau=1.0, targetdir=None):
     """
     Plot AI based reweighting results
-    
     """
     
     cprint(f'label = {label} | sublabel = {sublabel} | tau = {tau}', 'green')
     
     dir = aux.makedir(f'{targetdir}/{label}/{sublabel}')
-    
-    # Pick events within cut mask            
-    W_m = copy.deepcopy(weights[mask]) if weights is not None else np.ones(len(X))[mask]
-    y_m = copy.deepcopy(y[mask])
     
     # ---------------------------------------------------
     ## 1. Transform model output scores to AI weights
@@ -1373,29 +1368,32 @@ def plot_AIRW(X, y, ids, weights, y_pred, mask, pick_ind,
     C0    = param['C0']
     C1    = param['C1']
     RN_ID = param['renorm_origin']
+    mode  = param['transform_mode']
     
     # Handle logits vs probabilities
-    min_y_pred = np.min(y_pred)
-    max_y_pred = np.max(y_pred)
+    min_y_pred, max_y_pred = np.min(y_pred), np.max(y_pred)
+    
     if min_y_pred < 0 or max_y_pred > 1:
-        print(__name__ + f'.plot_AIRW: Detected raw logit output [{min_y_pred}, {max_y_pred}] from the model')
-        logits = y_pred[mask][y_m == C0] / tau
-        #prob  = aux.sigmoid(logits)
+        print(__name__ + f'.plot_AIRW: Detected raw logit output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+        logits = y_pred[y == C0]
+        probs  = aux.sigmoid(logits)
+        print(__name__ + f'.plot_AIRW: Corresponding probability output [{np.min(probs):0.4f}, {np.max(probs):0.4f}]')
     else:
-        print(__name__ + f'.plot_AIRW: Detected probability output [{min_y_pred}, {max_y_pred}] from the model')
-        logits = aux.inverse_sigmoid(p = y_pred[mask][y_m == C0], EPS=EPS) / tau
-        #prob  = aux.sigmoid(logits)
+        print(__name__ + f'.plot_AIRW: Detected probability output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+        logits = aux.inverse_sigmoid(p = y_pred[y == C0], EPS=EPS)
+        print(__name__ + f'.plot_AIRW: Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
     
-    mode = param['transform_mode']
+    # 1. Apply temperature scaling
+    logits /= tau
     
-    # Get re-weighting transform weights
+    # 2. Get weights after the re-weighting transform
     AIw0 = reweight.rw_transform_with_logits(logits=logits, mode=mode)
     
-    # Cut-off regularize anomalous high weights before event weights
+    # 3. Cut-off regularize anomalous high weights before event weights
     AIw0 = np.clip(AIw0, a_min=0.0, a_max=maxW)
     
-    # Apply multiplicatively to event weights (which can be negative)
-    AIw0 = AIw0 * W_m[y_m == C0]
+    # 4. Apply multiplicatively to event weights (which can be negative)
+    AIw0 = AIw0 * weights[y == C0]
     
     # ---------------------------------------------------
     ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
@@ -1407,11 +1405,14 @@ def plot_AIRW(X, y, ids, weights, y_pred, mask, pick_ind,
         print(f'Sum before: {sum_before:0.1f}')
         
         AIw0 /= np.sum(AIw0)              # Normalize
-        AIw0 *= np.sum(W_m[y_m == RN_ID]) # Scale
+        AIw0 *= np.sum(weights[y == RN_ID]) # Scale
         
         sum_after = AIw0.sum()
         print(f'Sum after:  {sum_after:0.1f} (after / before = {sum_after/sum_before:0.2f})')
         print('')
+    
+    # ===================================================
+    # Visualization
     # ---------------------------------------------------
     
     total_ndf     = 0.0
@@ -1421,106 +1422,57 @@ def plot_AIRW(X, y, ids, weights, y_pred, mask, pick_ind,
     local_dir     = aux.makedir(dir + f'/tau_{tau:0.2f}')
     chi2_table    = PrettyTable(["observable", "ndf", "chi2 / ndf", "(AI) chi2 / ndf"]) 
     
-    # Loop over each observable
-    for running_index,i in tqdm(enumerate(pick_ind)):
+    # ---------------------------------------------------
+    param = {
+        'i':         None,
         
-        X_m  = copy.deepcopy(X[mask, i])
-        bins = binengine(bindef=param['edges'], x=X_m)
+        'X':         None,
+        'y':         None,
+        'weights':   None,
+        'ids':       None,
+        'AIw0':      None,
         
-        # ----------------------------------------------------
+        'C0':        C0,
+        'C1':        C1,
         
-        obs_X = {
-            
-            # Axis limits
-            'xlim'    : (bins[0], bins[-1]),
-            'ylim'    : None,
-            'xlabel'  : f'{ids[i]}',
-            'ylabel'  : r'Weighted counts',
-            'units'   : {'x': r'a.u.', 'y' : r'1'},
-            'label'   : f'{label}',
-            'figsize' : (4, 3.75),
-            
-            # Ratio
-            'ylim_ratio' : (0.75, 1.25),
-            
-            # Histogramming
-            'bins'    : None,
-            'density' : False,
-            
-            # Function to calculate
-            'func'    : None
-        }
+        'label':     label,
+        'param':     param,
+        'local_dir': local_dir
+    }
+    
+    # Loop over each observable (specific column of X)
+    paramlist = []
+    
+    for i in pick_ind:
+        paramlist.append(copy.deepcopy(param)) 
         
-        data_template = {
-            'data'   : None,
-            'weights': None,
-            'label'  : 'Data',
-            'hfunc'  : 'errorbar',
-            'style'  : iceplot.errorbar_style,
-            'obs'    : obs_X,
-            'hdata'  : None,
-            'color'  : None
-        }
-        
-        # Data source <-> Observable collections
-        class1    = data_template.copy() # Deep copies
-        class0    = data_template.copy()
-        class0_ML = data_template.copy()
-        
-        class1.update({
-            'label' : '$C_1$',
-            'hfunc' : 'hist',
-            'style' : iceplot.hist_style_step,
-            'color' : (0,0,0)
-        })
-        class0.update({
-            'label' : '$C_0$',
-            'hfunc' : 'hist',
-            'style' : iceplot.hist_style_step,
-            'color' : iceplot.imperial_green
-        })
-        class0_ML.update({
-            'label' : '$C_0$ (AI)',
-            'hfunc' : 'hist',
-            'style' : iceplot.hist_style_step,
-            'color' : iceplot.imperial_dark_red
-        })
+        # big numpy arrays should share the memory (i.e. no copy of X)
+        paramlist[-1]['i']       = i
+        paramlist[-1]['X']       = X
+        paramlist[-1]['y']       = y
+        paramlist[-1]['weights'] = weights
+        paramlist[-1]['ids']     = ids
+        paramlist[-1]['AIw0']    = AIw0
+    
+    # Start multiprocessing
+    cprint(__name__ + f'.plot_AIRW: Multiprocessing {len(pick_ind)} plots', 'yellow')
+    
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2)
+    tic  = time.time()
+    r    = pool.map(multiprocess_AIRW_wrapper, paramlist)
+    pool.close() # no more tasks
+    pool.join()  # wrap up current tasks
+    
+    toc  = time.time()
+    print(f'Took {toc-tic:0.2f} sec')
+    
+    # Collect summary statistics from the pool
+    for i in range(len(r)):
+        total_ndf     += r[i]['ndf_0']
+        total_chi2    += r[i]['chi2_0']
+        total_chi2_AI += r[i]['chi2_0_AI']
 
-        data = [class1, class0, class0_ML]
-        
-        data[0]['hdata'] = iceplot.hist_obj(X_m[y_m == C1], bins=bins, weights=W_m[y_m == C1])
-        data[1]['hdata'] = iceplot.hist_obj(X_m[y_m == C0], bins=bins, weights=W_m[y_m == C0])
-        data[2]['hdata'] = iceplot.hist_obj(X_m[y_m == C0], bins=bins, weights=AIw0)
-        
-        # Update labels with chi2
-        chi2_0, ndf_0       = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
-        chi2_0_AI, ndf_0_AI = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
-        
-        data[1]['label'] += f' | $\\chi^2 = {chi2_0:0.0f} \, / \, {ndf_0} = {chi2_0/ndf_0:0.1f}$'
-        data[2]['label'] += f' | $\\chi^2 = {chi2_0_AI:0.0f} \, / \, {ndf_0_AI} = {chi2_0_AI/ndf_0_AI:0.1f}$'
-        
-        # Pretty table                
-        total_ndf     += ndf_0
-        total_chi2    += chi2_0
-        total_chi2_AI += chi2_0_AI
-        
-        divider = True if running_index == len(pick_ind) - 1 else False
-        chi2_table.add_row([ids[i], f'{ndf_0}', f'{chi2_0/ndf_0:0.1f}', f'{chi2_0_AI/ndf_0:0.1f}'], divider=divider)
-        # --------------------
-        
-        # Plot it
-        fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale='log', ratio_error_plot=True)
-        fig1, ax1 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_error_plot=True)
-        
-        fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.pdf', bbox_inches='tight')
-        fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.png', bbox_inches='tight', dpi=300)
-        
-        fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.pdf', bbox_inches='tight')
-        fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.png', bbox_inches='tight', dpi=300)
-        
-        fig0.clf()
-        fig1.clf()
-        plt.close('all')
+        chi2_table.add_row(r[i]['chi2_row'], divider=True if i == len(r)-1 else False)
     
     chi2_table.add_row(['total', f'{total_ndf}', f'{total_chi2/total_ndf:0.1f}', f'{total_chi2_AI/total_ndf:0.1f}'])
     
@@ -1531,3 +1483,121 @@ def plot_AIRW(X, y, ids, weights, y_pred, mask, pick_ind,
     # -----------------------------------------------
     
     return chi2_table
+
+
+def multiprocess_AIRW_wrapper(p):
+    """
+    Multiprocessing plots
+    """
+    
+    i         = p['i'] # Column index
+    
+    X         = p['X']
+    y         = p['y']
+    w         = p['weights']
+    ids       = p['ids']
+    
+    AIw0      = p['AIw0']
+    
+    C0        = p['C0']
+    C1        = p['C1']
+    
+    label     = p['label']
+    param     = p['param']
+    local_dir = p['local_dir']
+    
+    X_col = copy.deepcopy(X[:, i])
+    bins  = binengine(bindef=param['edges'], x=X_col)
+    
+    # ----------------------------------------------------
+    
+    obs_X = {
+        
+        # Axis limits
+        'xlim'    : (bins[0], bins[-1]),
+        'ylim'    : None,
+        'xlabel'  : f'{ids[i]}',
+        'ylabel'  : r'Weighted counts',
+        'units'   : {'x': r'a.u.', 'y' : r'1'},
+        'label'   : f'{label}',
+        'figsize' : (4, 3.75),
+        
+        # Ratio
+        'ylim_ratio' : (0.75, 1.25),
+        
+        # Histogramming
+        'bins'    : None,
+        'density' : False,
+        
+        # Function to calculate
+        'func'    : None
+    }
+    
+    data_template = {
+        'data'   : None,
+        'weights': None,
+        'label'  : 'Data',
+        'hfunc'  : 'errorbar',
+        'style'  : iceplot.errorbar_style,
+        'obs'    : obs_X,
+        'hdata'  : None,
+        'color'  : None
+    }
+    
+    # Data source <-> Observable collections
+    class1    = data_template.copy() # Deep copies
+    class0    = data_template.copy()
+    class0_ML = data_template.copy()
+    
+    class1.update({
+        'label' : '$C_1$',
+        'hfunc' : 'hist',
+        'style' : iceplot.hist_style_step,
+        'color' : (0,0,0)
+    })
+    class0.update({
+        'label' : '$C_0$',
+        'hfunc' : 'hist',
+        'style' : iceplot.hist_style_step,
+        'color' : iceplot.imperial_green
+    })
+    class0_ML.update({
+        'label' : '$C_0$ (AI)',
+        'hfunc' : 'hist',
+        'style' : iceplot.hist_style_step,
+        'color' : iceplot.imperial_dark_red
+    })
+
+    data = [class1, class0, class0_ML]
+    
+    data[0]['hdata'] = iceplot.hist_obj(X_col[y == C1], bins=bins, weights=w[y == C1])
+    data[1]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w[y == C0])
+    data[2]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=AIw0)
+    
+    # Update labels with chi2
+    chi2_0, ndf_0       = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+    chi2_0_AI, ndf_0_AI = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+    
+    data[1]['label'] += f' | $\\chi^2 = {chi2_0:0.0f} \, / \, {ndf_0} = {chi2_0/ndf_0:0.1f}$'
+    data[2]['label'] += f' | $\\chi^2 = {chi2_0_AI:0.0f} \, / \, {ndf_0_AI} = {chi2_0_AI/ndf_0_AI:0.1f}$'
+    
+    # --------------------
+    
+    # Plot it
+    fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale='log', ratio_error_plot=True)
+    fig1, ax1 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_error_plot=True)
+    
+    fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.pdf', bbox_inches='tight')
+    fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.png', bbox_inches='tight', dpi=300)
+    
+    fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.pdf', bbox_inches='tight')
+    fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.png', bbox_inches='tight', dpi=300)
+    
+    fig0.clf()
+    fig1.clf()
+    plt.close(fig0)
+    plt.close(fig1)
+
+    chi2_row = [ids[i], f'{ndf_0}', f'{chi2_0/ndf_0:0.1f}', f'{chi2_0_AI/ndf_0:0.1f}']
+    
+    return {'ndf_0': ndf_0, 'ndf_0_AI': ndf_0_AI, 'chi2_0': chi2_0, 'chi2_0_AI': chi2_0_AI, 'chi2_row': chi2_row}

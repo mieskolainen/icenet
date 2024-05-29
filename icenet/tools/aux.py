@@ -26,22 +26,22 @@ from scipy import interpolate
 
 from icefit import statstools
 
-def inverse_sigmoid(p, EPS=1E-9):
+def inverse_sigmoid(p: np.ndarray, EPS=1E-9):
     """
     Stable inverse sigmoid function
     """
-    x = np.clip(p, a_min=EPS, a_max=1.0 - EPS) 
+    x = np.clip(p, EPS, 1.0 - EPS) 
     
     return np.log(x) - np.log(1 - x)
 
-def _positive_sigmoid(x):
+def _positive_sigmoid(x: np.ndarray):
     return 1 / (1 + np.exp(-x))
 
-def _negative_sigmoid(x):
+def _negative_sigmoid(x: np.ndarray):
     exp = np.exp(x) # Cache exp for speed
     return exp / (exp + 1)
 
-def sigmoid(x):
+def sigmoid(x: np.ndarray):
     """
     Stable sigmoid function
     """

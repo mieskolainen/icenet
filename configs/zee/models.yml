@@ -277,6 +277,7 @@ lzmlp0:
   
   eval_batch_size: 4096
 
+
 ## FastKAN
 #
 fastkan0:
@@ -294,17 +295,17 @@ fastkan0:
   # Model
   conv_type: 'fastkan'
   out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
-
+  
   model_param:
     grid_min: -2.0                    # Activation learning param
     grid_max:  2.0                    # 
     num_grids:   8                    # 
-    mlp_dim: [32, 32, 32]             # hidden layer dimensions
-    use_base_update: False            # Use "base MLP" in addition
+    mlp_dim: [128, 128 ,128]          # hidden layer dimensions
+    use_base_update: True             # Use "base MLP" in addition
     
     last_tanh: True                   # Extra tanh layer
     last_tanh_scale: 10.0             # Scale after tanh()
-
+  
   # Optimization
   opt_param:  
     lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy

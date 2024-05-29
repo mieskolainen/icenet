@@ -1285,7 +1285,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     
     # --------------------------------------
     ### Output score re-weighted observables
-
+    
     if 'OBS_reweight' in args['plot_param'] and args['plot_param']['OBS_reweight']['active']:
         
         var_names = aux.process_regexp_ids(all_ids=ids_RAW, ids=args['plot_param']['OBS_reweight']['var'])
@@ -1294,7 +1294,6 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         # -----------------------------------------------
         
         # ** All inclusive **
-        mask = np.ones(len(y_pred), dtype=bool)
         
         ## Plot over different temperature values
         sublabel = 'inclusive'
@@ -1305,7 +1304,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         for tau in args['plot_param']['OBS_reweight']['tau_values']:
             
             chi2_table = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
-                                         mask=mask, pick_ind=pick_ind, label=label, sublabel=sublabel,
+                                         pick_ind=pick_ind, label=label, sublabel=sublabel,
                                          param=args['plot_param']['OBS_reweight'], tau=tau,
                                          targetdir=targetdir + '/OBS_reweight')
             
@@ -1333,8 +1332,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                     
                     mask = mask_filterset[m,:]
                     
-                    chi2_table = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
-                                         mask=mask, pick_ind=pick_ind, label=label, sublabel=sublabel,
+                    chi2_table = plots.plot_AIRW(X=X_RAW[mask,:], y=y[mask], ids=ids_RAW, weights=weights[mask], y_pred=y_pred[mask],
+                                         pick_ind=pick_ind, label=label, sublabel=sublabel,
                                          param=args['plot_param']['OBS_reweight'], tau=tau,
                                          targetdir=targetdir + '/OBS_reweight')
                     

@@ -105,13 +105,13 @@ train_runmode:
   models:  !include configs/zee/models.yml
   active_models: &ACTIVE_MODELS
 
-    - iceboost_plus
-    - iceboost0
-    - xgb0
-    
     - fastkan0
     - lzmlp0
     - dmlp0
+
+    - iceboost_plus
+    - iceboost0
+    - xgb0
   
   raytune: !include configs/zee/raytune.yml
 
