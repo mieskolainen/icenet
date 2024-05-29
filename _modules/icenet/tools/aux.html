@@ -546,25 +546,25 @@
 
 <div class="viewcode-block" id="inverse_sigmoid">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.inverse_sigmoid">[docs]</a>
-<span class="k">def</span> <span class="nf">inverse_sigmoid</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-9</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">inverse_sigmoid</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stable inverse sigmoid function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">EPS</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">)</span> 
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">)</span> 
     
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_positive_sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_positive_sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
 
-<span class="k">def</span> <span class="nf">_negative_sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_negative_sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="n">exp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># Cache exp for speed</span>
     <span class="k">return</span> <span class="n">exp</span> <span class="o">/</span> <span class="p">(</span><span class="n">exp</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="sigmoid">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.sigmoid">[docs]</a>
-<span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stable sigmoid function</span>
 <span class="sd">    &quot;&quot;&quot;</span>

@@ -1939,20 +1939,15 @@
 
 <div class="viewcode-block" id="plot_AIRW">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_AIRW">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_AIRW</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">pick_ind</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">plot_AIRW</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pick_ind</span><span class="p">,</span>
               <span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot AI based reweighting results</span>
-<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;label = </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | sublabel = </span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1"> | tau = </span><span class="si">{</span><span class="n">tau</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     
     <span class="nb">dir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    
-    <span class="c1"># Pick events within cut mask            </span>
-    <span class="n">W_m</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))[</span><span class="n">mask</span><span class="p">]</span>
-    <span class="n">y_m</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
     
     <span class="c1"># ---------------------------------------------------</span>
     <span class="c1">## 1. Transform model output scores to AI weights</span>
@@ -1962,29 +1957,32 @@
     <span class="n">C0</span>    <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;C0&#39;</span><span class="p">]</span>
     <span class="n">C1</span>    <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;C1&#39;</span><span class="p">]</span>
     <span class="n">RN_ID</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;renorm_origin&#39;</span><span class="p">]</span>
+    <span class="n">mode</span>  <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;transform_mode&#39;</span><span class="p">]</span>
     
     <span class="c1"># Handle logits vs probabilities</span>
-    <span class="n">min_y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
-    <span class="n">max_y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">min_y_pred</span><span class="p">,</span> <span class="n">max_y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">y_pred</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+    
     <span class="k">if</span> <span class="n">min_y_pred</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">max_y_pred</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AIRW: Detected raw logit output [</span><span class="si">{</span><span class="n">min_y_pred</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">max_y_pred</span><span class="si">}</span><span class="s1">] from the model&#39;</span><span class="p">)</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">mask</span><span class="p">][</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C0</span><span class="p">]</span> <span class="o">/</span> <span class="n">tau</span>
-        <span class="c1">#prob  = aux.sigmoid(logits)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AIRW: Detected raw logit output [</span><span class="si">{</span><span class="n">min_y_pred</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">max_y_pred</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">] from the model&#39;</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C0</span><span class="p">]</span>
+        <span class="n">probs</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AIRW: Corresponding probability output [</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AIRW: Detected probability output [</span><span class="si">{</span><span class="n">min_y_pred</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">max_y_pred</span><span class="si">}</span><span class="s1">] from the model&#39;</span><span class="p">)</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">inverse_sigmoid</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">mask</span><span class="p">][</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C0</span><span class="p">],</span> <span class="n">EPS</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span> <span class="o">/</span> <span class="n">tau</span>
-        <span class="c1">#prob  = aux.sigmoid(logits)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AIRW: Detected probability output [</span><span class="si">{</span><span class="n">min_y_pred</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">max_y_pred</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">] from the model&#39;</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">inverse_sigmoid</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C0</span><span class="p">],</span> <span class="n">EPS</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AIRW: Corresponding logit output [</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
     
-    <span class="n">mode</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;transform_mode&#39;</span><span class="p">]</span>
+    <span class="c1"># 1. Apply temperature scaling</span>
+    <span class="n">logits</span> <span class="o">/=</span> <span class="n">tau</span>
     
-    <span class="c1"># Get re-weighting transform weights</span>
+    <span class="c1"># 2. Get weights after the re-weighting transform</span>
     <span class="n">AIw0</span> <span class="o">=</span> <span class="n">reweight</span><span class="o">.</span><span class="n">rw_transform_with_logits</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
     
-    <span class="c1"># Cut-off regularize anomalous high weights before event weights</span>
+    <span class="c1"># 3. Cut-off regularize anomalous high weights before event weights</span>
     <span class="n">AIw0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">AIw0</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">maxW</span><span class="p">)</span>
     
-    <span class="c1"># Apply multiplicatively to event weights (which can be negative)</span>
-    <span class="n">AIw0</span> <span class="o">=</span> <span class="n">AIw0</span> <span class="o">*</span> <span class="n">W_m</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C0</span><span class="p">]</span>
+    <span class="c1"># 4. Apply multiplicatively to event weights (which can be negative)</span>
+    <span class="n">AIw0</span> <span class="o">=</span> <span class="n">AIw0</span> <span class="o">*</span> <span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C0</span><span class="p">]</span>
     
     <span class="c1"># ---------------------------------------------------</span>
     <span class="c1">## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)</span>
@@ -1996,11 +1994,14 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Sum before: </span><span class="si">{</span><span class="n">sum_before</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="n">AIw0</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AIw0</span><span class="p">)</span>              <span class="c1"># Normalize</span>
-        <span class="n">AIw0</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W_m</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">RN_ID</span><span class="p">])</span> <span class="c1"># Scale</span>
+        <span class="n">AIw0</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">RN_ID</span><span class="p">])</span> <span class="c1"># Scale</span>
         
         <span class="n">sum_after</span> <span class="o">=</span> <span class="n">AIw0</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Sum after:  </span><span class="si">{</span><span class="n">sum_after</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> (after / before = </span><span class="si">{</span><span class="n">sum_after</span><span class="o">/</span><span class="n">sum_before</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># ===================================================</span>
+    <span class="c1"># Visualization</span>
     <span class="c1"># ---------------------------------------------------</span>
     
     <span class="n">total_ndf</span>     <span class="o">=</span> <span class="mf">0.0</span>
@@ -2010,106 +2011,57 @@
     <span class="n">local_dir</span>     <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="nb">dir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/tau_</span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">chi2_table</span>    <span class="o">=</span> <span class="n">PrettyTable</span><span class="p">([</span><span class="s2">&quot;observable&quot;</span><span class="p">,</span> <span class="s2">&quot;ndf&quot;</span><span class="p">,</span> <span class="s2">&quot;chi2 / ndf&quot;</span><span class="p">,</span> <span class="s2">&quot;(AI) chi2 / ndf&quot;</span><span class="p">])</span> 
     
-    <span class="c1"># Loop over each observable</span>
-    <span class="k">for</span> <span class="n">running_index</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">pick_ind</span><span class="p">)):</span>
+    <span class="c1"># ---------------------------------------------------</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;i&#39;</span><span class="p">:</span>         <span class="kc">None</span><span class="p">,</span>
         
-        <span class="n">X_m</span>  <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
-        <span class="n">bins</span> <span class="o">=</span> <span class="n">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">X_m</span><span class="p">)</span>
+        <span class="s1">&#39;X&#39;</span><span class="p">:</span>         <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;y&#39;</span><span class="p">:</span>         <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;weights&#39;</span><span class="p">:</span>   <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;ids&#39;</span><span class="p">:</span>       <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;AIw0&#39;</span><span class="p">:</span>      <span class="kc">None</span><span class="p">,</span>
         
-        <span class="c1"># ----------------------------------------------------</span>
+        <span class="s1">&#39;C0&#39;</span><span class="p">:</span>        <span class="n">C0</span><span class="p">,</span>
+        <span class="s1">&#39;C1&#39;</span><span class="p">:</span>        <span class="n">C1</span><span class="p">,</span>
         
-        <span class="n">obs_X</span> <span class="o">=</span> <span class="p">{</span>
-            
-            <span class="c1"># Axis limits</span>
-            <span class="s1">&#39;xlim&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
-            <span class="s1">&#39;ylim&#39;</span>    <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;xlabel&#39;</span>  <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;ylabel&#39;</span>  <span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;Weighted counts&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;units&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;a.u.&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span> <span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;1&#39;</span><span class="p">},</span>
-            <span class="s1">&#39;label&#39;</span>   <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;figsize&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mf">3.75</span><span class="p">),</span>
-            
-            <span class="c1"># Ratio</span>
-            <span class="s1">&#39;ylim_ratio&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">),</span>
-            
-            <span class="c1"># Histogramming</span>
-            <span class="s1">&#39;bins&#39;</span>    <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;density&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            
-            <span class="c1"># Function to calculate</span>
-            <span class="s1">&#39;func&#39;</span>    <span class="p">:</span> <span class="kc">None</span>
-        <span class="p">}</span>
+        <span class="s1">&#39;label&#39;</span><span class="p">:</span>     <span class="n">label</span><span class="p">,</span>
+        <span class="s1">&#39;param&#39;</span><span class="p">:</span>     <span class="n">param</span><span class="p">,</span>
+        <span class="s1">&#39;local_dir&#39;</span><span class="p">:</span> <span class="n">local_dir</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Loop over each observable (specific column of X)</span>
+    <span class="n">paramlist</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pick_ind</span><span class="p">:</span>
+        <span class="n">paramlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">param</span><span class="p">))</span> 
         
-        <span class="n">data_template</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;data&#39;</span>   <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;label&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Data&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;hfunc&#39;</span>  <span class="p">:</span> <span class="s1">&#39;errorbar&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;style&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">errorbar_style</span><span class="p">,</span>
-            <span class="s1">&#39;obs&#39;</span>    <span class="p">:</span> <span class="n">obs_X</span><span class="p">,</span>
-            <span class="s1">&#39;hdata&#39;</span>  <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;color&#39;</span>  <span class="p">:</span> <span class="kc">None</span>
-        <span class="p">}</span>
-        
-        <span class="c1"># Data source &lt;-&gt; Observable collections</span>
-        <span class="n">class1</span>    <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># Deep copies</span>
-        <span class="n">class0</span>    <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">class0_ML</span> <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        
-        <span class="n">class1</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s1">&#39;label&#39;</span> <span class="p">:</span> <span class="s1">&#39;$C_1$&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;hfunc&#39;</span> <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;style&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
-            <span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="p">})</span>
-        <span class="n">class0</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s1">&#39;label&#39;</span> <span class="p">:</span> <span class="s1">&#39;$C_0$&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;hfunc&#39;</span> <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;style&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
-            <span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">imperial_green</span>
-        <span class="p">})</span>
-        <span class="n">class0_ML</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s1">&#39;label&#39;</span> <span class="p">:</span> <span class="s1">&#39;$C_0$ (AI)&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;hfunc&#39;</span> <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;style&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
-            <span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">imperial_dark_red</span>
-        <span class="p">})</span>
+        <span class="c1"># big numpy arrays should share the memory (i.e. no copy of X)</span>
+        <span class="n">paramlist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">i</span>
+        <span class="n">paramlist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;X&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">X</span>
+        <span class="n">paramlist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">y</span>
+        <span class="n">paramlist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;weights&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="n">paramlist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">ids</span>
+        <span class="n">paramlist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;AIw0&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">AIw0</span>
+    
+    <span class="c1"># Start multiprocessing</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.plot_AIRW: Multiprocessing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pick_ind</span><span class="p">)</span><span class="si">}</span><span class="s1"> plots&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">tic</span>  <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">r</span>    <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">multiprocess_AIRW_wrapper</span><span class="p">,</span> <span class="n">paramlist</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># no more tasks</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># wrap up current tasks</span>
+    
+    <span class="n">toc</span>  <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Took </span><span class="si">{</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Collect summary statistics from the pool</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)):</span>
+        <span class="n">total_ndf</span>     <span class="o">+=</span> <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0&#39;</span><span class="p">]</span>
+        <span class="n">total_chi2</span>    <span class="o">+=</span> <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0&#39;</span><span class="p">]</span>
+        <span class="n">total_chi2_AI</span> <span class="o">+=</span> <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">]</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">class1</span><span class="p">,</span> <span class="n">class0</span><span class="p">,</span> <span class="n">class0_ML</span><span class="p">]</span>
-        
-        <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">X_m</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C1</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">W_m</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C1</span><span class="p">])</span>
-        <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">X_m</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C0</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">W_m</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C0</span><span class="p">])</span>
-        <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">X_m</span><span class="p">[</span><span class="n">y_m</span> <span class="o">==</span> <span class="n">C0</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">AIw0</span><span class="p">)</span>
-        
-        <span class="c1"># Update labels with chi2</span>
-        <span class="n">chi2_0</span><span class="p">,</span> <span class="n">ndf_0</span>       <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">h_data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">chi2_0_AI</span><span class="p">,</span> <span class="n">ndf_0_AI</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">h_data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        
-        <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; | $</span><span class="se">\\</span><span class="s1">chi^2 = </span><span class="si">{</span><span class="n">chi2_0</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1"> \, / \, </span><span class="si">{</span><span class="n">ndf_0</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">chi2_0</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$&#39;</span>
-        <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; | $</span><span class="se">\\</span><span class="s1">chi^2 = </span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1"> \, / \, </span><span class="si">{</span><span class="n">ndf_0_AI</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="o">/</span><span class="n">ndf_0_AI</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$&#39;</span>
-        
-        <span class="c1"># Pretty table                </span>
-        <span class="n">total_ndf</span>     <span class="o">+=</span> <span class="n">ndf_0</span>
-        <span class="n">total_chi2</span>    <span class="o">+=</span> <span class="n">chi2_0</span>
-        <span class="n">total_chi2_AI</span> <span class="o">+=</span> <span class="n">chi2_0_AI</span>
-        
-        <span class="n">divider</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">running_index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pick_ind</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span>
-        <span class="n">chi2_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ndf_0</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">chi2_0</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span> <span class="n">divider</span><span class="o">=</span><span class="n">divider</span><span class="p">)</span>
-        <span class="c1"># --------------------</span>
-        
-        <span class="c1"># Plot it</span>
-        <span class="n">fig0</span><span class="p">,</span> <span class="n">ax0</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        
-        <span class="n">fig0</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-        <span class="n">fig0</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__log.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-        
-        <span class="n">fig1</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__linear.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-        <span class="n">fig1</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__linear.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-        
-        <span class="n">fig0</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-        <span class="n">fig1</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+        <span class="n">chi2_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_row&#39;</span><span class="p">],</span> <span class="n">divider</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
     
     <span class="n">chi2_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_ndf</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_chi2</span><span class="o">/</span><span class="n">total_ndf</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_chi2_AI</span><span class="o">/</span><span class="n">total_ndf</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
     
@@ -2120,6 +2072,127 @@
     <span class="c1"># -----------------------------------------------</span>
     
     <span class="k">return</span> <span class="n">chi2_table</span></div>
+
+
+
+<div class="viewcode-block" id="multiprocess_AIRW_wrapper">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.multiprocess_AIRW_wrapper">[docs]</a>
+<span class="k">def</span> <span class="nf">multiprocess_AIRW_wrapper</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multiprocessing plots</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">i</span>         <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="c1"># Column index</span>
+    
+    <span class="n">X</span>         <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span>
+    <span class="n">y</span>         <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+    <span class="n">w</span>         <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;weights&#39;</span><span class="p">]</span>
+    <span class="n">ids</span>       <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span>
+    
+    <span class="n">AIw0</span>      <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;AIw0&#39;</span><span class="p">]</span>
+    
+    <span class="n">C0</span>        <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;C0&#39;</span><span class="p">]</span>
+    <span class="n">C1</span>        <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;C1&#39;</span><span class="p">]</span>
+    
+    <span class="n">label</span>     <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+    <span class="n">param</span>     <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;param&#39;</span><span class="p">]</span>
+    <span class="n">local_dir</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;local_dir&#39;</span><span class="p">]</span>
+    
+    <span class="n">X_col</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">bins</span>  <span class="o">=</span> <span class="n">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">X_col</span><span class="p">)</span>
+    
+    <span class="c1"># ----------------------------------------------------</span>
+    
+    <span class="n">obs_X</span> <span class="o">=</span> <span class="p">{</span>
+        
+        <span class="c1"># Axis limits</span>
+        <span class="s1">&#39;xlim&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="s1">&#39;ylim&#39;</span>    <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;xlabel&#39;</span>  <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ylabel&#39;</span>  <span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;Weighted counts&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;units&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;a.u.&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span> <span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;1&#39;</span><span class="p">},</span>
+        <span class="s1">&#39;label&#39;</span>   <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;figsize&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mf">3.75</span><span class="p">),</span>
+        
+        <span class="c1"># Ratio</span>
+        <span class="s1">&#39;ylim_ratio&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">),</span>
+        
+        <span class="c1"># Histogramming</span>
+        <span class="s1">&#39;bins&#39;</span>    <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;density&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        
+        <span class="c1"># Function to calculate</span>
+        <span class="s1">&#39;func&#39;</span>    <span class="p">:</span> <span class="kc">None</span>
+    <span class="p">}</span>
+    
+    <span class="n">data_template</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;data&#39;</span>   <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;label&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Data&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;hfunc&#39;</span>  <span class="p">:</span> <span class="s1">&#39;errorbar&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;style&#39;</span>  <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">errorbar_style</span><span class="p">,</span>
+        <span class="s1">&#39;obs&#39;</span>    <span class="p">:</span> <span class="n">obs_X</span><span class="p">,</span>
+        <span class="s1">&#39;hdata&#39;</span>  <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;color&#39;</span>  <span class="p">:</span> <span class="kc">None</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Data source &lt;-&gt; Observable collections</span>
+    <span class="n">class1</span>    <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># Deep copies</span>
+    <span class="n">class0</span>    <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">class0_ML</span> <span class="o">=</span> <span class="n">data_template</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="n">class1</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s1">&#39;label&#39;</span> <span class="p">:</span> <span class="s1">&#39;$C_1$&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;hfunc&#39;</span> <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;style&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
+        <span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">})</span>
+    <span class="n">class0</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s1">&#39;label&#39;</span> <span class="p">:</span> <span class="s1">&#39;$C_0$&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;hfunc&#39;</span> <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;style&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
+        <span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">imperial_green</span>
+    <span class="p">})</span>
+    <span class="n">class0_ML</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s1">&#39;label&#39;</span> <span class="p">:</span> <span class="s1">&#39;$C_0$ (AI)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;hfunc&#39;</span> <span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;style&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_style_step</span><span class="p">,</span>
+        <span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">imperial_dark_red</span>
+    <span class="p">})</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">class1</span><span class="p">,</span> <span class="n">class0</span><span class="p">,</span> <span class="n">class0_ML</span><span class="p">]</span>
+    
+    <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">X_col</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C1</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C1</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">X_col</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C0</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C0</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">hist_obj</span><span class="p">(</span><span class="n">X_col</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">C0</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">AIw0</span><span class="p">)</span>
+    
+    <span class="c1"># Update labels with chi2</span>
+    <span class="n">chi2_0</span><span class="p">,</span> <span class="n">ndf_0</span>       <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">h_data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">chi2_0_AI</span><span class="p">,</span> <span class="n">ndf_0_AI</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">h_data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;hdata&#39;</span><span class="p">],</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; | $</span><span class="se">\\</span><span class="s1">chi^2 = </span><span class="si">{</span><span class="n">chi2_0</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1"> \, / \, </span><span class="si">{</span><span class="n">ndf_0</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">chi2_0</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$&#39;</span>
+    <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; | $</span><span class="se">\\</span><span class="s1">chi^2 = </span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="si">:</span><span class="s1">0.0f</span><span class="si">}</span><span class="s1"> \, / \, </span><span class="si">{</span><span class="n">ndf_0_AI</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="o">/</span><span class="n">ndf_0_AI</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">$&#39;</span>
+    
+    <span class="c1"># --------------------</span>
+    
+    <span class="c1"># Plot it</span>
+    <span class="n">fig0</span><span class="p">,</span> <span class="n">ax0</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">iceplot</span><span class="o">.</span><span class="n">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">fig0</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__log.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="n">fig0</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__log.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    
+    <span class="n">fig1</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__linear.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="n">fig1</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/reweight_[</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">]__linear.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    
+    <span class="n">fig0</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">fig1</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig1</span><span class="p">)</span>
+
+    <span class="n">chi2_row</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ndf_0</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">chi2_0</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;ndf_0&#39;</span><span class="p">:</span> <span class="n">ndf_0</span><span class="p">,</span> <span class="s1">&#39;ndf_0_AI&#39;</span><span class="p">:</span> <span class="n">ndf_0_AI</span><span class="p">,</span> <span class="s1">&#39;chi2_0&#39;</span><span class="p">:</span> <span class="n">chi2_0</span><span class="p">,</span> <span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">:</span> <span class="n">chi2_0_AI</span><span class="p">,</span> <span class="s1">&#39;chi2_row&#39;</span><span class="p">:</span> <span class="n">chi2_row</span><span class="p">}</span></div>
 
 </pre></div>
 
