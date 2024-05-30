@@ -227,7 +227,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                 
                 # Minimum number of events per category cutoff
                 if reg_param['min_count'] is not None and np.sum(mm_) < reg_param['min_count']:
-                    cprint(__name__ + f'MI_reg: {np.sum(mm_)} < reg_param["min_count"] = {reg_param["min_count"]}', 'red')
+                    cprint(__name__ + f" MI_reg: {np.sum(mm_)} < {reg_param['min_count']} = reg_param['min_count'] (class [{c}] | category [{m}]) -- skip", 'red')
                     continue
                 
                 ## Non-Linear Distance Correlation

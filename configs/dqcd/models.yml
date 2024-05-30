@@ -85,7 +85,7 @@ MI_DOMAIN_FILTER: &MI_DOMAIN_FILTER
 # ** Mutual Information regularization **
 MI_REG_PARAM: &MI_REG_PARAM
   
-  classes: [-2]            #  Which classes to use in the regularization
+  classes: [0,-2]          #  Which classes to use in the regularization
   
   losstype: 'DCORR'        # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
   min_count: 32            #  Minimum number of events (per category)
@@ -98,7 +98,7 @@ MI_REG_PARAM: &MI_REG_PARAM
 
   eval_batch_size: 8192    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  [null]           #  EMA tracking values (for each class)
+  ma_eT:  [null, null]     #  EMA tracking values (set for each class!)
   
   y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
@@ -115,7 +115,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   activation: 'relu'
   
   # -------------------------
-
+  
   # Comment out for no categories (N.B. dependence structure over inclusive sample != categorical)
   set_filter: *MI_DOMAIN_FILTER
 # -----------------------------------------------
