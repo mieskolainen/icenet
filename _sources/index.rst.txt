@@ -58,6 +58,7 @@ Contents
    :maxdepth: 1
    :caption: Package Reference
 
+   modules/icebrem
    modules/icebrk
    modules/icedqcd
    modules/icefit
@@ -68,10 +69,11 @@ Contents
    modules/icenet
    modules/iceplot
    modules/icetrg
+   modules/icezee
 
 
 Indices and Tables
-===================
+======================
 
 * :ref:`genindex`
 * :ref:`modindex`
