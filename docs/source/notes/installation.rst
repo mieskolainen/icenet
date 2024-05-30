@@ -35,12 +35,14 @@ This can be used with IC machines in principle, however, is not tested.
 Automated setup
 ----------------------------------
 
-Remark: To avoid ``No space left on device`` problem with conda or pip, set the temporary path first, e.g.
+Remark: To avoid ``No space left on device`` problem with conda or pip, set the temporary path first
 
 .. code-block:: none
 	
 	mkdir <PATH_WITH_SPACE>/tmp
 	export TMPDIR=<PATH_WITH_SPACE>/tmp
+
+Also after activating the icenet conda environment.
 
 Execute
 
@@ -53,9 +55,11 @@ Execute
 	conda activate icenet
 	
 	# Install dependencies with pip
-	pip install -r requirements.txt
+	python -m pip install -r requirements.txt
 	
-	(OR pip install -r requirements-cpu-only.txt e.g. for Github Actions)
+	(OR -r requirements-cpu-only.txt e.g. for Github Actions)
+
+Note: The command ``python -m pip`` should use the pip installed under the conda environment.
 
 
 Initialize the environment
@@ -71,6 +75,12 @@ Always start with
 
 Possible problems
 ----------------------------------
+
+Note: One may need to steer where ``pip`` installs the packages, for example
+
+.. code-block:: none
+
+	python -m pip install --target $CONDA_PREFIX <package>
 
 Note: If you experience ``OSError: libcusparse.so.11`` (or similar) with torch-geometric, set the system path
 
@@ -94,6 +104,15 @@ removing e.g. ``tensorflow`` from requirements.txt, and install it separately wi
 	pip install tensorflow
 
 Then if something else fails, google with the error message.
+
+
+Show installation paths of binaries
+--------------------------------------
+
+.. code-block:: none
+	
+	which -a pip
+	which -a python
 
 
 GPU-support commands
@@ -154,6 +173,7 @@ Conda virtual environment commands
 	
 	# Remove environment completely
 	conda env remove --name icenet
+
 
 C-library versions
 -----------------------------------

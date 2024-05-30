@@ -16,7 +16,9 @@ class LipschitzLinear(torch.nn.Module):
     """ Lipschitz linear layer
     """
     def __init__(self, in_features, out_features):
-        super().__init__()
+        
+        super(LipschitzLinear, self).__init__()
+        
         self.in_features  = in_features
         self.out_features = out_features
         self.weight       = torch.nn.Parameter(torch.empty((out_features, in_features), requires_grad=True))
@@ -46,12 +48,13 @@ class LipschitzLinear(torch.nn.Module):
 
 
 class LZMLP(torch.nn.Module):
-    def __init__(self, D, C, out_dim=None, mlp_dim = [128, 64], activation='relu', batch_norm=False, dropout=0.0, last_tanh=False, last_tanh_scale=10.0, **kwargs):
+    def __init__(self, D, C, out_dim=None, mlp_dim = [128, 64], activation='relu', layer_norm=False, batch_norm=False, dropout=0.0, last_tanh=False,
+                 last_tanh_scale=10.0, act_after_norm=True, **kwargs):
         """
         Lipschitz MLP
         """
-        super().__init__()
-
+        super(LZMLP, self).__init__()
+        
         self.D = D
         self.C = C
         
@@ -64,20 +67,32 @@ class LZMLP(torch.nn.Module):
         
         ## First layer
         layers.append(LipschitzLinear(D, mlp_dim[0]))
-        layers.append(get_act(activation))
         
+        if not act_after_norm:
+            layers.append(get_act(activation))
+        
+        if layer_norm:  layers.append(nn.LayerNorm(mlp_dim[0]))
         if batch_norm:  layers.append(nn.BatchNorm1d(mlp_dim[0]))
         if dropout > 0: layers.append(nn.Dropout(dropout, inplace=False))
+        
+        if act_after_norm:
+            layers.append(get_act(activation))
         
         ## Hidden layers
         if len(mlp_dim) >= 2:
             
             for i in range(len(mlp_dim)-1):
                 layers.append(LipschitzLinear(mlp_dim[i], mlp_dim[i+1]))
-                layers.append(get_act(activation))
 
+                if not act_after_norm:
+                    layers.append(get_act(activation))
+
+                if layer_norm:  layers.append(nn.LayerNorm(mlp_dim[i+1]))
                 if batch_norm:  layers.append(nn.BatchNorm1d(mlp_dim[i+1]))
                 if dropout > 0: layers.append(nn.Dropout(dropout, inplace=False))
+
+                if act_after_norm:
+                    layers.append(get_act(activation))
         
         ## Output layer
         layers.append(LipschitzLinear(mlp_dim[-1], self.out_dim))

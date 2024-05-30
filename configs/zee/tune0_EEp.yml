@@ -95,7 +95,7 @@ train_runmode:
     algo: 'truncate'   # algorithm: 'truncate', null
     qmin: 0.01         # in [0,100] 
     qmax: 99.9         # in [0,100]
-
+    
     truncate_weights: True # Truncate outlier event weights
     process_validate: True # Protect also validation sample
   
@@ -105,10 +105,10 @@ train_runmode:
   models:  !include configs/zee/models.yml
   active_models: &ACTIVE_MODELS
 
-    - fastkan0
     - lzmlp0
     - dmlp0
-
+    - fastkan0
+    
     - iceboost_plus
     - iceboost0
     - xgb0

@@ -69,9 +69,14 @@ def pred_cutset(ids, param):
     
     return func_predict
 
-def pred_graph_xgb(args, param, device='cpu'):
+def pred_graph_xgb(args, param):
     
     print(__name__ + f'.pred_graph_xgb: Evaluate <{param["label"]}> model ...')
+    
+    if 'deploy_device' in param['graph']:
+        device = param['graph']['deploy_device']
+    else:
+        device = param['graph']['device']
     
     graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \
         label=param['graph']['label'], epoch=param['graph']['readmode']).to(device)
@@ -113,7 +118,13 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
     
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    
+    if 'deploy_device' in param:
+        device = param['deploy_device']
+    else:
+        device = param['device']
+    
+    model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
     
@@ -149,7 +160,13 @@ def pred_torch_generic(args, param, return_model=False):
     
     print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    
+    if 'deploy_device' in param:
+        device = param['deploy_device']
+    else:
+        device = param['device']
+    
+    model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
     
@@ -177,7 +194,13 @@ def pred_torch_scalar(args, param, return_model=False):
     
     print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
     model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    
+    if 'deploy_device' in param:
+        device = param['deploy_device']
+    else:
+        device = param['device']
+    
+    model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
     
@@ -199,6 +222,37 @@ def pred_torch_scalar(args, param, return_model=False):
         return func_predict
     else:
         return func_predict, model
+
+
+def pred_flow(args, param, n_dims, return_model=False):
+
+    print(__name__ + f'.pred_flow: Evaluate <{param["label"]}> model ...')
+
+    # Load models
+    param['model_param']['n_dims'] = n_dims # Set input dimension
+    
+    modelnames = []
+    for i in range(args['num_classes']):
+        modelnames.append(f'{param["label"]}_class_{i}')
+    
+    if 'deploy_device' in param:
+        device = param['deploy_device']
+    else:
+        device = param['device']
+    
+    models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'], device=device)
+    
+    # Turn on eval!
+    for i in range(len(models)):
+        models[i].eval()
+    
+    def func_predict(x):
+        return dbnf.predict(x, models)
+
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, models
 
 
 def pred_xgb(args, param, feature_names=None, return_model=False):
@@ -252,32 +306,6 @@ def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
         return func_predict
     else:
         return func_predict, model
-
-
-def pred_flow(args, param, n_dims, return_model=False):
-
-    print(__name__ + f'.pred_flow: Evaluate <{param["label"]}> model ...')
-
-    # Load models
-    param['model_param']['n_dims'] = n_dims # Set input dimension
-    
-    modelnames = []
-    for i in range(args['num_classes']):
-        modelnames.append(f'{param["label"]}_class_{i}')
-    
-    models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'])
-    
-    # Turn on eval!
-    for i in range(len(models)):
-        models[i].eval()
-    
-    def func_predict(x):
-        return dbnf.predict(x, models)
-
-    if return_model == False:
-        return func_predict
-    else:
-        return func_predict, models
 
 
 def pred_flr(args, param):

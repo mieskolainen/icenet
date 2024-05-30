@@ -129,18 +129,28 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
         from tensorboardX import SummaryWriter
         writer = SummaryWriter(os.path.join(param['tensorboard'], param['modelname']))
 
-    params = {'batch_size': param['opt_param']['batch_size'],
-              'shuffle'     : True,
-              'num_workers' : param['num_workers'],
-              'pin_memory'  : True}
+    # Datasets
+    training_set   = Dataset(trn_x, trn_weights)
+    validation_set = Dataset(val_x, val_weights)
     
-    # Training generator
-    training_set         = Dataset(trn_x, trn_weights)
-    training_generator   = torch.utils.data.DataLoader(training_set, **params)
+    # N.B. We use 'sampler' with 'BatchSampler', which loads a set of events using multiple event indices (faster) than the default
+    # one which takes events one-by-one and concatenates the results (slow).
+    params_train = {'batch_size'  : None,
+                    'num_workers' : param['num_workers'],
+                    'sampler'     : torch.utils.data.BatchSampler(
+                        torch.utils.data.RandomSampler(training_set), param['opt_param']['batch_size'], drop_last=False
+                    ),
+                    'pin_memory'  : True}
     
-    # Validation generator
-    validation_set       = Dataset(val_x, val_weights)
-    validation_generator = torch.utils.data.DataLoader(validation_set, batch_size=512, shuffle=False)
+    params_validate = {'batch_size'  : None,
+                    'num_workers' : param['num_workers'],
+                    'sampler'     : torch.utils.data.BatchSampler(
+                        torch.utils.data.RandomSampler(validation_set), param['eval_batch_size'], drop_last=False
+                    ),
+                    'pin_memory'  : True}
+    
+    training_loader   = torch.utils.data.DataLoader(training_set,   **params_train)
+    validation_loader = torch.utils.data.DataLoader(validation_set, **params_validate)
     
     # Loss function
     """
@@ -159,9 +169,8 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
         model.train() # !
 
         train_loss  = []
-        permutation = torch.randperm((trn_x.shape[0]))
 
-        for batch_x, batch_weights in training_generator:
+        for batch_x, batch_weights in training_loader:
 
             # Transfer to GPU
             batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
@@ -185,15 +194,18 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
         model.eval() # !
 
         validation_loss = []
-        for batch_x, batch_weights in validation_generator:
+        
+        with torch.no_grad():
+        
+            for batch_x, batch_weights in validation_loader:
 
-            # Transfer to GPU
-            batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
-            batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
-            
-            loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
-            validation_loss.append(loss)
-
+                # Transfer to GPU
+                batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
+                batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
+                
+                loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
+                validation_loss.append(loss)
+        
         validation_loss = torch.stack(validation_loss).mean()
         optimizer.swap()
         # ----------------------------------------------------------------

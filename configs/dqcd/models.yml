@@ -611,7 +611,9 @@ iceboost01-DA-MI-NOJETS:
   readmode: -1                 # -1 is the last saved epoch
 
 # -----------------------------------------------------------------------------
-
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
 
 # Logistic Regression (convex model = global optimum guarantee)
 lgr0:
@@ -634,14 +636,14 @@ lgr0:
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 150
-    batch_size: 196
+    epochs: 200
+    batch_size: 1024
     lr: 1.0e-3
     weight_decay: 1.0e-2       # L2-regularization
   
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
   
   post_process:
@@ -649,12 +651,12 @@ lgr0:
 
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-
+  
   # Read/Write of epochs
-  evalmode: 'all'               # 'all', 'latest'
+  evalmode: 1                   # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
 
-  eval_batch_size: 512
+  eval_batch_size: 1024
 
 
 # Permutation Equivariant Network
@@ -683,23 +685,23 @@ deps:
     clip_norm: 1.0
     
     epochs:  200
-    batch_size:  128
+    batch_size:  1024
     lr: 1.0e-3
-    weight_decay: 1.0e-2       # L2-regularization
+    weight_decay: 1.0e-4       # L2-regularization
 
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
-    
+  
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 16
+  num_workers: 4
   
   # Read/Write of epochs
-  evalmode: 'all'               # 'all', 'latest'
+  evalmode:  1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
 
-  eval_batch_size: 512
+  eval_batch_size: 1024
 
 
 # Deep MAXOUT network
@@ -726,21 +728,23 @@ dmx0:
     clip_norm: 1.0
 
     epochs: 200
-    batch_size: 128
+    batch_size: 1024
     lr: 1.0e-3
     weight_decay: 1.0e-2       # L2-regularization
 
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
-    
+  
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 16
+  num_workers: 4
 
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 1024
 
 
 # Deep MLP
@@ -749,15 +753,15 @@ dmlp:
   predict: 'torch_vector'
   label:   'DMLP'
   raytune:  null
-
+  
   # Model
   conv_type: 'dmlp'
   model_param:
-    mlp_dim: [64, 64, 64]     # hidden layer dimensions
-    activation: 'relu'
+    mlp_dim: [64, 64, 64, 64] # hidden layer dimensions
+    activation: 'silu'
     batch_norm: False
     dropout: 0.0
-  
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -768,23 +772,23 @@ dmlp:
     clip_norm: 1.0
     
     epochs: 200
-    batch_size: 256
+    batch_size: 1024
     lr: 1.0e-4
-    weight_decay: 1.0e-3      # L2-regularization
+    weight_decay: 1.0e-2      # L2-regularization
 
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 16
+  num_workers: 4
 
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
-  eval_batch_size: 512
+  eval_batch_size: 1024
 
 
 # Variational Autoencoder
@@ -795,26 +799,29 @@ vae0:
   raytune:  null
 
   # ** Custom set of variables **
-  exclude_MVA_vars: ['MODEL_.*'] # No conditional
-  
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet.*', 'MODEL.*']
+  #include_MVA_vars: ['.*']
+
   # Model param
   conv_type: 'vae'
   model_param:
-    hidden_dim: 64
-    latent_dim: 12
+    encoder_hidden_dim: [64, 64, 64]
+    var_hidden_dim:     [64]        # First dimension needs to match with the last of 'encoder_hidden_dim'
+    latent_dim:          12
+    decoder_hidden_dim: [64, 64, 64]
     
-    encoder_act: 'relu'
+    encoder_act: 'silu'
     encoder_bn: False
-    encoder_dropout: 0.05
+    encoder_dropout: 0.01
 
-    decoder_act: 'tanh'
+    decoder_act: 'silu'
     decoder_bn: False
-    decoder_dropout: 0.05
-
+    decoder_dropout: 0.01
+    
     reco_prob: 'Gaussian'           # 'Gaussian', 'Bernoulli'
     kl_prob:   'Gaussian'           # 'Gaussian'
     anomaly_score: 'RECO'           # 'RECO', 'KL_RECO'
-    
+  
   # Optimization
   opt_param:  
     lossfunc: 'VAE_background_only' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -826,16 +833,9 @@ vae0:
     clip_norm: 1.0
 
     epochs: 200
-    batch_size: 256
+    batch_size: 1024
     lr: 3.0e-4
     weight_decay: 1.0e-3       # L2-regularization
-
-  # Mutual information regularization
-  #MI_reg_param:
-  #  beta: 0.99                  # Positive for minimizing
-  #  x_dim: 12
-  #  y_index: "param['model_param']['latent_dim']"
-  #  <<: *MI_REG_PARAM
 
   # Scheduler
   scheduler_param:
@@ -843,13 +843,13 @@ vae0:
     gamma: 0.1
 
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 16
+  num_workers: 4
 
   # Read/Write of epochs
-  evalmode: 'all'               # 'all', 'latest'
+  evalmode: 1                   # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
 
-  eval_batch_size: 512
+  eval_batch_size: 1024
 
 
 # Graph net
@@ -896,7 +896,7 @@ gnet1:
     clip_norm: 1.0
 
     epochs: 150
-    batch_size: 128
+    batch_size: 1024
     lr: 3.0e-4
     weight_decay:  1.0e-4        # L2-regularization
 
@@ -906,13 +906,13 @@ gnet1:
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 16
+  num_workers: 4
 
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # 'name', epoch number, or -1 uses the last saved epoch
 
-  eval_batch_size: 512
+  eval_batch_size: 1024
 
 
 # Graph net
@@ -959,7 +959,7 @@ gnet2:
     clip_norm: 1.0
 
     epochs: 150
-    batch_size: 128
+    batch_size: 1024
     lr: 3.0e-4
     weight_decay:  1.0e-4      # L2-regularization
 
@@ -969,13 +969,13 @@ gnet2:
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 16
+  num_workers: 4
 
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
 
-  eval_batch_size: 512
+  eval_batch_size: 1024
 
 
 # Graph net
@@ -1022,7 +1022,7 @@ gnet3:
     clip_norm: 1.0
 
     epochs: 150
-    batch_size: 128
+    batch_size: 1024
     lr: 3.0e-4
     weight_decay:  1.0e-4        # L2-regularization
 
@@ -1032,11 +1032,11 @@ gnet3:
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 16
+  num_workers: 4
 
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
 
-  eval_batch_size: 512
+  eval_batch_size: 1024
 

@@ -20,7 +20,8 @@ class LogitsWithTemperature(nn.Module):
     Use with original raw logits and class labels as an input.
     """
     def __init__(self, mode='softmax', device='cpu'):
-        super(LogitsWithTemperature, self).__init__()
+        super().__init__()
+        
         self.temperature = nn.Parameter(1.0 * torch.ones(1, device=device))
         self.device      = device
         self.mode        = mode
@@ -101,7 +102,9 @@ class ModelWithTemperature(nn.Module):
     Expects model(input) to return logits.
     """
     def __init__(self, model, mode='softmax', device='cpu'):
-        super(ModelWithTemperature, self).__init__()
+        
+        super().__init__()
+        
         self.model       = model
         self.temperature = nn.Parameter(1.0 * torch.ones(1, device=device))
         self.device      = device
@@ -232,7 +235,8 @@ class _ECELoss(nn.Module):
             mode:   'softmax' or 'binary'
             n_bins: number of confidence interval bins
         """
-        super(_ECELoss, self).__init__()
+        super().__init__()
+        
         bin_boundaries  = torch.linspace(0, 1, n_bins + 1)
         self.bin_lowers = bin_boundaries[:-1]
         self.bin_uppers = bin_boundaries[1:]

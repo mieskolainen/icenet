@@ -720,7 +720,7 @@ def train_models(data_trn, data_val, args=None):
             minval = np.percentile(data_trn['data'].w, args['outlier_param']['qmin'])
             maxval = np.percentile(data_trn['data'].w, args['outlier_param']['qmax'])
 
-            print(__name__ + f'.train_models: Before: min event weight: {minval} | max event weight: {maxval}')
+            print(__name__ + f'.train_models: Before: min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
 
             # -----
             
@@ -735,7 +735,7 @@ def train_models(data_trn, data_val, args=None):
             
             # Validation sample
             if args['outlier_param']['process_validate']:
-                
+
                 minval = np.percentile(data_val['data'].w, args['outlier_param']['qmin'])
                 maxval = np.percentile(data_val['data'].w, args['outlier_param']['qmax'])
 
@@ -1161,7 +1161,7 @@ def evaluate_models(data=None, info=None, args=None):
                     targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
 
             plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
-
+        
         elif   param['predict'] == 'torch_graph':
             func_predict = predict.pred_torch_graph(args=args, param=param)
 

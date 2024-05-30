@@ -14,7 +14,7 @@ class SplineLinear(nn.Linear):
     def __init__(self, in_features: int, out_features: int, init_scale: float = 0.1, **kw) -> None:
         self.init_scale = init_scale
         super().__init__(in_features, out_features, bias=False, **kw)
-
+    
     def reset_parameters(self) -> None:
         nn.init.trunc_normal_(self.weight, mean=0, std=self.init_scale)
 
@@ -65,7 +65,7 @@ class FastKAN(nn.Module):
                  use_base_update: bool = False, base_activation = F.silu, spline_weight_init_scale: float = 0.1,
                  out_dim=None, last_tanh=False, last_tanh_scale=10.0, **kwargs):
         
-        super().__init__()
+        super(FastKAN, self).__init__()
         
         self.D = D
         self.C = C
@@ -99,7 +99,7 @@ class FastKAN(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
-
+    
     def softpredict(self,x) :
         """ Softmax probability
         """
@@ -121,7 +121,7 @@ class AttentionWithFastKANTransform(nn.Module):
         num_heads: int,
         gating: bool = True,
     ):
-        super(AttentionWithFastKANTransform, self).__init__()
+        super().__init__()
 
         self.num_heads = num_heads
         total_dim = head_dim * self.num_heads

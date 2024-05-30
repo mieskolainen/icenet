@@ -18,7 +18,7 @@ class MLGR(nn.Module):
             D : Input dimension
             C : Number of classes
         """
-        super(MLGR,self).__init__()
+        super(MLGR, self).__init__()
 
         self.D = D
         self.C = C
@@ -32,9 +32,7 @@ class MLGR(nn.Module):
         self.layer1 = nn.Linear(self.D, self.out_dim)
 
     def forward(self,x):
-        
-        x = self.layer1(x)
-        return x
+        return self.layer1(x)
     
     def softpredict(self,x) :
         """ Softmax probability

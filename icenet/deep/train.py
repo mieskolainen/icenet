@@ -481,16 +481,22 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
     ### ** Optimization hyperparameters [possibly from Raytune] **
     opt_param    = aux.replace_param(default=param['opt_param'], raytune=config['params'])
     
-    params_train = {'batch_size'  : opt_param['batch_size'],
-                    'shuffle'     : True,
+    # N.B. We use 'sampler' with 'BatchSampler', which loads a set of events using multiple event indices (faster) than the default
+    # one which takes events one-by-one and concatenates the results (slow).
+    params_train = {'batch_size'  : None,
                     'num_workers' : param['num_workers'],
+                    'sampler'     : torch.utils.data.BatchSampler(
+                        torch.utils.data.RandomSampler(training_set), opt_param['batch_size'], drop_last=False
+                    ),
                     'pin_memory'  : True}
     
-    params_test  = {'batch_size'  : param['eval_batch_size'],
-                    'shuffle'     : True,
+    params_test  = {'batch_size'  : None,
                     'num_workers' : param['num_workers'],
+                    'sampler'     : torch.utils.data.BatchSampler(
+                        torch.utils.data.RandomSampler(validation_set), param['eval_batch_size'], drop_last=False
+                    ),
                     'pin_memory'  : True}
-    
+        
     train_loader = torch.utils.data.DataLoader(training_set,   **params_train)
     test_loader  = torch.utils.data.DataLoader(validation_set, **params_test)
     

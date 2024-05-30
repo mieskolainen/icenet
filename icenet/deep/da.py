@@ -32,7 +32,7 @@ class GradientReversalFunction(Function):
 
 class GradientReversal(torch.nn.Module):
     def __init__(self, alpha = 1.0):
-        super(GradientReversal, self).__init__()
+        super().__init__()
         self.alpha = alpha
 
     def forward(self, x):

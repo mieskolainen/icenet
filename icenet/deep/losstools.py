@@ -39,7 +39,9 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
     # --------------------------------------------
     
     def MI_helper(output):
-        # Mutual Information regularization
+        """ 
+        Mutual Information regularization
+        """
         if MI is not None:
             X = MI['x'].float()
             
@@ -54,7 +56,9 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
             return {}
     
     def LZ_helper():
-        # Lipschitz continuity regularization
+        """
+        Lipschitz continuity regularization
+        """
         if 'lipschitz_beta' in param and param['lipschitz_beta'] > 0:
             LZ_loss = param['lipschitz_beta'] * model.get_lipschitz_loss()
             LZ = {f"LZ x $\\beta = {param['lipschitz_beta']}$": LZ_loss}
@@ -62,58 +66,69 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
             LZ = {}
         return LZ
     
-    if     param['lossfunc'] == 'binary_cross_entropy':
-        
-        logits = model.forward(x).squeeze()
-        loss   = BCE_loss(logits=logits, y=y, weights=weights)
-        
-        # Logit magnitude L1-regularization
+    def LR_helper(logits):
+        """
+        Logit magnitude L1-regularization
+        """
         if 'logit_L1_beta' in param and param['logit_L1_beta'] > 0:
             L1_loss = LOGIT_L1_loss(logits=logits, logit_beta=param['logit_L1_beta'], weights=weights)
             LRL1 = {f"LRL1 x $\\lambda = {param['logit_L1_beta']}$": L1_loss}
         else:
             LRL1 = {}
         
-        # Logit magnitude L2-regularization
+        """
+        Logit magnitude L2-regularization
+        """
         if 'logit_L2_beta' in param and param['logit_L2_beta'] > 0:
             L2_loss = LOGIT_L2_loss(logits=logits, logit_beta=param['logit_L2_beta'], weights=weights)
             LRL2 = {f"LRL2 x $\\lambda = {param['logit_L2_beta']}$": L2_loss}
         else:
             LRL2 = {}
+
+        return {**LRL1, **LRL2}
+    
+    ## Loss functions
+    
+    if   param['lossfunc'] == 'binary_cross_entropy':
         
-        loss = {'BCE': loss, **LZ_helper(), **LRL1, **LRL2, **MI_helper(torch.sigmoid(logits))}
+        logits = model.forward(x)
+        loss   = BCE_loss(logits=logits, y=y, weights=weights)
+        
+        loss = {'BCE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
     
     elif  param['lossfunc'] == 'binary_LQ':
         
-        logits = model.forward(x).squeeze()
+        logits = model.forward(x)
         loss = LQ_loss(logits=logits, y=y, weights=weights)
         
-        loss = {'LQ': loss, **LZ_helper(), **MI_helper(torch.sigmoid(logits))}
+        loss = {'LQ': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
     
     elif   param['lossfunc'] == 'MSE':
         
-        y_hat = model.forward(x).squeeze()
+        y_hat = model.forward(x)
         loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
         
-        loss  = {'MSE': loss, **LZ_helper(), **MI_helper(y_hat)}
+        loss  = {'MSE': loss, **LZ_helper(), **LR_helper(y_hat), **MI_helper(y_hat)}
     
     elif   param['lossfunc'] == 'MSE_prob':
         
-        y_hat = model.softpredict(x).squeeze()
-        loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
+        logits = model.forward(x)
+        y_hat  = torch.sigmoid(logits)
+        loss   = MSE_loss(y_hat=y_hat, y=y, weights=weights)
         
-        loss  = {'MSE': loss, **LZ_helper(), **MI_helper(y_hat)}
+        loss  = {'MSE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(y_hat)}
     
     elif   param['lossfunc'] == 'MAE':
         
-        y_hat = model.forward(x).squeeze()
+        y_hat = model.forward(x)
         loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
         
-        loss  = {'MAE': loss, **LZ_helper(), **MI_helper(y_hat)}
+        loss  = {'MAE': loss, **LZ_helper(), **LR_helper(y_hat), **MI_helper(y_hat)}
     
     elif  param['lossfunc'] == 'cross_entropy':
         
-        log_phat = F.log_softmax(model.forward(x), dim=-1)
+        logits   = model.forward(x)
+        log_phat = F.log_softmax(logits, dim=-1)
         
         if num_classes > 2:
             loss = multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
@@ -122,34 +137,38 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         else:
             loss = binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
         
-        loss  = {'CE': loss, **LZ_helper(), **MI_helper(torch.exp(log_phat))}
+        loss  = {'CE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
     
     elif param['lossfunc'] == 'cross_entropy_with_DA':
 
-        x, x_DA     = model.forward_with_DA(x)
-
-        log_phat    = F.log_softmax(x,    dim=-1)
-        log_phat_DA = F.log_softmax(x_DA, dim=-1)
+        logits, logits_DA = model.forward_with_DA(x)
+        
+        log_phat    = F.log_softmax(logits,    dim=-1)
+        log_phat_DA = F.log_softmax(logits_DA, dim=-1)
         
         # https://arxiv.org/abs/1409.7495
         CE_loss    = multiclass_cross_entropy_logprob(log_phat=log_phat,    y=y,    num_classes=num_classes, weights=weights)
         CE_DA_loss = multiclass_cross_entropy_logprob(log_phat=log_phat_DA, y=y_DA, num_classes=2, weights=w_DA)
 
-        loss  = {'CE': CE_loss, **LZ_helper(), 'DA': CE_DA_loss, **MI_helper(torch.exp(log_phat))}
-
+        loss  = {'CE': CE_loss, 'DA': CE_DA_loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
+    
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
-        logit = model.forward(x)
-        loss  = multiclass_logit_norm_loss(logit=logit, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
-        loss  = {'LNCE': loss, **LZ_helper(), **MI_helper(torch.exp(log_phat))}
+        logits = model.forward(x)
+        loss   = multiclass_logit_norm_loss(logit=logits, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
+        
+        loss  = {'LNCE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
 
     elif param['lossfunc'] == 'focal_entropy':
-        log_phat = F.log_softmax(model.forward(x), dim=-1)
+        
+        logits   = model.forward(x)
+        log_phat = F.log_softmax(logits, dim=-1)
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
-        loss  = {'FE': loss, **LZ_helper(), **MI_helper(torch.exp(log_phat))}
+        loss  = {'FE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
 
     elif param['lossfunc'] == 'VAE_background_only':
+        
         B_ind    = (y == 0) # Use only background to train
         xhat, z, mu, std = model.forward(x=x[B_ind, ...])
         log_loss = model.loss_kl_reco(x=x[B_ind, ...], xhat=xhat, z=z, mu=mu, std=std, beta=param['VAE_beta'])
@@ -159,7 +178,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         else:
             loss = log_loss.mean(dim=0)
 
-        loss  = {'VAE': loss,**LZ_helper()}
+        loss  = {'VAE': loss, **LR_helper(xhat), **LZ_helper()}
     
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
@@ -210,51 +229,48 @@ def MI_loss(X, Z, weights, MI, y):
 
 def LQ_loss(logits, y, weights=None):
     """
-    L_q loss
+    L_q loss (TBD)
     """
     return 1.0
-
 
 def LOGIT_L1_loss(logits, logit_beta=1.0, weights=None):
     """
     Logit magnitude L1-regularization
     """
     w    = 1.0 if weights is None else weights
-    loss = w * logit_beta * torch.abs(logits)
+    norm = torch.linalg.vector_norm(logits, 1, dim=1).squeeze()
+    loss = w * logit_beta * norm
     
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / logits.shape[0]
-
 
 def LOGIT_L2_loss(logits, logit_beta=1.0, weights=None):
     """
     Logit magnitude L2-regularization
     """
     w    = 1.0 if weights is None else weights
-    loss = w * logit_beta * logits**2
+    norm = torch.linalg.vector_norm(logits, 2, dim=1).squeeze()
+    loss = w * logit_beta * norm
     
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / logits.shape[0]
 
-
 def BCE_loss(logits, y, weights=None):
     """
     Binary Cross Entropy loss
     """
-    w   = 1.0 if weights is None else weights
     
-    criterion = nn.BCEWithLogitsLoss(reduction='none')
-    loss      = w * criterion(logits, y.float())
+    criterion = nn.BCEWithLogitsLoss(reduction='none', weight=weights)
+    loss      = criterion(logits.squeeze(), y.squeeze().float())
 
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / y.shape[0]
-    
 
 def MSE_loss(y_hat, y, weights=None):
     """
@@ -263,13 +279,12 @@ def MSE_loss(y_hat, y, weights=None):
     
     w = 1.0 if weights is None else weights
 
-    loss = - w * (y_hat - y)**2
+    loss = - w * ((y_hat - y)**2).squeeze()
 
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / y.shape[0]
-
 
 def MAE_loss(y_hat, y, weights=None):
     """
@@ -278,13 +293,12 @@ def MAE_loss(y_hat, y, weights=None):
     
     w = 1.0 if weights is None else weights
     
-    loss = - w * torch.abs(y_hat - y)
+    loss = - w * (torch.abs(y_hat - y)).squeeze()
 
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / y.shape[0]
-
 
 def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
     """ 
@@ -293,35 +307,12 @@ def binary_cross_entropy_logprob(log_phat_0, log_phat_1, y, weights=None):
     """
     w = 1.0 if weights is None else weights
 
-    loss = - w * (y*log_phat_1 + (1 - y) * log_phat_0)
+    loss = - w * (y*log_phat_1 + (1 - y) * log_phat_0).squeeze()
 
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / y.shape[0]
-
-
-def logsumexp(x, dim=-1):
-    """ 
-    https://en.wikipedia.org/wiki/LogSumExp
-    """
-    xmax, idx = torch.max(x, dim=dim, keepdim=True)
-    return xmax + torch.log(torch.sum(torch.exp(x - xmax), dim=dim, keepdim=True))
-
-
-def log_softmax(x, dim=-1):
-    """
-    Log of softmax
-    
-    Args:
-        x : network output without softmax
-    Returns:
-        logsoftmax values
-    """
-    log_z = logsumexp(x, dim=dim)
-    y = x - log_z
-    return y
-
 
 def multiclass_logit_norm_loss(logit, y, num_classes, weights=None, t=1.0, EPS=1e-7):
     """
@@ -332,7 +323,6 @@ def multiclass_logit_norm_loss(logit, y, num_classes, weights=None, t=1.0, EPS=1
     log_phat = F.log_softmax(logit_norm, dim=-1)
     
     return multiclass_cross_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights)
-
 
 def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
     """ 
@@ -345,13 +335,12 @@ def multiclass_cross_entropy_logprob(log_phat, y, num_classes, weights=None):
         w = 1.0
 
     y    = F.one_hot(y, num_classes)
-    loss = - y*log_phat * w
+    loss = - y * log_phat * w
 
     if weights is not None:
         return loss.sum() / torch.sum(weights)
     else:
         return loss.sum() / y.shape[0]
-
 
 def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=None) :
     """
@@ -371,15 +360,22 @@ def multiclass_focal_entropy_logprob(log_phat, y, num_classes, gamma, weights=No
     else:
         return loss.sum() / y.shape[0]
 
-
-def log_sum_exp(x):
+def logsumexp(x, dim=-1):
     """ 
-    http://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/
+    https://en.wikipedia.org/wiki/LogSumExp
     """
+    xmax, idx = torch.max(x, dim=dim, keepdim=True)
+    return xmax + torch.log(torch.sum(torch.exp(x - xmax), dim=dim, keepdim=True))
 
-    b, _ = torch.max(x, 1)
-    # b.size() = [N, ], unsqueeze() required
-    y = b + torch.log(torch.exp(x - b.unsqueeze(dim=1).expand_as(x)).sum(1))
-    # y.size() = [N, ], no need to squeeze()
+def log_softmax(x, dim=-1):
+    """
+    Log of Softmax
+    
+    Args:
+        x : network output without softmax
+    Returns:
+        logsoftmax values
+    """
+    log_z = logsumexp(x, dim=dim)
+    y = x - log_z
     return y
-

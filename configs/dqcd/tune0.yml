@@ -152,6 +152,8 @@ train_runmode:
     #- gnet2
     #- gnet1
     #- gnet3
+    #- dmlp
+    #- vae0
     
     - iceboost01-DA
     - iceboost01-DA-NOJETS
@@ -164,12 +166,10 @@ train_runmode:
     #- dmlp
     #- lgr0
     
-    #- deps
-    #- vae0    
+    #- deps    
     #- dbnf0
     
     #- xgb1
-    - dmlp
     #- dmx0
     #- dmx1
     

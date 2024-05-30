@@ -239,6 +239,11 @@ lgr0:
   
   eval_batch_size: 4096
 
+# -----------------------------------------------------------------------------
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
+
 # Deep MLP
 dmlp0:
   train:   'torch_generic'

@@ -31,6 +31,7 @@ def inverse_sigmoid(p: np.ndarray, EPS=1E-9):
     Stable inverse sigmoid function
     """
     x = np.clip(p, EPS, 1.0 - EPS) 
+    p[~np.isfinite(p)] = EPS
     
     return np.log(x) - np.log(1 - x)
 

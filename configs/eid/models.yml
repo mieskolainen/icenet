@@ -425,6 +425,10 @@ xgb0:
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
+# -----------------------------------------------------------------------------
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
 
 # Deep MLP
 dmlp:
@@ -642,11 +646,11 @@ dbnf0:
   
   modelname: 'null'
   tensorboard: 'tensorboard'
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
-
+  
   eval_batch_size: 4096

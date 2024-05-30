@@ -21,7 +21,7 @@ class PEN_max(nn.Module):
     Multidimensional model.
     """
     def __init__(self, in_dim, out_dim):
-        super(PEN_max, self).__init__()
+        super().__init__()
         self.Gamma  = nn.Linear(in_dim, out_dim)
         self.Lambda = nn.Linear(in_dim, out_dim, bias=False)
 
@@ -39,7 +39,7 @@ class PEN_mean(nn.Module):
     Multidimensional model.
     """
     def __init__(self, in_dim, out_dim):
-        super(PEN_mean, self).__init__()
+        super().__init__()
         self.Gamma  = nn.Linear(in_dim, out_dim)
         self.Lambda = nn.Linear(in_dim, out_dim, bias=False)
 
@@ -57,7 +57,7 @@ class PEN1_max(nn.Module):
     Single dimensional model.
     """
     def __init__(self, in_dim, out_dim):
-        super(PEN1_max, self).__init__()
+        super().__init__()
         self.Gamma = nn.Linear(in_dim, out_dim)
 
     def forward(self, x):
@@ -72,7 +72,7 @@ class PEN1_mean(nn.Module):
     Single dimensional model.
     """
     def __init__(self, in_dim, out_dim):
-        super(PEN1_mean, self).__init__()
+        super().__init__()
         self.Gamma = nn.Linear(in_dim, out_dim)
 
     def forward(self, x):

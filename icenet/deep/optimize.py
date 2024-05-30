@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 
 class Dataset(torch.utils.data.Dataset):
-
+    
     def __init__(self, X, Y, W, Y_DA=None, W_DA=None, X_MI=None):
         """ Initialization """
         self.x = X
@@ -33,9 +33,9 @@ class Dataset(torch.utils.data.Dataset):
     def __len__(self):
         """ Return the total number of samples """
         return self.y.shape[0]
-
+    
     def __getitem__(self, index):
-        """ Generates one sample of data """
+        """ Generates one batch of data """
 
         # Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices
         out = {'x': self.x[index,...], 'y': self.y[index, ...], 'w': self.w[index, ...]}
@@ -83,6 +83,7 @@ class DualDataset(torch.utils.data.Dataset):
         
         return out
 
+
 def dict_batch_to_cuda(batch, device):
     """
     Transfer to (GPU) device memory
@@ -91,6 +92,7 @@ def dict_batch_to_cuda(batch, device):
         batch[key] = batch[key].to(device, non_blocking=True)
 
     return batch
+
 
 def batch2tensor(batch, device):
     """
@@ -109,6 +111,9 @@ def batch2tensor(batch, device):
 
 
 def printloss(loss, precision=5):
+    """
+    Loss string printer
+    """
     out = ''
     loss_keys = loss.keys()
     for i,key in enumerate(loss_keys):
@@ -119,6 +124,9 @@ def printloss(loss, precision=5):
 
 
 def trackloss(loss, loss_history):
+    """
+    Track individual loss terms
+    """
     for key in loss.keys():
         if key not in loss_history: # First iteration
             loss_history[key] = [loss[key]]
@@ -321,7 +329,7 @@ def test(name, model, loader, device, opt_param, MI=None, compute_loss=False):
                 
                 loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, weights=w, y_DA=y_DA, w_DA=w_DA,
                                 num_classes=model.C, param=opt_param, MI=MI) 
-                 
+                
                 ## Create combined loss
                 loss = 0
                 for key in loss_tuple.keys():

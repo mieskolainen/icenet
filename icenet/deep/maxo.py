@@ -20,7 +20,8 @@ class MAXOUT(nn.Module):
             D: Input dimension
             C: Output dimension
         """
-        super(MAXOUT,self).__init__()
+        super(MAXOUT, self).__init__()
+        
         self.D = D
         self.C = C
         
