@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.8
+                0.1.0.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#show-installation-paths-of-binaries">Show installation paths of binaries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
@@ -661,18 +662,28 @@
         <span class="kn">from</span> <span class="nn">tensorboardX</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
         <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;modelname&#39;</span><span class="p">]))</span>
 
-    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
-              <span class="s1">&#39;shuffle&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-              <span class="s1">&#39;num_workers&#39;</span> <span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">],</span>
-              <span class="s1">&#39;pin_memory&#39;</span>  <span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+    <span class="c1"># Datasets</span>
+    <span class="n">training_set</span>   <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">trn_x</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">)</span>
+    <span class="n">validation_set</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">val_x</span><span class="p">,</span> <span class="n">val_weights</span><span class="p">)</span>
     
-    <span class="c1"># Training generator</span>
-    <span class="n">training_set</span>         <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">trn_x</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">)</span>
-    <span class="n">training_generator</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_set</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="c1"># N.B. We use &#39;sampler&#39; with &#39;BatchSampler&#39;, which loads a set of events using multiple event indices (faster) than the default</span>
+    <span class="c1"># one which takes events one-by-one and concatenates the results (slow).</span>
+    <span class="n">params_train</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span>  <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;num_workers&#39;</span> <span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;sampler&#39;</span>     <span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">BatchSampler</span><span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">RandomSampler</span><span class="p">(</span><span class="n">training_set</span><span class="p">),</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="p">),</span>
+                    <span class="s1">&#39;pin_memory&#39;</span>  <span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
     
-    <span class="c1"># Validation generator</span>
-    <span class="n">validation_set</span>       <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">val_x</span><span class="p">,</span> <span class="n">val_weights</span><span class="p">)</span>
-    <span class="n">validation_generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">validation_set</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">params_validate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span>  <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s1">&#39;num_workers&#39;</span> <span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;sampler&#39;</span>     <span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">BatchSampler</span><span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">RandomSampler</span><span class="p">(</span><span class="n">validation_set</span><span class="p">),</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;eval_batch_size&#39;</span><span class="p">],</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="p">),</span>
+                    <span class="s1">&#39;pin_memory&#39;</span>  <span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+    
+    <span class="n">training_loader</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_set</span><span class="p">,</span>   <span class="o">**</span><span class="n">params_train</span><span class="p">)</span>
+    <span class="n">validation_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">validation_set</span><span class="p">,</span> <span class="o">**</span><span class="n">params_validate</span><span class="p">)</span>
     
     <span class="c1"># Loss function</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -691,9 +702,8 @@
         <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="c1"># !</span>
 
         <span class="n">train_loss</span>  <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">permutation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">((</span><span class="n">trn_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">training_generator</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">training_loader</span><span class="p">:</span>
 
             <span class="c1"># Transfer to GPU</span>
             <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -717,15 +727,18 @@
         <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># !</span>
 
         <span class="n">validation_loss</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">validation_generator</span><span class="p">:</span>
+        
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        
+            <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">validation_loader</span><span class="p">:</span>
 
-            <span class="c1"># Transfer to GPU</span>
-            <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            
-            <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
-            <span class="n">validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
-
+                <span class="c1"># Transfer to GPU</span>
+                <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
+                <span class="n">validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+        
         <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
         <span class="c1"># ----------------------------------------------------------------</span>

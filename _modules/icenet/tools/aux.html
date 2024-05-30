@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.8
+                0.1.0.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#show-installation-paths-of-binaries">Show installation paths of binaries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
@@ -551,6 +552,7 @@
 <span class="sd">    Stable inverse sigmoid function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">)</span> 
+    <span class="n">p</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span> <span class="o">=</span> <span class="n">EPS</span>
     
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span></div>
 

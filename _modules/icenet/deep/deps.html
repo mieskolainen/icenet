@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.8
+                0.1.0.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#show-installation-paths-of-binaries">Show installation paths of binaries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
@@ -541,7 +542,7 @@
 <span class="sd">    Multidimensional model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">PEN_max</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Gamma</span>  <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Lambda</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
@@ -565,7 +566,7 @@
 <span class="sd">    Multidimensional model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">PEN_mean</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Gamma</span>  <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Lambda</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
@@ -589,7 +590,7 @@
 <span class="sd">    Single dimensional model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">PEN1_max</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Gamma</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PEN1_max.forward">
@@ -610,7 +611,7 @@
 <span class="sd">    Single dimensional model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">PEN1_mean</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Gamma</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PEN1_mean.forward">

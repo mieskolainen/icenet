@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.8
+                0.1.0.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#show-installation-paths-of-binaries">Show installation paths of binaries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
@@ -534,7 +535,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">out_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">init_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_scale</span> <span class="o">=</span> <span class="n">init_scale</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-
+    
 <div class="viewcode-block" id="SplineLinear.reset_parameters">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.fastkan.SplineLinear.reset_parameters">[docs]</a>
     <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -603,7 +604,7 @@
                  <span class="n">use_base_update</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">base_activation</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">silu</span><span class="p">,</span> <span class="n">spline_weight_init_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
                  <span class="n">out_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_tanh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">last_tanh_scale</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FastKAN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -640,7 +641,7 @@
             <span class="n">x</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-
+    
 <div class="viewcode-block" id="FastKAN.softpredict">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.fastkan.FastKAN.softpredict">[docs]</a>
     <span class="k">def</span> <span class="nf">softpredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span>
@@ -668,7 +669,7 @@
         <span class="n">num_heads</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">gating</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AttentionWithFastKANTransform</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
         <span class="n">total_dim</span> <span class="o">=</span> <span class="n">head_dim</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span>

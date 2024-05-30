@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.8
+                0.1.0.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#automated-setup">Automated setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#show-installation-paths-of-binaries">Show installation paths of binaries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
@@ -538,7 +539,7 @@
 <span class="sd">            D : Input dimension</span>
 <span class="sd">            C : Number of classes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MLGR</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MLGR</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -554,9 +555,7 @@
 <div class="viewcode-block" id="MLGR.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.mlgr.MLGR.forward">[docs]</a>
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
-        
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">x</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="MLGR.softpredict">

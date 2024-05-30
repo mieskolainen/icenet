@@ -27,16 +27,17 @@ For end-to-end deep learning examples, see e.g. github actions (CI) workflows un
 References
 ===================
 
-If you use this work in your research (especially if you find algorithms or ideas novel), please cite:
+If you use this work in your research -- especially if you find algorithms, their application or ideas novel,
+please include a citation:
 
 ::
 
-    @misc{mieskolainen2023icenet,
-      author = "{Mikael Mieskolainen}",
-      title  = "ICENET: a deep learning library for HEP",
-      year   = "2023",
-      url    = "https://github.com/mieskolainen/icenet",
-      note   = "[Online code; accessed XX-YY-2023]"
+    @software{icenet,
+      author  = "{Mikael Mieskolainen}",
+      title   = "ICENET: a deep learning library for HEP",
+      url     = "https://github.com/mieskolainen/icenet",
+      version = {X.Y.Z},
+      date    = {2024-05-30},
     }
 
 
