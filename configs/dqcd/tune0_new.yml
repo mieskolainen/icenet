@@ -150,32 +150,26 @@ train_runmode:
   models:  !include configs/dqcd/models.yml
   active_models: &ACTIVE_MODELS
     
-    #- gnet2
     #- gnet1
+    #- gnet2
     #- gnet3
     
+    - iceboost01
+    - iceboost01-NOJETS
+    - iceboost01-MI
     - iceboost01-DA
+    - iceboost01-DA-NC
     - iceboost01-DA-NOJETS
     - iceboost01-DA-MI
     - iceboost01-DA-MI-NOJETS
-    - iceboost01-DA-NC
+    
     - xgb01
     
-    #- xgb01-NOJETS
-    #- xgb01-no-mass
-    #- xgb01-no-jets
-    
-    #- dmlp
     #- lgr0
-    
+    #- dmlp
     #- deps
-    #- vae0    
-    #- dbnf0
-    
-    #- xgb1
-    - dmlp
+    #- vae0
     #- dmx0
-    #- dmx1
     
     #- exp
     #- cut0

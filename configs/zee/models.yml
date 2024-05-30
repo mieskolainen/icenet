@@ -225,7 +225,7 @@ iceboost_plus:
 
 ## Lipschitz MLP
 #
-lzmlp0:
+lzmlp0: &LZMLP
   train:   'torch_generic'
   predict: 'torch_scalar'
   raw_logit: true               # Return raw logits
@@ -282,9 +282,22 @@ lzmlp0:
   eval_batch_size: 4096
 
 
+## Lipschitz MLP
+#
+lzmlp0_nozero:
+
+  <<: *LZMLP
+
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  exclude_MVA_vars: ['probe_pfChargedIso', 'probe_ecalPFClusterIso', 'probe_trkSumPtHollowConeDR03', 'probe_trkSumPtSolidConeDR04']
+  
+  label:   'LZMLP-NOZERO'
+
+
 ## FastKAN
 #
-fastkan0:
+fastkan0: &FASTKAN
   train:   'torch_generic'
   predict: 'torch_scalar'
   raw_logit: true               # Return raw logits
@@ -346,9 +359,22 @@ fastkan0:
   deploy_device: 'cpu'        # 'auto', 'cpu', 'cuda'
 
 
+## FastKAN
+#
+fastkan0_nozero:
+
+  <<: *FASTKAN
+  
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  exclude_MVA_vars: ['probe_pfChargedIso', 'probe_ecalPFClusterIso', 'probe_trkSumPtHollowConeDR03', 'probe_trkSumPtSolidConeDR04']
+  
+  label:   'FASTKAN-NOZERO'
+
+
 ## Deep MLP
 #
-dmlp0:
+dmlp0: &DMLP
   train:   'torch_generic'
   predict: 'torch_scalar'
   raw_logit: true               # Return raw logits
@@ -406,3 +432,16 @@ dmlp0:
   readmode: -1                 # -1 is the last saved epoch
   
   eval_batch_size: 4096
+
+
+## Deep MLP
+#
+dmlp0_nozero:
+
+  <<: *DMLP
+
+  # ** Custom set of variables **
+  #include_MVA_vars: ['.*']
+  exclude_MVA_vars: ['probe_pfChargedIso', 'probe_ecalPFClusterIso', 'probe_trkSumPtHollowConeDR03', 'probe_trkSumPtSolidConeDR04']
+  
+  label:   'DMLP-NOZERO'

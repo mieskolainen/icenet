@@ -105,6 +105,10 @@ train_runmode:
   models:  !include configs/zee/models.yml
   active_models: &ACTIVE_MODELS
 
+    - lzmlp0_nozero
+    - dmlp0_nozero
+    - fastkan0_nozero
+    
     - lzmlp0
     - dmlp0
     - fastkan0
