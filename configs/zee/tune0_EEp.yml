@@ -95,11 +95,11 @@ train_runmode:
     algo: 'truncate'   # algorithm: 'truncate', null
     qmin: 0.01         # in [0,100] 
     qmax: 99.9         # in [0,100]
-    
+
     truncate_weights: True # Truncate outlier event weights
     process_validate: True # Protect also validation sample
   
-
+  
   # ** Activate models here **
   # Give all models some unique identifier and label
   models:  !include configs/zee/models.yml
@@ -115,7 +115,7 @@ train_runmode:
     
     - iceboost_plus
     - iceboost0
-    - xgb0
+    #- xgb0
   
   raytune: !include configs/zee/raytune.yml
 

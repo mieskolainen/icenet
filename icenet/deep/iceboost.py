@@ -170,7 +170,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     if loss_mode == 'eval':
         
         ts = tempscale.LogitsWithTemperature(mode='binary', device=device)
-        ts.set_temperature(logits=preds, labels=targets.to(torch.float32), weights=weights)
+        ts.set_temperature(logits=preds, labels=targets.to(torch.float32), weights=w)
     
     # --------------------------------------------------------------------
     ## MI Regularization
@@ -418,7 +418,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         print(__name__ + f'.train_xgb: Negative weights in the sample -- handled via custom loss')
         out_weights_on = True
         
-        if use_custom:
+        if not use_custom:
             raise Exception(__name__ + f'.train_xgb: Need to use custom with negative weights, e.g. "custom:binary_cross_entropy". Change your parameters.')
     else:
         out_weights_on = False

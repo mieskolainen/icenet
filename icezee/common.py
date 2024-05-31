@@ -71,16 +71,14 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     
     X_MC = frame_mc[LOAD_VARS].to_numpy()
     
-    ## Pre-computed weights (kinematic re-weight x gen event weight x ...)
-    """
-    W_MC    = frame_mc[['weight']].to_numpy().squeeze()
-    W_MC_rw = frame_mc[['rw_weights']].to_numpy().squeeze()
-    W_MC    = W_MC / W_MC_rw # Extract out raw "gen" weights
-    W_MC    = W_MC / np.sum(W_MC) * len(W_MC)
-    """
+    ## Pre-computed weights (gen event weight x CMS weights)
+    W_MC = frame_mc[['weight']].to_numpy().squeeze()
+    #W_MC_rw = frame_mc[['rw_weights']].to_numpy().squeeze()
+    #W_MC    = W_MC / W_MC_rw # Extract out raw "gen" weights
+    W_MC = W_MC / np.sum(W_MC) * len(W_MC)
     
     # Use all events with weight 1
-    W_MC = np.ones(len(X_MC))
+    #W_MC = np.ones(len(X_MC))
     
     # Label = 0
     Y_MC = np.zeros(len(X_MC)).astype(int)

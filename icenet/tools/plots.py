@@ -1342,7 +1342,7 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
         s_ind  = np.array(np.argsort(yy), dtype=int)
         yy     = yy[s_ind]
         labels = [labels[i] for i in s_ind]
-
+    
     # Plot
     fig,ax = plt.subplots(figsize=(0.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
     plt.barh(xx, yy, align='center', height=0.5, tick_label=labels)
@@ -1504,7 +1504,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     chi2_table.add_row(['total', f'{total_ndf}', f'{total_chi2/total_ndf:0.1f}', f'{total_chi2_AI/total_ndf:0.1f}'])
     
     # -----------------------------------------------
-    filename = local_dir + f"/chi2.log"
+    filename = local_dir + f"/stats_chi2.log"
     open(filename, 'w').close() # Clear content
     table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table, print_to_screen=True)
     # -----------------------------------------------

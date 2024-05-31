@@ -1338,7 +1338,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         ## Plot over different temperature values
         sublabel = 'inclusive'
         dir      = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
-        filename = dir + "/chi2_summary.log"
+        filename = dir + "/stats_chi2_summary.log"
         open(filename, 'w').close() # Clear content
         
         for tau in args['plot_param']['OBS_reweight']['tau_values']:

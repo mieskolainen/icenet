@@ -116,7 +116,7 @@ train_runmode:
     
     - iceboost_plus
     - iceboost0
-    - xgb0
+    #- xgb0
   
   raytune: !include configs/zee/raytune.yml
 
