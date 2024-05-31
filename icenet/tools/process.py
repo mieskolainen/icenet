@@ -288,6 +288,12 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Create aux
     aux.makedir('tmp')
     
+    if runmode == 'train':
+        aux.makedir(f'{args["plotdir"]}/train')
+    if runmode == 'eval':
+        aux.makedir(f'{args["plotdir"]}/eval')
+    # -------------------------------------------------------------------
+    
     # -------------------------------------------------------------------
     # Set random seeds for reproducability and train-validate-test splits
 
@@ -330,13 +336,17 @@ def generic_flow(rootname, func_loader, func_factor):
         
     if runmode == 'train':
         
-        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids)
+        output_file = f'{args["plotdir"]}/train/stats_train.log'
+        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
+        
         make_plots(data=data['trn'], args=args, runmode=runmode)
         train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 
     if runmode == 'eval':
 
-        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids)
+        output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
+        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)
+        
         make_plots(data=data['tst'], args=args, runmode=runmode)
         evaluate_models(data=data['tst'], info=data['info'], args=args)
     
@@ -672,6 +682,23 @@ def train_models(data_trn, data_val, args=None):
     cprint(__name__ + f'.train_models: ', 'yellow')
     print('')
     
+    # -----------------------------
+    # Prepare output folders
+
+    targetdir  = f'{args["plotdir"]}/train'
+
+    subdirs = ['']
+    for sd in subdirs:
+        os.makedirs(targetdir + '/' + sd, exist_ok = True)
+    # ----------------------------------
+    
+    # Print training stats
+    output_file = f'{args["plotdir"]}/train/stats_weights_train.log'
+    prints.print_weights(weights=data_trn['data'].w, y=data_trn['data'].y, output_file=output_file)
+    
+    output_file = f'{args["plotdir"]}/train/stats_weights_validate.log'
+    prints.print_weights(weights=data_val['data'].w, y=data_val['data'].y, output_file=output_file)
+    
     
     # @@ Tensor normalization @@
     if data_trn['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
@@ -766,7 +793,9 @@ def train_models(data_trn, data_val, args=None):
         # Save it for the evaluation
         pickle.dump({'X_mu': X_mu, 'X_std': X_std, 'ids': data_trn['data'].ids}, open(args['modeldir'] + '/zscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
-        prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w)
+        # Print train
+        output_file = f'{args["plotdir"]}/train/stats_train_{args["varnorm"]}.log'
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
 
     elif args['varnorm'] == 'madscore' :
         
@@ -779,7 +808,9 @@ def train_models(data_trn, data_val, args=None):
         # Save it for the evaluation
         pickle.dump({'X_m': X_m, 'X_mad': X_mad, 'ids': data_trn['data'].ids}, open(args['modeldir'] + '/madscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
-        prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w)
+        # Print train
+        output_file = f'{args["plotdir"]}/train/stats_train_{args["varnorm"]}.log'
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
 
     # -------------------------------------------------------------
 
@@ -996,6 +1027,13 @@ def evaluate_models(data=None, info=None, args=None):
         os.makedirs(targetdir + '/' + sd, exist_ok = True)
 
     # --------------------------------------------------------------------
+    
+    # Print evaluation stats
+    output_file = f'{args["plotdir"]}/eval/stats_weights.log'
+    prints.print_weights(weights=data['data'].w, y=data['data'].y, output_file=output_file)
+    
+    
+    # --------------------------------------------------------------------
     # Collect data
 
     X       = None
@@ -1068,7 +1106,8 @@ def evaluate_models(data=None, info=None, args=None):
             
             X = io.apply_zscore(X, X_mu, X_std)
             
-            prints.print_variables(X, ids, weights)
+            output_file = f'{args["plotdir"]}/eval/stats_variables_{args["varnorm"]}.log'
+            prints.print_variables(X, ids, weights, output_file=output_file)
 
         elif args['varnorm'] == 'madscore':
             
@@ -1079,7 +1118,8 @@ def evaluate_models(data=None, info=None, args=None):
             
             X = io.apply_madscore(X, X_m, X_mad)
             
-            prints.print_variables(X, ids, weights)
+            output_file = f'{args["plotdir"]}/eval/stats_variables_{args["varnorm"]}.log'
+            prints.print_variables(X, ids, weights, output_file=output_file)
             
     except:
         cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
@@ -1278,7 +1318,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
 
     global ROC_binned_mstats
     global ROC_binned_mlabel
-
+    
     # ** Compute predictions once and for all here **
     y_pred = func_predict(x_input)
     y_preds.append(copy.deepcopy(y_pred))

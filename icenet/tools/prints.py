@@ -70,7 +70,39 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
+def print_weights(weights, y, output_file=None):
+    """
+    Print event weights table
+    """
+    
+    class_ids = np.unique(y.astype(int))
+    
+    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)", "min(w)", "Q5(w)", "Q95(w)", "max(w)"]) 
+    
+    for c in class_ids:
+        ind = (y == c)
+        table.add_row([f'{c}',
+                       f'{np.sum(ind)}',
+                       f'{np.round(np.sum(weights[ind]), 2)}',
+                       f'{np.mean(weights[ind]):0.3E}',
+                       f'{np.std(weights[ind]):0.3E}',
+                       f'{np.min(weights[ind]):0.3E}',
+                       f'{np.percentile(weights[ind],  5):0.3E}',
+                       f'{np.percentile(weights[ind], 95):0.3E}',
+                       f'{np.max(weights[ind]):0.3E}'])
+    
+    print(table)
+    print('')
+    
+    # Print to file
+    if output_file is not None:
+        with open(output_file, 'w') as f:
+            print(table, file=f)
+    
+    return table
+
+
+def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, output_file=None):
     """ Print statistics of X
     
     Args:
@@ -124,6 +156,11 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
             print(f'[{j: >3}] Cannot print variable "{ids[j]}" (probably non-scalar type)')
     
     print(table)
-    print('\n')
+    print('')
 
+    # Print to file
+    if output_file is not None:
+        with open(output_file, 'w') as f:
+            print(table, file=f)
+    
     return table

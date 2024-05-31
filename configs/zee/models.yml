@@ -70,7 +70,7 @@ xgb0:
   
   # booster parameters
   model_param:
-    num_boost_round: 400        # number of epochs (equal to the number of trees!)
+    num_boost_round: 500        # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
@@ -115,7 +115,7 @@ iceboost0:
   
   # booster parameters
   model_param:
-    num_boost_round: 400        # number of epochs (equal to the number of trees!)
+    num_boost_round: 500        # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
@@ -167,7 +167,7 @@ iceboost_plus:
   
   # booster parameters
   model_param:
-    num_boost_round: 400        # number of epochs (equal to the number of trees!)
+    num_boost_round: 500        # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'

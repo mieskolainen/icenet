@@ -8,10 +8,10 @@ import torch
 import matplotlib.pyplot as plt
 from termcolor import colored, cprint
 import copy
-from prettytable import PrettyTable
 
 from icenet.tools import aux
 from icenet.tools import io
+from icenet.tools import prints
 from icenet.deep  import iceboost
 
 
@@ -447,23 +447,8 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12, x_val=None, y_
     for c in class_ids:
         weights = weights + weights_doublet[c]
     
-    ### Compute diagnostics
-    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)", "min(w)", "Q5(w)", "Q95(w)", "max(w)"]) 
-    
-    for c in class_ids:
-        ind = (y == c)
-        table.add_row([f'{c}',
-                       f'{np.sum(ind)}',
-                       f'{np.round(np.sum(weights[ind]), 2)}',
-                       f'{np.mean(weights[ind]):0.3E}',
-                       f'{np.std(weights[ind]):0.3E}',
-                       f'{np.min(weights[ind]):0.3E}',
-                       f'{np.percentile(weights[ind],  5):0.3E}',
-                       f'{np.percentile(weights[ind], 95):0.3E}',
-                       f'{np.max(weights[ind]):0.3E}'])
-    
-    print(table)
-    print('')
+    ### Print weights
+    prints.print_weights(weights=weights, y=y)
     
     if use_ak:
         return ak.Array(weights), pdf
