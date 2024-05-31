@@ -1906,7 +1906,7 @@
         <span class="c1">## Plot over different temperature values</span>
         <span class="n">sublabel</span> <span class="o">=</span> <span class="s1">&#39;inclusive&#39;</span>
         <span class="nb">dir</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="nb">dir</span> <span class="o">+</span> <span class="s2">&quot;/chi2_summary.log&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">dir</span> <span class="o">+</span> <span class="s2">&quot;/stats_chi2_summary.log&quot;</span>
         <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># Clear content</span>
         
         <span class="k">for</span> <span class="n">tau</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">][</span><span class="s1">&#39;tau_values&#39;</span><span class="p">]:</span>

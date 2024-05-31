@@ -709,7 +709,7 @@
     <span class="k">if</span> <span class="n">loss_mode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
         
         <span class="n">ts</span> <span class="o">=</span> <span class="n">tempscale</span><span class="o">.</span><span class="n">LogitsWithTemperature</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">ts</span><span class="o">.</span><span class="n">set_temperature</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">ts</span><span class="o">.</span><span class="n">set_temperature</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">## MI Regularization</span>
@@ -962,7 +962,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Negative weights in the sample -- handled via custom loss&#39;</span><span class="p">)</span>
         <span class="n">out_weights_on</span> <span class="o">=</span> <span class="kc">True</span>
         
-        <span class="k">if</span> <span class="n">use_custom</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_custom</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Need to use custom with negative weights, e.g. &quot;custom:binary_cross_entropy&quot;. Change your parameters.&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">out_weights_on</span> <span class="o">=</span> <span class="kc">False</span>

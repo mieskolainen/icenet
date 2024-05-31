@@ -609,16 +609,14 @@
     
     <span class="n">X_MC</span> <span class="o">=</span> <span class="n">frame_mc</span><span class="p">[</span><span class="n">LOAD_VARS</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     
-    <span class="c1">## Pre-computed weights (kinematic re-weight x gen event weight x ...)</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    W_MC    = frame_mc[[&#39;weight&#39;]].to_numpy().squeeze()</span>
-<span class="sd">    W_MC_rw = frame_mc[[&#39;rw_weights&#39;]].to_numpy().squeeze()</span>
-<span class="sd">    W_MC    = W_MC / W_MC_rw # Extract out raw &quot;gen&quot; weights</span>
-<span class="sd">    W_MC    = W_MC / np.sum(W_MC) * len(W_MC)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">## Pre-computed weights (gen event weight x CMS weights)</span>
+    <span class="n">W_MC</span> <span class="o">=</span> <span class="n">frame_mc</span><span class="p">[[</span><span class="s1">&#39;weight&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="c1">#W_MC_rw = frame_mc[[&#39;rw_weights&#39;]].to_numpy().squeeze()</span>
+    <span class="c1">#W_MC    = W_MC / W_MC_rw # Extract out raw &quot;gen&quot; weights</span>
+    <span class="n">W_MC</span> <span class="o">=</span> <span class="n">W_MC</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W_MC</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">W_MC</span><span class="p">)</span>
     
     <span class="c1"># Use all events with weight 1</span>
-    <span class="n">W_MC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_MC</span><span class="p">))</span>
+    <span class="c1">#W_MC = np.ones(len(X_MC))</span>
     
     <span class="c1"># Label = 0</span>
     <span class="n">Y_MC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_MC</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
