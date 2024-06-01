@@ -849,12 +849,11 @@
 
 <div class="viewcode-block" id="test">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.test">[docs]</a>
-<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compute_loss</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compute_loss</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pytorch based testing routine.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        name      : &#39;test&#39; or &#39;validate&#39;, for example</span>
 <span class="sd">        model     : pytorch geometric model</span>
 <span class="sd">        loader    : pytorch geometric dataloader</span>
 <span class="sd">        device    : &#39;cpu&#39; or &#39;device&#39;</span>
@@ -929,22 +928,14 @@
     
     <span class="c1"># Normalize</span>
     <span class="k">if</span> <span class="n">compute_loss</span><span class="p">:</span>
-            
         <span class="n">total_loss</span> <span class="o">/=</span> <span class="n">n_batches</span>
-
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">component_losses</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">component_losses</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">/=</span> <span class="n">n_batches</span>
     
-    <span class="c1"># Change names</span>
-    <span class="n">old_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">component_losses</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">old_keys</span><span class="p">:</span>
-        <span class="n">component_losses</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">component_losses</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-        <span class="n">component_losses</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-    
     <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;sum (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">:</span> <span class="n">total_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">component_losses</span><span class="p">},</span> <span class="n">accsum</span> <span class="o">/</span> <span class="n">k</span><span class="p">,</span> <span class="n">aucsum</span> <span class="o">/</span> <span class="n">k</span>
+        <span class="k">return</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;sum&#39;</span><span class="p">:</span> <span class="n">total_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">component_losses</span><span class="p">},</span> <span class="n">accsum</span> <span class="o">/</span> <span class="n">k</span><span class="p">,</span> <span class="n">aucsum</span> <span class="o">/</span> <span class="n">k</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;sum (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">:</span> <span class="n">total_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">component_losses</span><span class="p">},</span> <span class="n">accsum</span><span class="p">,</span> <span class="n">aucsum</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;sum&#39;</span><span class="p">:</span> <span class="n">total_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">component_losses</span><span class="p">},</span> <span class="n">accsum</span><span class="p">,</span> <span class="n">aucsum</span></div>
 
 
 
