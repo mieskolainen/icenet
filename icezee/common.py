@@ -71,27 +71,23 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     
     X_MC = frame_mc[LOAD_VARS].to_numpy()
     
-    ## Pre-computed weights (gen event weight x CMS weights)
-    W_MC = frame_mc[['weight']].to_numpy().squeeze()
-    #W_MC_rw = frame_mc[['rw_weights']].to_numpy().squeeze()
-    #W_MC    = W_MC / W_MC_rw # Extract out raw "gen" weights
-    W_MC = W_MC / np.sum(W_MC) * len(W_MC)
-    
-    # Use all events with weight 1
-    #W_MC = np.ones(len(X_MC))
-    
     # Label = 0
     Y_MC = np.zeros(len(X_MC)).astype(int)
     
+    ## Pre-computed weights (gen event weight x CMS weights)
+    W_MC = frame_mc[['weight']].to_numpy().squeeze()
+    
     # ** Drop negative weight events **
-    """
     ind  = W_MC < 0
     if np.sum(ind) > 0:
         cprint(__name__ + f'.load_root_file: Dropping negative weight events ({np.sum(ind)/len(ind):0.3f})', 'red')
         W_MC = W_MC[~ind] # Boolean NOT
         X_MC = X_MC[~ind]
         Y_MC = Y_MC[~ind]
-    """
+    
+    # Renormalize to the event count
+    W_MC = W_MC / np.sum(W_MC) * len(W_MC)
+    
     
     print(f'X_MC.shape = {X_MC.shape}')
     print(f'W_MC.shape = {W_MC.shape}')

@@ -250,9 +250,6 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     Main training loop for all torch based models
     """
     
-    trn_aucs  = []
-    val_aucs  = []
-    
     # Transfer to CPU / GPU
     model, device = optimize.model_to_cuda(model=model, device_type=param['device'])
 
@@ -309,11 +306,19 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         MI['optimizer'] = torch.optim.Adam(all_parameters, lr=MI['lr'], weight_decay=MI['weight_decay'])
     else:
         MI = None
+    
     # --------------------------------------------------------------------
-
     # Training loop
-    loss_history = {}
-
+    
+    loss_history_train = {}
+    loss_history_eval  = {}
+    
+    trn_losses = []
+    val_losses = []
+    
+    trn_aucs = []
+    val_aucs = []
+    
     for epoch in range(1, opt_param['epochs']+1):
 
         if MI is not None: # Reset diagnostics
@@ -322,8 +327,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
         
         if epoch == 1 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
-            _, train_acc, train_auc                   = optimize.test(name='train', model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
-            validate_loss, validate_acc, validate_auc = optimize.test(name='eval',  model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
+            _, train_acc, train_auc                   = optimize.test(model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
+            validate_loss, validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
 
             # Temperature calibration
             try:
@@ -335,8 +340,12 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
                 print('Could not evaluate temperature scaling -- skip')
         
         ## ** Save values **
-        optimize.trackloss(loss=loss, loss_history=loss_history)
-        optimize.trackloss(loss=validate_loss, loss_history=loss_history)
+        optimize.trackloss(loss=loss, loss_history=loss_history_train)
+        optimize.trackloss(loss=validate_loss, loss_history=loss_history_eval)
+        
+        trn_losses.append(loss_history_train['sum'][-1])
+        val_losses.append(loss_history_eval['sum'][-1])
+        
         trn_aucs.append(train_auc)
         val_aucs.append(validate_auc)
         
@@ -350,7 +359,22 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         # Update scheduler
         scheduler.step()
         
-        if args['__raytune_running__']:
+        if not args['__raytune_running__']:
+            
+            ## Save the model
+            filename = args['modeldir'] + f'/{param["label"]}_{epoch}'
+            
+            losses     = {'trn_losses':         trn_losses,
+                          'val_losses':         val_losses,
+                          'trn_aucs':           trn_aucs,
+                          'val_aucs:':          val_aucs,
+                          'loss_history_train': loss_history_train,
+                          'loss_history_eval':  loss_history_eval}
+            
+            checkpoint = {'model': model, 'state_dict': model.state_dict(), 'ids': ids, 'losses': losses}
+            torch.save(checkpoint, filename + '.pth')
+            
+        else:
             
             # OLD
             # with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:
@@ -362,18 +386,19 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             # with tempfile.TemporaryDirectory as temp_checkpoint_dir:
             #   torch.save(state_dict, os.path.join(temp_checkpoint_dir, 'model.pt'))
             #   ray.train.report({'metric': 1}, checkpoint=Checkpoint.from_directory(temp_checkpoint_dir))
-            
-            ray.train.report({'loss': loss.item(), 'AUC': validate_auc})
-        else:
-            ## Save
-            checkpoint = {'model': model, 'state_dict': model.state_dict(), 'ids': ids}
-            torch.save(checkpoint, args['modeldir'] + f'/{param["label"]}_' + str(epoch) + '.pth')
+
+            ray.train.report({'loss': val_losses[-1], 'AUC': validate_auc})
     
     if not args['__raytune_running__']:
         
         # Plot evolution
         plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
-        fig,ax   = plots.plot_train_evolution_multi(loss_history, trn_aucs, val_aucs, param['label'])
+        
+        ltr = {f'train: {k}': v for k, v in loss_history_train.items()}
+        lev = {f'eval:  {k}': v for k, v in loss_history_eval.items()}
+        
+        fig,ax = plots.plot_train_evolution_multi(losses=ltr | lev, trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+
         plt.savefig(f"{plotdir}/{param['label']}--evolution.pdf", bbox_inches='tight'); plt.close()
 
         return model
@@ -701,6 +726,13 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     
     print(__name__ + f'.train_graph_xgb: After extension: {x_trn.shape}')
 
+    # Create all feature names
+    ids = []
+    for i in range(Z):                  # Graph-net latent dimension Z (message passing output) features
+        ids.append(f'conv_Z_{i}')
+    for i in range(len(data_trn[0].u)): # Xgboost high-level features
+        ids.append(feature_names[i])
+    
     # ------------------------------------------------------------------------------
     ## Train xgboost
 
@@ -767,7 +799,8 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
 
         ## Save
-        pickle.dump(model, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.dat", 'wb'))
+        losses = {'trn_losses': trn_losses, 'val_losses': val_losses, 'trn_aucs': trn_aucs, 'val_aucs': val_aucs}
+        pickle.dump({'model': model, 'ids': ids, 'losses': losses}, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.pkl", 'wb'))
         
         print(__name__ + f'.train_graph_xgb: Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
     
@@ -781,12 +814,6 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     # -------------------------------------------
     ## Plot feature importance
 
-    # Create all feature names
-    ids = []
-    for i in range(Z):                  # Graph-net latent dimension Z (message passing output) features
-        ids.append(f'conv_Z_{i}')
-    for i in range(len(data_trn[0].u)): # Xgboost high-level features
-        ids.append(feature_names[i])
     
     for sort in [True, False]:
         fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)

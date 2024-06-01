@@ -287,12 +287,11 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     return {'sum': total_loss, **component_losses}
 
 
-def test(name, model, loader, device, opt_param, MI=None, compute_loss=False):
+def test(model, loader, device, opt_param, MI=None, compute_loss=False):
     """
     Pytorch based testing routine.
     
     Args:
-        name      : 'test' or 'validate', for example
         model     : pytorch geometric model
         loader    : pytorch geometric dataloader
         device    : 'cpu' or 'device'
@@ -367,22 +366,14 @@ def test(name, model, loader, device, opt_param, MI=None, compute_loss=False):
     
     # Normalize
     if compute_loss:
-            
         total_loss /= n_batches
-
         for key in component_losses.keys():
             component_losses[key] /= n_batches
     
-    # Change names
-    old_keys = copy.deepcopy(list(component_losses.keys()))
-    for key in old_keys:
-        component_losses[f'{key} ({name})'] = copy.deepcopy(component_losses[key])
-        component_losses.pop(key)
-    
     if k > 0:
-        return {f'sum ({name})': total_loss, **component_losses}, accsum / k, aucsum / k
+        return {f'sum': total_loss, **component_losses}, accsum / k, aucsum / k
     else:
-        return {f'sum ({name})': total_loss, **component_losses}, accsum, aucsum
+        return {f'sum': total_loss, **component_losses}, accsum, aucsum
 
 
 def model_to_cuda(model, device_type='auto'):

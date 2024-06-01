@@ -8,7 +8,7 @@ import awkward as ak
 import re
 import time
 import datetime
-import torch
+import pickle
 
 import numba
 import copy
@@ -877,15 +877,36 @@ def getmtime(filename):
 def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None):
     """
     Create model filename
+    
+    This function automatically takes the minimum validation loss epoch / iteration,
+    if epoch == - 1, by first reading the last epoch / iteration file.
     """
     def createfilename(i):
         return f'{path}/{label}_{i}{filetype}'
     
     if epoch is None or epoch == -1:
         cprint(__name__ + f'.create_model_filename: Loading the latest model by timestamp', 'yellow')
-        
+
         list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
         filename      = max(list_of_files, key=os.path.getctime)
+
+        try:
+            
+            # Now read the saved model optimize
+            with open(filename, 'rb') as file:
+                data  = pickle.load(file)
+            
+            losses = np.array(data['losses']['val_losses'])
+            idx    = np.argmin(losses) + 1 # + 1 because epochs count from 1
+            
+            str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+            cprint(__name__ + f'.create_model_filename: {str}', 'magenta')
+            
+            filename  = createfilename(idx)
+
+        except:
+            cprint(__name__ + f'.create_model_filename: Problem in finding the model [{label}] with the minimum validation loss', 'red')
+        
     else:
         cprint(__name__ + f'.create_model_filename: Loading the model with the provided epoch = {epoch}', 'yellow')
         
@@ -1094,8 +1115,8 @@ def sort_fpr_tpr(fpr, tpr):
     """
     For numerical stability with negative weighted events
     """
-    fpr = np.clip(fpr, a_min=0.0, a_max=1.0)
-    tpr = np.clip(tpr, a_min=0.0, a_max=1.0)
+    fpr = np.clip(fpr, 0.0, 1.0)
+    tpr = np.clip(tpr, 0.0, 1.0)
     
     sorted_index = np.argsort(fpr) # x-axis needs to be monotonic
     fpr_sorted   = np.array(fpr)[sorted_index]
@@ -1119,7 +1140,7 @@ def auc_score(fpr, tpr):
     """
     auc = scipy.integrate.trapz(y=tpr, x=fpr)
 
-    return np.clip(auc, a_min=0.0, a_max=1.0)
+    return np.clip(auc, 0.0, 1.0)
 
 
 def compute_metrics(class_ids, y_true, y_pred, weights):

@@ -36,7 +36,7 @@ def rw_transform_with_logits(logits, mode, absMax=30):
         sigmoid_ = aux.sigmoid
         logits   = np.clip(logits, -absMax, absMax)
     
-    if   mode  == 'LR':                # LR trick
+    if   mode == 'LR':                # LR trick
         return exp_(logits)
     elif mode == 'inverse-LR':         # Inverse LR trick
         return exp_(-logits)
@@ -70,7 +70,7 @@ def rw_transform(phat, mode, EPS=1E-12):
     else:
         phat = np.clip(phat, EPS, 1-EPS)
     
-    if   mode  == 'LR':                   # LR trick
+    if   mode == 'LR':                    # LR trick
         return phat / (1.0 - phat)
     elif mode == 'inverse-LR':            # Inverse LR trick
         return (1.0 - phat) / phat
@@ -349,11 +349,11 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
         p   = func_predict(x[ind])
 
         # Turn into a likelihood ratio to obtain the reweight factor
-        p   = np.clip(p, a_min = EPS, a_max = 1 - EPS)
+        p   = np.clip(p, EPS, 1 - EPS)
         LR  = p / (1 - p)
         
         # Apply maximum weight regularization
-        LR = np.clip(LR, a_min=0.0, a_max=diff_args['ML_param']['max_reg'])
+        LR = np.clip(LR, 0.0, diff_args['ML_param']['max_reg'])
         
         # Apply to weights
         wnew[ind] = wnew[ind] * LR if w is not None else np.ones_like(y) * LR
@@ -479,7 +479,7 @@ def reweightcoeff1D(X, y, pdf, reference_class, max_reg = 1e3, EPS=1e-12):
     for c in class_ids:
         inds = aux.x2ind(X[y == c], pdf['binedges'])
         if c is not reference_class:
-            weights_doublet[c][y == c] = pdf[reference_class][inds] / np.clip(pdf[c][inds], a_min=EPS, a_max=None)
+            weights_doublet[c][y == c] = pdf[reference_class][inds] / np.clip(pdf[c][inds], EPS, None)
         else:
             weights_doublet[c][y == c] = 1.0 # Reference class stays intact
 
@@ -517,7 +517,7 @@ def reweightcoeff2D(X_A, X_B, y, pdf, reference_class, max_reg = 1e3, EPS=1E-12)
         inds_0 = aux.x2ind(X_A[y == c], pdf['binedges'][0]) # variable 0
         inds_1 = aux.x2ind(X_B[y == c], pdf['binedges'][1]) # variable 1
         if c is not reference_class:
-            weights_doublet[c][y == c] = pdf[reference_class][inds_0, inds_1] / np.clip(pdf[c][inds_0, inds_1], a_min=EPS, a_max=None)
+            weights_doublet[c][y == c] = pdf[reference_class][inds_0, inds_1] / np.clip(pdf[c][inds_0, inds_1], EPS, None)
         else:
             weights_doublet[c][y == c] = 1.0 # Reference class stays intact
 
@@ -568,7 +568,7 @@ def balanceweights(weights_doublet, reference_class, y, EPS=1e-12):
     
     for c in class_ids:
         if c is not reference_class:
-            EQ = ref_sum / np.clip(np.sum(weights_doublet[c][y == c]), a_min=EPS, a_max=None)
+            EQ = ref_sum / np.clip(np.sum(weights_doublet[c][y == c]), EPS, None)
             weights_doublet[c][y == c] *= EQ
     
     return weights_doublet

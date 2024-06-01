@@ -194,12 +194,12 @@ def main():
                     loss = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
                     # Validate
-                    _, trn_acc, trn_AUC        = deep.optimize.test(name='train', model=model[ID], loader=train_loader,    device=device[ID], opt_param=param[ID]['opt_param'])
-                    val_loss, val_acc, val_AUC = deep.optimize.test(name='eval',  model=model[ID], loader=validate_loader, device=device[ID], opt_param=param[ID]['opt_param'], compute_loss=True)
+                    _, trn_acc, trn_AUC        = deep.optimize.test(model=model[ID], loader=train_loader,    device=device[ID], opt_param=param[ID]['opt_param'])
+                    val_loss, val_acc, val_AUC = deep.optimize.test(model=model[ID], loader=validate_loader, device=device[ID], opt_param=param[ID]['opt_param'], compute_loss=True)
                     
                     scheduler[ID].step()
                     
-                    print(f"Epoch: {epoch+1:03d} / {N_epochs:03d} | file: {f+1} / {len(root_files)} | block: {block+1} / {N_blocks}]")
+                    print(f"Epoch: {epoch+1:03d} / {N_epochs:03d} | file: {f+1} / {len(root_files)} | block: {block+1} / {N_blocks}")
                     print(f"[train] loss: {deep.optimize.printloss(loss)} | acc: {trn_acc:.4f} | AUC: {trn_AUC:.4f}")
                     print(f"[eval]  loss: {deep.optimize.printloss(val_loss)} | acc: {val_acc:.4f} | AUC: {val_AUC:.4f}")
                     print(f"lr = {scheduler[ID].get_last_lr()}")

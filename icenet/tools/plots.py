@@ -1414,7 +1414,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file)
     
     # 3. Cut-off regularize anomalous high weights before event weights
-    AIw0 = np.clip(AIw0, a_min=0.0, a_max=maxW)
+    AIw0 = np.clip(AIw0, 0.0, maxW)
     
     # 4. Apply multiplicatively to event weights (which can be negative)
     AIw0 = AIw0 * weights[y == C0]
@@ -1614,11 +1614,11 @@ def multiprocess_AIRW_wrapper(p):
     fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale='log', ratio_error_plot=True)
     fig1, ax1 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_error_plot=True)
     
-    fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.pdf', bbox_inches='tight')
-    fig0.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__log.png', bbox_inches='tight', dpi=300)
+    fig0.savefig(aux.makedir(local_dir + '/pdf/') + f'/reweight_[{ids[i]}]__log.pdf', bbox_inches='tight')
+    fig0.savefig(aux.makedir(local_dir + '/png/') + f'/reweight_[{ids[i]}]__log.png', bbox_inches='tight', dpi=300)
     
-    fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.pdf', bbox_inches='tight')
-    fig1.savefig(aux.makedir(local_dir) + f'/reweight_[{ids[i]}]__linear.png', bbox_inches='tight', dpi=300)
+    fig1.savefig(aux.makedir(local_dir + '/pdf/') + f'/reweight_[{ids[i]}]__linear.pdf', bbox_inches='tight')
+    fig1.savefig(aux.makedir(local_dir + '/png/') + f'/reweight_[{ids[i]}]__linear.png', bbox_inches='tight', dpi=300)
     
     fig0.clf()
     fig1.clf()

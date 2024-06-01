@@ -20,6 +20,7 @@ import copy
 import sys
 import pickle
 import xgboost
+
 from yamlinclude import YamlIncludeConstructor
 
 import icenet.deep.iceboost as iceboost
@@ -446,6 +447,12 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             gc.disable()
             pickle.dump(predata, handle, protocol=pickle.HIGHEST_PROTOCOL)
             gc.enable()
+        
+        # Save args
+        import yaml
+        with open(cache_filename.replace('.pkl', '.yml'), "w", encoding = "utf-8") as file:
+            file.write(yaml.safe_dump(args, sort_keys=False))
+
     else:
         with open(cache_filename, 'rb') as handle:
             cprint(__name__ + f'.read_data_processed: Loading <DATA> from a file: "{cache_filename}"', 'yellow')
@@ -474,6 +481,12 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             gc.disable()
             pickle.dump(processed_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
             gc.enable()
+        
+        # Save args
+        import yaml
+        with open(cache_filename.replace('.pkl', '.yml'), "w", encoding = "utf-8") as file:
+            file.write(yaml.safe_dump(args, sort_keys=False))
+        
     else:
         with open(cache_filename, 'rb') as handle:
             cprint(__name__ + f'.read_data_processed: Loading <PROCESSED DATA> from a file: "{cache_filename}"', 'yellow')

@@ -5,7 +5,7 @@ import psutil
 
 __version__    = '0.1.0.9'
 __release__    = 'alpha'
-__date__       = '31/05/2024'
+__date__       = '01/06/2024'
 __author__     = 'm.mieskolainen@imperial.ac.uk'
 __repository__ = 'github.com/mieskolainen/icenet'
 __asciiart__   = \

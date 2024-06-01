@@ -209,10 +209,10 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
         validation_loss = torch.stack(validation_loss).mean()
         optimizer.swap()
         # ----------------------------------------------------------------
-
+        
         print('Epoch {:3d}/{:3d} | Train: loss: {:4.3f} | Validation: loss: {:4.3f}'.format(
             epoch + 1, param['opt_param']['start_epoch'] + param['opt_param']['epochs'], train_loss.item(), validation_loss.item()))
-
+        
         stop = scheduler.step(validation_loss,
             callback_best = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
                 filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'),

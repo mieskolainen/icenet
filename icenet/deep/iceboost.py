@@ -569,10 +569,21 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             
             ## Save the model
             filename = args['modeldir'] + f'/{param["label"]}_{epoch}'
-            pickle.dump(model, open(filename + '.dat', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+            
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
 
+            losses = {'trn_losses':         trn_losses,
+                      'val_losses':         val_losses,
+                      'trn_aucs':           trn_aucs,
+                      'val_aucs:':          val_aucs,
+                      'loss_history_train': loss_history_train,
+                      'loss_history_eval':  loss_history_eval}
+            
+            with open(filename + '.pkl', 'wb') as file:
+                pickle.dump({'model': model, 'ids': ids_trn, 'losses': losses}, file, protocol=pickle.HIGHEST_PROTOCOL)
+            
+            
     # Report only once after all boost iterations
     # otherwise early stopping may happen due to scheduler as with neural net epochs
     if args['__raytune_running__']:
@@ -580,7 +591,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         #    path = os.path.join(checkpoint_dir, "checkpoint")
         #    pickle.dump(model, open(path, 'wb'))
         ray.train.report({'loss': trn_losses[-1], 'AUC': val_aucs[-1]})
-
+    
     if not args['__raytune_running__']:
         
         # Plot evolution

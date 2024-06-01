@@ -84,7 +84,7 @@ def pred_graph_xgb(args, param):
     graph_model.eval() # Turn on eval!
     
     xgb_model   = pickle.load(open(aux.create_model_filename(path=args['modeldir'], \
-        label=param['xgb']['label'], epoch=param['xgb']['readmode'], filetype='.dat'), 'rb'))
+        label=param['xgb']['label'], epoch=param['xgb']['readmode'], filetype='.pkl'), 'rb'))['model']
 
     def func_predict(x):
 
@@ -117,7 +117,7 @@ def pred_graph_xgb(args, param):
 def pred_torch_graph(args, param, batch_size=5000, return_model=False):
     
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
-    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     
     if 'deploy_device' in param:
         device = param['deploy_device']
@@ -159,7 +159,7 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
 def pred_torch_generic(args, param, return_model=False):
     
     print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
-    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     
     if 'deploy_device' in param:
         device = param['deploy_device']
@@ -193,7 +193,7 @@ def pred_torch_generic(args, param, return_model=False):
 def pred_torch_scalar(args, param, return_model=False):
     
     print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
-    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
+    model = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     
     if 'deploy_device' in param:
         device = param['deploy_device']
@@ -258,8 +258,8 @@ def pred_flow(args, param, n_dims, return_model=False):
 def pred_xgb(args, param, feature_names=None, return_model=False):
     
     print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
-    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model    = pickle.load(open(filename, 'rb'))
+    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    model    = pickle.load(open(filename, 'rb'))['model']
     
     def func_predict(x):
         pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
@@ -275,8 +275,8 @@ def pred_xgb(args, param, feature_names=None, return_model=False):
 def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
     
     print(__name__ + f'.pred_xgb_scalar: Evaluate <{param["label"]}> model ...')
-    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model    = pickle.load(open(filename, 'rb'))
+    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    model    = pickle.load(open(filename, 'rb'))['model']
     
     def func_predict(x):
         pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
@@ -294,8 +294,8 @@ def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
     """
     
     print(__name__ + f'.pred_xgb_logistic: Evaluate <{param["label"]}> model ...')
-    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model    = pickle.load(open(filename, 'rb'))
+    filename = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    model    = pickle.load(open(filename, 'rb'))['model']
     
     def func_predict(x):
         
@@ -312,7 +312,7 @@ def pred_flr(args, param):
 
     print(__name__ + f'.pred_flr: Evaluate <{param["label"]}> model ...')
     
-    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{param["label"]}_0_.dat', 'rb'))
+    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{param["label"]}_0_.pkl', 'rb'))
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
     
