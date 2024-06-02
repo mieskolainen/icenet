@@ -555,7 +555,6 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux_torch</span>
 
 <span class="kn">from</span> <span class="nn">icenet.algo</span>  <span class="kn">import</span> <span class="n">flr</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">bnaf</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">optimize</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dbnf</span>
 
@@ -617,13 +616,12 @@
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_graph_xgb: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
     
-    <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">]:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">][</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">][</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
     
     <span class="n">graph_model</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> \
-        <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">][</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">][</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
+    
+    <span class="n">graph_model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">graph_model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
     
     <span class="n">graph_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># Turn on eval!</span>
     
@@ -666,11 +664,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_torch_graph: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
     
-    <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
-    
+    <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
     <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
     
     <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># ! Turn on eval mode!</span>
@@ -711,11 +705,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_torch_generic: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
     
-    <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
-    
+    <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
     <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
     
     <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># ! Turn on eval mode!</span>
@@ -748,11 +738,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.pred_torch_scalar: Evaluate &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; model ...&#39;</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="n">epoch</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;readmode&#39;</span><span class="p">])</span>
     
-    <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
-    
+    <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
     <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
     
     <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># ! Turn on eval mode!</span>
@@ -788,22 +774,18 @@
     <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;n_dims&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_dims</span> <span class="c1"># Set input dimension</span>
     
     <span class="n">modelnames</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_classes&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;primary_classes&#39;</span><span class="p">]:</span>
         <span class="n">modelnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_class_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
-    
-    <span class="n">models</span> <span class="o">=</span> <span class="n">dbnf</span><span class="o">.</span><span class="n">load_models</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">modelnames</span><span class="o">=</span><span class="n">modelnames</span><span class="p">,</span> <span class="n">modeldir</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;deploy_device&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;deploy_device&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="k">else</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
+    <span class="n">models</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">dbnf</span><span class="o">.</span><span class="n">load_models</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">modelnames</span><span class="o">=</span><span class="n">modelnames</span><span class="p">,</span> <span class="n">modeldir</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
     
     <span class="c1"># Turn on eval!</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)):</span>
         <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
     
     <span class="k">def</span> <span class="nf">func_predict</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">dbnf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">models</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dbnf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">models</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">return_model</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">func_predict</span>
