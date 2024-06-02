@@ -371,7 +371,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
                           'loss_history_train': loss_history_train,
                           'loss_history_eval':  loss_history_eval}
             
-            checkpoint = {'model': model, 'state_dict': model.state_dict(), 'ids': ids, 'losses': losses}
+            checkpoint = {'model': model, 'state_dict': model.state_dict(), 'ids': ids, 'losses': losses, 'epoch': epoch}
             torch.save(checkpoint, filename + '.pth')
             
         else:
@@ -603,7 +603,7 @@ def train_flr(config={'params': {}}, data_trn=None, args=None, param=None):
         trained model
     """
     print(__name__ + f'.train_flr: Training <{param["label"]}> classifier ...')
-    
+
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data_trn.x, y = data_trn.y, weights = data_trn.w, param = param)
     pickle.dump({'b_pdfs': b_pdfs, 's_pdfs': s_pdfs, 'bin_edges': bin_edges},
         open(args['modeldir'] + f'/{param["label"]}_' + str(0) + '.pkl', 'wb'))
@@ -629,8 +629,6 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
     
     for classid in range(len(args['primary_classes'])):
         
-        param['model'] = 'class_' + str(classid)
-
         # Load datasets
         trn   = data_trn.classfilter(classid)
         val   = data_val.classfilter(classid)
@@ -656,10 +654,14 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
                                       early_stopping = param['scheduler_param']['early_stopping'],
                                       threshold_mode = 'abs')
         
-        print(__name__ + f'.train_flow: Training density for class = {classid} ...')
-        dbnf.train(model=model, optimizer=optimizer, scheduler=sched,
-            trn_x=trn.x, val_x=val.x, trn_weights=trn.w, val_weights=val.w, param=param, modeldir=args['modeldir'])
+        cprint(__name__ + f'.train_flow: Training density for class = {classid}', 'magenta')
         
+        save_name = f'{param["label"]}_class_{classid}'
+        
+        dbnf.train(model=model, optimizer=optimizer, scheduler=sched,
+            trn_x=trn.x, val_x=val.x, trn_weights=trn.w, val_weights=val.w,
+            param=param, modeldir=args['modeldir'], save_name=save_name)
+    
     return True
 
 

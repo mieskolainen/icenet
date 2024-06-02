@@ -77,7 +77,7 @@ def print_weights(weights, y, output_file=None):
     
     class_ids = np.unique(y.astype(int))
     
-    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)", "min(w)", "Q5(w)", "Q95(w)", "max(w)"]) 
+    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)", "min(w)", "Q5(w)", "med(w)", "Q95(w)", "max(w)"]) 
     
     for c in class_ids:
         ind = (y == c)
@@ -88,6 +88,7 @@ def print_weights(weights, y, output_file=None):
                        f'{np.std(weights[ind]):0.3E}',
                        f'{np.min(weights[ind]):0.3E}',
                        f'{np.percentile(weights[ind],  5):0.3E}',
+                       f'{np.median(weights[ind]):0.3E}',
                        f'{np.percentile(weights[ind], 95):0.3E}',
                        f'{np.max(weights[ind]):0.3E}'])
     

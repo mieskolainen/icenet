@@ -445,3 +445,52 @@ dmlp0_nozero:
   exclude_MVA_vars: ['probe_pfChargedIso', 'probe_ecalPFClusterIso', 'probe_trkSumPtHollowConeDR03', 'probe_trkSumPtSolidConeDR04']
   
   label:   'DMLP-NOZERO'
+
+
+## Deep Normalizing Flow
+#
+dbnf0:
+  train:   'flow'
+  predict: 'torch_flow'
+  label:   'DBNF'
+  raytune:  null
+
+  # Gradient descent
+  opt_param:
+    lossfunc: 'flow_logpx'
+    optimizer: 'Adam'
+    clip_norm: 0.1
+    
+    epochs: 250
+    batch_size: 512           # Keep it high!
+    lr: 1.0e-3
+    weight_decay: 1.0e-5      # L2-regularization
+    polyak: 0.998
+
+    start_epoch: 1
+  
+  # Learning rate reduction on plateau
+  scheduler_param:  
+    factor:  0.1
+    patience: 20
+    cooldown: 10
+    min_lr: 0.0005
+    early_stopping: 100
+
+  # Model structure
+  model_param:  
+    flows: 10                 # number of flow blocks
+    layers: 0                 # intermediate layers in a flow block
+    hidden_dim: 10            # 
+    residual: 'gated'         # choises 'none', 'normal', 'gated'
+    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
+  
+  tensorboard: True
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+
+  # Read/Write of epochs
+  evalmode: 1                 # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                # -1 is the last saved epoch
+
+  eval_batch_size: 4096

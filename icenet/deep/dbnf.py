@@ -58,32 +58,32 @@ def get_pdf(model, x) :
         > x = torch.tensor([[1.0, 2.0]])
         > l = get_pdf(model,x)
     """
-    return (torch.exp(compute_log_p_x(model=model, x=x))).detach().numpy()
+    return (torch.exp(compute_log_p_x(model=model, x=x))).detach().cpu().numpy()
 
 
-def predict(X, models, return_prob=True, EPS=1E-12):
+def predict(X, models, return_prob=True, EPS=1E-9):
     """
     2-class density ratio pdf(x,S) / pdf(x,B) for each vector x.
     
     Args:
-        param      : input parameters
-        X          : pytorch tensor of vectors
-        models     : list of model objects
-        return_prob: return pdf(S) / (pdf(S)+pdf(B)), else pdf(S)/pdf(B)
+        param       : input parameters
+        X           : pytorch tensor of vectors
+        models      : list of model objects
+        return_prob : return pdf(S) / (pdf(S) + pdf(B)), else pdf(S) / pdf(B)
     
     Returns:
         likelihood ratio (or alternatively probability)
     """
     
-    print(__name__ + f'.predict: Computing density (likelihood) ratio for N = {X.shape[0]} events ...')
+    print(__name__ + f'.predict: Computing density (likelihood) ratio for N = {X.shape[0]} events | return_prob = {return_prob}')
     
     bgk_pdf = get_pdf(models[0], X)
     sgn_pdf = get_pdf(models[1], X)
     
     if return_prob:
-        out = sgn_pdf / np.clip(sgn_pdf + bgk_pdf, a_min=EPS, a_max=None)
+        out = sgn_pdf / np.clip(sgn_pdf + bgk_pdf, EPS, None)
     else:
-        out = sgn_pdf / np.clip(bgk_pdf, a_min=EPS, a_max=None)
+        out = sgn_pdf / np.clip(bgk_pdf, EPS, None)
     
     out[~np.isfinite(out)] = 0
     
@@ -107,7 +107,8 @@ class Dataset(torch.utils.data.Dataset):
         return self.X[index,...], self.W[index]
 
 
-def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, param, modeldir):
+def train(model, optimizer, scheduler, trn_x, val_x,
+          trn_weights, val_weights, param, modeldir, save_name):
     """ Train the model density.
     
     Args:
@@ -117,18 +118,24 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
         trn_x       : training vectors
         val_x       : validation vectors
         trn_weights : training weights
+        val_weights : validation weights
         param       : parameters
         modeldir    : directory to save the model
     """
-    label = param['label']
-
+    
     model, device = optimize.model_to_cuda(model, param['device'])
 
     # TensorboardX
-    if param['tensorboard']:
+    if 'tensorboard' in param and param['tensorboard']:
         from tensorboardX import SummaryWriter
-        writer = SummaryWriter(os.path.join(param['tensorboard'], param['modelname']))
+        writer = SummaryWriter(os.path.join('tmp/tensorboard/', save_name))
 
+    if trn_weights is None:
+        trn_weights = torch.ones(trn_x.shape[0], dtype=torch.float32)
+    
+    if val_weights is None:
+        val_weights = torch.ones(val_x.shape[0], dtype=torch.float32)
+    
     # Datasets
     training_set   = Dataset(trn_x, trn_weights)
     validation_set = Dataset(val_x, val_weights)
@@ -164,8 +171,8 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
         return -(lossvec * w).sum(dim=0) # log-likelihood
     
     # Training loop
-    for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs']), ncols = 88):
-
+    for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs'] + 1), ncols = 88):
+        
         model.train() # !
 
         train_loss  = []
@@ -209,24 +216,29 @@ def train(model, optimizer, scheduler, trn_x, val_x, trn_weights, val_weights, p
         validation_loss = torch.stack(validation_loss).mean()
         optimizer.swap()
         # ----------------------------------------------------------------
-        
+
         print('Epoch {:3d}/{:3d} | Train: loss: {:4.3f} | Validation: loss: {:4.3f}'.format(
-            epoch + 1, param['opt_param']['start_epoch'] + param['opt_param']['epochs'], train_loss.item(), validation_loss.item()))
+            epoch,
+            param['opt_param']['start_epoch'] + param['opt_param']['epochs'],
+            train_loss.item(),
+            validation_loss.item()))
+
+        # Save
+        filename = f'{modeldir}/{save_name}_{epoch}.pth'
         
         stop = scheduler.step(validation_loss,
-            callback_best = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch,
-                filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth'),
-            callback_reduce = aux_torch.load_torch_model(model=model, optimizer=optimizer,
-                filename = modeldir + f'/{label}_' + param['model'] + '_' + str(epoch) + '.pth', device=device))
+            callback_best   = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch, filename=filename),
+            callback_reduce = aux_torch.load_torch_model(model=model, optimizer=optimizer, filename=filename, param=param, device=device)
+        )
         
-        if param['tensorboard']:
-            writer.add_scalar('lr', optimizer.param_groups[0]['lr'], epoch)
+        if 'tensorboard' in param and param['tensorboard']:
+            writer.add_scalar('lr', scheduler.get_last_lr(), epoch)
             writer.add_scalar('loss/validation', validation_loss.item(), epoch)
             writer.add_scalar('loss/train', train_loss.item(), epoch)
         
         if stop:
             break
-
+        
 
 def create_model(param, verbose=False, rngseed=0):
     """ Construct the network object.
@@ -276,7 +288,7 @@ def create_model(param, verbose=False, rngseed=0):
     return model
 
 
-def load_models(param, modelnames, modeldir, device='cpu'):
+def load_models(param, modelnames, modeldir, device):
     """ Load models from files
     """
     
@@ -289,11 +301,13 @@ def load_models(param, modelnames, modeldir, device='cpu'):
 
         filename   = aux.create_model_filename(path=modeldir, label=modelnames[i], \
             epoch=param['readmode'], filetype='.pth')
-        checkpoint = torch.load(filename, map_location=device)
+        checkpoint = torch.load(filename, map_location='cpu')
         
         model.load_state_dict(checkpoint['model'])
+        model, device = optimize.model_to_cuda(model, device_type=device)
+        
         model.eval() # Turn on eval mode!
 
         models.append(model)
 
-    return models
+    return models, device

@@ -626,8 +626,8 @@ dbnf0:
     weight_decay: 0.0         # L2-regularization
     polyak: 0.998
 
-    start_epoch: 0
-
+    start_epoch: 1
+  
   # Learning rate reduction on plateau
   scheduler_param:  
     factor:  0.1
@@ -644,8 +644,7 @@ dbnf0:
     residual: 'gated'         # choises 'none', 'normal', 'gated'
     perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
   
-  modelname: 'null'
-  tensorboard: 'tensorboard'
+  tensorboard: True
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 

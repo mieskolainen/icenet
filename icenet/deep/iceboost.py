@@ -581,9 +581,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                       'loss_history_eval':  loss_history_eval}
             
             with open(filename + '.pkl', 'wb') as file:
-                pickle.dump({'model': model, 'ids': ids_trn, 'losses': losses}, file, protocol=pickle.HIGHEST_PROTOCOL)
-            
-            
+                pickle.dump({'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': epoch}, file, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    
     # Report only once after all boost iterations
     # otherwise early stopping may happen due to scheduler as with neural net epochs
     if args['__raytune_running__']:

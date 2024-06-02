@@ -73,7 +73,7 @@ def save_torch_model(model, optimizer, epoch, filename):
     return f
 
 
-def load_torch_model(model, optimizer, filename, load_start_epoch = False, device='cpu'):
+def load_torch_model(model, optimizer, filename, device='cpu', param=None, load_start_epoch = False):
     """ PyTorch model loader
     """
     def f():
@@ -82,7 +82,7 @@ def load_torch_model(model, optimizer, filename, load_start_epoch = False, devic
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         
-        if load_start_epoch:
-            param.start_epoch = checkpoint['epoch']
+        if param is not None and load_start_epoch:
+            param['start_epoch'] = checkpoint['epoch']
     
     return f

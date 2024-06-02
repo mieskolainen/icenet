@@ -888,8 +888,12 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
         cprint(__name__ + f'.create_model_filename: Loading the latest model by timestamp', 'yellow')
 
         list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
-        filename      = max(list_of_files, key=os.path.getctime)
-
+        
+        if len(list_of_files) == 0:
+            raise Exception(__name__ + f'.create_model_filename: Could not find any files for model "{label}"')
+        
+        filename = max(list_of_files, key=os.path.getctime)
+        
         try:
             
             # Now read the saved model optimize

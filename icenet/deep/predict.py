@@ -19,7 +19,6 @@ from icenet.tools import aux
 from icenet.tools import aux_torch
 
 from icenet.algo  import flr
-from icenet.deep  import bnaf
 from icenet.deep  import optimize
 from icenet.deep  import dbnf
 
@@ -73,13 +72,12 @@ def pred_graph_xgb(args, param):
     
     print(__name__ + f'.pred_graph_xgb: Evaluate <{param["label"]}> model ...')
     
-    if 'deploy_device' in param['graph']:
-        device = param['graph']['deploy_device']
-    else:
-        device = param['graph']['device']
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
     
     graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \
-        label=param['graph']['label'], epoch=param['graph']['readmode']).to(device)
+        label=param['graph']['label'], epoch=param['graph']['readmode'])
+    
+    graph_model, device = optimize.model_to_cuda(graph_model, device_type=device)
     
     graph_model.eval() # Turn on eval!
     
@@ -119,11 +117,7 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
     print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
     model = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     
-    if 'deploy_device' in param:
-        device = param['deploy_device']
-    else:
-        device = param['device']
-    
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
     model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
@@ -161,11 +155,7 @@ def pred_torch_generic(args, param, return_model=False):
     print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
     model = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     
-    if 'deploy_device' in param:
-        device = param['deploy_device']
-    else:
-        device = param['device']
-    
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
     model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
@@ -195,11 +185,7 @@ def pred_torch_scalar(args, param, return_model=False):
     print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
     model = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
     
-    if 'deploy_device' in param:
-        device = param['deploy_device']
-    else:
-        device = param['device']
-    
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
     model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
@@ -232,22 +218,18 @@ def pred_flow(args, param, n_dims, return_model=False):
     param['model_param']['n_dims'] = n_dims # Set input dimension
     
     modelnames = []
-    for i in range(args['num_classes']):
+    for i in args['primary_classes']:
         modelnames.append(f'{param["label"]}_class_{i}')
     
-    if 'deploy_device' in param:
-        device = param['deploy_device']
-    else:
-        device = param['device']
-    
-    models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'], device=device)
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
+    models, device = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'], device=device)
     
     # Turn on eval!
     for i in range(len(models)):
         models[i].eval()
     
     def func_predict(x):
-        return dbnf.predict(x, models)
+        return dbnf.predict(x.to(device), models)
 
     if return_model == False:
         return func_predict
