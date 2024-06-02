@@ -603,10 +603,10 @@ def train_flr(config={'params': {}}, data_trn=None, args=None, param=None):
         trained model
     """
     print(__name__ + f'.train_flr: Training <{param["label"]}> classifier ...')
-
+    
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data_trn.x, y = data_trn.y, weights = data_trn.w, param = param)
-    pickle.dump([b_pdfs, s_pdfs, bin_edges],
-        open(args['modeldir'] + f'/{param["label"]}_' + str(0) + '_.dat', 'wb'))
+    pickle.dump({'b_pdfs': b_pdfs, 's_pdfs': s_pdfs, 'bin_edges': bin_edges},
+        open(args['modeldir'] + f'/{param["label"]}_' + str(0) + '.pkl', 'wb'))
 
     return (b_pdfs, s_pdfs)
 

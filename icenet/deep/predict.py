@@ -312,7 +312,12 @@ def pred_flr(args, param):
 
     print(__name__ + f'.pred_flr: Evaluate <{param["label"]}> model ...')
     
-    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{param["label"]}_0_.pkl', 'rb'))
+    model = pickle.load(open(args['modeldir'] + f'/{param["label"]}_0.pkl', 'rb'))
+    
+    b_pdfs    = model['b_pdfs']
+    s_pdfs    = model['s_pdfs']
+    bin_edges = model['bin_edges']
+    
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
     
