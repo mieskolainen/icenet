@@ -545,22 +545,18 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-
-<span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">cprint</span>
 
 <span class="kn">import</span> <span class="nn">sklearn</span>
 <span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
-<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
 
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">statstools</span>
 
 <div class="viewcode-block" id="inverse_sigmoid">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.inverse_sigmoid">[docs]</a>
@@ -568,10 +564,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stable inverse sigmoid function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">EPS</span><span class="p">)</span> 
-    <span class="n">p</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span> <span class="o">=</span> <span class="n">EPS</span>
-    
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span></div>
+    <span class="c1"># log(p) - log(1-p)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">-</span><span class="n">EPS</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">-</span><span class="n">EPS</span><span class="p">))</span></div>
 
 
 <span class="k">def</span> <span class="nf">_positive_sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -1565,7 +1559,7 @@
                 <span class="n">data</span>  <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
             
             <span class="n">losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;losses&#39;</span><span class="p">][</span><span class="s1">&#39;val_losses&#39;</span><span class="p">])</span>
-            <span class="n">idx</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># + 1 because epochs count from 1</span>
+            <span class="n">idx</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
             
             <span class="nb">str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Found the best model at epoch [</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s1">] with validation loss = </span><span class="si">{</span><span class="n">losses</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.create_model_filename: </span><span class="si">{</span><span class="nb">str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>

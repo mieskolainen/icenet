@@ -1815,16 +1815,37 @@ respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <sp
 <dd><p>Binary Cross Entropy loss</p>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="icenet.deep.losstools.FocalWithLogitsLoss">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FocalWithLogitsLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#FocalWithLogitsLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.FocalWithLogitsLoss" title="Link to this definition">¶</a></dt>
+<dd><p>Focal Loss with logits as input</p>
+<p><a class="reference external" href="https://arxiv.org/abs/1708.02002">https://arxiv.org/abs/1708.02002</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.losstools.FocalWithLogitsLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#FocalWithLogitsLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.FocalWithLogitsLoss.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.losstools.LOGIT_L1_loss">
 <span class="sig-name descname"><span class="pre">LOGIT_L1_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logit_beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#LOGIT_L1_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.LOGIT_L1_loss" title="Link to this definition">¶</a></dt>
-<dd><p>Logit magnitude L1-regularization</p>
+<dd><p>Logit magnitude L1-regularization sum <a href="#id5"><span class="problematic" id="id6">|z|</span></a></p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.losstools.LOGIT_L2_loss">
 <span class="sig-name descname"><span class="pre">LOGIT_L2_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logit_beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#LOGIT_L2_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.LOGIT_L2_loss" title="Link to this definition">¶</a></dt>
-<dd><p>Logit magnitude L2-regularization</p>
+<dd><p>Logit magnitude L2-regularization sum <a href="#id1"><span class="problematic" id="id2">|</span></a>z|^2</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1856,6 +1877,12 @@ respective nodes <span class="math notranslate nohighlight">\(i\)</span> and <sp
 <span class="sig-name descname"><span class="pre">binary_cross_entropy_logprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_phat_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_phat_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#binary_cross_entropy_logprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.binary_cross_entropy_logprob" title="Link to this definition">¶</a></dt>
 <dd><p>Per instance weighted binary cross entropy loss (y can be a scalar between [0,1])
 (negative log-likelihood)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.deep.losstools.binary_focal_loss">
+<span class="sig-name descname"><span class="pre">binary_focal_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#binary_focal_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.binary_focal_loss" title="Link to this definition">¶</a></dt>
+<dd><p>Focal Cross Entropy loss</p>
 </dd></dl>
 
 <dl class="py function">
@@ -2089,7 +2116,7 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.deep.optimize.printloss">
 <span class="sig-name descname"><span class="pre">printloss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/optimize.html#printloss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.optimize.printloss" title="Link to this definition">¶</a></dt>
-<dd><p>Loss string printer</p>
+<dd><p>Loss torch string printer</p>
 </dd></dl>
 
 <dl class="py function">
@@ -2811,7 +2838,7 @@ returns the loss. Optional for most optimizers.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux_torch.save_torch_model">
-<span class="sig-name descname"><span class="pre">save_torch_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux_torch.html#save_torch_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux_torch.save_torch_model" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save_torch_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">losses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux_torch.html#save_torch_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux_torch.save_torch_model" title="Link to this definition">¶</a></dt>
 <dd><p>PyTorch model saver</p>
 </dd></dl>
 
@@ -2974,7 +3001,7 @@ returns the loss. Optional for most optimizers.</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
-<p>cartesian_product(<a href="#id1"><span class="problematic" id="id2">*</span></a>[np.array([1,2,3]), np.array([100,200,500])])</p>
+<p>cartesian_product(<a href="#id3"><span class="problematic" id="id4">*</span></a>[np.array([1,2,3]), np.array([100,200,500])])</p>
 </dd></dl>
 
 <dl class="py function">
@@ -4410,7 +4437,7 @@ other dimensions evaluated at zero=(0,0,…0) (thus z-normalized with 0-mean is 
 <li><p><strong>ids</strong> – Variable names (list of length D)</p></li>
 <li><p><strong>weights</strong> – Event weights</p></li>
 <li><p><strong>y</strong> – Class labels per event (list of length N)</p></li>
-<li><p><strong>round_threshold</strong> – Correlation matrix <a href="#id3"><span class="problematic" id="id4">|C|</span></a> &lt; threshold to set matrix elements to zero</p></li>
+<li><p><strong>round_threshold</strong> – Correlation matrix <a href="#id7"><span class="problematic" id="id8">|C|</span></a> &lt; threshold to set matrix elements to zero</p></li>
 <li><p><strong>targetdir</strong> – Output plot directory</p></li>
 <li><p><strong>colorbar</strong> – Colorbar on the plot</p></li>
 </ul>

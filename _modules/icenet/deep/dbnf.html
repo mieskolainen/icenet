@@ -720,8 +720,11 @@
         <span class="n">lossvec</span> <span class="o">=</span> <span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">lossvec</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># log-likelihood</span>
     
+    <span class="n">trn_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">val_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    
     <span class="c1"># Training loop</span>
-    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">88</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">]),</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">88</span><span class="p">):</span>
         
         <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="c1"># !</span>
 
@@ -748,41 +751,54 @@
 
         <span class="c1"># ----------------------------------------------------------------</span>
         <span class="c1"># Compute validation loss</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># !</span>
+        
+        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;evalmode&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        
+            <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># !</span>
 
-        <span class="n">validation_loss</span> <span class="o">=</span> <span class="p">[]</span>
-        
-        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-        
-            <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">validation_loader</span><span class="p">:</span>
+            <span class="n">validation_loss</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            
+                <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">validation_loader</span><span class="p">:</span>
 
-                <span class="c1"># Transfer to GPU</span>
-                <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                
-                <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
-                <span class="n">validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+                    <span class="c1"># Transfer to GPU</span>
+                    <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
+                    <span class="n">validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+            
+            <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
         
-        <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-        <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
         <span class="c1"># ----------------------------------------------------------------</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch </span><span class="si">{:3d}</span><span class="s1">/</span><span class="si">{:3d}</span><span class="s1"> | Train: loss: </span><span class="si">{:4.3f}</span><span class="s1"> | Validation: loss: </span><span class="si">{:4.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        
+        <span class="c1"># Save metrics</span>
+        <span class="n">trn_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+        <span class="n">val_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+        
+        <span class="c1"># Step scheduler</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch </span><span class="si">{:3d}</span><span class="s1">/</span><span class="si">{:3d}</span><span class="s1"> | Train: loss: </span><span class="si">{:4.3f}</span><span class="s1"> | Validation: loss: </span><span class="si">{:4.3f}</span><span class="s1"> | lr: </span><span class="si">{:0.3E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">epoch</span><span class="p">,</span>
             <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">],</span>
             <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-            <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()))</span>
-
-        <span class="c1"># Save</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">modeldir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">save_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">.pth&#39;</span>
-        
-        <span class="n">stop</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">,</span>
-            <span class="n">callback_best</span>   <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">save_torch_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">),</span>
-            <span class="n">callback_reduce</span> <span class="o">=</span> <span class="n">aux_torch</span><span class="o">.</span><span class="n">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">scheduler</span><span class="o">.</span><span class="n">get_last_lr</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
         <span class="p">)</span>
         
+        <span class="c1"># Save</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">modeldir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">save_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">.pth&#39;</span>
+        <span class="n">aux_torch</span><span class="o">.</span><span class="n">save_torch_model</span><span class="p">(</span><span class="n">model</span>     <span class="o">=</span> <span class="n">model</span><span class="p">,</span>
+                                   <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">,</span>
+                                   <span class="n">epoch</span>     <span class="o">=</span> <span class="n">epoch</span><span class="p">,</span>
+                                   <span class="n">losses</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;trn_losses&#39;</span><span class="p">:</span> <span class="n">trn_losses</span><span class="p">,</span> <span class="s1">&#39;val_losses&#39;</span><span class="p">:</span> <span class="n">val_losses</span><span class="p">},</span>
+                                   <span class="n">filename</span>  <span class="o">=</span> <span class="n">filename</span><span class="p">)()</span>
+
         <span class="k">if</span> <span class="s1">&#39;tensorboard&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
-            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">get_last_lr</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">get_last_lr</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/validation&#39;</span><span class="p">,</span> <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/train&#39;</span><span class="p">,</span> <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
         
