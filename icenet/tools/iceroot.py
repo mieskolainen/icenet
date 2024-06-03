@@ -5,7 +5,6 @@
 import numpy as np
 import uproot
 import awkward as ak
-import re
 import ray
 import multiprocessing
 import os
@@ -13,7 +12,7 @@ import copy
 import gc
 
 from tqdm import tqdm
-from termcolor import colored, cprint
+from termcolor import cprint
 
 from icenet.tools import io
 from icenet.tools import aux

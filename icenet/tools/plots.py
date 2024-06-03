@@ -8,7 +8,7 @@ import awkward as ak
 import torch
 import gc
 from pprint import pprint
-from termcolor import colored, cprint
+from termcolor import cprint
 import copy
 from prettytable import PrettyTable
 import multiprocessing
@@ -189,7 +189,8 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     for key in losses.keys():
         if ('sum' in key) and (N_terms == 2):
-            continue # Do not plot sum if only sum made of one term
+            continue # Do not plot 'sum' if only sum made of one term
+        
         ax[0].plot(losses[key], label=key)
     
     ax[0].set_xlabel('k (epoch)')

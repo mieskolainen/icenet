@@ -9,31 +9,25 @@ import re
 import time
 import datetime
 import pickle
-
-import numba
-import copy
-from tqdm import tqdm
 import os
 import glob
+
+import numba
+from tqdm import tqdm
 from termcolor import cprint
 
 import sklearn
 from sklearn import metrics
 import scipy
-from scipy import stats
-import scipy.special as special
 from scipy import interpolate
 
-from icefit import statstools
 
 def inverse_sigmoid(p: np.ndarray, EPS=1E-9):
     """
     Stable inverse sigmoid function
     """
-    x = np.clip(p, EPS, 1.0 - EPS) 
-    p[~np.isfinite(p)] = EPS
-    
-    return np.log(x) - np.log(1 - x)
+    # log(p) - log(1-p)
+    return np.log(np.clip(p, EPS, 1.0-EPS)) - np.log(np.clip(1-p, EPS, 1.0-EPS))
 
 def _positive_sigmoid(x: np.ndarray):
     return 1 / (1 + np.exp(-x))
@@ -901,7 +895,7 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
                 data  = pickle.load(file)
             
             losses = np.array(data['losses']['val_losses'])
-            idx    = np.argmin(losses) + 1 # + 1 because epochs count from 1
+            idx    = np.argmin(losses)
             
             str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
             cprint(__name__ + f'.create_model_filename: {str}', 'magenta')

@@ -112,12 +112,15 @@ def batch2tensor(batch, device):
 
 def printloss(loss, precision=5):
     """
-    Loss string printer
+    Loss torch string printer
     """
     out = ''
     loss_keys = loss.keys()
     for i,key in enumerate(loss_keys):
-        out += f'{key}: {np.round(loss[key], precision)}'
+        if type(loss[key]) is float:
+            out += f'{key}: {np.round(loss[key], precision)}'
+        else:
+            out += f'{key}: {np.round(loss[key].item(), precision)}'
         if i < len(loss_keys) - 1:
             out += ', '
     return out
@@ -332,8 +335,8 @@ def test(model, loader, device, opt_param, MI=None, compute_loss=False):
                 ## Create combined loss
                 loss = 0
                 for key in loss_tuple.keys():
-                    loss = loss + loss_tuple[key]
-
+                    loss = loss + loss_tuple[key].item()
+                
                 for key in loss_tuple.keys():
                     if key in component_losses:
                         component_losses[key] += loss_tuple[key].item()
@@ -341,7 +344,7 @@ def test(model, loader, device, opt_param, MI=None, compute_loss=False):
                         component_losses[key]  = loss_tuple[key].item()
 
                 ## Aggregate losses
-                total_loss = total_loss + loss.item()
+                total_loss = total_loss + loss
 
                 n_batches += 1
             

@@ -61,14 +61,15 @@ def load_torch_checkpoint(path='/', label='mynet', epoch=-1):
     return model
 
 
-def save_torch_model(model, optimizer, epoch, filename):
+def save_torch_model(model, optimizer, epoch, losses, filename):
     """ PyTorch model saver
     """
     def f():
         torch.save({
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
-            'epoch': epoch
+            'epoch': epoch,
+            'losses': losses
         }, (filename))
     return f
 

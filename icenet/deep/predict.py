@@ -213,7 +213,7 @@ def pred_torch_scalar(args, param, return_model=False):
 def pred_flow(args, param, n_dims, return_model=False):
 
     print(__name__ + f'.pred_flow: Evaluate <{param["label"]}> model ...')
-
+    
     # Load models
     param['model_param']['n_dims'] = n_dims # Set input dimension
     

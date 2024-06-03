@@ -623,10 +623,10 @@ dbnf0:
     epochs: 100
     batch_size: 512           # Keep it high!
     lr: 1.0e-3
-    weight_decay: 0.0         # L2-regularization
+    weight_decay: 0.0         # L2-regularization (without any weight decay seems OK)
     polyak: 0.998
-
-    start_epoch: 1
+    
+    start_epoch: 0
   
   # Learning rate reduction on plateau
   scheduler_param:  

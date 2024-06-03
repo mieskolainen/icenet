@@ -299,7 +299,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     track_loss['sum'] = total_loss.item()
     
     # Print
-    loss_str = f'Loss[{loss_mode}]: sum: {track_loss["sum"]:0.5f} | ' + loss_str
+    loss_str = f'Loss[{loss_mode}]: sum: {total_loss.item():0.5f} | ' + loss_str
     cprint(loss_str, 'yellow')
     # --------------------------------------------------------------------
     
@@ -449,14 +449,14 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     X_trn, ids_trn = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, verbose=True)  # variable reduction
     X_val, ids_val = aux.red(X=data_val.x, ids=data_val.ids, param=param, verbose=False) # variable reduction
     
-    for epoch in range(1, num_epochs+1):
-
+    for epoch in range(0, num_epochs):
+        
         # Create input xgboost frames
         dtrain = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)    
         deval  = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val if not out_weights_on else None, feature_names=ids_val)
         
         ## What to evaluate
-        if epoch == 1 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
             evallist = [(dtrain, 'train'), (deval, 'eval')]
         else:
             evallist = [(dtrain, 'train')]
@@ -502,9 +502,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             del a['params']['objective']
         # -----------------
 
-        if epoch > 1: # Continue from the previous epoch model
+        if epoch > 0: # Continue from the previous epoch model
             a['xgb_model'] = model
-
+        
         if out_weights_on:
             out_weights = copy.deepcopy(w_trn)
 
@@ -517,7 +517,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         # ==============================================
         ## Validate
-        if epoch == 1 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
             
             # ------- AUC values ------
             if len(args['primary_classes']) >= 2:

@@ -68,7 +68,7 @@ OBS_reweight:
   renorm_origin: 1        # Reference class for the final weight sum
   
   # Temperature values
-  tau_values: [0.7, 0.8, 0.9, 1.0, 1.1, 1.3]
+  tau_values: [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
   
   var: ['.*']   # RegExp supported
   #var: ['probe_eta', 'probe_pt', 'fixedGridRhoAll', 'probe_mvaID', 'probe_trkSumPtSolidConeDR04']

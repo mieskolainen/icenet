@@ -8,13 +8,12 @@ import awkward as ak
 import gc
 import torch
 import torch_geometric
-from prettytable import PrettyTable
 
 import copy
 from tqdm import tqdm
             
 from importlib import import_module
-from termcolor import colored, cprint
+from termcolor import cprint
 import os
 import copy
 import sys
@@ -27,15 +26,12 @@ import icenet.deep.iceboost as iceboost
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
-from iceplot import iceplot
-
 from icenet.tools import stx
 from icenet.tools import io
 from icenet.tools import prints
 from icenet.tools import aux
 from icenet.tools import reweight
 from icenet.tools import plots
-
 
 import matplotlib.pyplot as plt
 
@@ -145,6 +141,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     # -----------------------------------------------------
     # Runmode setup
+    
+    cprint(__name__ + f'.read_config: runmode = "{runmode}"', 'magenta')
+    
     if   runmode == 'genesis':
         new_args.update(args['genesis_runmode'])
         new_args.update(inputmap)

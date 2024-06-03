@@ -170,8 +170,11 @@ def train(model, optimizer, scheduler, trn_x, val_x,
         lossvec = compute_log_p_x(model, x)
         return -(lossvec * w).sum(dim=0) # log-likelihood
     
+    trn_losses = []
+    val_losses = []
+    
     # Training loop
-    for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs'] + 1), ncols = 88):
+    for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs']), ncols = 88):
         
         model.train() # !
 
@@ -198,41 +201,54 @@ def train(model, optimizer, scheduler, trn_x, val_x,
 
         # ----------------------------------------------------------------
         # Compute validation loss
-        model.eval() # !
+        
+        if epoch == 0 or (epoch % param['evalmode']) == 0:
+        
+            model.eval() # !
 
-        validation_loss = []
-        
-        with torch.no_grad():
-        
-            for batch_x, batch_weights in validation_loader:
+            validation_loss = []
+            
+            with torch.no_grad():
+            
+                for batch_x, batch_weights in validation_loader:
 
-                # Transfer to GPU
-                batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
-                batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
-                
-                loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
-                validation_loss.append(loss)
+                    # Transfer to GPU
+                    batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
+                    batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
+                    
+                    loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
+                    validation_loss.append(loss)
+            
+            validation_loss = torch.stack(validation_loss).mean()
+            optimizer.swap()
         
-        validation_loss = torch.stack(validation_loss).mean()
-        optimizer.swap()
         # ----------------------------------------------------------------
-
-        print('Epoch {:3d}/{:3d} | Train: loss: {:4.3f} | Validation: loss: {:4.3f}'.format(
+        
+        # Save metrics
+        trn_losses.append(train_loss.item())
+        val_losses.append(validation_loss.item())
+        
+        # Step scheduler
+        stop = scheduler.step(validation_loss)
+        
+        print('Epoch {:3d}/{:3d} | Train: loss: {:4.3f} | Validation: loss: {:4.3f} | lr: {:0.3E}'.format(
             epoch,
             param['opt_param']['start_epoch'] + param['opt_param']['epochs'],
             train_loss.item(),
-            validation_loss.item()))
-
-        # Save
-        filename = f'{modeldir}/{save_name}_{epoch}.pth'
-        
-        stop = scheduler.step(validation_loss,
-            callback_best   = aux_torch.save_torch_model(model=model, optimizer=optimizer, epoch=epoch, filename=filename),
-            callback_reduce = aux_torch.load_torch_model(model=model, optimizer=optimizer, filename=filename, param=param, device=device)
+            validation_loss.item(),
+            scheduler.get_last_lr()[0])
         )
         
+        # Save
+        filename = f'{modeldir}/{save_name}_{epoch}.pth'
+        aux_torch.save_torch_model(model     = model,
+                                   optimizer = optimizer,
+                                   epoch     = epoch,
+                                   losses    = {'trn_losses': trn_losses, 'val_losses': val_losses},
+                                   filename  = filename)()
+
         if 'tensorboard' in param and param['tensorboard']:
-            writer.add_scalar('lr', scheduler.get_last_lr(), epoch)
+            writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
             writer.add_scalar('loss/validation', validation_loss.item(), epoch)
             writer.add_scalar('loss/train', train_loss.item(), epoch)
         

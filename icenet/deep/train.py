@@ -5,15 +5,15 @@
 import numpy as np
 import torch
 import torch_geometric
+import xgboost
 
 import os
 import pickle
 import copy
-from termcolor import cprint
 import multiprocessing
-import xgboost
-from tqdm import tqdm
 
+from tqdm import tqdm
+from termcolor import cprint
 from matplotlib import pyplot as plt
 
 # icenet
@@ -39,7 +39,6 @@ from icenet.deep  import graph
 from icefit import mine
 
 from icenet.optim import adam
-from icenet.optim import adamax
 from icenet.optim import scheduler
 
 
@@ -53,7 +52,6 @@ from ray.tune.search.bayesopt      import BayesOptSearch
 
 from ray.air.config import RunConfig, ScalingConfig
 from ray.tune.schedulers import ASHAScheduler
-from functools import partial
 
 
 def getgenericmodel(conv_type, netparam):
@@ -307,6 +305,11 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     else:
         MI = None
     
+    # TensorboardX
+    if 'tensorboard' in param and param['tensorboard']:
+        from tensorboardX import SummaryWriter
+        writer = SummaryWriter(os.path.join('tmp/tensorboard/', param['label']))
+
     # --------------------------------------------------------------------
     # Training loop
     
@@ -319,14 +322,14 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     trn_aucs = []
     val_aucs = []
     
-    for epoch in range(1, opt_param['epochs']+1):
-
+    for epoch in range(0, opt_param['epochs']):
+        
         if MI is not None: # Reset diagnostics
             MI['MI_lb'] = np.zeros(len(MI['classes']))
         
         loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
         
-        if epoch == 1 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
             _, train_acc, train_auc                   = optimize.test(model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
             validate_loss, validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
 
@@ -350,7 +353,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         val_aucs.append(validate_auc)
         
         print(__name__)
-        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()}', 'yellow')
+        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()[0]}', 'yellow')
         if MI is not None:
             print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f}')
             for k in range(len(MI['classes'])):
@@ -358,6 +361,11 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         
         # Update scheduler
         scheduler.step()
+        
+        if 'tensorboard' in param and param['tensorboard']:
+            writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
+            writer.add_scalar('loss/validation', validate_loss['sum'], epoch)
+            writer.add_scalar('loss/train', loss['sum'], epoch)
         
         if not args['__raytune_running__']:
             
@@ -376,17 +384,6 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             
         else:
             
-            # OLD
-            # with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:
-            #    path = os.path.join(checkpoint_dir, "checkpoint")
-            #    torch.save((model.state_dict(), optimizer.state_dict()), path)
-            #
-            # NEW
-            # from ray.train import Checkpoint
-            # with tempfile.TemporaryDirectory as temp_checkpoint_dir:
-            #   torch.save(state_dict, os.path.join(temp_checkpoint_dir, 'model.pt'))
-            #   ray.train.report({'metric': 1}, checkpoint=Checkpoint.from_directory(temp_checkpoint_dir))
-
             ray.train.report({'loss': val_losses[-1], 'AUC': validate_auc})
     
     if not args['__raytune_running__']:
@@ -546,9 +543,9 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     new_param   = copy.deepcopy(param)
     new_param['model_param'] = model_param
     
-    x                = data_trn.x
-    y_true           = data_trn.y
-    weights          = data_trn.w
+    x         = data_trn.x
+    y_true    = data_trn.y
+    weights   = data_trn.w
     
     pred_func = predict.pred_cutset(ids=data_trn.ids, param=new_param)
     
@@ -645,12 +642,12 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
             optimizer = torch.optim.AdamW(model.parameters(), lr = param['opt_param']['lr'], \
                 weight_decay = param['opt_param']['weight_decay'])
         
+        # Custom wrapper
         sched = scheduler.ReduceLROnPlateau(optimizer,
                                       factor   = param['scheduler_param']['factor'],
                                       patience = param['scheduler_param']['patience'],
                                       cooldown = param['scheduler_param']['cooldown'],
                                       min_lr   = param['scheduler_param']['min_lr'],
-                                      verbose  = True,
                                       early_stopping = param['scheduler_param']['early_stopping'],
                                       threshold_mode = 'abs')
         
@@ -766,7 +763,8 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
 
     # Boosting iterations
     num_epochs = param['xgb']['model_param']['num_boost_round']
-    for epoch in range(1, num_epochs+1):
+    
+    for epoch in range(0, num_epochs):
         
         results = dict()
         
@@ -777,7 +775,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
              'evals_result':    results,
              'verbose_eval':    False}
 
-        if epoch > 1: # Continue from the previous epoch model
+        if epoch > 0: # Continue from the previous epoch model
             a['xgb_model'] = model
 
         # Train it
@@ -806,7 +804,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         
         print(__name__ + f'.train_graph_xgb: Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
     
-    # ------------------------------------------------------------------------------
+    # -------------------------------------------
     # Plot evolution
     plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
     fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
@@ -815,13 +813,12 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     
     # -------------------------------------------
     ## Plot feature importance
-
-    
     for sort in [True, False]:
         fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
         targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
         plt.savefig(f'{targetdir}/{param["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
-        
+    
+    # -------------------------------------------
     ## Plot decision trees
     if ('plot_trees' in param['xgb']) and param['xgb']['plot_trees']:
         try:

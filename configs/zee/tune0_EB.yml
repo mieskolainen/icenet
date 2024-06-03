@@ -51,7 +51,7 @@ genesis_runmode:
 train_runmode:
 
   <<: *MVA_INPUT_PARAM
-
+  
   maxevents: null
   modeltag:  null
 
@@ -99,25 +99,29 @@ train_runmode:
 
     truncate_weights: True # Truncate outlier event weights
     process_validate: True # Protect also validation sample
-  
+
   
   # ** Activate models here **
   # Give all models some unique identifier and label
   models:  !include configs/zee/models.yml
   active_models: &ACTIVE_MODELS
     
-    - lzmlp0_nozero
-    - dmlp0_nozero
-    - fastkan0_nozero
+    #- dbnf0
+    
+    #- lzmlp0_nozero
+    #- dmlp0_nozero
+    #- fastkan0_nozero
     
     - lzmlp0
-    - dmlp0
-    - fastkan0
+    - lzmlp1
+    - lzmlp2
     
-    - dbnf0
-    - iceboost_plus
-    - iceboost0
-    - xgb0
+    #- dmlp0
+    #- fastkan0
+    
+    #- iceboost_plus
+    #- iceboost0
+    #- xgb0
   
   raytune: !include configs/zee/raytune.yml
 
