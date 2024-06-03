@@ -547,6 +547,86 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux_torch</span>
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
 
+<div class="viewcode-block" id="FocalWithLogitsLoss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.FocalWithLogitsLoss">[docs]</a>
+<span class="k">class</span> <span class="nc">FocalWithLogitsLoss</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Focal Loss with logits as input</span>
+<span class="sd">    </span>
+<span class="sd">    https://arxiv.org/abs/1708.02002</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FocalWithLogitsLoss</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>    <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bce</span>       <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">binary_cross_entropy_with_logits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span>     <span class="o">=</span> <span class="n">gamma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">=</span> <span class="n">reduction</span>
+    
+<div class="viewcode-block" id="FocalWithLogitsLoss.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.FocalWithLogitsLoss.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="n">pt</span>           <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">))</span>
+        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+        <span class="n">focal_loss</span>   <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">pt</span><span class="p">)</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">)</span><span class="o">*</span><span class="n">entropy_loss</span>
+        
+        <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">focal_loss</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">focal_loss</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">focal_loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">focal_loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LqBernoulliWithLogitsLoss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.LqBernoulliWithLogitsLoss">[docs]</a>
+<span class="k">class</span> <span class="nc">LqBernoulliWithLogitsLoss</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    L_q likelihood for the Bernoulli case</span>
+<span class="sd">    </span>
+<span class="sd">    https://arxiv.org/pdf/1002.4533</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LqBernoulliWithLogitsLoss</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>    <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bce</span>       <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">binary_cross_entropy_with_logits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span>         <span class="o">=</span> <span class="n">q</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">=</span> <span class="n">reduction</span>
+    
+<div class="viewcode-block" id="LqBernoulliWithLogitsLoss.L_q">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.LqBernoulliWithLogitsLoss.L_q">[docs]</a>
+    <span class="k">def</span> <span class="nf">L_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        when q -&gt; 1, then L_q -&gt; log(x)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="LqBernoulliWithLogitsLoss.forward">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.LqBernoulliWithLogitsLoss.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="n">p</span>    <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">predicted</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">target</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">L_q</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">L_q</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
+
+        <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">loss</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+</div>
+
+
 
 <div class="viewcode-block" id="loss_wrapper">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.loss_wrapper">[docs]</a>
@@ -633,28 +713,28 @@
         <span class="n">loss</span>   <span class="o">=</span> <span class="n">BCE_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
         
         <span class="n">loss</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;BCE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">LR_helper</span><span class="p">(</span><span class="n">logits</span><span class="p">),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">))}</span>
-    
+
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary_focal_entropy&#39;</span><span class="p">:</span>
         
         <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">loss</span>   <span class="o">=</span> <span class="n">binary_focal_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
         
         <span class="n">loss</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;FE ($</span><span class="se">\\</span><span class="s2">gamma = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">$)&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">LR_helper</span><span class="p">(</span><span class="n">logits</span><span class="p">),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">))}</span>
-    
-    <span class="c1">#elif param[&#39;lossfunc&#39;] == &#39;binary_LQ&#39;:</span>
-    <span class="c1">#    </span>
-    <span class="c1">#    logits = model.forward(x)</span>
-    <span class="c1">#    loss = LQ_loss(logits=logits, y=y, weights=weights)</span>
-    <span class="c1">#    </span>
-    <span class="c1">#    loss = {&#39;LQ&#39;: loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}</span>
-    
+
+    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary_Lq_entropy&#39;</span><span class="p">:</span>
+        
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">loss</span>   <span class="o">=</span> <span class="n">Lq_binary_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;LQ ($</span><span class="se">\\</span><span class="s2">gamma = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">$)&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">LR_helper</span><span class="p">(</span><span class="n">logits</span><span class="p">),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">logits</span><span class="p">))}</span>
+
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MSE&#39;</span><span class="p">:</span>
         
         <span class="n">y_hat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">loss</span>  <span class="o">=</span> <span class="n">MSE_loss</span><span class="p">(</span><span class="n">y_hat</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
         
         <span class="n">loss</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;MSE&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">LZ_helper</span><span class="p">(),</span> <span class="o">**</span><span class="n">LR_helper</span><span class="p">(</span><span class="n">y_hat</span><span class="p">),</span> <span class="o">**</span><span class="n">MI_helper</span><span class="p">(</span><span class="n">y_hat</span><span class="p">)}</span>
-    
+
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;lossfunc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MSE_prob&#39;</span><span class="p">:</span>
         
         <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -790,48 +870,19 @@
 
 
 
-<div class="viewcode-block" id="FocalWithLogitsLoss">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.FocalWithLogitsLoss">[docs]</a>
-<span class="k">class</span> <span class="nc">FocalWithLogitsLoss</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="Lq_binary_loss">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.Lq_binary_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">Lq_binary_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Focal Loss with logits as input</span>
-<span class="sd">    </span>
-<span class="sd">    https://arxiv.org/abs/1708.02002</span>
+<span class="sd">    L_q Bernoulli loss</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">FocalWithLogitsLoss</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>    <span class="o">=</span> <span class="n">weight</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bce</span>       <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">binary_cross_entropy_with_logits</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span>     <span class="o">=</span> <span class="n">gamma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">=</span> <span class="n">reduction</span>
-    
-<div class="viewcode-block" id="FocalWithLogitsLoss.forward">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.FocalWithLogitsLoss.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
-        <span class="n">pt</span>           <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">))</span>
-        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
-        <span class="n">focal_loss</span>   <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">pt</span><span class="p">)</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">)</span><span class="o">*</span><span class="n">entropy_loss</span>
-        
-        <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">focal_loss</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">focal_loss</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">focal_loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">focal_loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
-</div>
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">LqBernoulliWithLogitsLoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+    <span class="n">loss</span>      <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
 
-
-
-<div class="viewcode-block" id="LQ_loss">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.LQ_loss">[docs]</a>
-<span class="k">def</span> <span class="nf">LQ_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    L_q loss (TBD)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">1.0</span></div>
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="LOGIT_L1_loss">

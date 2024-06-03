@@ -1848,10 +1848,37 @@ registered hooks while the latter silently ignores them.</p>
 <dd><p>Logit magnitude L2-regularization sum <a href="#id1"><span class="problematic" id="id2">|</span></a>z|^2</p>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="icenet.deep.losstools.LqBernoulliWithLogitsLoss">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LqBernoulliWithLogitsLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#LqBernoulliWithLogitsLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.LqBernoulliWithLogitsLoss" title="Link to this definition">¶</a></dt>
+<dd><p>L_q likelihood for the Bernoulli case</p>
+<p><a class="reference external" href="https://arxiv.org/pdf/1002.4533">https://arxiv.org/pdf/1002.4533</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.losstools.LqBernoulliWithLogitsLoss.L_q">
+<span class="sig-name descname"><span class="pre">L_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#LqBernoulliWithLogitsLoss.L_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.LqBernoulliWithLogitsLoss.L_q" title="Link to this definition">¶</a></dt>
+<dd><p>when q -&gt; 1, then L_q -&gt; log(x)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="icenet.deep.losstools.LqBernoulliWithLogitsLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#LqBernoulliWithLogitsLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.LqBernoulliWithLogitsLoss.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.deep.losstools.LQ_loss">
-<span class="sig-name descname"><span class="pre">LQ_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#LQ_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.LQ_loss" title="Link to this definition">¶</a></dt>
-<dd><p>L_q loss (TBD)</p>
+<dt class="sig sig-object py" id="icenet.deep.losstools.Lq_binary_loss">
+<span class="sig-name descname"><span class="pre">Lq_binary_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/losstools.html#Lq_binary_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.losstools.Lq_binary_loss" title="Link to this definition">¶</a></dt>
+<dd><p>L_q Bernoulli loss</p>
 </dd></dl>
 
 <dl class="py function">
