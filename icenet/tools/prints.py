@@ -77,20 +77,27 @@ def print_weights(weights, y, output_file=None):
     
     class_ids = np.unique(y.astype(int))
     
-    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)", "min(w)", "Q5(w)", "med(w)", "Q95(w)", "max(w)"]) 
+    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)",
+                         "min(w)", "Q1(w)", "Q5(w)", "med(w)", "Q95(w)", "Q99(w)", "max(w)"]) 
     
     for c in class_ids:
         ind = (y == c)
+        
+        prc = np.percentile(weights[ind], [0, 1, 5, 50, 95, 99, 100])
+        
         table.add_row([f'{c}',
                        f'{np.sum(ind)}',
                        f'{np.round(np.sum(weights[ind]), 2)}',
                        f'{np.mean(weights[ind]):0.3E}',
                        f'{np.std(weights[ind]):0.3E}',
-                       f'{np.min(weights[ind]):0.3E}',
-                       f'{np.percentile(weights[ind],  5):0.3E}',
-                       f'{np.median(weights[ind]):0.3E}',
-                       f'{np.percentile(weights[ind], 95):0.3E}',
-                       f'{np.max(weights[ind]):0.3E}'])
+                       f'{prc[0]:0.3E}',
+                       f'{prc[1]:0.3E}',
+                       f'{prc[2]:0.3E}',
+                       f'{prc[3]:0.3E}',
+                       f'{prc[4]:0.3E}',
+                       f'{prc[5]:0.3E}',
+                       f'{prc[6]:0.3E}'
+                       ])
     
     print(table)
     print('')
@@ -121,7 +128,7 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, out
 
     print(f'Excluding values: {exclude_vals}')
     
-    table = PrettyTable(["i", "variable", "min", "Q5", "med", "Q95", "max", "# unique", "mean", "std", "#Inf", "#NaN"]) 
+    table = PrettyTable(["i", "variable", "min", "Q1", "Q5", "med", "Q95", "Q99", "max", "# unique", "mean", "std", "#Inf", "#NaN"]) 
     
     for j in range(len(ids)):
         try:
@@ -135,11 +142,7 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, out
 
             x = x[ind]
 
-            minval     = np.min(x)
-            Q5         = np.percentile(x,5)
-            med        = np.median(x)
-            Q95        = np.percentile(x,95)
-            maxval     = np.max(x)
+            prc = np.percentile(x, [0, 1, 5, 50, 95, 99, 100])
             
             if W is not None:
                 mean,std = aux.weighted_avg_and_std(values=x, weights=W[ind])
@@ -150,8 +153,19 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, out
             isinf  = np.sum(np.isinf(x))
             isnan  = np.sum(np.isnan(x))
 
-            table.add_row([f'{j}', f'{ids[j]}', f'{minval:10.2E}', f'{Q5:10.2E}', f'{med:10.2E}', f'{Q95:10.2E}', f'{maxval:10.2E}', f'{num_unique}', f'{mean:10.2E}', f'{std:10.2E}', f'{isinf}', f'{isnan}'])
-
+            table.add_row([f'{j}',
+                           f'{ids[j]}',
+                           f'{prc[0]:10.2E}',
+                           f'{prc[1]:10.2E}',
+                           f'{prc[2]:10.2E}',
+                           f'{prc[3]:10.2E}',
+                           f'{prc[4]:10.2E}',
+                           f'{prc[5]:10.2E}',
+                           f'{prc[6]:10.2E}',
+                           f'{num_unique}',
+                           f'{mean:10.2E}', f'{std:10.2E}',
+                           f'{isinf}', f'{isnan}'])
+        
         except Exception as e:
             print(e)
             print(f'[{j: >3}] Cannot print variable "{ids[j]}" (probably non-scalar type)')

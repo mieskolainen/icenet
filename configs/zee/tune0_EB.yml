@@ -112,9 +112,17 @@ train_runmode:
     #- dmlp0_nozero
     #- fastkan0_nozero
     
-    - lzmlp0
-    - lzmlp1
-    - lzmlp2
+    #- lzmlp0
+    #- lzmlp1
+    #- lzmlp2
+    #- lzmlp3
+    #- lzmlp4
+    
+    - lzmlp_q=0p7
+    - lzmlp_q=0p8
+    - lzmlp_q=0p9
+    - lzmlp_q=1p1
+    - lzmlp_q=1p2
     
     #- dmlp0
     #- fastkan0

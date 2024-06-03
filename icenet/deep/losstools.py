@@ -11,6 +11,71 @@ import torch.nn.functional as F
 from icenet.tools import aux_torch
 from icefit import mine
 
+class FocalWithLogitsLoss(nn.Module):
+    """
+    Focal Loss with logits as input
+    
+    https://arxiv.org/abs/1708.02002
+    """
+    def __init__(self, weight=None, gamma=2, reduction="mean"):
+        super(FocalWithLogitsLoss, self).__init__()
+        self.weight    = weight
+        self.bce       = torch.nn.functional.binary_cross_entropy_with_logits
+        self.gamma     = gamma
+        self.reduction = reduction
+    
+    def forward(self, predicted, target):
+        pt           = torch.exp(-self.bce(predicted, target, reduction='none'))
+        entropy_loss = self.bce(predicted, target, weight=self.weight, reduction='none')
+        focal_loss   = ((1-pt)**self.gamma)*entropy_loss
+        
+        if   self.reduction == "none":
+            return focal_loss
+        elif self.reduction == "mean":
+            if self.weight is None:
+                return focal_loss.mean()
+            else:
+                return focal_loss.sum() / torch.sum(self.weight)
+        else:
+            return focal_loss.sum()
+
+
+class LqBernoulliWithLogitsLoss(nn.Module):
+    """
+    L_q likelihood for the Bernoulli case
+    
+    https://arxiv.org/pdf/1002.4533
+    """
+    def __init__(self, weight=None, q=1.0, reduction="mean"):
+        super(LqBernoulliWithLogitsLoss, self).__init__()
+        self.weight    = weight
+        self.bce       = torch.nn.functional.binary_cross_entropy_with_logits
+        self.q         = q
+        self.reduction = reduction
+    
+    def L_q(self, x):
+        """
+        when q -> 1, then L_q -> log(x)
+        """
+        return (x**(1 - self.q) - 1) / (1 - self.q)
+    
+    def forward(self, predicted, target):
+        p    = torch.sigmoid(predicted)
+        loss = - (target*self.L_q(p) + (1 - target) * self.L_q(1 - p))
+        
+        if self.weight is not None:
+            loss = loss * self.weight
+
+        if   self.reduction == "none":
+            return loss
+        elif self.reduction == "mean":
+            if self.weight is None:
+                return loss.mean()
+            else:
+                return loss.sum() / torch.sum(self.weight)
+        else:
+            return loss.sum()
+
 
 def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None, MI=None, EPS=1e-12):
     """
@@ -95,28 +160,28 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         loss   = BCE_loss(logits=logits, y=y, weights=weights)
         
         loss = {'BCE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
-    
+
     elif param['lossfunc'] == 'binary_focal_entropy':
         
         logits = model.forward(x)
         loss   = binary_focal_loss(logits=logits, y=y, gamma=param['gamma'], weights=weights)
         
         loss = {f"FE ($\\gamma = {param['gamma']}$)": loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
-    
-    #elif param['lossfunc'] == 'binary_LQ':
-    #    
-    #    logits = model.forward(x)
-    #    loss = LQ_loss(logits=logits, y=y, weights=weights)
-    #    
-    #    loss = {'LQ': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
-    
+
+    elif param['lossfunc'] == 'binary_Lq_entropy':
+        
+        logits = model.forward(x)
+        loss   = Lq_binary_loss(logits=logits, y=y, q=param['q'], weights=weights)
+        
+        loss = {f"LQ ($\\gamma = {param['q']}$)": loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
+
     elif param['lossfunc'] == 'MSE':
         
         y_hat = model.forward(x)
         loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
         
         loss  = {'MSE': loss, **LZ_helper(), **LR_helper(y_hat), **MI_helper(y_hat)}
-    
+
     elif param['lossfunc'] == 'MSE_prob':
         
         logits = model.forward(x)
@@ -248,40 +313,17 @@ def MI_loss(X, Z, weights, MI, y):
     return loss
 
 
-class FocalWithLogitsLoss(nn.Module):
+def Lq_binary_loss(logits, y, q, weights=None):
     """
-    Focal Loss with logits as input
-    
-    https://arxiv.org/abs/1708.02002
+    L_q Bernoulli loss
     """
-    def __init__(self, weight=None, gamma=2, reduction="mean"):
-        super(FocalWithLogitsLoss, self).__init__()
-        self.weight    = weight
-        self.bce       = torch.nn.functional.binary_cross_entropy_with_logits
-        self.gamma     = gamma
-        self.reduction = reduction
-    
-    def forward(self, predicted, target):
-        pt           = torch.exp(-self.bce(predicted, target, reduction='none'))
-        entropy_loss = self.bce(predicted, target, weight=self.weight, reduction='none')
-        focal_loss   = ((1-pt)**self.gamma)*entropy_loss
-        
-        if   self.reduction == "none":
-            return focal_loss
-        elif self.reduction == "mean":
-            if self.weight is None:
-                return focal_loss.mean()
-            else:
-                return focal_loss.sum() / torch.sum(self.weight)
-        else:
-            return focal_loss.sum()
+    criterion = LqBernoulliWithLogitsLoss(reduction='none', q=q, weight=weights)
+    loss      = criterion(logits.squeeze(), y.squeeze().float())
 
-
-def LQ_loss(logits, y, weights=None):
-    """
-    L_q loss (TBD)
-    """
-    return 1.0
+    if weights is not None:
+        return loss.sum() / torch.sum(weights)
+    else:
+        return loss.sum() / y.shape[0]
 
 def LOGIT_L1_loss(logits, logit_beta=1.0, weights=None):
     """

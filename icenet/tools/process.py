@@ -371,8 +371,11 @@ def read_data(args, func_loader, runmode):
     if args['__use_cache__'] == False or (not os.path.exists(f'{cache_directory}/output_0.pkl')):
 
         if runmode != "genesis":
-            raise Exception(__name__ + f'.read_data: Data "{cache_directory}" not found (or __use_cache__ == False) but --runmode is not "genesis"')
+            if args['__use_cache__'] == False:
+                raise Exception(__name__ + f'.read_data: [--use_cache 0] is to be used only with [--runmode genesis]')
 
+            raise Exception(__name__ + f'.read_data: Data "{cache_directory}" not found [execute --runmode genesis and set --maxevents N]')
+        
         # func_loader does the multifile processing
         load_args = {'entry_start': 0, 'entry_stop': None, 'maxevents': args['maxevents'], 'args': args}
         predata   = func_loader(root_path=args['root_files'], **load_args)
