@@ -541,7 +541,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-
+<span class="kn">import</span> <span class="nn">math</span>
 
 <div class="viewcode-block" id="Multiply">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.Multiply">[docs]</a>
@@ -670,6 +670,66 @@
         <span class="n">y</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">in_features</span>
         <span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
         <span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="set_scheduler">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.set_scheduler">[docs]</a>
+<span class="k">def</span> <span class="nf">set_scheduler</span><span class="p">(</span><span class="n">optimizer</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        optimizer: optimizers for different models</span>
+<span class="sd">        param:     setup parameters</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        torch scheduler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.set_scheduler: &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span> <span class="s1">&#39;cos&#39;</span><span class="p">:</span>
+        
+        <span class="n">period</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># &quot;Cosine cycle scheme&quot;</span>
+        <span class="n">lf</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">period</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.9</span> <span class="o">+</span> <span class="mf">0.1</span>
+        
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">LambdaLR</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">lr_lambda</span><span class="o">=</span><span class="n">lf</span><span class="p">)</span>
+        
+    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;warm-cos&#39;</span><span class="p">:</span>
+        
+        <span class="n">T0</span>      <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span>
+        <span class="n">eta_min</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;eta_min&#39;</span><span class="p">]</span> <span class="c1"># ~ lr / 10</span>
+        
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">CosineAnnealingWarmRestarts</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">T_0</span><span class="o">=</span><span class="n">T0</span><span class="p">,</span> <span class="n">eta_min</span><span class="o">=</span><span class="n">eta_min</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
+        
+        <span class="n">gamma</span>      <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">]</span>      <span class="c1"># ~ (1 - 1e-5)</span>
+        <span class="n">last_epoch</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;last_epoch&#39;</span><span class="p">]</span> <span class="c1"># -1</span>
+        
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">ExponentialLR</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">last_epoch</span><span class="o">=</span><span class="n">last_epoch</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;step&#39;</span><span class="p">:</span>
+        
+        <span class="n">step_size</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">]</span>  <span class="c1"># ~ 150</span>
+        <span class="n">gamma</span>     <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">]</span>      <span class="c1"># ~ 0.1</span>
+        
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">StepLR</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;constant&#39;</span><span class="p">:</span>
+        
+        <span class="n">factor</span>      <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;factor&#39;</span><span class="p">]</span>      <span class="c1"># ~ 1</span>
+        <span class="n">total_iters</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;total_iters&#39;</span><span class="p">]</span> <span class="c1"># ~ 10000</span>
+        
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">ConstantLR</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">total_iters</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.set_scheduler: Unknown scheduler_type: </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">scheduler</span></div>
 
 </pre></div>
 
