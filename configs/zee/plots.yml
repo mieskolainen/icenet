@@ -62,7 +62,7 @@ OBS_reweight:
   
   # Regularization
   EPS:  1.0E-8            # Technical
-  maxW: 300               # Maximum ML weight cutoff
+  maxW: 30                # Maximum ML weight cutoff
   
   # Renormalize weights (set null for no renormalization)
   renorm_origin: 1        # Reference class for the final weight sum

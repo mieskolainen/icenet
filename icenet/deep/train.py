@@ -21,7 +21,7 @@ from icenet.tools import aux
 from icenet.tools import aux_torch
 
 from icenet.tools import plots
-from icenet.deep  import optimize, predict
+from icenet.deep  import optimize, predict, deeptools
 
 from icenet.algo  import flr
 from icenet.deep  import deps
@@ -39,7 +39,6 @@ from icenet.deep  import graph
 from icefit import mine
 
 from icenet.optim import adam
-from icenet.optim import scheduler
 
 
 # Raytune
@@ -263,7 +262,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     else:
         raise Exception(__name__ + f".torch_loop: Unknown optimizer <{opt_param['optimizer']}> chosen")
     
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_param['step_size'], gamma=scheduler_param['gamma'])
+    # Create scheduler
+    scheduler = deeptools.set_scheduler(optimizer=optimizer, param=scheduler_param)
     
     cprint(__name__ + f'.torch_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
@@ -309,7 +309,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     if 'tensorboard' in param and param['tensorboard']:
         from tensorboardX import SummaryWriter
         writer = SummaryWriter(os.path.join('tmp/tensorboard/', param['label']))
-
+    
     # --------------------------------------------------------------------
     # Training loop
     
@@ -319,11 +319,11 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     trn_losses = []
     val_losses = []
     
-    trn_aucs = []
-    val_aucs = []
+    trn_aucs   = []
+    val_aucs   = []
     
     for epoch in range(0, opt_param['epochs']):
-        
+
         if MI is not None: # Reset diagnostics
             MI['MI_lb'] = np.zeros(len(MI['classes']))
         
@@ -353,7 +353,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         val_aucs.append(validate_auc)
         
         print(__name__)
-        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()[0]}', 'yellow')
+        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()[0]:0.4E}', 'yellow')
         if MI is not None:
             print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f}')
             for k in range(len(MI['classes'])):
@@ -383,21 +383,27 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             torch.save(checkpoint, filename + '.pth')
             
         else:
-            
             ray.train.report({'loss': val_losses[-1], 'AUC': validate_auc})
     
     if not args['__raytune_running__']:
         
         # Plot evolution
-        plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
+        plotdir = aux.makedir(f'{args["plotdir"]}/train/loss/{param["label"]}')
         
         ltr = {f'train: {k}': v for k, v in loss_history_train.items()}
         lev = {f'eval:  {k}': v for k, v in loss_history_eval.items()}
         
-        fig,ax = plots.plot_train_evolution_multi(losses=ltr | lev, trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
-
-        plt.savefig(f"{plotdir}/{param['label']}--evolution.pdf", bbox_inches='tight'); plt.close()
-
+        losses_ = ltr | lev
+        
+        for yscale in ['linear', 'log']:
+            for xscale in ['linear', 'log']:
+                
+                fig,ax = plots.plot_train_evolution_multi(losses=losses_, trn_aucs=trn_aucs, val_aucs=val_aucs,
+                                                          label=param["label"], yscale=yscale, xscale=xscale)
+                
+                plt.savefig(f"{plotdir}/{param['label']}_losses_yscale_{yscale}_xscale_{xscale}.pdf", bbox_inches='tight')
+                plt.close(fig)
+        
         return model
 
     return # No return value for raytune

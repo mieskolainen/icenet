@@ -7,10 +7,11 @@ import numpy as np
 import awkward as ak
 import re
 import time
-import datetime
 import pickle
 import os
 import glob
+import torch
+from datetime import datetime
 
 import numba
 from tqdm import tqdm
@@ -21,6 +22,12 @@ from sklearn import metrics
 import scipy
 from scipy import interpolate
 
+
+def get_datetime():
+    """
+    Return datetime string of style '2024-06-04--14-45-07'
+    """
+    return str(datetime.now()).replace(' ', '_').replace(':','-').split('.')[0]
 
 def inverse_sigmoid(p: np.ndarray, EPS=1E-9):
     """
@@ -886,31 +893,44 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
         if len(list_of_files) == 0:
             raise Exception(__name__ + f'.create_model_filename: Could not find any files for model "{label}"')
         
+        # Latest model
         filename = max(list_of_files, key=os.path.getctime)
         
+        # ----------------------------------------------------
+        # Try to find the best model
+        succeeded = False
         try:
-            
-            # Now read the saved model optimize
+            # Try with pickle load
             with open(filename, 'rb') as file:
                 data  = pickle.load(file)
+            succeeded = True
             
+        except:
+            # Try with torch load
+            try:
+                data = torch.load(filename, map_location = 'cpu')
+                succeeded = True
+            
+            except Exception as e:
+                print(e)
+                cprint(__name__ + f'.create_model_filename: Problem in finding the model [{label}] with the minimum validation loss', 'red')
+        
+        if succeeded:
+            # Take the minimum validation loss epoch index
             losses = np.array(data['losses']['val_losses'])
             idx    = np.argmin(losses)
             
             str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
             cprint(__name__ + f'.create_model_filename: {str}', 'magenta')
             
-            filename  = createfilename(idx)
-
-        except:
-            cprint(__name__ + f'.create_model_filename: Problem in finding the model [{label}] with the minimum validation loss', 'red')
+            filename = createfilename(idx)
+        # ----------------------------------------------------
         
     else:
         cprint(__name__ + f'.create_model_filename: Loading the model with the provided epoch = {epoch}', 'yellow')
-        
         filename = createfilename(epoch)
     
-    dt = datetime.datetime.fromtimestamp(getmtime(filename))
+    dt = datetime.fromtimestamp(getmtime(filename))
     cprint(__name__ + f'.create_model_filename: Found a model file: {filename} (modified {dt})', 'green')
     
     return filename

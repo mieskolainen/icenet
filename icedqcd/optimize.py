@@ -101,7 +101,7 @@ def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args,
         plt.plot(xval, func_binormal(xval, *popt), linestyle='-', color=(0.35,0.35,0.35), label='binormal fit')
         plt.plot(xval, xval, color=(0.5,0.5,0.5), linestyle=':')
 
-        path = aux.makedir(f'{args["plotdir"]}/eval/optimize/ROC_fit/{roc_label}')
+        path = aux.makedir(f'{args["plotdir"]}/optimize/ROC_fit/{roc_label}')
         
         if k == 0:
             plt.xscale('linear')
@@ -214,7 +214,7 @@ def optimize_selection(args):
         with open(latex_filename, mode) as f:
             f.write(string + '\n')
     
-    latex_path     = aux.makedir(f'{args["plotdir"]}/eval/optimize')
+    latex_path     = aux.makedir(f'{args["plotdir"]}/optimize')
     latex_filename = f'{latex_path}/optimize.tex'
     
     # -----------------
@@ -528,7 +528,7 @@ def optimize_selection(args):
         # Compute upper limits
         
         limits.run_limits_vector(data=output, param=args['limits_param'],
-            savepath = f'{args["plotdir"]}/eval/limits/{ML_model_names[ML_idx]}')
+            savepath = f'{args["plotdir"]}/optimize/limits/{ML_model_names[ML_idx]}')
         
         # << == Loop over models ends
     

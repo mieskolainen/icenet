@@ -8,8 +8,9 @@ import awkward as ak
 import gc
 import torch
 import torch_geometric
-
+import socket
 import copy
+import glob
 from tqdm import tqdm
             
 from importlib import import_module
@@ -67,6 +68,7 @@ def read_cli():
     
     parser.add_argument("--inputmap",        type=str,  default=None)
     parser.add_argument("--modeltag",        type=str,  default=None)
+    parser.add_argument("--run_id",          type=str,  default='latest')
     
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -259,21 +261,80 @@ def read_config(config_path='configs/xyz/', runmode='all'):
                 True
 
         # Finally create hash
-        args['__hash_post_genesis__']  = args['__hash_genesis__'] + '__' + io.make_hash_sha256_object(hash_args)
-        
+        args['__hash_post_genesis__'] = args['__hash_genesis__'] + '__' + io.make_hash_sha256_object(hash_args)
+
         cprint(f'[__hash_post_genesis__] : {args["__hash_post_genesis__"]}', 'magenta')
-    
+
     # -------------------------------------------------------------------
     ## Update variables to args dictionary (and create directories)
 
-    args["config"]       = cli_dict['config']
-    args['datadir']      = aux.makedir(f'{cwd}/output/{args["rootname"]}')
+    args["config"]  = cli_dict['config']
+    args['datadir'] = aux.makedir(f'{cwd}/output/{args["rootname"]}')
     
     if runmode != 'genesis':
-        conditional_tag  = f'--use_conditional__{args["use_conditional"]}' if args["use_conditional"] else ""
-        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}{conditional_tag}')
-        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}{conditional_tag}')
+        
+        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}')
+        args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}')
+        
+        # Add conditional tag
+        conditional_tag   = f'--use_conditional__{args["use_conditional"]}' if args["use_conditional"] else ""
+        args['modeldir'] += conditional_tag
+        args['plotdir']  += conditional_tag
+        
+        # Add runtime and hostname tag
+        run_id = f'{aux.get_datetime()}_{socket.gethostname().split(".")[0]}'
+        
+        if runmode == 'eval' or runmode == 'deploy':
+            
+            if cli_dict['run_id'] == 'latest':
+                
+                # Find the latest training
+                list_of_files = glob.glob(f"{args['modeldir']}/*")
+
+                if len(list_of_files) == 0:
+                    raise Exception(__name__ + f'.read_config: Could not find any trained models -- run training first')
+
+                run_id = max(list_of_files, key=os.path.getctime).split('/')[-1]
+
+            # Use specified run_id
+            else:
+                run_id = cli_dict['run_id']
+
+        elif runmode == 'optimize':
+            
+            if cli_dict['run_id'] == 'latest':
+                
+                # Find the latest evaluation
+                list_of_files = glob.glob(f"{args['plotdir']}/*")
+
+                if len(list_of_files) == 0:
+                    raise Exception(__name__ + f'.read_config: Could not find any evaluation run -- run evaluation first')
+
+                run_id = max(list_of_files, key=os.path.getctime).split('/')[-1]
+
+            # Use specified run_id
+            else:
+                run_id = cli_dict['run_id']
+        
+        # Store it
+        args['run_id']   = run_id
+        
+        ## ** Create and set folders **
+        args['modeldir'] = aux.makedir(f"{args['modeldir']}/{run_id}")
+        args['plotdir']  = aux.makedir(f"{args['plotdir']}/{run_id}")
+        
+        # ----------------------------------------------------------------
+        ## Save args to yaml as a checkpoint of the run configuration
+        dir              = aux.makedir(f'{args["plotdir"]}/{runmode}')
+        
+        import yaml
+        
+        args_filename = f'{dir}/args.yml'
+        with open(args_filename, "w", encoding = "utf-8") as file:
+            file.write(yaml.safe_dump(args, sort_keys=False))
+        # ----------------------------------------------------------------
     
+    # "Simplified" data reader
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
     
     # Technical
@@ -285,13 +346,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         args[key] = cli_dict[key]
     
     # -------------------------------------------------------------------
-    ## Create aux
+    ## Create aux dirs
     aux.makedir('tmp')
-    
-    if runmode == 'train':
-        aux.makedir(f'{args["plotdir"]}/train')
-    if runmode == 'eval':
-        aux.makedir(f'{args["plotdir"]}/eval')
     # -------------------------------------------------------------------
     
     # -------------------------------------------------------------------
@@ -300,7 +356,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     print('')
     print(" torch.__version__: " + torch.__version__)
 
-    cprint(__name__ + f'.read_config: Setting random seed: {args["rngseed"]}', 'yellow')
+    cprint(__name__ + f'.read_config: Setting random seed: {args["rngseed"]} (numpy, torch)', 'yellow')
     np.random.seed(args['rngseed'])
     torch.manual_seed(args['rngseed'])
 
@@ -708,10 +764,10 @@ def train_models(data_trn, data_val, args=None):
     # ----------------------------------
     
     # Print training stats
-    output_file = f'{args["plotdir"]}/train/stats_weights_train.log'
+    output_file = f'{args["plotdir"]}/train/stats_train_weights.log'
     prints.print_weights(weights=data_trn['data'].w, y=data_trn['data'].y, output_file=output_file)
     
-    output_file = f'{args["plotdir"]}/train/stats_weights_validate.log'
+    output_file = f'{args["plotdir"]}/train/stats_validate_weights.log'
     prints.print_weights(weights=data_val['data'].w, y=data_val['data'].y, output_file=output_file)
     
     
@@ -1044,13 +1100,13 @@ def evaluate_models(data=None, info=None, args=None):
     # --------------------------------------------------------------------
     
     # Print evaluation stats
-    output_file = f'{args["plotdir"]}/eval/stats_weights.log'
+    output_file = f'{args["plotdir"]}/eval/stats_eval_weights.log'
     prints.print_weights(weights=data['data'].w, y=data['data'].y, output_file=output_file)
     
     
     # --------------------------------------------------------------------
     # Collect data
-
+    
     X       = None
     X_RAW   = None
     ids_RAW = None

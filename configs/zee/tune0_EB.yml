@@ -118,14 +118,9 @@ train_runmode:
     #- lzmlp3
     #- lzmlp4
     
-    - lzmlp_q=0p7
-    - lzmlp_q=0p8
-    - lzmlp_q=0p9
-    - lzmlp_q=1p1
-    - lzmlp_q=1p2
-    
-    #- dmlp0
-    #- fastkan0
+    - lzmlp0
+    - dmlp0
+    - fastkan0
     
     #- iceboost_plus
     #- iceboost0

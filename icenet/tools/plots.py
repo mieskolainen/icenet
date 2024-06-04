@@ -166,7 +166,8 @@ def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3
     return fig,ax,c
 
 
-def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
+def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85,
+                               yscale='linear', xscale='linear'):
     """ Training evolution plots.
 
     Args:
@@ -200,6 +201,8 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     plt.sca(ax[0])
     plt.autoscale(enable=True, axis='x', tight=True)
+    plt.yscale(yscale)
+    plt.xscale(xscale)
     
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
@@ -210,9 +213,11 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     plt.sca(ax[1])
     plt.autoscale(enable=True, axis='x', tight=True)
+    plt.yscale(yscale)
+    plt.xscale(xscale)
     
     ax[0].set_aspect(1.0/ax[0].get_data_ratio()*aspect)
-
+    
     for i in [1]:
         ax[1].set_ylim([np.min([np.min(trn_aucs), np.min(val_aucs)]), 1.0])
         ax[1].set_aspect(1.0/ax[i].get_data_ratio()*aspect)

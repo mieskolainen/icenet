@@ -214,15 +214,12 @@ def splitfactor(x, y, w, ids, args):
     
     # -------------------------------------------------------------------------
     ### ** DEBUG TEST -- special transform for "zero-inflated" variables **
-    """
+    
     special_var = ['probe_esEffSigmaRR',
                    'probe_pfChargedIso',
                    'probe_ecalPFClusterIso',
                    'probe_trkSumPtHollowConeDR03',
                    'probe_trkSumPtSolidConeDR04']
-    
-    # Thresholds
-    dT          = [0.1, 0.1, 0.1, 0.1, 0.1]
     
     for i, v in enumerate(special_var):
         
@@ -230,16 +227,15 @@ def splitfactor(x, y, w, ids, args):
             ind = data.find_ind(v)
         except:
             cprint(__name__ + f'.splitfactor: Could not find variable "{v}" -- continue', 'red')
+            continue
         
-        cprint(__name__ + f'.splitfactor: Pre-transforming variable "{v}" with dT < {dT[i]}', 'magenta')
+        cprint(__name__ + f'.splitfactor: Pre-transforming variable "{v}" with log1p', 'magenta')
         
-        mask              = np.abs(data.x[:,ind] < dT[i])
-        data.x[mask, ind] = np.random.triangular(left=-1, mode=-0.75, right=dT[i], size=np.sum(mask))
-        data.x[:,ind]     = np.log1p(data.x[:,ind] + 1)
+        data.x[:,ind] = np.log1p(data.x[:,ind])
         
         # Change the variable name
         data.ids[ind] = f'DQL__{v}'
-    """
+    
     # -------------------------------------------------------------------------
     
     return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

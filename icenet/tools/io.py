@@ -12,6 +12,7 @@ import os
 import psutil
 import subprocess
 import re
+from datetime import datetime
 
 from termcolor import colored, cprint
 
@@ -32,6 +33,7 @@ import base64
 
 from icenet.tools import aux
 from icenet.tools import stx
+
 
 def rootsafe(txt):
     """

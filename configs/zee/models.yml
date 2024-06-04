@@ -230,7 +230,7 @@ lzmlp0: &LZMLP
   predict: 'torch_scalar'
   raw_logit: true               # Return raw logits
 
-  label:   'LZMLP-0p5'
+  label:   'LZMLP'
   raytune:  null
   
   # ** Custom set of variables **
@@ -242,22 +242,24 @@ lzmlp0: &LZMLP
   out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
 
   model_param:
-    mlp_dim: [64, 64, 64, 64, 64, 64] # hidden layer dimensions
-    activation: 'silu'
+    mlp_dim: [64, 64, 64, 64]     # hidden layer dimensions
+    activation: 'relu'
     layer_norm: True
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
-    dropout: 0
+    dropout: 0.05
     act_after_norm: True
   
   # Optimization
   opt_param:  
-    lossfunc: 'binary_focal_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    #lossfunc: 'binary_focal_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'binary_Lq_entropy'     # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    q: 0.8                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
     lipschitz_beta:    5.0e-5         # lipschitz regularization (use with 'lzmlp')
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
 
-    gamma: -0.5                        # focal_entropy "exponent"
+    #gamma: -0.5                       # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
     
     optimizer: 'AdamW'
@@ -265,13 +267,18 @@ lzmlp0: &LZMLP
     
     epochs: 300
     batch_size: 2048
-    lr: 1.0e-4
+    lr: 5.0e-4
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
   scheduler_param:
-    step_size: 200             # Number of epochs for drop
-    gamma: 0.1
+
+    type: 'cos'
+    period: 30
+    
+    #type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
+    #step_size: 200             # Number of epochs for drop
+    #gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
@@ -296,152 +303,6 @@ lzmlp0_nozero:
   label:   'LZMLP-NOZERO'
 
 
-## Lipschitz MLP
-#
-lzmlp_q=0p7:
-
-  <<: *LZMLP
-
-  label: 'LZMLP_q=0p7'
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'binary_Lq_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    
-    lipschitz_beta:    5.0e-4         # lipschitz regularization (use with 'lzmlp')
-    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
-    logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
-
-    #gamma: 0.5                       # focal_entropy "exponent"
-    q: 0.7                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
-    #temperature: 1                   # logit_norm_cross_entropy "temperature"
-    
-    optimizer: 'AdamW'
-    clip_norm: 1.0
-    
-    epochs: 300
-    batch_size: 2048
-    lr: 1.0e-4
-    weight_decay: 1.0e-3              # L2-regularization
-
-
-## Lipschitz MLP
-#
-lzmlp_q=0p8:
-  
-  <<: *LZMLP
-
-  label: 'LZMLP_q=0p8'
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'binary_Lq_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    
-    lipschitz_beta:    5.0e-4         # lipschitz regularization (use with 'lzmlp')
-    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
-    logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
-
-    #gamma: 0.5                       # focal_entropy "exponent"
-    q: 0.8                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
-    #temperature: 1                   # logit_norm_cross_entropy "temperature"
-    
-    optimizer: 'AdamW'
-    clip_norm: 1.0
-    
-    epochs: 300
-    batch_size: 2048
-    lr: 1.0e-4
-    weight_decay: 1.0e-3       # L2-regularization
-  
-
-## Lipschitz MLP
-#
-lzmlp_q=0p9:
-
-  <<: *LZMLP
-
-  label: 'LZMLP_q=0p9'
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'binary_Lq_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    
-    lipschitz_beta:    5.0e-4         # lipschitz regularization (use with 'lzmlp')
-    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
-    logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
-
-    #gamma: 0.5                       # focal_entropy "exponent"
-    q: 0.9                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
-    #temperature: 1                   # logit_norm_cross_entropy "temperature"
-    
-    optimizer: 'AdamW'
-    clip_norm: 1.0
-    
-    epochs: 300
-    batch_size: 2048
-    lr: 1.0e-4
-    weight_decay: 1.0e-3              # L2-regularization
-
-
-## Lipschitz MLP
-#
-lzmlp_q=1p1:
-
-  <<: *LZMLP
-
-  label: 'LZMLP_q=1p1'
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'binary_Lq_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    
-    lipschitz_beta:    5.0e-4         # lipschitz regularization (use with 'lzmlp')
-    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
-    logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
-
-    #gamma: 0.5                       # focal_entropy "exponent"
-    q: 1.1                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
-    #temperature: 1                   # logit_norm_cross_entropy "temperature"
-    
-    optimizer: 'AdamW'
-    clip_norm: 1.0
-    
-    epochs: 300
-    batch_size: 2048
-    lr: 1.0e-4
-    weight_decay: 1.0e-3              # L2-regularization
-
-
-## Lipschitz MLP
-#
-lzmlp_q=1p2:
-
-  <<: *LZMLP
-
-  label: 'LZMLP_q=1p2'
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'binary_Lq_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    
-    lipschitz_beta:    5.0e-4         # lipschitz regularization (use with 'lzmlp')
-    #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
-    logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
-
-    #gamma: 0.5                       # focal_entropy "exponent"
-    q: 1.2                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
-    #temperature: 1                   # logit_norm_cross_entropy "temperature"
-    
-    optimizer: 'AdamW'
-    clip_norm: 1.0
-    
-    epochs: 300
-    batch_size: 2048
-    lr: 1.0e-4
-    weight_decay: 1.0e-4              # L2-regularization
-
-
-
 ## FastKAN
 #
 fastkan0: &FASTKAN
@@ -464,7 +325,7 @@ fastkan0: &FASTKAN
     grid_min: -2.0                    # Activation learning param
     grid_max:  2.0                    # 
     num_grids:   8                    # 
-    mlp_dim: [64, 64, 64]             # hidden layer dimensions
+    mlp_dim: [64, 64, 64, 64]         # hidden layer dimensions
     use_base_update: True             # Use "base MLP" in addition
     
     last_tanh: True                   # Extra tanh layer
@@ -472,7 +333,10 @@ fastkan0: &FASTKAN
   
   # Optimization
   opt_param:  
-    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    #lossfunc: 'binary_cross_entropy' # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'binary_Lq_entropy'     # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    q: 0.8                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    
     #lipshitz_beta:    1.0e-4         # Lipshitz regularization (use with 'lzmlp')
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
@@ -485,13 +349,17 @@ fastkan0: &FASTKAN
     
     epochs: 300
     batch_size: 2048
-    lr: 1.0e-4
-    weight_decay: 1.0e-4       # L2-regularization
+    lr: 5.0e-4
+    weight_decay: 1.0e-2       # L2-regularization
   
   # Scheduler
   scheduler_param:
-    step_size: 200             # Number of epochs for drop
-    gamma: 0.1
+    type: 'cos'
+    period: 30
+    
+    #type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
+    #step_size: 200             # Number of epochs for drop
+    #gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
@@ -542,7 +410,7 @@ dmlp0: &DMLP
     activation: 'silu'
     layer_norm: True
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
-    dropout: 0
+    dropout: 0.05
     act_after_norm: True
     
     skip_connections: False
@@ -551,7 +419,10 @@ dmlp0: &DMLP
 
   # Optimization
   opt_param:  
-    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    #lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'binary_Lq_entropy'     # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    q: 0.8                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ lambda * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ lambda * torch.sum(logits**2)
 
@@ -563,13 +434,17 @@ dmlp0: &DMLP
     
     epochs: 300
     batch_size: 2048
-    lr: 1.0e-4
+    lr: 5.0e-4
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
   scheduler_param:
-    step_size: 200             # Number of epochs for drop
-    gamma: 0.1
+    type: 'cos'
+    period: 30
+    
+    #type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
+    #step_size: 200             # Number of epochs for drop
+    #gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4

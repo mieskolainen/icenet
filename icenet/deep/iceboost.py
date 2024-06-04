@@ -595,20 +595,25 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     if not args['__raytune_running__']:
         
         # Plot evolution
-        plotdir  = aux.makedir(f'{args["plotdir"]}/train/loss')
+        plotdir = aux.makedir(f'{args["plotdir"]}/train/loss/{param["label"]}')
         
         if use_custom:
             ltr = {f'train: {k}': v for k, v in loss_history_train.items()}
             lev = {f'eval:  {k}': v for k, v in loss_history_eval.items()}
-            
-            fig,ax = plots.plot_train_evolution_multi(losses=ltr | lev, trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+
+            losses_ = ltr | lev
         
-        # Standard
         else:
-            fig,ax = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'eval': val_losses},
-                trn_aucs=trn_aucs, val_aucs=val_aucs, label=param["label"])
+            losses_ = {'train': trn_losses, 'eval': val_losses}
         
-        plt.savefig(f'{plotdir}/{param["label"]}--evolution.pdf', bbox_inches='tight'); plt.close()
+        for yscale in ['linear', 'log']:
+            for xscale in ['linear', 'log']:
+                
+                fig,ax = plots.plot_train_evolution_multi(losses=losses_, trn_aucs=trn_aucs, val_aucs=val_aucs,
+                                                          label=param["label"], yscale=yscale, xscale=xscale)
+                
+                plt.savefig(f"{plotdir}/{param['label']}_losses_yscale_{yscale}_xscale_{xscale}.pdf", bbox_inches='tight')
+                plt.close(fig)
         
         ## Plot feature importance
         if plot_importance:
