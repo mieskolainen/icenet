@@ -106,7 +106,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
     RV = {}
     for i, var in enumerate(variables):
         if isinstance(x, ak.Array):
-            RV[i] = aux.ak2numpy(x=x, fields=[var]).astype(np.float32)
+            RV[i] = ak.to_numpy(x[var]).astype(np.float32)
         else:
             RV[i] = x[:, ids.index(var)].astype(np.float32)
     
@@ -301,9 +301,9 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
     # Conversions and pick variables of interest
     
     if isinstance(x, ak.Array):
-        x     = ak.to_numpy(x[variables]).astype(np.float32)
+        x     = aux.ak2numpy(x=x, fields=variables).astype(np.float32)
         if x_val is not None:
-            x_val = ak.to_numpy(x_val[variables]).astype(np.float32)
+            x_val = aux.ak2numpy(x=x_val, fields=variables).astype(np.float32)
     else:
         x = x[:, io.index_list(ids, variables)].astype(np.float32)
         if x_val is not None:
