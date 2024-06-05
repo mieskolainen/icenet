@@ -651,7 +651,8 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
                 weight_decay = param['opt_param']['weight_decay'])
         
         # Custom wrapper
-        sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+        from icenet.optim import scheduler
+        sched = scheduler.ReduceLROnPlateau(optimizer,
                                       factor   = param['scheduler_param']['factor'],
                                       patience = param['scheduler_param']['patience'],
                                       cooldown = param['scheduler_param']['cooldown'],
