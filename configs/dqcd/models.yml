@@ -297,15 +297,8 @@ iceboost01-MI:
   exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
   #include_MVA_vars: ['.*']
   
-  # BCE loss domains
-  BCE_param:
-    main:
-      classes: [0, 1]
-      beta: 1.0
-      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-  
   MI_param:
-    beta: [0.1]               # Positive for minimizing, regularization strength [per class]
+    beta: [0.1, 0.1]         # Positive for minimizing (per class in use)
     <<: *MI_REG_PARAM
 
 
@@ -401,7 +394,7 @@ iceboost01-DA-MI:
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
-    beta: [0.1]                # Positive for minimizing
+    beta: [0.1, 0.1]                # Positive for minimizing (per class in use)
     <<: *MI_REG_PARAM
 
 
@@ -428,7 +421,7 @@ iceboost01-DA-MI-NOJETS:
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
-    beta: [0.1]                # Positive for minimizing
+    beta: [0.1, 0.1]                  # Positive for minimizing (per class in use)
     <<: *MI_REG_PARAM
 
 
