@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.0
+                0.1.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -993,7 +993,7 @@
         
         <span class="c1"># Renormalize integral (sum) to the event counts per class</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;diff_param&#39;</span><span class="p">][</span><span class="s1">&#39;renorm_weight_to_count&#39;</span><span class="p">]:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_weights: Renormalizing sum(weights) == sum(count) per class&#39;</span><span class="p">)</span>    
+            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_ND_reweights: Renormalizing sum(weights) == sum(count) per class&#39;</span><span class="p">)</span>    
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
                 <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
                 <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">ind</span><span class="p">])</span>
@@ -1009,7 +1009,7 @@
             <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>                   <span class="c1"># init with zeros</span>
             <span class="n">sample_weights</span>     <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">y</span><span class="o">==</span><span class="n">c</span><span class="p">]</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span>  <span class="c1"># Feed in the input weights</span>
             <span class="n">weights_doublet</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_weights</span>
-
+    
     <span class="c1"># -------------------------------------------------</span>
     
     <span class="c1">### Apply class balance equalizing weight</span>
