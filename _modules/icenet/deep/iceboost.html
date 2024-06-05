@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.0.9
+                0.1.1.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -920,6 +920,12 @@
     <span class="n">loss_history_train</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">loss_history_eval</span>  <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="c1"># TensorboardX</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
+        <span class="kn">from</span> <span class="nn">tensorboardX</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span>
+    
+    
     <span class="k">if</span> <span class="s1">&#39;BCE_param&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
         
         <span class="n">BCE_param</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1106,6 +1112,13 @@
             <span class="n">trn_aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics_train</span><span class="o">.</span><span class="n">auc</span><span class="p">)</span>
             <span class="n">val_aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics_eval</span><span class="o">.</span><span class="n">auc</span><span class="p">)</span>
         <span class="c1"># ==============================================</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
+            <span class="c1">#writer.add_scalar(&#39;lr&#39;, scheduler.get_last_lr()[0], epoch)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/validation&#39;</span><span class="p">,</span> <span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/train&#39;</span><span class="p">,</span>      <span class="n">trn_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;AUC/validation&#39;</span><span class="p">,</span>  <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>   <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;AUC/train&#39;</span><span class="p">,</span>       <span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>   <span class="n">epoch</span><span class="p">)</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb [</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">] Tree </span><span class="si">{</span><span class="n">epoch</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1"> | Train: loss = </span><span class="si">{</span><span class="n">trn_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1"> | Eval: loss = </span><span class="si">{</span><span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
