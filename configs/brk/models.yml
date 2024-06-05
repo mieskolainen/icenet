@@ -36,8 +36,9 @@ xgb:
     objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
     eval_metric: ['mlogloss']   # for evaluation, 'logloss', 'mlogloss'
   
-  plot_trees: False
-  
+  plot_trees: false
+  tensorboard: true
+
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
@@ -83,6 +84,7 @@ maxo:
     
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
@@ -129,6 +131,7 @@ deps:
     
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
   
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th

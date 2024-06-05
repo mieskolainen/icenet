@@ -376,6 +376,12 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     loss_history_train = {}
     loss_history_eval  = {}
 
+    # TensorboardX
+    if not args['__raytune_running__'] and param['tensorboard']:
+        from tensorboardX import SummaryWriter
+        writer = SummaryWriter(os.path.join(args['modeldir'], param['label']))
+    
+    
     if 'BCE_param' in param:
         
         BCE_param = {}
@@ -562,6 +568,13 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             trn_aucs.append(metrics_train.auc)
             val_aucs.append(metrics_eval.auc)
         # ==============================================
+        
+        if not args['__raytune_running__'] and param['tensorboard']:
+            #writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
+            writer.add_scalar('loss/validation', val_losses[-1], epoch)
+            writer.add_scalar('loss/train',      trn_losses[-1], epoch)
+            writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
+            writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
         
         print(__name__ + f'.train_xgb [{param["label"]}] Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         

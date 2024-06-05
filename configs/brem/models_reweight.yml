@@ -35,8 +35,9 @@ xgb0:
     objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']      # for evaluation, 'logloss', 'mlogloss', 'auc'
 
-  plot_trees: False
-
+  plot_trees: false
+  tensorboard: true
+  
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch

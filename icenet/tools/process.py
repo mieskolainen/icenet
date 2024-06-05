@@ -621,10 +621,13 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             
-            fmodel = args["modeldir"] + '/' + args['reweight_file']
+            if args["reweight_file"] is None:
+                fmodel = f'{args["datadir"]}/reweighter_{args["__hash_genesis__"]}.pkl' 
+            else:
+                fmodel = f'{args["datadir"]}/{args["reweight_file"]}'
             
             if args['reweight_mode'] == 'load':
-                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} (runmode == {runmode})', 'green')
+                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
@@ -633,11 +636,11 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             val.w,_    = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
             
             if args['reweight_mode'] == 'write':
-                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode == {runmode})', 'green')
+                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
                 pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Compute different data representations
-        cprint(__name__ + f'.process_data: Compute representations (func_factor)', 'green')
+        cprint(__name__ + f'.process_data: Compute representations [common.func_factor]', 'green')
         
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
@@ -648,19 +651,23 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
             output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
-            outputfile = args["modeldir"] + f'/imputer.pkl'
-            cprint(__name__ + f'.process_data: Saving imputer to: {outputfile}', 'green')
-            pickle.dump(imputer, open(outputfile, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+            fmodel = f'{args["datadir"]}/imputer_{args["__hash_genesis__"]}.pkl'
+            
+            cprint(__name__ + f'.process_data: Saving imputer to: {fmodel}', 'green')
+            pickle.dump(imputer, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
     elif runmode == 'eval':
         
         ### Compute reweighting weights (before func_factor because we need all the variables !)
         if args['reweight']:
             
-            fmodel = args["modeldir"] + '/' + args['reweight_file']
+            if args["reweight_file"] is None:
+                fmodel = f'{args["datadir"]}/reweighter_{args["__hash_genesis__"]}.pkl' 
+            else:    
+                fmodel = f'{args["datadir"]}/{args["reweight_file"]}' 
             
             if args['reweight_mode'] == 'load':
-                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} (runmode = {runmode})', 'green')
+                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
@@ -668,20 +675,21 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             tst.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
             
             if args['reweight_mode'] == 'write':
-                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} (runmode = {runmode})', 'green')
+                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
                 pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Compute different data representations
-        cprint(__name__ + f'.process_data: Compute representations (func_factor)', 'green')
+        cprint(__name__ + f'.process_data: Compute representations [common.func_factor]', 'green')
         
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
         
         ## Imputate
         if args['imputation_param']['active']:
             
-            inputfile = args["modeldir"] + f'/imputer.pkl'
-            cprint(__name__ + f'.process_data: Loading imputer from: {inputfile}', 'green')
-            imputer = pickle.load(open(inputfile, 'rb'))
+            fmodel = f'{args["datadir"]}/imputer_{args["__hash_genesis__"]}.pkl'
+            
+            cprint(__name__ + f'.process_data: Loading imputer from: {fmodel}', 'green')
+            imputer = pickle.load(open(fmodel, 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
         
     io.showmem()

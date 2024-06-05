@@ -58,7 +58,7 @@ train_runmode:
   ## Reweighting setup
   reweight: true
   reweight_mode: 'write'              # 'write', 'load'
-  reweight_file: 'reweight_train.pkl' # differential reweighting model file
+  reweight_file: null                 # null for automatic, or string for specific
   
   reweight_param: &REWEIGHT_PARAM
 
@@ -69,9 +69,11 @@ train_runmode:
     # Differential reweighting param
     diff_param:
       
-      maxevents: null                      # Maximum number of events for the PDF construction
+      maxevents: null                   # Maximum number of events for the PDF construction
+      renorm_weight_to_count: True      # Renormalize sum(weights) == sum(counts) per class
+      
       var:  ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
-      type: 'ML'                           # 'ML', 'pseudo-ND', '2D', '1D'
+      type: 'AIRW'                         # 'AIRW', 'pseudo-ND', '2D', '1D'
       
       hist_param:
 
@@ -85,11 +87,12 @@ train_runmode:
         
         max_reg: 1000.0                    # Maximum weight cut-off regularization
       
-      ML_param:
+      AIRW_param:
         active_model: xgb3Drw              # Under models.yml
         max_reg:      1000.0               # Maximum weight cut-off regularization
+        mode:         'LR'                 # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
   
-  
+
   ## Outlier protection in the training
   outlier_param:
     algo: 'truncate'   # algorithm: 'truncate', null
@@ -150,8 +153,8 @@ eval_runmode:
   
   reweight: true
   reweight_mode: 'load'          # 'write', 'load'
-  reweight_file: 'reweight_train.pkl'
-
+  reweight_file: null                 # null for automatic, or string for specific
+  
   reweight_param: *REWEIGHT_PARAM
 
   models:  !include configs/zee/models.yml

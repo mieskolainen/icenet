@@ -259,7 +259,7 @@ def parse_vars(items):
     return d
 
 
-def ak2numpy(x, fields, null_value=float(-999.0), dtype='float32'):
+def ak2numpy(x: ak.Array, fields: list, null_value=float(-999.0), dtype='float32'):
     """
     Unzip awkward array to numpy array per column (awkward Record)
     

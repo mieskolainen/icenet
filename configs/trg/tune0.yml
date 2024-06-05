@@ -79,7 +79,7 @@ train_runmode:
   ## Reweighting setup
   reweight: true
   reweight_mode: 'write'          # 'write', 'load'
-  reweight_file: 'reweight_train.pkl' # differential reweighting model file
+  reweight_file: null                 # null for automatic, or string for specific
   
   reweight_param: &REWEIGHT_PARAM
 
@@ -97,27 +97,29 @@ train_runmode:
 
     diff_param:
 
-      maxevents: 100000                    # Maximum number of events for the PDF construction
+      maxevents: null                   # Maximum number of events for the PDF construction
+      renorm_weight_to_count: True      # Renormalize sum(weights) == sum(counts) per class
+      
       var:   ['x_hlt_pt', 'x_hlt_eta']
-      type: '2D'                           # 'ML', 'pseudo-ND', '2D', '1D'
+      type: '2D'                        # 'AIRW', 'pseudo-ND', '2D', '1D'
       
       hist_param:
 
-        pseudo_type: 'product'         # 'product', 'geometric_mean'
+        pseudo_type: 'product'          # 'product', 'geometric_mean'
 
         # Make sure the bounds cover the phase space
         bins:  [[0.001, 100.0, 150], [-3.1, 3.1, 150]]
-        binmode: ['linear', 'linear']  # 'log10', 'linear' or 'edges' for custom array based binning
+        binmode: ['linear', 'linear']   # 'log10', 'linear' or 'edges' for custom array based binning
         
         # ! Variable, and binning min/max boundaries are both transformed !
-        transform: ['log10', null]     # 'log10', 'sqrt', 'square', null
+        transform: ['log10', null]      # 'log10', 'sqrt', 'square', null
 
-        max_reg: 10000.0               # Maximum weight cut-off regularization
+        max_reg: 10000.0                # Maximum weight cut-off regularization
       
-      ML_param:
-        active_model: xgb3Drw              # Under models.yml
-        max_reg:      1000.0               # Maximum weight cut-off regularization
-        
+      AIRW_param:
+        active_model: xgb3Drw           # Under models.yml
+        max_reg:      1000.0            # Maximum weight cut-off regularization
+        mode:         'LR'              # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
 
   ## Outlier protection in the training
   outlier_param:
@@ -180,7 +182,7 @@ eval_runmode:
   
   reweight: true
   reweight_mode: 'load'      # 'write', 'load'
-  reweight_file: 'reweight_train.pkl'
+  reweight_file: null                 # null for automatic, or string for specific
   
   reweight_param: *REWEIGHT_PARAM
 

@@ -306,9 +306,9 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         MI = None
     
     # TensorboardX
-    if 'tensorboard' in param and param['tensorboard']:
+    if not args['__raytune_running__'] and 'tensorboard' in param and param['tensorboard']:
         from tensorboardX import SummaryWriter
-        writer = SummaryWriter(os.path.join('tmp/tensorboard/', param['label']))
+        writer = SummaryWriter(os.path.join(args['modeldir'], param['label']))
     
     # --------------------------------------------------------------------
     # Training loop
@@ -362,10 +362,12 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         # Update scheduler
         scheduler.step()
         
-        if 'tensorboard' in param and param['tensorboard']:
-            writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
-            writer.add_scalar('loss/validation', validate_loss['sum'], epoch)
-            writer.add_scalar('loss/train', loss['sum'], epoch)
+        if not args['__raytune_running__'] and 'tensorboard' in param and param['tensorboard']:
+            writer.add_scalar('lr', scheduler.get_last_lr()[0],  epoch)
+            writer.add_scalar('loss/validation', val_losses[-1], epoch)
+            writer.add_scalar('loss/train',      trn_losses[-1], epoch)
+            writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
+            writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
         
         if not args['__raytune_running__']:
             

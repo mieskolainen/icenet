@@ -46,8 +46,9 @@ xgb3Drw:
       beta: 1.0
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
-  plot_trees: False
-  
+  tensorboard: true
+  plot_trees: false
+
   # Read/Write of epochs
   evalmode: 25                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
@@ -94,8 +95,9 @@ xgb0:
     objective: 'binary:logistic'  # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']      # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
-  plot_trees: False
-  
+  tensorboard: true
+  plot_trees: false
+
   # Read/Write of epochs
   evalmode: 25                    # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                    # -1 is the last saved epoch
@@ -146,8 +148,9 @@ iceboost0:
       beta: 1.0
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
-  plot_trees: False
-  
+  tensorboard: true
+  plot_trees: false
+
   # Read/Write of epochs
   evalmode: 25                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
@@ -212,7 +215,8 @@ iceboost_plus:
   #  beta: [0.1]                 # Positive for minimizing (for each class in use)
   #  <<: *MI_REG_PARAM
   
-  plot_trees: False
+  tensorboard: true
+  plot_trees: false
 
   # Read/Write of epochs
   evalmode: 25                  # Every n-th epoch (integer), evaluation done also for every n-th
@@ -282,6 +286,7 @@ lzmlp0: &LZMLP
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
   
   # Read/Write of epochs
   evalmode: 10                 # Every n-th epoch (integer), evaluation done also for every n-th
@@ -363,7 +368,8 @@ fastkan0: &FASTKAN
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  
+  tensorboard: true
+
   # Read/Write of epochs
   evalmode: 10                 # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
@@ -448,6 +454,7 @@ dmlp0: &DMLP
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
   
   # Read/Write of epochs
   evalmode: 10                 # Every n-th epoch (integer), evaluation done also for every n-th
@@ -507,10 +514,10 @@ dbnf0:
     residual: 'gated'         # choises 'none', 'normal', 'gated'
     perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
   
-  tensorboard: True
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-
+  tensorboard: true
+  
   # Read/Write of epochs
   evalmode: 1                 # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # -1 is the last saved epoch

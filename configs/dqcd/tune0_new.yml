@@ -215,8 +215,8 @@ eval_runmode:
   
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
-  reweight_file: 'reweight_train.pkl'
-
+  reweight_file: null                 # null for automatic, or string for specific
+  
   reweight_param: *REWEIGHT_PARAM
 
   models:  !include configs/dqcd/models.yml
@@ -233,8 +233,8 @@ optimize_runmode:
 
   reweight: true
   reweight_mode: 'load'               # 'write', 'load'
-  reweight_file: 'reweight_train.pkl'
-
+  reweight_file: null                 # null for automatic, or string for specific
+  
   reweight_param: *REWEIGHT_PARAM
 
   limits_param:

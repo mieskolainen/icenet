@@ -86,8 +86,8 @@ train_runmode:
   ## Reweighting setup
   reweight: true
   reweight_mode: 'write'          # 'write', 'load'
-  reweight_file: 'reweight_train.pkl' # differential reweighting model file
-
+  reweight_file: null                 # null for automatic, or string for specific
+  
   reweight_param: &REWEIGHT_PARAM
     
     equal_frac: true               # Equalize integrated class fractions
@@ -149,8 +149,8 @@ eval_runmode:
   
   reweight: true
   reweight_mode: 'load'          # 'write', 'load'
-  reweight_file: 'reweight_train.pkl'
-
+  reweight_file: null                 # null for automatic, or string for specific
+  
   reweight_param: *REWEIGHT_PARAM
 
   models:  !include configs/hgcal/models_cnd.yml

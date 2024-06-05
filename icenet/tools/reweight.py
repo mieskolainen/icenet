@@ -13,6 +13,7 @@ from icenet.tools import aux
 from icenet.tools import io
 from icenet.tools import prints
 from icenet.deep  import iceboost
+from icenet.deep  import predict
 
 
 def rw_transform_with_logits(logits, mode, absMax=30):
@@ -99,13 +100,13 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
     h_args    = args['reweight_param']['diff_param']['hist_param']
     variables = diff_args['var']
     
-    print(__name__ + f".compute_ND_reweights: Reference (target) class: <{reference_class}> | Found classes: {class_ids} from y")
+    print(__name__ + f".histogram_helper: Reference (target) class [{reference_class}] | Found classes: {class_ids} from y")
     
     ### Collect re-weighting variables
     RV = {}
     for i, var in enumerate(variables):
         if isinstance(x, ak.Array):
-            RV[i] = ak.to_numpy(x[var]).astype(np.float32)
+            RV[i] = aux.ak2numpy(x=x, fields=[var]).astype(np.float32)
         else:
             RV[i] = x[:, ids.index(var)].astype(np.float32)
     
@@ -115,14 +116,14 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
         mode = h_args[f'transform'][i]
         
         if h_args[f'binmode'][i] == 'edges':
-            raise Exception(__name__ + '.compute_ND_reweights: Cannot transform "edges" type')
+            raise Exception(__name__ + '.histogram_helper: Cannot transform "edges" type')
         
         d = h_args[f'bins'][i]
         
         if   mode == 'log10':
             if np.any(RV[i] <= 0):
                 ind = (RV[i] <= 0)
-                cprint(__name__ + f'.compute_ND_reweights: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
+                cprint(__name__ + f'.histogram_helper: Variable {var} < 0 (in {np.sum(ind)} elements) in log10 -- truncating to zero', 'red')
 
             # Transform values
             RV[i] = np.log10(np.maximum(RV[i], EPS))
@@ -152,7 +153,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
         elif mode == None:
             True
         else:
-            raise Exception(__name__ + '.compute_ND_reweights: Unknown pre-transform')
+            raise Exception(__name__ + '.histogram_helper: Unknown pre-transform')
 
     # Binning setup
     binedges = {}
@@ -181,7 +182,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
     ### Compute 2D-PDFs for each class
     if diff_args['type'] == '2D':
         
-        print(__name__ + f'.compute_ND_reweights: 2D re-weighting with: [{variables[0]}, {variables[1]}] ...')
+        print(__name__ + f'.histogram_helper: 2D re-weighting with: [{variables[0]}, {variables[1]}] ...')
         
         if pdf is None: # Not given by user
             pdf = {}
@@ -201,7 +202,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
     ### Compute factorized 1D x 1D product
     elif diff_args['type'] == 'pseudo-ND':
         
-        print(__name__ + f'.compute_ND_reweights: pseudo-ND (2D for now) re-weighting with: [{variables[0]}, {variables[1]}] ...')
+        print(__name__ + f'.histogram_helper: pseudo-ND (2D for now) re-weighting with: [{variables[0]}, {variables[1]}] ...')
         
         if pdf is None: # Not given by user
             pdf = {}
@@ -218,7 +219,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
                 elif h_args['pseudo_type'] == 'product':
                     pdf[c] = np.outer(pdf_0, pdf_1)
                 else:
-                    raise Exception(__name__ + f'.compute_ND_reweights: Unknown <pseudo_type>')
+                    raise Exception(__name__ + f'.histogram_helper: Unknown "pseudo_type"')
 
                 # Normalize to discrete density
                 pdf[c] /= np.sum(pdf[c].flatten())
@@ -231,7 +232,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
     ### Compute 1D-PDFs for each class
     elif diff_args['type'] == '1D':
         
-        print(__name__ + f'.compute_ND_reweights: 1D re-weighting with: {variables[0]} ...')
+        print(__name__ + f'.histogram_helper: 1D re-weighting with: {variables[0]} ...')
         
         if pdf is None: # Not given by user
             pdf = {}
@@ -245,7 +246,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
         
         weights_doublet = reweightcoeff1D(X = RV[0], pdf=pdf, **rwparam)
     else:
-        raise Exception(__name__ + f".compute_ND_reweights: Unsupported dimensionality mode <{diff_args['type']}>")
+        raise Exception(__name__ + f'.histogram_helper: Unsupported dimensionality mode "{diff_args["type"]}"')
 
     pdf['vars'] = variables
     
@@ -254,7 +255,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
 
 def map_xyw(x, y, w, vars, c, reference_class):
     """
-    For AIRW
+    For AIRW helper
     """
     
     # Source and Target collected
@@ -287,10 +288,14 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
     class_ids       = np.unique(y.astype(int))
     reference_class = args['reweight_param']['reference_class']
     
-    ID        = args['reweight_param']['diff_param']['ML_param']['active_model']
-    param     = args['models'][ID]
     diff_args = args['reweight_param']['diff_param']
     variables = diff_args['var']
+    ID        = diff_args['AIRW_param']['active_model']
+    RW_mode   = diff_args['AIRW_param']['mode']
+    MAX_REG   = diff_args['AIRW_param']['max_reg']
+    
+    param     = args['models'][ID]
+    
     
     # ----------------------------------------
     # Conversions and pick variables of interest
@@ -327,36 +332,52 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
     
     # ------------------------------------------------
     ## Now apply the model
-    from icenet.deep import predict
     
     param = pdf['param']
-    wnew  = copy.deepcopy(w)
+    
+    if w is not None:
+        wnew = copy.deepcopy(w)
+    else:
+        wnew = np.ones(len(y))
     
     for c in pdf['model'].keys():
         
-        print(__name__ + f'.AIRW_helper: Applying AIRW reweighter to class {c}')
+        print(__name__ + f'.AIRW_helper: Applying AIRW reweighter to class [{c}]')
         
         if   param['predict'] == 'xgb':
             func_predict = predict.pred_xgb(args=args, param=param, feature_names=variables)
         elif param['predict'] == 'xgb_logistic':
             func_predict = predict.pred_xgb_logistic(args=args, param=param, feature_names=variables)
         else:
-            raise Exception('Unsupported model -- "predict" should be "xgb" or "xgb_logistic"')
+            raise Exception(__name__ + f'.AIRW_helper: Unsupported model -- "predict" field should be "xgb" or "xgb_logistic"')
         
         # -----------------------------------------------
         # Predict for events of this class
-        ind = (y == c)
-        p   = func_predict(x[ind])
+        ind  = (y == c)
+        pred = func_predict(x[ind])
 
-        # Turn into a likelihood ratio to obtain the reweight factor
-        p   = np.clip(p, EPS, 1 - EPS)
-        LR  = p / (1 - p)
+        # Handle logits vs probabilities
+        min_pred, max_pred = np.min(pred), np.max(pred)
+        
+        THRESH = 1E-5
+        if min_pred < (-THRESH) or max_pred > (1.0 + THRESH):
+            print(__name__ + f'.AIRW_helper: Detected raw logit output [{min_pred:0.4f}, {max_pred:0.4f}] from the model')
+            logits = pred
+            p      = aux.sigmoid(logits)
+            print(__name__ + f'.AIRW_helper: Corresponding probability output [{np.min(p):0.4f}, {np.max(p):0.4f}]')
+        else:
+            print(__name__ + f'.AIRW_helper: Detected probability output [{min_pred:0.4f}, {max_pred:0.4f}] from the model')
+            logits = aux.inverse_sigmoid(pred)
+            print(__name__ + f'.AIRW_helper: Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
+        
+        # Get weights after the re-weighting transform
+        LR = rw_transform_with_logits(logits=logits, mode=RW_mode)
         
         # Apply maximum weight regularization
-        LR = np.clip(LR, 0.0, diff_args['ML_param']['max_reg'])
+        LR = np.clip(LR, 0.0, MAX_REG)
         
-        # Apply to weights
-        wnew[ind] = wnew[ind] * LR if w is not None else np.ones_like(y) * LR
+        # Apply multiplicatively to weights
+        wnew[ind] = wnew[ind] * LR
         # -----------------------------------------------
     
     # Transform weights into weights doublet
@@ -407,26 +428,28 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12, x_val=None, y_
         print(__name__ + f'.compute_ND_reweights: Differential reweighting')
         
         # Histogram based
-        if args['reweight_param']['diff_param']['type'] != 'ML':
+        if args['reweight_param']['diff_param']['type'] != 'AIRW':
             
             weights_doublet, pdf = histogram_helper(x=x, y=y, w=w, ids=ids,
                                                     pdf=pdf, args=args, EPS=EPS)      
 
-        # ML-model based
+        # AIRW based
         else:
             weights_doublet, pdf = AIRW_helper(x=x, y=y, w=w, ids=ids, pdf=pdf, args=args,
                                     x_val=x_val, y_val=y_val, w_val=w_val, EPS=EPS)
         
         # Renormalize integral (sum) to the event counts per class
-        for c in class_ids:
-            ind = (y == c)
-            weights_doublet[c][ind] /= np.sum(weights_doublet[c][ind])
-            weights_doublet[c][ind] *= np.sum(ind)
+        if args['reweight_param']['diff_param']['renorm_weight_to_count']:
+            print(__name__ + f'.compute_ND_weights: Renormalizing sum(weights) == sum(count) per class')    
+            for c in class_ids:
+                ind = (y == c)
+                weights_doublet[c][ind] /= np.sum(weights_doublet[c][ind])
+                weights_doublet[c][ind] *= np.sum(ind)
     
     # No differential re-weighting    
     else:
         print(__name__ + f'.compute_ND_reweights: No differential reweighting')
-        print(__name__ + f".compute_ND_reweights: Reference (target) class: <{args['reweight_param']['reference_class']}> | Found classes {class_ids} from y")
+        print(__name__ + f".compute_ND_reweights: Reference [target] class: [{args['reweight_param']['reference_class']}] | Found classes {class_ids} from y")
         weights_doublet = {}
         
         for c in class_ids:
