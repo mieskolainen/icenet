@@ -247,6 +247,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     Main training loop for all torch based models
     """
     
+    savedir  = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
+    
     # Transfer to CPU / GPU
     model, device = optimize.model_to_cuda(model=model, device_type=param['device'])
 
@@ -266,6 +268,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     scheduler = deeptools.set_scheduler(optimizer=optimizer, param=scheduler_param)
     
     cprint(__name__ + f'.torch_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
+    
     
     # --------------------------------------------------------------------
     ## Mutual information regularization
@@ -372,17 +375,17 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         if not args['__raytune_running__']:
             
             ## Save the model
-            filename = args['modeldir'] + f'/{param["label"]}_{epoch}'
+            filename = savedir + f'/{param["label"]}_{epoch}.pth'
             
-            losses     = {'trn_losses':         trn_losses,
-                          'val_losses':         val_losses,
-                          'trn_aucs':           trn_aucs,
-                          'val_aucs:':          val_aucs,
-                          'loss_history_train': loss_history_train,
-                          'loss_history_eval':  loss_history_eval}
+            losses   = {'trn_losses':         trn_losses,
+                        'val_losses':         val_losses,
+                        'trn_aucs':           trn_aucs,
+                        'val_aucs:':          val_aucs,
+                        'loss_history_train': loss_history_train,
+                        'loss_history_eval':  loss_history_eval}
             
             checkpoint = {'model': model, 'state_dict': model.state_dict(), 'ids': ids, 'losses': losses, 'epoch': epoch}
-            torch.save(checkpoint, filename + '.pth')
+            torch.save(checkpoint, filename)
             
         else:
             ray.train.report({'loss': val_losses[-1], 'AUC': validate_auc})
@@ -609,9 +612,13 @@ def train_flr(config={'params': {}}, data_trn=None, args=None, param=None):
     """
     print(__name__ + f'.train_flr: Training <{param["label"]}> classifier ...')
 
+    savedir = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
+    
     b_pdfs, s_pdfs, bin_edges = flr.train(X = data_trn.x, y = data_trn.y, weights = data_trn.w, param = param)
-    pickle.dump({'b_pdfs': b_pdfs, 's_pdfs': s_pdfs, 'bin_edges': bin_edges},
-        open(args['modeldir'] + f'/{param["label"]}_' + str(0) + '.pkl', 'wb'))
+    
+    with open(f'{savedir}/{param["label"]}_0.pkl', 'wb') as file:
+        data = {'b_pdfs': b_pdfs, 's_pdfs': s_pdfs, 'bin_edges': bin_edges}
+        pickle.dump(data, file)
 
     return (b_pdfs, s_pdfs)
 
@@ -630,7 +637,7 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
     # Set input dimensions
     param['model_param']['n_dims'] = data_trn.x.shape[1]
 
-    print(__name__ + f'.train_flow: Training <{param["label"]}> classifier ...')
+    print(__name__ + f'.train_flow: Training [{param["label"]}] classifier ...')
     
     for classid in range(len(args['primary_classes'])):
         
@@ -662,11 +669,12 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
         
         cprint(__name__ + f'.train_flow: Training density for class = {classid}', 'magenta')
         
+        modeldir  = aux.makedir(f"{args['modeldir']}/{param['label']}")
         save_name = f'{param["label"]}_class_{classid}'
         
         dbnf.train(model=model, optimizer=optimizer, scheduler=sched,
             trn_x=trn.x, val_x=val.x, trn_weights=trn.w, val_weights=val.w,
-            param=param, modeldir=args['modeldir'], save_name=save_name)
+            param=param, modeldir=modeldir, save_name=save_name)
     
     return True
 
@@ -685,7 +693,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     if param['xgb']['model_param']['tree_method'] == 'auto':
         param['xgb']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
     
-    print(__name__ + f'.train_graph_xgb: Training <{param["label"]}> classifier ...')
+    print(__name__ + f'.train_graph_xgb: Training [{param["label"]}] classifier ...')
 
     # --------------------------------------------------------------------
     ### Train GNN
@@ -773,6 +781,8 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     # Boosting iterations
     num_epochs = param['xgb']['model_param']['num_boost_round']
     
+    savedir = aux.makedir(f"{args['modeldir']}/{param['xgb']['label']}")
+    
     for epoch in range(0, num_epochs):
         
         results = dict()
@@ -809,106 +819,46 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
 
         ## Save
         losses = {'trn_losses': trn_losses, 'val_losses': val_losses, 'trn_aucs': trn_aucs, 'val_aucs': val_aucs}
-        pickle.dump({'model': model, 'ids': ids, 'losses': losses}, open(args['modeldir'] + f"/{param['xgb']['label']}_{epoch}.pkl", 'wb'))
+        
+        with open(savedir + f"{param['xgb']['label']}_{epoch}.pkl", 'wb') as file:
+            pickle.dump({'model': model, 'ids': ids, 'losses': losses}, file, protocol=pickle.HIGHEST_PROTOCOL)
         
         print(__name__ + f'.train_graph_xgb: Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
     
     # -------------------------------------------
     # Plot evolution
-    plotdir  = aux.makedir(f'{args["plotdir"]}/train/')
+    plotdir  = aux.makedir(f'{args["plotdir"]}/train/{param["xgb"]["label"]}')
     fig,ax   = plots.plot_train_evolution_multi(losses={'train': trn_losses, 'validate': val_losses},
                     trn_aucs=trn_aucs, val_aucs=val_aucs, label=param['xgb']['label'])
     plt.savefig(f"{plotdir}/{param['xgb']['label']}--evolution.pdf", bbox_inches='tight'); plt.close()
     
     # -------------------------------------------
     ## Plot feature importance
+    targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance/{param["xgb"]["label"]}')
+    
     for sort in [True, False]:
-        fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param["label"], sort=sort)
-        targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
-        plt.savefig(f'{targetdir}/{param["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
+        fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids, label=param['xgb']['label'], sort=sort)
+        
+        plt.savefig(f'{targetdir}/{param["xgb"]["label"]}--importance--sort-{sort}.pdf', bbox_inches='tight'); plt.close()
     
     # -------------------------------------------
     ## Plot decision trees
+    
     if ('plot_trees' in param['xgb']) and param['xgb']['plot_trees']:
+        
+        targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-treeviz/{param["xgb"]["label"]}')
+        
         try:
             print(__name__ + f'.train_graph_xgb: Plotting decision trees ...')
             model.feature_names = ids
             for i in tqdm(range(num_epochs)):
                 xgboost.plot_tree(model, num_trees=i)
-                fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
-                path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
-                plt.savefig(f'{path}/tree-{i}.pdf', bbox_inches='tight'); plt.close()
+                fig = plt.gcf()
+                fig.set_size_inches(60, 20) # Higher reso
+                plt.savefig(f'{targetdir}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
         except:
             print(__name__ + f'.train_graph_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
         
     model.feature_names = None # Set original default ones
 
     return model
-
-
-def train_xtx(config={'params': {}}, X_trn=None, Y_trn=None, X_val=None, Y_val=None, data_kin=None, args=None, param=None):
-    """
-    Train binned neural model (untested function; TODO add weights)
-    
-    Args:
-        See other train_*
-    
-    Returns:
-        trained model
-    """
-
-    label  = param['label']
-    var0   = param['binning']['var'][0]
-    var1   = param['binning']['var'][1]
-
-    edges0 = param['binning']['edges'][0]
-    edges1 = param['binning']['edges'][1]
-
-
-    for i in range(len(edges0) - 1):
-        for j in range(len(edges1) - 1):
-
-            try:
-                range0 = [edges0[i], edges0[i+1]]
-                range1 = [edges1[j], edges1[j+1]]
-
-                # Indices
-                trn_ind = np.logical_and(aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index(var0)], range0),
-                                         aux.pick_ind(data_kin.trn.x[:, data_kin.ids.index(var1)], range1))
-
-                val_ind = np.logical_and(aux.pick_ind(data_kin.val.x[:, data_kin.ids.index(var0)], range0),
-                                         aux.pick_ind(data_kin.val.x[:, data_kin.ids.index(var1)], range1))
-
-                print(__name__ + f'.train_xtx: --- {var0} = {range0}], {var1} = {range1} ---')
-
-
-                # Compute weights for this hyperbin (balance class ratios)
-                y = Y_trn[trn_ind]
-                frac = [np.sum(y == k) / y.shape[0] for k in range(len(args['primary_classes']))]
-
-                print(__name__ + f'.train_xtx: --- frac = [{frac[0]:.3f}, {frac[1]:.3f}] ---')
-
-                # Inverse weights
-                weights = np.zeros(y.shape[0])
-                for k in range(weights.shape[0]):
-                    weights[k] = 1.0 / frac[int(y[k])] / y.shape[0] / len(args['primary_classes'])
-                
-                for c in range(len(args['primary_classes'])):
-                    print(__name__ + f'.train_xtx: class = {c} | sum(weights) = {np.sum(weights[y == c])}')
-
-
-                # Set hyperbin label and train
-                param['label'] = f'{label}_bin_{i}_{j}'
-
-                model, train_loader, test_loader = \
-                    torch_construct(X_trn = X_trn[trn_ind,:], Y_trn = Y_trn[trn_ind],
-                        X_val = X_val[val_ind,:], Y_val = Y_val[val_ind], X_trn_2D=None, X_val_2D=None, \
-                     trn_weights=weights, val_weights=None, param=param['model_param'], args=args)
-
-                model = torch_loop(model=model, train_loader=train_loader, test_loader=test_loader, \
-                            args=args, param=param['model_param'])
-
-            except:
-                print(__name__ + f'.train_xtx: Problem in training with bin: {var0} = {range0}], {var1} = {range1}')
-
-    return True

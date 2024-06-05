@@ -440,7 +440,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12, x_val=None, y_
         
         # Renormalize integral (sum) to the event counts per class
         if args['reweight_param']['diff_param']['renorm_weight_to_count']:
-            print(__name__ + f'.compute_ND_weights: Renormalizing sum(weights) == sum(count) per class')    
+            print(__name__ + f'.compute_ND_reweights: Renormalizing sum(weights) == sum(count) per class')    
             for c in class_ids:
                 ind = (y == c)
                 weights_doublet[c][ind] /= np.sum(weights_doublet[c][ind])
@@ -456,7 +456,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12, x_val=None, y_
             weights_doublet[c] = np.zeros(len(x))                   # init with zeros
             sample_weights     = w[y==c] if w is not None else 1.0  # Feed in the input weights
             weights_doublet[c][y == c] = sample_weights
-
+    
     # -------------------------------------------------
     
     ### Apply class balance equalizing weight

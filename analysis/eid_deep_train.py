@@ -203,12 +203,12 @@ def main():
                     print(f"[train] loss: {deep.optimize.printloss(loss)} | acc: {trn_acc:.4f} | AUC: {trn_AUC:.4f}")
                     print(f"[eval]  loss: {deep.optimize.printloss(val_loss)} | acc: {val_acc:.4f} | AUC: {val_AUC:.4f}")
                     print(f"lr = {scheduler[ID].get_last_lr()}")
-
+                
         ## Save each model per global epoch
         for ID in model.keys():
-            checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
-            torch.save(checkpoint, args['modeldir'] + f'/{param[ID]["label"]}_{epoch}' + '.pth')
-
+            checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict(), 'epoch': epoch}
+            torch.save(checkpoint, aux.makedir(f'{args["modeldir"]}/{param[ID]["label"]}') + f'/{param[ID]["label"]}_{epoch}.pth')
+        
     print(__name__ + f' [Done!]')
 
 if __name__ == '__main__' :

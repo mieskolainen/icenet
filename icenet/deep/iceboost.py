@@ -581,7 +581,8 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         if not args['__raytune_running__']:
             
             ## Save the model
-            filename = args['modeldir'] + f'/{param["label"]}_{epoch}'
+            savedir  = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
+            filename = f'{savedir}/{param["label"]}_{epoch}'
             
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
@@ -594,7 +595,8 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                       'loss_history_eval':  loss_history_eval}
             
             with open(filename + '.pkl', 'wb') as file:
-                pickle.dump({'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': epoch}, file, protocol=pickle.HIGHEST_PROTOCOL)
+                data = {'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': epoch}
+                pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
     
     
     # Report only once after all boost iterations
@@ -604,6 +606,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         #    path = os.path.join(checkpoint_dir, "checkpoint")
         #    pickle.dump(model, open(path, 'wb'))
         ray.train.report({'loss': trn_losses[-1], 'AUC': val_aucs[-1]})
+    
     
     if not args['__raytune_running__']:
         
@@ -634,20 +637,23 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                 for importance_type in ['weight', 'gain', 'cover', 'total_gain', 'total_cover']:
                     fig,ax = plots.plot_xgb_importance(model=model, tick_label=ids_trn,
                         label=param["label"], importance_type=importance_type, sort=sort)
-                    targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance')
+                    targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-importance/{param["label"]}')
                     plt.savefig(f'{targetdir}/{param["label"]}--type_{importance_type}--sort-{sort}.pdf', bbox_inches='tight');
-                    plt.close()
+                    plt.close(fig)
         
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:
             try:
                 print(__name__ + f'.train_xgb: Plotting decision trees ...')
                 model.feature_names = ids_trn # Make it explicit
+                
+                path = aux.makedir(f'{args["plotdir"]}/train/xgboost-treeviz/{param["label"]}')
+                
                 for i in tqdm(range(num_epochs)):
                     xgboost.plot_tree(model, num_trees=i)
                     fig = plt.gcf(); fig.set_size_inches(60, 20) # Higher reso
-                    path = aux.makedir(f'{targetdir}/trees_{param["label"]}')
-                    plt.savefig(f'{path}/tree-{i}.pdf', bbox_inches='tight'); plt.close()
+                    plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight')
+                    plt.close()
             except:
                 print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
         
