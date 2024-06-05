@@ -122,7 +122,7 @@ train_runmode:
 
     diff_param:
 
-      maxevents: null                # Maximum number of events for the PDF construction
+      maxevents: 100000              # Maximum number of events for the PDF construction (eid_deep_train)
       renorm_weight_to_count: True   # Renormalize sum(weights) == sum(counts) per class
       
       var:  ['trk_pt', 'trk_eta']
