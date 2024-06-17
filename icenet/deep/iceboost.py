@@ -584,10 +584,10 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             savedir  = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
             filename = f'{savedir}/{param["label"]}_{epoch}'
             
-            model.save_model(filename + '.model')
+            model.save_model(filename + '.ubj')
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
-
+            
             losses = {'trn_losses':         trn_losses,
                       'val_losses':         val_losses,
                       'trn_aucs':           trn_aucs,
