@@ -99,11 +99,21 @@ def process_data(args):
     root_path = args['root_files']
     if type(root_path) is list:
         root_path = root_path[0] # Remove [] list
-
+    
+    # ------------------
+    # Phase 0: Create output path
+    
+    path_str = f"{cwd}/output/{rootname}/deploy/modeltag__{args['modeltag']}"
+    
+    # Add conditional tag
+    conditional_tag = f'--use_conditional__{args["use_conditional"]}' if args["use_conditional"] else ""
+    path_str += conditional_tag
+    
+    basepath = aux.makedir(path_str)
+    
     # ------------------
     # Phase 1: Read ROOT-file to awkward-format
-    basepath = aux.makedir(f"{cwd}/output/{rootname}/deploy/modeltag__{args['modeltag']}")
-
+    
     nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--grid_id__{args['grid_id']}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
     logging.basicConfig(filename=f'{basepath}/deploy--{nodestr}.log', encoding='utf-8',
         level=logging.DEBUG, format='%(asctime)s | %(message)s', datefmt='%d/%m/%Y %H:%M:%S')

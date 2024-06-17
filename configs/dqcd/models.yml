@@ -89,7 +89,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   losstype: 'DCORR'        # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
   min_count: 32            #  Minimum number of events (per category)
-  max_N: null              #  Maximum number of events per function call (use to limit sample size for DCORR)
+  max_N: 5000              #  Maximum number of events per function call (use to limit sample size for DCORR)
   min_score: 0.6           #  Consider only events with MVA output [0,1] larger than this value (null for None)
   poisson_weight: False    #  Per category Poisson sqrt(N) weighted loss
   

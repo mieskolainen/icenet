@@ -384,7 +384,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
                         'loss_history_train': loss_history_train,
                         'loss_history_eval':  loss_history_eval}
             
-            checkpoint = {'model': model, 'state_dict': model.state_dict(), 'ids': ids, 'losses': losses, 'epoch': epoch}
+            checkpoint = {'model': model, 'state_dict': model.state_dict(),
+                          'ids': ids, 'losses': losses, 'epoch': epoch, 'param': param}
             torch.save(checkpoint, filename)
             
         else:
@@ -821,7 +822,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         losses = {'trn_losses': trn_losses, 'val_losses': val_losses, 'trn_aucs': trn_aucs, 'val_aucs': val_aucs}
         
         with open(savedir + f"{param['xgb']['label']}_{epoch}.pkl", 'wb') as file:
-            pickle.dump({'model': model, 'ids': ids, 'losses': losses}, file, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump({'model': model, 'ids': ids, 'losses': losses, 'param': param}, file, protocol=pickle.HIGHEST_PROTOCOL)
         
         print(__name__ + f'.train_graph_xgb: Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
     

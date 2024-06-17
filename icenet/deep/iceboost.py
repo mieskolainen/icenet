@@ -202,7 +202,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             
             # Total maximum is limited (for DCORR), pick random subsample
             if reg_param['losstype'] == 'DCORR' and reg_param['max_N'] is not None and X.shape[0] > reg_param['max_N']:
-                r    = np.random.choice(len(X), reg_param['max_N'], replace=False)
+                r    = np.random.choice(len(X), size=reg_param['max_N'], replace=False)
                 X    = X[r]
                 Z    = Z[r]
                 W    = W[r]
@@ -584,6 +584,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             savedir  = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
             filename = f'{savedir}/{param["label"]}_{epoch}'
             
+            model.save_model(filename + '.model')
             model.save_model(filename + '.json')
             model.dump_model(filename + '.text', dump_format='text')
 
@@ -595,7 +596,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                       'loss_history_eval':  loss_history_eval}
             
             with open(filename + '.pkl', 'wb') as file:
-                data = {'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': epoch}
+                data = {'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': epoch, 'param': param}
                 pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
     
     
