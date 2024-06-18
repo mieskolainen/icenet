@@ -35,7 +35,7 @@ numba==0.59.1
 pandas==2.2.2
 scipy==1.13.0
 matplotlib==3.9.0
-scikit-learn==1.4.2
+scikit-learn==1.5.0
 dcor==0.6
 shap2==0.42.0
 
