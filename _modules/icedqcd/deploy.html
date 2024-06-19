@@ -796,12 +796,16 @@
                 <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="s1">&#39;xgb_logistic&#39;</span><span class="p">]:</span>
                     
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Evaluating MVA-model &quot;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&quot; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
+                    
                     <span class="c1">## 1. Impute data</span>
                     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-                        <span class="n">imputer</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/imputer.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-                        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">impute_datasets</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">],</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer</span><span class="p">)</span>
 
+                        <span class="n">fmodel</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/imputer_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+                        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading imputer from: </span><span class="si">{</span><span class="n">fmodel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                        <span class="n">imputer</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fmodel</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+
+                        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">impute_datasets</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">],</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer</span><span class="p">)</span>
+                    
                     <span class="c1">## 2. Apply the input variable set reductor</span>
                     <span class="n">X</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
 
@@ -898,12 +902,12 @@
 
     <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb_logistic&#39;</span><span class="p">:</span>
         <span class="n">func_predict</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_xgb_logistic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">,</span> <span class="n">return_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="c1">#elif param[&#39;predict&#39;] == &#39;torch_vector&#39;:</span>
+    <span class="c1">#    func_predict = predict.pred_torch_generic(args=args, param=param)</span>
 
-    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_vector&#39;</span><span class="p">:</span>
-        <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_generic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_graph&#39;</span><span class="p">:</span>
-        <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_graph</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+    <span class="c1">#elif param[&#39;predict&#39;] == &#39;torch_graph&#39;:</span>
+    <span class="c1">#    func_predict = predict.pred_torch_graph(args=args, param=param)</span>
     
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.get_predictor: Unknown param[&quot;predict&quot;] = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;predict&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -911,50 +915,6 @@
     <span class="k">return</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">model</span></div>
 
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">def apply_models(data=None, args=None):</span>
-<span class="sd">    #</span>
-<span class="sd">    #Evaluate ML/AI models.</span>
-<span class="sd">    #</span>
-<span class="sd">    #Args:</span>
-<span class="sd">    #    Different datatype objects (see the code)</span>
-<span class="sd">    #</span>
-
-<span class="sd">    try:</span>
-<span class="sd">        ### Tensor variable normalization</span>
-<span class="sd">        if data[&#39;data_tensor&#39;] is not None and (args[&#39;varnorm_tensor&#39;] == &#39;zscore&#39;):</span>
-
-<span class="sd">            print(&#39;\nZ-score normalizing tensor variables ...&#39;)</span>
-<span class="sd">            X_mu_tensor, X_std_tensor = pickle.load(open(args[&quot;modeldir&quot;] + &#39;/zscore_tensor.pkl&#39;, &#39;rb&#39;))</span>
-<span class="sd">            X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)</span>
-<span class="sd">        </span>
-<span class="sd">        ### Variable normalization</span>
-<span class="sd">        if   args[&#39;varnorm&#39;] == &#39;zscore&#39;:</span>
-
-<span class="sd">            print(&#39;\nZ-score normalizing variables ...&#39;)</span>
-<span class="sd">            X_mu, X_std = pickle.load(open(args[&quot;modeldir&quot;] + &#39;/zscore.pkl&#39;, &#39;rb&#39;))</span>
-<span class="sd">            X = io.apply_zscore(X, X_mu, X_std)</span>
-
-<span class="sd">        elif args[&#39;varnorm&#39;] == &#39;madscore&#39;:</span>
-
-<span class="sd">            print(&#39;\nMAD-score normalizing variables ...&#39;)</span>
-<span class="sd">            X_m, X_mad = pickle.load(open(args[&quot;modeldir&quot;] + &#39;/madscore.pkl&#39;, &#39;rb&#39;))</span>
-<span class="sd">            X = io.apply_madscore(X, X_m, X_mad)</span>
-
-<span class="sd">    except:</span>
-<span class="sd">        cprint(&#39;\n&#39; + __name__ + f&#39; WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n&#39;, &#39;red&#39;)</span>
-<span class="sd">    </span>
-<span class="sd">    # --------------------------------------------------------------------</span>
-<span class="sd">    # For pytorch based</span>
-<span class="sd">    if X is not None:</span>
-<span class="sd">        X_ptr      = torch.from_numpy(X).type(torch.FloatTensor)</span>
-
-<span class="sd">    if X_2D is not None:</span>
-<span class="sd">        X_2D_ptr   = torch.from_numpy(X_2D).type(torch.FloatTensor)</span>
-<span class="sd">        </span>
-<span class="sd">    if X_deps is not None:</span>
-<span class="sd">        X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)</span>
-<span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
 
            </div>
