@@ -651,7 +651,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
             output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
-            fmodel = f'{args["datadir"]}/imputer_{args["__hash_genesis__"]}.pkl'
+            fmodel = f'{args["modeldir"]}/imputer.pkl'
             
             cprint(__name__ + f'.process_data: Saving imputer to: {fmodel}', 'green')
             pickle.dump(imputer, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
@@ -686,7 +686,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         ## Imputate
         if args['imputation_param']['active']:
             
-            fmodel = f'{args["datadir"]}/imputer_{args["__hash_genesis__"]}.pkl'
+            fmodel = f'{args["modeldir"]}/imputer.pkl'
             
             cprint(__name__ + f'.process_data: Loading imputer from: {fmodel}', 'green')
             imputer = pickle.load(open(fmodel, 'rb'))

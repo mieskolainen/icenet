@@ -246,15 +246,13 @@ def process_data(args):
                 if param['predict'] in ['xgb', 'xgb_logistic']:
                     
                     print(f'Evaluating MVA-model "{ID}" \n')
-                    
+
                     ## 1. Impute data
                     if args['imputation_param']['active']:
-
-                        fmodel = f'{args["datadir"]}/imputer_{args["__hash_genesis__"]}.pkl'
-                        cprint(f'Loading imputer from: {fmodel}', 'green')
+                        
+                        fmodel  = f'{args["modeldir"]}/imputer.pkl'
                         imputer = pickle.load(open(fmodel, 'rb'))
-
-                        data['data'], _ = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
+                        data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
                     
                     ## 2. Apply the input variable set reductor
                     X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
@@ -349,7 +347,7 @@ def get_predictor(args, param, feature_names=None):
 
     elif param['predict'] == 'xgb_logistic':
         func_predict, model = predict.pred_xgb_logistic(args=args, param=param, feature_names=feature_names, return_model=True)
-    
+
     #elif param['predict'] == 'torch_vector':
     #    func_predict = predict.pred_torch_generic(args=args, param=param)
 
@@ -360,4 +358,3 @@ def get_predictor(args, param, feature_names=None):
         raise Exception(__name__ + f'.get_predictor: Unknown param["predict"] = {param["predict"]}')
 
     return func_predict, model
-
