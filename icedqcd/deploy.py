@@ -246,12 +246,16 @@ def process_data(args):
                 if param['predict'] in ['xgb', 'xgb_logistic']:
                     
                     print(f'Evaluating MVA-model "{ID}" \n')
-
+                    
                     ## 1. Impute data
                     if args['imputation_param']['active']:
-                        imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
-                        data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
 
+                        fmodel = f'{args["datadir"]}/imputer_{args["__hash_genesis__"]}.pkl'
+                        cprint(f'Loading imputer from: {fmodel}', 'green')
+                        imputer = pickle.load(open(fmodel, 'rb'))
+
+                        data['data'], _ = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
+                    
                     ## 2. Apply the input variable set reductor
                     X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
 
@@ -345,59 +349,15 @@ def get_predictor(args, param, feature_names=None):
 
     elif param['predict'] == 'xgb_logistic':
         func_predict, model = predict.pred_xgb_logistic(args=args, param=param, feature_names=feature_names, return_model=True)
+    
+    #elif param['predict'] == 'torch_vector':
+    #    func_predict = predict.pred_torch_generic(args=args, param=param)
 
-    elif param['predict'] == 'torch_vector':
-        func_predict = predict.pred_torch_generic(args=args, param=param)
-
-    elif param['predict'] == 'torch_graph':
-        func_predict = predict.pred_torch_graph(args=args, param=param)
+    #elif param['predict'] == 'torch_graph':
+    #    func_predict = predict.pred_torch_graph(args=args, param=param)
     
     else:
         raise Exception(__name__ + f'.get_predictor: Unknown param["predict"] = {param["predict"]}')
 
     return func_predict, model
 
-"""
-def apply_models(data=None, args=None):
-    #
-    #Evaluate ML/AI models.
-    #
-    #Args:
-    #    Different datatype objects (see the code)
-    #
-
-    try:
-        ### Tensor variable normalization
-        if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
-
-            print('\nZ-score normalizing tensor variables ...')
-            X_mu_tensor, X_std_tensor = pickle.load(open(args["modeldir"] + '/zscore_tensor.pkl', 'rb'))
-            X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
-        
-        ### Variable normalization
-        if   args['varnorm'] == 'zscore':
-
-            print('\nZ-score normalizing variables ...')
-            X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
-            X = io.apply_zscore(X, X_mu, X_std)
-
-        elif args['varnorm'] == 'madscore':
-
-            print('\nMAD-score normalizing variables ...')
-            X_m, X_mad = pickle.load(open(args["modeldir"] + '/madscore.pkl', 'rb'))
-            X = io.apply_madscore(X, X_m, X_mad)
-
-    except:
-        cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
-    
-    # --------------------------------------------------------------------
-    # For pytorch based
-    if X is not None:
-        X_ptr      = torch.from_numpy(X).type(torch.FloatTensor)
-
-    if X_2D is not None:
-        X_2D_ptr   = torch.from_numpy(X_2D).type(torch.FloatTensor)
-        
-    if X_deps is not None:
-        X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
-"""
