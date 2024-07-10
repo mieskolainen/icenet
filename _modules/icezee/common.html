@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.1
+                0.1.1.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -501,6 +501,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/icezee.html">icezee</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/icezee.html#module-icezee.common">icezee.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icezee.html#icezee.common.load_helper"><code class="docutils literal notranslate"><span class="pre">load_helper()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icezee.html#icezee.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/icezee.html#icezee.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
 </ul>
@@ -553,53 +554,26 @@
 <span class="c1">#from configs.zee.cuts import *</span>
 <span class="c1">#from configs.zee.filter import *</span>
 
+<div class="viewcode-block" id="load_helper">
+<a class="viewcode-back" href="../../modules/icezee.html#icezee.common.load_helper">[docs]</a>
+<span class="k">def</span> <span class="nf">load_helper</span><span class="p">(</span><span class="n">mcfiles</span><span class="p">,</span> <span class="n">datafiles</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 
-<div class="viewcode-block" id="load_root_file">
-<a class="viewcode-back" href="../../modules/icezee.html#icezee.common.load_root_file">[docs]</a>
-<span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Loads the root file.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        root_path : paths to root files (list)</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        X:     columnar data</span>
-<span class="sd">        Y:     class labels</span>
-<span class="sd">        W:     event weights</span>
-<span class="sd">        ids:   columnar variable string (list)</span>
-<span class="sd">        info:  trigger and pre-selection acceptance x efficiency information (dict)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_helper:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mcfiles</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">datafiles</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
     <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
-    
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Remove [] list, we expect only the path here</span>
-    
-    <span class="c1"># -----------------------------------------------</span>
-    <span class="c1">#param = {</span>
-    <span class="c1">#    &#39;entry_start&#39;: entry_start,</span>
-    <span class="c1">#    &quot;entry_stop&quot;:  entry_stop,</span>
-    <span class="c1">#    &quot;maxevents&quot;:   maxevents,</span>
-    <span class="c1">#    &quot;args&quot;: args</span>
-    <span class="c1">#}</span>
-
     <span class="n">LOAD_VARS</span> <span class="o">=</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">LOAD_VARS</span>
-    
-    <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">maxevents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e10</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &quot;maxevents&quot; is None, set </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-    
     
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1"># *** MC ***</span>
     
     <span class="n">frames</span> <span class="o">=</span> <span class="p">[]</span>
     
-    <span class="n">mcfiles</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;mcfile&quot;</span><span class="p">],</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
-    
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">mcfiles</span><span class="p">:</span>
         <span class="n">new_frame</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
         <span class="n">frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_frame</span><span class="o">.</span><span class="n">keys</span><span class="p">());</span> <span class="n">ids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
     
@@ -615,18 +589,6 @@
     <span class="c1">## Pre-computed weights (gen event weight x CMS weights)</span>
     <span class="n">W_MC</span> <span class="o">=</span> <span class="n">frame_mc</span><span class="p">[[</span><span class="s1">&#39;weight&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
     
-    <span class="c1"># ** Drop negative weight events **</span>
-    <span class="n">ind</span>  <span class="o">=</span> <span class="n">W_MC</span> <span class="o">&lt;</span> <span class="mi">0</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Dropping negative weight events (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-        <span class="n">W_MC</span> <span class="o">=</span> <span class="n">W_MC</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span> <span class="c1"># Boolean NOT</span>
-        <span class="n">X_MC</span> <span class="o">=</span> <span class="n">X_MC</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span>
-        <span class="n">Y_MC</span> <span class="o">=</span> <span class="n">Y_MC</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span>
-    
-    <span class="c1"># Renormalize to the event count</span>
-    <span class="n">W_MC</span> <span class="o">=</span> <span class="n">W_MC</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W_MC</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">W_MC</span><span class="p">)</span>
-    
-    
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;X_MC.shape = </span><span class="si">{</span><span class="n">X_MC</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;W_MC.shape = </span><span class="si">{</span><span class="n">W_MC</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
@@ -636,12 +598,10 @@
     
     <span class="n">frames</span> <span class="o">=</span> <span class="p">[]</span>
     
-    <span class="n">datafiles</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datafile&quot;</span><span class="p">],</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
-    
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">datafiles</span><span class="p">:</span>
         <span class="n">new_frame</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
         <span class="n">frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_frame</span><span class="o">.</span><span class="n">keys</span><span class="p">());</span> <span class="n">ids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
     
@@ -667,24 +627,98 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;X_data.shape = </span><span class="si">{</span><span class="n">X_data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;W_data.shape = </span><span class="si">{</span><span class="n">W_data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1"># Combine MC and Data samples</span>
     
     <span class="n">X</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X_MC</span><span class="p">,</span> <span class="n">X_data</span><span class="p">))</span>
-    <span class="n">W</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">W_MC</span><span class="p">,</span> <span class="n">W_data</span><span class="p">))</span>
     <span class="n">Y</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Y_MC</span><span class="p">,</span> <span class="n">Y_data</span><span class="p">))</span>
-    <span class="n">ids</span> <span class="o">=</span> <span class="n">LOAD_VARS</span>
+    <span class="n">W</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">W_MC</span><span class="p">,</span> <span class="n">W_data</span><span class="p">))</span>
     
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">LOAD_VARS</span> <span class="c1"># We use these</span>
+
+    <span class="c1">## -------------------------------------------------</span>
+    <span class="c1"># ** Drop negative weight events **</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;drop_negative&#39;</span><span class="p">]:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">W</span> <span class="o">&lt;</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: Dropping negative weight events (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span> <span class="c1"># Boolean NOT</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span>
+    
+    <span class="c1"># Re-nenormalize MC to the event count</span>
+    <span class="n">ind</span>    <span class="o">=</span> <span class="p">(</span><span class="n">Y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">W</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+    <span class="c1">## -------------------------------------------------</span>
+
+    <span class="c1">## Print some diagnostics</span>
+    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: class[</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">] | N = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="si">}</span><span class="s1"> | weight[mean,std,min,max] = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">ids</span></div>
+
+
+
+<div class="viewcode-block" id="load_root_file">
+<a class="viewcode-back" href="../../modules/icezee.html#icezee.common.load_root_file">[docs]</a>
+<span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Loads the root file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        root_path : paths to root files (list)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        X:     columnar data</span>
+<span class="sd">        Y:     class labels</span>
+<span class="sd">        W:     event weights</span>
+<span class="sd">        ids:   columnar variable string (list)</span>
+<span class="sd">        info:  trigger and pre-selection acceptance x efficiency information (dict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Remove [] list, we expect only the path here</span>
+    
+    <span class="c1"># -----------------------------------------------</span>
+    <span class="c1">#param = {</span>
+    <span class="c1">#    &#39;entry_start&#39;: entry_start,</span>
+    <span class="c1">#    &quot;entry_stop&quot;:  entry_stop,</span>
+    <span class="c1">#    &quot;maxevents&quot;:   maxevents,</span>
+    <span class="c1">#    &quot;args&quot;: args</span>
+    <span class="c1">#}</span>
+
+    <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">maxevents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e10</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &quot;maxevents&quot; is None, set </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1">## Print some diagnostics</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># We do splitting according to dictionary (trn, val, tst) structure</span>
     
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">):</span>      
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: class[</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">] weight[mean,std,min,max] = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">running_split</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">N_prev</span> <span class="o">=</span> <span class="mi">0</span>
     
-    <span class="c1"># ** Crucial -- randomize order to avoid problems with other functions **</span>
+    <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">,</span> <span class="s1">&#39;val&#39;</span><span class="p">,</span> <span class="s1">&#39;tst&#39;</span><span class="p">]:</span>
+        
+        <span class="n">mc_files</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;mcfile&quot;</span><span class="p">][</span><span class="n">mode</span><span class="p">],</span>   <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
+        <span class="n">da_files</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datafile&quot;</span><span class="p">][</span><span class="n">mode</span><span class="p">],</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
+        
+        <span class="n">X</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span><span class="n">Y</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span><span class="n">W</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span><span class="n">ids</span> <span class="o">=</span> <span class="n">load_helper</span><span class="p">(</span><span class="n">mcfiles</span><span class="o">=</span><span class="n">mc_files</span><span class="p">,</span> <span class="n">datafiles</span><span class="o">=</span><span class="n">da_files</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">running_split</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N_prev</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">mode</span><span class="p">])</span> <span class="o">+</span> <span class="n">N_prev</span><span class="p">)</span>
+    
+    <span class="c1"># Combine</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">X</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]))</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Y</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">W</span><span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="s1">&#39;val&#39;</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="s1">&#39;tst&#39;</span><span class="p">]))</span>
+    
+    <span class="c1"># Aux info here</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;running_split&#39;</span><span class="p">:</span> <span class="n">running_split</span><span class="p">}</span>
+    
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># ** Randomize MC vs Data order to avoid problems with other functions **</span>
     <span class="n">rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
     <span class="n">X</span>    <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="c1"># Squeeze removes additional [] dimension</span>
     <span class="n">Y</span>    <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">rand</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
@@ -692,12 +726,10 @@
     
     <span class="c1"># Apply maxevents cutoff</span>
     <span class="n">maxevents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">maxevents</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Applying maxevents cutoff </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
-    
-    <span class="c1"># TBD add cut statistics etc. here</span>
-    <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
-    
+    <span class="k">if</span> <span class="n">maxevents</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Applying maxevents cutoff </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
+        
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span><span class="n">Y</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">:</span><span class="n">W</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">:</span><span class="n">info</span><span class="p">}</span></div>
 
 
@@ -755,28 +787,28 @@
     
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### ** DEBUG TEST -- special transform for &quot;zero-inflated&quot; variables **</span>
-    
-    <span class="n">special_var</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;probe_esEffSigmaRR&#39;</span><span class="p">,</span>
-                   <span class="s1">&#39;probe_pfChargedIso&#39;</span><span class="p">,</span>
-                   <span class="s1">&#39;probe_ecalPFClusterIso&#39;</span><span class="p">,</span>
-                   <span class="s1">&#39;probe_trkSumPtHollowConeDR03&#39;</span><span class="p">,</span>
-                   <span class="s1">&#39;probe_trkSumPtSolidConeDR04&#39;</span><span class="p">]</span>
-    
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">special_var</span><span class="p">):</span>
-        
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_ind</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Could not find variable &quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot; -- continue&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-            <span class="k">continue</span>
-        
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: Pre-transforming variable &quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot; with log1p&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
-        
-        <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span><span class="n">ind</span><span class="p">])</span>
-        
-        <span class="c1"># Change the variable name</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;DQL__</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span>
-    
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    special_var = [&#39;probe_esEffSigmaRR&#39;,</span>
+<span class="sd">                   &#39;probe_pfChargedIso&#39;,</span>
+<span class="sd">                   &#39;probe_ecalPFClusterIso&#39;,</span>
+<span class="sd">                   &#39;probe_trkSumPtHollowConeDR03&#39;,</span>
+<span class="sd">                   &#39;probe_trkSumPtSolidConeDR04&#39;]</span>
+<span class="sd">    </span>
+<span class="sd">    for i, v in enumerate(special_var):</span>
+<span class="sd">        </span>
+<span class="sd">        try:</span>
+<span class="sd">            ind = data.find_ind(v)</span>
+<span class="sd">        except:</span>
+<span class="sd">            cprint(__name__ + f&#39;.splitfactor: Could not find variable &quot;{v}&quot; -- continue&#39;, &#39;red&#39;)</span>
+<span class="sd">            continue</span>
+<span class="sd">        </span>
+<span class="sd">        cprint(__name__ + f&#39;.splitfactor: Pre-transforming variable &quot;{v}&quot; with log1p&#39;, &#39;magenta&#39;)</span>
+<span class="sd">        </span>
+<span class="sd">        data.x[:,ind] = np.log1p(data.x[:,ind])</span>
+<span class="sd">        </span>
+<span class="sd">        # Change the variable name</span>
+<span class="sd">        data.ids[ind] = f&#39;DQL__{v}&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># -------------------------------------------------------------------------</span>
     
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;data_MI&#39;</span><span class="p">:</span> <span class="n">data_MI</span><span class="p">,</span> <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span> <span class="n">data_kin</span><span class="p">,</span> <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span> <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span><span class="p">}</span></div>
