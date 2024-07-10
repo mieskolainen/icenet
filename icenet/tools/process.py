@@ -613,7 +613,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     
     # 2. Split into training, validation, test here
     else:
-        cprint(__name__ + f'.process_data: Splitting into [train, validate, test] = {args["frag"]}', 'magenta')
+        cprint(__name__ + f'.process_data: Splitting into [train, validate, test] = {args["frac"]}', 'magenta')
         
         permute = args['permute'] if 'permute' in args else True
         trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'], permute=permute)
