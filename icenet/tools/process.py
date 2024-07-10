@@ -356,10 +356,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     print('')
     print(" torch.__version__: " + torch.__version__)
 
-    cprint(__name__ + f'.read_config: Setting random seed: {args["rngseed"]} (numpy, torch)', 'yellow')
-    np.random.seed(args['rngseed'])
-    torch.manual_seed(args['rngseed'])
-
+    cprint(__name__ + f'.read_config: Setting random seed', 'yellow')
+    aux.set_random_seed(args['rngseed'])
+    
     # ------------------------------------------------
     print(__name__ + f'.read_config: Created arguments dictionary with runmode = <{runmode}> :')    
     # ------------------------------------------------
@@ -599,9 +598,26 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     
     # ----------------------------------------------------------
     
-    # Split into training, validation, test
-    trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'])
+    # 1. Split done inside common.py already
+    if 'running_split' in info:
+        
+        cprint(__name__ + f'.process_data: Using pre-defined [train, validate, test] split', 'magenta')
+        
+        ind_trn = info['running_split']['trn']
+        ind_val = info['running_split']['val']
+        ind_tst = info['running_split']['tst']
+        
+        trn = io.IceXYW(x = X[ind_trn,:], y = Y[ind_trn], w=W[ind_trn], ids=ids)
+        val = io.IceXYW(x = X[ind_val,:], y = Y[ind_val], w=W[ind_val], ids=ids)
+        tst = io.IceXYW(x = X[ind_tst,:], y = Y[ind_tst], w=W[ind_tst], ids=ids)
     
+    # 2. Split into training, validation, test here
+    else:
+        cprint(__name__ + f'.process_data: Splitting into [train, validate, test] = {args["frag"]}', 'magenta')
+        
+        permute = args['permute'] if 'permute' in args else True
+        trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'], permute=permute)
+       
     # ----------------------------------------------------------
     if args['imputation_param']['active']:
         module = import_module(mvavars, 'configs.subpkg')
@@ -793,7 +809,7 @@ def train_models(data_trn, data_val, args=None):
     
     # --------------------------------------------------------------------
     
-    # @@ Truncate outliers (component by component) from the training set @@
+    # @@ Truncate outliers (component by component) from the training set @@
     if args['outlier_param']['algo'] == 'truncate' :
         
         print(__name__ + f'.train_models: Truncating outlier variable values with {args["outlier_param"]}')

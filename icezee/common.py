@@ -17,51 +17,24 @@ from icenet.tools import aux
 #from configs.zee.cuts import *
 #from configs.zee.filter import *
 
+def load_helper(mcfiles, datafiles, args):
 
-def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
-    """ Loads the root file.
+    print(__name__ + '.load_helper:')
+    print(f'{mcfiles}')
+    print(f'{datafiles}')
     
-    Args:
-        root_path : paths to root files (list)
-    
-    Returns:
-        X:     columnar data
-        Y:     class labels
-        W:     event weights
-        ids:   columnar variable string (list)
-        info:  trigger and pre-selection acceptance x efficiency information (dict)
-    """
     inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
-    
-    if type(root_path) is list:
-        root_path = root_path[0] # Remove [] list, we expect only the path here
-    
-    # -----------------------------------------------
-    #param = {
-    #    'entry_start': entry_start,
-    #    "entry_stop":  entry_stop,
-    #    "maxevents":   maxevents,
-    #    "args": args
-    #}
-
     LOAD_VARS = inputvars.LOAD_VARS
-    
-    if maxevents is None:
-        maxevents = int(1e10)
-        cprint(__name__ + f'.load_root_file: "maxevents" is None, set {maxevents}', 'yellow')
-    
     
     # -------------------------------------------------------------------------
     # *** MC ***
     
     frames = []
     
-    mcfiles = io.glob_expand_files(datasets=args["mcfile"], datapath=root_path)
-    
     for f in mcfiles:
         new_frame = copy.deepcopy(pd.read_parquet(f))
         frames.append(new_frame)
-        cprint(__name__ + f'.load_root_file: {f} | N = {len(new_frame)}', 'yellow')
+        cprint(__name__ + f'.load_helper: {f} | N = {len(new_frame)}', 'yellow')
         ids = list(new_frame.keys()); ids.sort()
         print(ids)
     
@@ -77,18 +50,6 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     ## Pre-computed weights (gen event weight x CMS weights)
     W_MC = frame_mc[['weight']].to_numpy().squeeze()
     
-    # ** Drop negative weight events **
-    ind  = W_MC < 0
-    if np.sum(ind) > 0:
-        cprint(__name__ + f'.load_root_file: Dropping negative weight events ({np.sum(ind)/len(ind):0.3f})', 'red')
-        W_MC = W_MC[~ind] # Boolean NOT
-        X_MC = X_MC[~ind]
-        Y_MC = Y_MC[~ind]
-    
-    # Renormalize to the event count
-    W_MC = W_MC / np.sum(W_MC) * len(W_MC)
-    
-    
     print(f'X_MC.shape = {X_MC.shape}')
     print(f'W_MC.shape = {W_MC.shape}')
     
@@ -98,12 +59,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     
     frames = []
     
-    datafiles = io.glob_expand_files(datasets=args["datafile"], datapath=root_path)
-    
     for f in datafiles:
         new_frame = copy.deepcopy(pd.read_parquet(f))
         frames.append(new_frame)
-        cprint(__name__ + f'.load_root_file: {f} | N = {len(new_frame)}', 'yellow')
+        cprint(__name__ + f'.load_helper: {f} | N = {len(new_frame)}', 'yellow')
         ids = list(new_frame.keys()); ids.sort()
         print(ids)
     
@@ -129,24 +88,95 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     print(f'X_data.shape = {X_data.shape}')
     print(f'W_data.shape = {W_data.shape}')
     
-    
     # -------------------------------------------------------------------------
     # Combine MC and Data samples
     
     X   = np.vstack((X_MC, X_data))
-    W   = np.concatenate((W_MC, W_data))
     Y   = np.concatenate((Y_MC, Y_data))
-    ids = LOAD_VARS
+    W   = np.concatenate((W_MC, W_data))
     
+    ids = LOAD_VARS # We use these
+
+    ## -------------------------------------------------
+    # ** Drop negative weight events **
+    if args['drop_negative']:
+        ind = W < 0
+        if np.sum(ind) > 0:
+            cprint(__name__ + f'.load_helper: Dropping negative weight events ({np.sum(ind)/len(ind):0.3f})', 'red')
+            X = X[~ind]
+            W = W[~ind] # Boolean NOT
+            Y = Y[~ind]
+    
+    # Re-nenormalize MC to the event count
+    ind    = (Y == 0)
+    W[ind] = W[ind] / np.sum(W[ind]) * len(W[ind])
+    ## -------------------------------------------------
+
+    ## Print some diagnostics
+    print(__name__ + f'.load_helper: Number of events: {len(X)}')
+    
+    for c in np.unique(Y):
+        print(__name__ + f'.load_helper: class[{c}] | N = {np.sum(Y == c)} | weight[mean,std,min,max] = {np.mean(W[Y==c]):0.3E}, {np.std(W[Y==c]):0.3E}, {np.min(W[Y==c]):0.3E}, {np.max(W[Y==c]):0.3E}')
+    
+    return X,Y,W,ids
+
+
+def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevents=None, args=None):
+    """ Loads the root file.
+    
+    Args:
+        root_path : paths to root files (list)
+    
+    Returns:
+        X:     columnar data
+        Y:     class labels
+        W:     event weights
+        ids:   columnar variable string (list)
+        info:  trigger and pre-selection acceptance x efficiency information (dict)
+    """
+    
+    if type(root_path) is list:
+        root_path = root_path[0] # Remove [] list, we expect only the path here
+    
+    # -----------------------------------------------
+    #param = {
+    #    'entry_start': entry_start,
+    #    "entry_stop":  entry_stop,
+    #    "maxevents":   maxevents,
+    #    "args": args
+    #}
+
+    if maxevents is None:
+        maxevents = int(1e10)
+        cprint(__name__ + f'.load_root_file: "maxevents" is None, set {maxevents}', 'yellow')
     
     # -------------------------------------------------------------------------
-    ## Print some diagnostics
-    print(__name__ + f'.load_root_file: Number of events: {len(X)}')
+    # We do splitting according to dictionary (trn, val, tst) structure
     
-    for c in np.unique(Y):      
-        print(__name__ + f'.load_root_file: class[{c}] weight[mean,std,min,max] = {np.mean(W[Y==c]):0.3E}, {np.std(W[Y==c]):0.3E}, {np.min(W[Y==c]):0.3E}, {np.max(W[Y==c]):0.3E}')
+    running_split = {}
+    X = {}
+    Y = {}
+    W = {}
+    N_prev = 0
     
-    # ** Crucial -- randomize order to avoid problems with other functions **
+    for mode in ['trn', 'val', 'tst']:
+        
+        mc_files  = io.glob_expand_files(datasets=args["mcfile"][mode],   datapath=root_path)
+        da_files  = io.glob_expand_files(datasets=args["datafile"][mode], datapath=root_path)
+        
+        X[mode],Y[mode],W[mode],ids = load_helper(mcfiles=mc_files, datafiles=da_files, args=args)
+        running_split[mode] = np.arange(N_prev, len(X[mode]) + N_prev)
+    
+    # Combine
+    X = np.vstack((X['trn'], X['val'], X['tst']))
+    Y = np.concatenate((Y['trn'], Y['val'], Y['tst']))
+    W = np.concatenate((W['trn'], W['val'], W['tst']))
+    
+    # Aux info here
+    info = {'running_split': running_split}
+    
+    # -------------------------------------------------------------------------
+    # ** Randomize MC vs Data order to avoid problems with other functions **
     rand = np.random.permutation(len(X))
     X    = X[rand].squeeze() # Squeeze removes additional [] dimension
     Y    = Y[rand].squeeze()
@@ -154,12 +184,10 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     
     # Apply maxevents cutoff
     maxevents = np.min([maxevents, len(X)])
-    print(__name__ + f'.load_root_file: Applying maxevents cutoff {maxevents}')
-    X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
-    
-    # TBD add cut statistics etc. here
-    info = {}
-    
+    if maxevents < len(X):
+        print(__name__ + f'.load_root_file: Applying maxevents cutoff {maxevents}')
+        X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
+        
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
@@ -214,7 +242,7 @@ def splitfactor(x, y, w, ids, args):
     
     # -------------------------------------------------------------------------
     ### ** DEBUG TEST -- special transform for "zero-inflated" variables **
-    
+    """
     special_var = ['probe_esEffSigmaRR',
                    'probe_pfChargedIso',
                    'probe_ecalPFClusterIso',
@@ -235,7 +263,7 @@ def splitfactor(x, y, w, ids, args):
         
         # Change the variable name
         data.ids[ind] = f'DQL__{v}'
-    
+    """
     # -------------------------------------------------------------------------
     
     return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

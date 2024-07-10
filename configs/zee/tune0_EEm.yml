@@ -17,7 +17,8 @@ mva_param: &MVA_INPUT_PARAM
   
   varnorm: 'zscore-weighted'          # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   
-  frac: [0.6, 0.1, 0.3]               # Train vs validate/test split fraction
+  #frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
+  frac: None                          # Train vs validate/test split fraction (we use file structure)
   
   # Imputation
   imputation_param:
@@ -34,11 +35,17 @@ genesis_runmode:
   maxevents:  null
   inputmap:   null
   
-  mcfile:     ['MC_*_EEm.parquet']
-  datafile:   ['Data_*_EEm.parquet']
+  mcfile:     {'trn': ['MC_train_EEm.parquet'],
+               'val': ['MC_val_EEm.parquet'],   
+               'tst': ['MC_test_EEm.parquet']}
+  
+  datafile:   {'trn': ['Data_train_EEm.parquet'],
+               'val': ['Data_val_EEm.parquet'],   
+               'tst': ['Data_test_EEm.parquet']}
+  
+  drop_negative: true                 # Drop negative weight (MC) events
   
   tree_name:  null                    # 'ntuplizer/tree'
-
   targetfunc: null                    # Training target,    implemented under mctargets.py
   filterfunc: 'filter_nofilter'       # Training filtering, implemented under mcfilter.py
   cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
@@ -105,21 +112,8 @@ train_runmode:
   # ** Activate models here **
   # Give all models some unique identifier and label
   models:  !include configs/zee/models.yml
-  active_models: &ACTIVE_MODELS
-
-    - dbnf0
-    
-    #- lzmlp0_nozero
-    #- dmlp0_nozero
-    #- fastkan0_nozero
-    
-    #- lzmlp0
-    #- dmlp0
-    #- fastkan0
-    
-    #- iceboost_plus
-    #- iceboost0
-    #- xgb0
+  
+  active_models: &ACTIVE_MODELS !include configs/zee/active_models.yml
   
   raytune: !include configs/zee/raytune.yml
 

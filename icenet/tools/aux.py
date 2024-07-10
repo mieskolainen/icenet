@@ -12,6 +12,8 @@ import os
 import glob
 import torch
 from datetime import datetime
+import torch
+import random
 
 import numba
 from tqdm import tqdm
@@ -22,6 +24,20 @@ from sklearn import metrics
 import scipy
 from scipy import interpolate
 
+
+def set_random_seed(seed):
+    """
+    Set random seeds
+    """
+    print(__name__ + f'.set_random_seed: {seed} (random, numpy, torch)')
+    
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 def get_datetime():
     """
