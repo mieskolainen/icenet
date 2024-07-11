@@ -17,7 +17,7 @@ from icenet.tools import aux
 #from configs.zee.cuts import *
 #from configs.zee.filter import *
 
-def load_helper(mcfiles, datafiles, args):
+def load_helper(mcfiles, datafiles, maxevents, args):
 
     print(__name__ + '.load_helper:')
     print(f'{mcfiles}')
@@ -96,7 +96,7 @@ def load_helper(mcfiles, datafiles, args):
     W   = np.concatenate((W_MC, W_data))
     
     ids = LOAD_VARS # We use these
-
+    
     ## -------------------------------------------------
     # ** Drop negative weight events **
     if args['drop_negative']:
@@ -106,6 +106,20 @@ def load_helper(mcfiles, datafiles, args):
             X = X[~ind]
             W = W[~ind] # Boolean NOT
             Y = Y[~ind]
+    
+    # -------------------------------------------------------------------------
+    # ** Randomize MC vs Data order to avoid problems with other functions **
+    rand = np.random.permutation(len(X))
+    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
+    Y    = Y[rand].squeeze()
+    W    = W[rand].squeeze()
+    # -------------------------------------------------------------------------
+    
+    # Apply maxevents cutoff
+    maxevents = np.min([maxevents, len(X)])
+    if maxevents < len(X):
+        print(__name__ + f'.load_root_file: Applying maxevents cutoff {maxevents}')
+        X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
     
     # Re-nenormalize MC to the event count
     ind    = (Y == 0)
@@ -164,7 +178,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         mc_files  = io.glob_expand_files(datasets=args["mcfile"][mode],   datapath=root_path)
         da_files  = io.glob_expand_files(datasets=args["datafile"][mode], datapath=root_path)
         
-        X[mode],Y[mode],W[mode],ids = load_helper(mcfiles=mc_files, datafiles=da_files, args=args)
+        X[mode],Y[mode],W[mode],ids = load_helper(mcfiles=mc_files, datafiles=da_files, maxevents=maxevents, args=args)
         running_split[mode] = np.arange(N_prev, len(X[mode]) + N_prev)
     
     # Combine
@@ -175,19 +189,6 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # Aux info here
     info = {'running_split': running_split}
     
-    # -------------------------------------------------------------------------
-    # ** Randomize MC vs Data order to avoid problems with other functions **
-    rand = np.random.permutation(len(X))
-    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
-    Y    = Y[rand].squeeze()
-    W    = W[rand].squeeze()
-    
-    # Apply maxevents cutoff
-    maxevents = np.min([maxevents, len(X)])
-    if maxevents < len(X):
-        print(__name__ + f'.load_root_file: Applying maxevents cutoff {maxevents}')
-        X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
-        
     return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
 
