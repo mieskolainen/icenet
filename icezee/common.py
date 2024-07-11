@@ -180,6 +180,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         
         X[mode],Y[mode],W[mode],ids = load_helper(mcfiles=mc_files, datafiles=da_files, maxevents=maxevents, args=args)
         running_split[mode] = np.arange(N_prev, len(X[mode]) + N_prev)
+        N_prev += len(X[mode]) #!
     
     # Combine
     X = np.vstack((X['trn'], X['val'], X['tst']))
