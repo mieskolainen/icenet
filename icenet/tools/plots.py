@@ -1385,6 +1385,11 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     dir       = aux.makedir(f'{targetdir}/{label}/{sublabel}')
     local_dir = aux.makedir(dir + f'/tau_{tau:0.2f}')
     
+    ## Print stats
+    output_file = f'{local_dir}/stats_AIRW_weight_flow.log'
+    prints.print_weights(weights=weights, y=y, output_file=output_file,
+        header='Step 1. Input event weights', write_mode='w')
+    
     # ---------------------------------------------------
     ## 1. Transform model output scores to AI weights
     
@@ -1416,14 +1421,22 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     AIw0 = reweight.rw_transform_with_logits(logits=logits, mode=mode)
     
     ## Print stats
-    output_file = f'{local_dir}/stats_AI_weights_raw.log'
-    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file)
+    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+        header='Step 2. AI weights [raw]', write_mode='a')
     
     # 3. Cut-off regularize anomalous high weights before event weights
     AIw0 = np.clip(AIw0, 0.0, maxW)
     
+    ## Print stats
+    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+        header=f'Step 3. AI weights [cutoff regularized with maxW = {maxW}]', write_mode='a')
+    
     # 4. Apply multiplicatively to event weights (which can be negative)
     AIw0 = AIw0 * weights[y == C0]
+    
+    ## Print stats
+    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+        header=f'Step 4. Total weights [input weights x AI weights]', write_mode='a')
     
     # ---------------------------------------------------
     ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
@@ -1434,16 +1447,16 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         sum_before = AIw0.sum()
         print(f'Sum before: {sum_before:0.1f}')
         
-        AIw0 /= np.sum(AIw0)              # Normalize
+        AIw0 /= np.sum(AIw0)                # Normalize
         AIw0 *= np.sum(weights[y == RN_ID]) # Scale
         
         sum_after = AIw0.sum()
         print(f'Sum after:  {sum_after:0.1f} (after / before = {sum_after/sum_before:0.2f})')
         print('')
-    
-    # Print stats
-    output_file = f'{local_dir}/stats_AI_weights_final.log'
-    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file)
+
+        # Print stats
+        prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+            header=f'Step 5. Total weights sum renormalized [wrt. class ID = {RN_ID}]', write_mode='a')
     
     # ===================================================
     # Visualization

@@ -70,7 +70,7 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_weights(weights, y, output_file=None):
+def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
     """
     Print event weights table
     """
@@ -104,8 +104,13 @@ def print_weights(weights, y, output_file=None):
     
     # Print to file
     if output_file is not None:
-        with open(output_file, 'w') as f:
+        with open(output_file, write_mode) as f:
+            if header is not None:
+                print(header, file=f)
+                print('\n', file=f)
             print(table, file=f)
+            if header is not None:
+                print('\n', file=f)
     
     return table
 
