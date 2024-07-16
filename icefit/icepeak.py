@@ -767,6 +767,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
 
     counts      = d['counts']
     errors      = d['errors']
+    bin_edges   = d['bin_edges']
     cbins       = d['bin_center']
     range_mask  = d['range_mask']
     fitbin_mask = d['fitbin_mask']
@@ -775,9 +776,10 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     # --------------------------------------------------------------------
     ## Create fit functions
     
-    # Samples on x-axis
-    x = np.linspace(np.min(cbins[range_mask]), np.max(cbins[range_mask]), int(nsamples))
-
+    # Samples on x-axis between [first_edge, ..., last_edge]
+    index = np.where(range_mask)[0]
+    x = np.linspace(np.min(bin_edges[index]), np.max(bin_edges[index+1]), int(nsamples))
+    
     # Loop over function components
     y = {}
     for key in param['components']:
