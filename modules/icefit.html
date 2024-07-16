@@ -35,7 +35,7 @@
             
           </a>
               <div class="version">
-                0.1.1.2
+                0.1.1.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -280,31 +280,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.peakfit">icefit.peakfit</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.CB_pdf"><code class="docutils literal notranslate"><span class="pre">CB_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.DSCB_pdf"><code class="docutils literal notranslate"><span class="pre">DSCB_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.RBW_pdf"><code class="docutils literal notranslate"><span class="pre">RBW_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.TH1_to_numpy"><code class="docutils literal notranslate"><span class="pre">TH1_to_numpy()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.analyze_1D_fit"><code class="docutils literal notranslate"><span class="pre">analyze_1D_fit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.asym_BW_pdf"><code class="docutils literal notranslate"><span class="pre">asym_BW_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.asym_RBW_pdf"><code class="docutils literal notranslate"><span class="pre">asym_RBW_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.binned_1D_fit"><code class="docutils literal notranslate"><span class="pre">binned_1D_fit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.cauchy_pdf"><code class="docutils literal notranslate"><span class="pre">cauchy_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.exp_pdf"><code class="docutils literal notranslate"><span class="pre">exp_pdf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.fit_and_analyze"><code class="docutils literal notranslate"><span class="pre">fit_and_analyze()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.fit_task"><code class="docutils literal notranslate"><span class="pre">fit_task()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.gauss_pdf"><code class="docutils literal notranslate"><span class="pre">gauss_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.generic_conv_pdf"><code class="docutils literal notranslate"><span class="pre">generic_conv_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.fit_task_multi"><code class="docutils literal notranslate"><span class="pre">fit_task_multi()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.get_rootfiles_jpsi"><code class="docutils literal notranslate"><span class="pre">get_rootfiles_jpsi()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.group_systematics"><code class="docutils literal notranslate"><span class="pre">group_systematics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.highres_x"><code class="docutils literal notranslate"><span class="pre">highres_x()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.iminuit2python"><code class="docutils literal notranslate"><span class="pre">iminuit2python()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.poly_pdf"><code class="docutils literal notranslate"><span class="pre">poly_pdf()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.read_yaml_input"><code class="docutils literal notranslate"><span class="pre">read_yaml_input()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.readwrap"><code class="docutils literal notranslate"><span class="pre">readwrap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_fitpeak"><code class="docutils literal notranslate"><span class="pre">run_jpsi_fitpeak()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_peakfit"><code class="docutils literal notranslate"><span class="pre">run_jpsi_peakfit()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.voigt_FWHM"><code class="docutils literal notranslate"><span class="pre">voigt_FWHM()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.voigt_pdf"><code class="docutils literal notranslate"><span class="pre">voigt_pdf()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.score">icefit.score</a><ul>
@@ -1558,287 +1540,45 @@ model</p>
 <section id="module-icefit.peakfit">
 <span id="icefit-peakfit"></span><h2>icefit.peakfit<a class="headerlink" href="#module-icefit.peakfit" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.CB_pdf">
-<span class="sig-name descname"><span class="pre">CB_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#CB_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.CB_pdf" title="Link to this definition">¶</a></dt>
-<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Crystal_Ball_function">https://en.wikipedia.org/wiki/Crystal_Ball_function</a></p>
-<p>Consists of a Gaussian core portion and a power-law low-end tail,
-below a certain threshold.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – mu &gt; 0, sigma &gt; 0, n &gt; 1, alpha &gt; 0</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.DSCB_pdf">
-<span class="sig-name descname"><span class="pre">DSCB_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#DSCB_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.DSCB_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Double sided Crystal-Ball</p>
-<p><a class="reference external" href="https://arxiv.org/abs/1606.03833">https://arxiv.org/abs/1606.03833</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – mu &gt; 0, sigma &gt; 0, n_low &gt; 1, alpha_low &gt; 0, n_high &gt; 1, alpha_high &gt; 0</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.RBW_pdf">
-<span class="sig-name descname"><span class="pre">RBW_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#RBW_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.RBW_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Relativistic Breit-Wigner pdf
-<a class="reference external" href="https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution">https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution</a></p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.TH1_to_numpy">
-<span class="sig-name descname"><span class="pre">TH1_to_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#TH1_to_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.TH1_to_numpy" title="Link to this definition">¶</a></dt>
-<dd><p>Convert TH1 (ROOT) histogram to numpy array</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>hist</strong> – TH1 object (from uproot)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.analyze_1D_fit">
-<span class="sig-name descname"><span class="pre">analyze_1D_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var2pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsamples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#analyze_1D_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.analyze_1D_fit" title="Link to this definition">¶</a></dt>
-<dd><p>Analyze and visualize fit results</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>hist</strong> – TH1 histogram object (from uproot)</p></li>
-<li><p><strong>param</strong> – Input parameters of the fit</p></li>
-<li><p><strong>fitfunc</strong> – Total fit function</p></li>
-<li><p><strong>cfunc</strong> – Component functions</p></li>
-<li><p><strong>par</strong> – Parameters obtained from the fit</p></li>
-<li><p><strong>cov</strong> – Covariance matrix obtained from the fit</p></li>
-<li><p><strong>var2pos</strong> – Variable name to position index</p></li>
-<li><p><strong>chi2</strong> – Chi2 value of the fit</p></li>
-<li><p><strong>ndof</strong> – Number of dof</p></li>
-<li><p><strong>nsamples</strong> – Number of samples of the functions</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>fig, ax</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.asym_BW_pdf">
-<span class="sig-name descname"><span class="pre">asym_BW_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#asym_BW_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.asym_BW_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Breit-Wigner with asymmetric tail shape</p>
-<p>Param: a &lt; 0 gives right hand tail, a == 0 without, a &gt; 0 left hand tail</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.asym_RBW_pdf">
-<span class="sig-name descname"><span class="pre">asym_RBW_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#asym_RBW_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.asym_RBW_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Asymmetric Relativistic Breit-Wigner pdf
-<a class="reference external" href="https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution">https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution</a></p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.binned_1D_fit">
-<span class="sig-name descname"><span class="pre">binned_1D_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">techno</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#binned_1D_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.binned_1D_fit" title="Link to this definition">¶</a></dt>
-<dd><p>Main fitting function for a binned fit</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>hist</strong> – TH1 histogram object (from uproot)</p></li>
-<li><p><strong>param</strong> – Fitting parametrization dictionary</p></li>
-<li><p><strong>fitfunc</strong> – Fit function</p></li>
-<li><p><strong>techno</strong> – losstype:       Loss function type
-ncall_simplex:  Number of calls
-ncall_gradient: Number of calls
-use_limits:     Use parameter limits
-max_trials:     Maximum number of restarts
-max_chi2:       Maximum chi2/ndf threshold for restarts
-min_count:      Minimum number of histogram counts
-minos:          Minos uncertainties if True, Hesse if False</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.cauchy_pdf">
-<span class="sig-name descname"><span class="pre">cauchy_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#cauchy_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.cauchy_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.exp_pdf">
-<span class="sig-name descname"><span class="pre">exp_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#exp_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.exp_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Exponential density</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – rate parameter (1/mean)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.fit_and_analyze">
-<span class="sig-name descname"><span class="pre">fit_and_analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#fit_and_analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.fit_and_analyze" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit_and_analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#fit_and_analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.fit_and_analyze" title="Link to this definition">¶</a></dt>
 <dd><p>Main analysis steering</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.fit_task">
 <span class="sig-name descname"><span class="pre">fit_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputparam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">YEAR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GENTYPE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#fit_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.fit_task" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.gauss_pdf">
-<span class="sig-name descname"><span class="pre">gauss_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#gauss_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.gauss_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Normal (Gaussian) density</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – parameters mu, sigma</p>
-</dd>
-</dl>
+<dd><p>Main fitting task for ‘single’ histogram fits</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.generic_conv_pdf">
-<span class="sig-name descname"><span class="pre">generic_conv_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xfactor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#generic_conv_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.generic_conv_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Convolution between two functions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – function argument</p></li>
-<li><p><strong>par</strong> – function parameters from the (fit) routine</p></li>
-<li><p><strong>pdf_pair</strong> – names of two functions, e.g. [‘CBW_pdf’, ‘G_pdf’]</p></li>
-<li><p><strong>par_index</strong> – indices of the parameter per pair, e.g. [[0,1,2], [3,4]]</p></li>
-<li><p><strong>norm</strong> – normalize the integral</p></li>
-<li><p><strong>xfactor</strong> – domain extension factor</p></li>
-<li><p><strong>Nmin</strong> – minimum number of function sample points</p></li>
-</ul>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="icefit.peakfit.fit_task_multi">
+<span class="sig-name descname"><span class="pre">fit_task_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputparam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">YEAR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GENTYPE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#fit_task_multi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.fit_task_multi" title="Link to this definition">¶</a></dt>
+<dd><p>Main fitting task for ‘dual’ (‘Pass’ and ‘Fail’ simultaneous) histogram fits</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.get_rootfiles_jpsi">
-<span class="sig-name descname"><span class="pre">get_rootfiles_jpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[2016,</span> <span class="pre">2017,</span> <span class="pre">2018]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systematics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['Nominal']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#get_rootfiles_jpsi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.get_rootfiles_jpsi" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_rootfiles_jpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[2016,</span> <span class="pre">2017,</span> <span class="pre">2018]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systematics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['Nominal']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#get_rootfiles_jpsi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.get_rootfiles_jpsi" title="Link to this definition">¶</a></dt>
 <dd><p>Return rootfile names for the J/psi (muon) study.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.group_systematics">
-<span class="sig-name descname"><span class="pre">group_systematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#group_systematics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.group_systematics" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">group_systematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#group_systematics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.group_systematics" title="Link to this definition">¶</a></dt>
 <dd><p>Group and print results of systematic fit variations</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.highres_x">
-<span class="sig-name descname"><span class="pre">highres_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xfactor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#highres_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.highres_x" title="Link to this definition">¶</a></dt>
-<dd><p>Extend range and sampling of x</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – array of values</p></li>
-<li><p><strong>factor</strong> – domain extension factor</p></li>
-<li><p><strong>Nmin</strong> – minimum number of samples</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.iminuit2python">
-<span class="sig-name descname"><span class="pre">iminuit2python</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var2pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#iminuit2python"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.iminuit2python" title="Link to this definition">¶</a></dt>
-<dd><p>Convert iminuit objects into standard python</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>par</strong> – Parameter values object</p></li>
-<li><p><strong>cov</strong> – Covariance object</p></li>
-<li><p><strong>var2pos</strong> – Variable string to index</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Parameter values dictionary
-cov_arr  : Covariance matrix</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>par_dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.poly_pdf">
-<span class="sig-name descname"><span class="pre">poly_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#poly_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.poly_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Polynomial density y = p0 + p1*x + p2*x**2 + …</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par</strong> – polynomial function params</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.read_yaml_input">
-<span class="sig-name descname"><span class="pre">read_yaml_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#read_yaml_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.read_yaml_input" title="Link to this definition">¶</a></dt>
-<dd><p>Parse input YAML file for fitting</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>inputfile</strong> – yaml file path</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>dictionary with parsed content</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.readwrap">
-<span class="sig-name descname"><span class="pre">readwrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#readwrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.readwrap" title="Link to this definition">¶</a></dt>
-<dd><p>Read out basic parameters</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.run_jpsi_fitpeak">
-<span class="sig-name descname"><span class="pre">run_jpsi_fitpeak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputparam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_fitpeak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_fitpeak" title="Link to this definition">¶</a></dt>
-<dd><p>J/psi peak fitting with multiprocessing (reservation)</p>
+<dt class="sig sig-object py" id="icefit.peakfit.run_jpsi_peakfit">
+<span class="sig-name descname"><span class="pre">run_jpsi_peakfit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputparam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_peakfit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_peakfit" title="Link to this definition">¶</a></dt>
+<dd><p>J/psi peak fitting with multiprocessing over kinematic ‘hyperbins’ via Ray</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icefit.peakfit.run_jpsi_tagprobe">
 <span class="sig-name descname"><span class="pre">run_jpsi_tagprobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputparam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#run_jpsi_tagprobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.run_jpsi_tagprobe" title="Link to this definition">¶</a></dt>
 <dd><p>Tag &amp; Probe efficiency (&amp; scale factors)</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.voigt_FWHM">
-<span class="sig-name descname"><span class="pre">voigt_FWHM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#voigt_FWHM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.voigt_FWHM" title="Link to this definition">¶</a></dt>
-<dd><p>Full width at half-maximum (FWHM) of a Voigtian function
-(Voigtian == a convolution integral between Lorentzian and Gaussian)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>gamma</strong> – Lorentzian (non-relativistic Breit-Wigner) parameter (half width!)</p></li>
-<li><p><strong>sigma</strong> – Gaussian distribution parameter</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>full width at half-maximum</p>
-</dd>
-</dl>
-<dl>
-<dt>See: Olivero, J. J.; R. L. Longbothum (1977).</dt><dd><p>“Empirical fits to the Voigt line width: A brief review”</p>
-<p><a class="reference external" href="https://en.wikipedia.org/wiki/Voigt_profile">https://en.wikipedia.org/wiki/Voigt_profile</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icefit.peakfit.voigt_pdf">
-<span class="sig-name descname"><span class="pre">voigt_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/peakfit.html#voigt_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.peakfit.voigt_pdf" title="Link to this definition">¶</a></dt>
-<dd><p>Voigtian pdf (Breit-Wigner convoluted with Gaussian)</p>
 </dd></dl>
 
 </section>
