@@ -522,8 +522,11 @@
 <span class="c1">#</span>
 <span class="c1"># Notes:</span>
 <span class="c1">#   </span>
-<span class="c1">#   Keep all pdf functions normalized in the steering yml (norm: True),</span>
+<span class="c1"># - Keep all pdf functions normalized in the steering yml (norm: True),</span>
 <span class="c1">#   otherwise fit stability problems and uncertainty estimation is not consistent.</span>
+<span class="c1">#</span>
+<span class="c1"># - Use &#39;chi2&#39; loss if using weighted event histograms (either MC or data)</span>
+<span class="c1">#   Use &#39;nll&#39; for unweighted Poisson count histograms (both MC and data)</span>
 <span class="c1"># </span>
 <span class="c1"># Run with: python icefit/peakfit.py --analyze --group (--test_mode)</span>
 <span class="c1"># </span>
@@ -1040,10 +1043,16 @@
             
             <span class="c1"># --------------------------------------- </span>
             <span class="c1">## ** Compute scale factor Data / MC **</span>
-            <span class="n">scale</span>     <span class="o">=</span> <span class="n">eff</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">/</span> <span class="n">eff</span><span class="p">[</span><span class="n">mc_key</span><span class="p">]</span>
-            <span class="n">scale_err</span> <span class="o">=</span> <span class="n">statstools</span><span class="o">.</span><span class="n">ratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="n">eff</span><span class="p">[</span><span class="n">data_key</span><span class="p">],</span> <span class="n">B</span><span class="o">=</span><span class="n">eff</span><span class="p">[</span><span class="n">mc_key</span><span class="p">],</span> \
-                            <span class="n">sigmaA</span><span class="o">=</span><span class="n">eff_err</span><span class="p">[</span><span class="n">data_key</span><span class="p">],</span> <span class="n">sigmaB</span><span class="o">=</span><span class="n">eff_err</span><span class="p">[</span><span class="n">mc_key</span><span class="p">],</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">eff</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eff</span><span class="p">[</span><span class="n">mc_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">scale</span>     <span class="o">=</span> <span class="n">eff</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">/</span> <span class="n">eff</span><span class="p">[</span><span class="n">mc_key</span><span class="p">]</span>
+                <span class="n">scale_err</span> <span class="o">=</span> <span class="n">statstools</span><span class="o">.</span><span class="n">ratio_eprop</span><span class="p">(</span><span class="n">A</span><span class="o">=</span><span class="n">eff</span><span class="p">[</span><span class="n">data_key</span><span class="p">],</span> <span class="n">B</span><span class="o">=</span><span class="n">eff</span><span class="p">[</span><span class="n">mc_key</span><span class="p">],</span> \
+                                <span class="n">sigmaA</span><span class="o">=</span><span class="n">eff_err</span><span class="p">[</span><span class="n">data_key</span><span class="p">],</span> <span class="n">sigmaB</span><span class="o">=</span><span class="n">eff_err</span><span class="p">[</span><span class="n">mc_key</span><span class="p">],</span> <span class="n">sigmaAB</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cprint</span><span class="p">(</span><span class="s1">&#39;Scale factor cannot be extracted (set nan)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="n">scale</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">scale_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Data / MC:  </span><span class="si">{</span><span class="n">scale</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> +- </span><span class="si">{</span><span class="n">scale_err</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> (scale factor) </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="c1"># --------------------------------------- </span>
             
@@ -1178,7 +1187,7 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--fit_type&#39;</span><span class="p">,</span>    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fit type&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--num_cpus&#39;</span><span class="p">,</span>    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of CPUs&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--rng_seed&#39;</span><span class="p">,</span>    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Random seed&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--losstype&#39;</span><span class="p">,</span>    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Loss type&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--loss_type&#39;</span><span class="p">,</span>    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Loss type&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
     
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -1208,8 +1217,8 @@
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">rng_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">p</span><span class="p">[</span><span class="s1">&#39;techno&#39;</span><span class="p">][</span><span class="s1">&#39;rng_seed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">rng_seed</span>
     
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">losstype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">p</span><span class="p">[</span><span class="s1">&#39;techno&#39;</span><span class="p">][</span><span class="s1">&#39;losstype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">losstype</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">loss_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">p</span><span class="p">[</span><span class="s1">&#39;techno&#39;</span><span class="p">][</span><span class="s1">&#39;loss_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">loss_type</span>
     <span class="c1"># -------------------------------------------------</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-----------------------------&#39;</span><span class="p">)</span>
