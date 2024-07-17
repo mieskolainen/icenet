@@ -510,10 +510,16 @@ def run_jpsi_tagprobe(inputparam, savepath):
             
             # --------------------------------------- 
             ## ** Compute scale factor Data / MC **
-            scale     = eff[data_key] / eff[mc_key]
-            scale_err = statstools.ratio_eprop(A=eff[data_key], B=eff[mc_key], \
-                            sigmaA=eff_err[data_key], sigmaB=eff_err[mc_key], sigmaAB=0)
-
+            
+            if (eff[data_key] > 0) and (eff[mc_key] > 0):
+                scale     = eff[data_key] / eff[mc_key]
+                scale_err = statstools.ratio_eprop(A=eff[data_key], B=eff[mc_key], \
+                                sigmaA=eff_err[data_key], sigmaB=eff_err[mc_key], sigmaAB=0)
+            else:
+                cprint('Scale factor cannot be extracted (set nan)', 'red')
+                scale     = np.nan
+                scale_err = np.nan
+            
             print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
             # --------------------------------------- 
             
@@ -641,7 +647,7 @@ if __name__ == "__main__":
     parser.add_argument('--fit_type',    type=str, default=None, help="Fit type", nargs='?')
     parser.add_argument('--num_cpus',    type=int, default=None, help="Number of CPUs", nargs='?')
     parser.add_argument('--rng_seed',    type=int, default=None, help="Random seed", nargs='?')
-    parser.add_argument('--losstype',    type=str, default=None, help="Loss type", nargs='?')
+    parser.add_argument('--loss_type',    type=str, default=None, help="Loss type", nargs='?')
     
     args = parser.parse_args()
     print(args)
@@ -671,8 +677,8 @@ if __name__ == "__main__":
     if args.rng_seed is not None:
         p['techno']['rng_seed'] = args.rng_seed
     
-    if args.losstype is not None:
-        p['techno']['losstype'] = args.losstype
+    if args.loss_type is not None:
+        p['techno']['loss_type'] = args.loss_type
     # -------------------------------------------------
     
     print('-----------------------------')

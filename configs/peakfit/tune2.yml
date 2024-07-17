@@ -19,7 +19,7 @@ fitrange: [2.91, 3.29] # Nominal fit window (GeV)
 systematics: ['Nominal'] # ['Nominal', 'nVertices_Up', 'nVertices_Down']
 
 # List of systematic variations active
-variations: ['DEFAULT', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
+variations: ['DEFAULT'] #, 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
 num_cpus: 0 # put 0 for automatic, set manually to 1 if problems (ray not used with 1)
 
@@ -67,9 +67,11 @@ fit:
 techno:
   rng_seed: 1234
 
-  losstype: 'nll'               # 'chi2', 'nll' or 'wasserstein'
-  use_limits: True              # Use parameter bounds
-  zerobin: 0.1                  # Minimum number of counts in a valid bin
+  loss_type: 'chi2'                # 'chi2', 'huber', 'nll' or 'wasserstein' [experimental]
+  use_limits: True                 # Use parameter bounds
+  zerobin: 0.1                     # Minimum number of counts in a valid bin
+  
+  huber_delta: 1.0                 # 'huber' loss threshold parameter
   
   # Use enough calls / iterations (otherwise can get stuck in bad local minima)
   

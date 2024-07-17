@@ -441,6 +441,38 @@ def get_ndf(fitbin_mask: np.ndarray, par: np.ndarray, fit_type: str):
     else:
         raise Exception(__name__ + f'.get_ndf: Unknown fit_type')
 
+
+def huber_lossfunc(y_true: np.ndarray, y_pred: np.ndarray, sigma: np.ndarray, delta: float=1.0):
+    """
+    Compute the Huber loss (robust statistics) with uncertainties
+    
+    Args:
+        y_true: Array of true values
+        y_pred: Array of predicted values
+        sigma:  Array of uncertainties for each data point
+        delta:  Threshold parameter (if None, use MAD based)
+    Returns:
+        float:  The total Huber loss.
+    """
+    
+    # Residuals
+    r     = (y_true - y_pred) / sigma
+    abs_r = np.abs(r)
+
+    # Compute the Huber loss
+    loss = np.zeros_like(r)
+    
+    # Quadratic part
+    quadratic_mask = (abs_r <= delta)
+    loss[quadratic_mask] = 0.5 * r[quadratic_mask]**2
+    
+    # Linear part
+    linear_mask = (abs_r > delta)
+    loss[linear_mask] = delta * (abs_r[linear_mask] - 0.5 * delta)
+
+    return np.sum(loss)
+
+
 def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixed: dict):
     """
     Main fitting function for a binned fit of multiple histograms
@@ -479,8 +511,6 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         fitbin_mask[key]   = d['fitbin_mask']
         num_counts_in_fit += d['num_counts_in_fit'] 
     
-    # Extract out
-    losstype = techno['losstype']
 
     ### [Chi2 loss function]
     def chi2_loss(par):
@@ -493,10 +523,30 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             mask = fitbin_mask[key]
             if np.sum(mask) == 0: return 1e9
             
-            yhat = fitfunc[key](cbins[key][mask], par, par_fixed)
-            xx   = (yhat - counts[key][mask])**2 / (errors[key][mask])**2
+            y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            residual = (y_pred - counts[key][mask]) / errors[key][mask]
 
-            total += np.sum(xx)
+            total += np.sum(residual**2)
+
+        return total
+
+    ### [Huber loss function]
+    def huber_loss(par):
+
+        total = 0
+        delta = techno['huber_delta']
+        
+        # Over histograms
+        for key in counts.keys():
+            
+            mask = fitbin_mask[key]
+            if np.sum(mask) == 0: return 1e9
+            
+            y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            T = huber_lossfunc(y_true=counts[key][mask], y_pred=y_pred,
+                               sigma=errors[key][mask], delta=delta)
+            
+            total += T
 
         return total
 
@@ -511,11 +561,13 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             mask = fitbin_mask[key]
             if np.sum(mask) == 0: return 1e9
 
-            yhat = fitfunc[key](cbins[key][mask], par, par_fixed)
-            T1 = counts[key][mask] * np.log(yhat)
-            T2 = yhat
+            y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            valid  = (y_pred > 0)
+            
+            T1 = counts[key][mask][valid] * np.log(y_pred[valid])
+            T2 = y_pred[valid]
 
-            total += (-1)*(np.sum(T1[np.isfinite(T1)]) - np.sum(T2[np.isfinite(T2)]))
+            total += (-1)*(np.sum(T1) - np.sum(T2))
 
         return total
     
@@ -536,14 +588,20 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         return total
     
     # --------------------------------------------------------------------
-    if   losstype == 'chi2':
+    loss_type = techno['loss_type']
+
+    cprint(__name__ + f".binned_1D_fit: Executing fit with loss_type: '{loss_type}'", 'magenta')
+    
+    if   loss_type == 'chi2':
         loss = chi2_loss
-    elif losstype == 'nll':
+    elif loss_type == 'huber':
+        loss = huber_loss
+    elif loss_type == 'nll':
         loss = poiss_nll_loss
-    elif losstype == 'wasserstein':
+    elif loss_type == 'wasserstein':
         loss = wasserstein_loss
     else:
-        raise Exception(f'Unknown losstype chosen <{losstype}>')
+        raise Exception(f'Unknown loss_type chosen <{loss_type}>')
     # --------------------------------------------------------------------
     
     trials = 0
@@ -686,11 +744,11 @@ def optimizer_execute(trials, loss, param, techno):
         m1.fixed[k] = param['fixed'][k]
     # --------------------------------------------------------------------
     
-    if   techno['losstype'] == 'chi2':
-        m1.errordef = iminuit.Minuit.LEAST_SQUARES
-    elif techno['losstype'] == 'nll':
+    if   techno['loss_type'] == 'nll':
         m1.errordef = iminuit.Minuit.LIKELIHOOD
-
+    else:
+        m1.errordef = iminuit.Minuit.LEAST_SQUARES
+    
     # Set parameter bounds
     if techno['use_limits']:
         m1.limits   = param['limits']
