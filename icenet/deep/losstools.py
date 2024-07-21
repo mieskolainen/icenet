@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 
 from icenet.tools import aux_torch
-from icefit import mine
+from icefit import mine, transport
 
 class FocalWithLogitsLoss(nn.Module):
     """
@@ -131,13 +131,13 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
             LZ = {}
         return LZ
     
-    def LR_helper(logits):
+    def LM_helper(logits):
         """
         Logit magnitude L1-regularization
         """
         if 'logit_L1_beta' in param and param['logit_L1_beta'] > 0:
             L1_loss = LOGIT_L1_loss(logits=logits, logit_beta=param['logit_L1_beta'], weights=weights)
-            LRL1 = {f"LRL1 x $\\lambda = {param['logit_L1_beta']}$": L1_loss}
+            LRL1 = {f"LML1 x $\\lambda = {param['logit_L1_beta']}$": L1_loss}
         else:
             LRL1 = {}
         
@@ -146,7 +146,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         """
         if 'logit_L2_beta' in param and param['logit_L2_beta'] > 0:
             L2_loss = LOGIT_L2_loss(logits=logits, logit_beta=param['logit_L2_beta'], weights=weights)
-            LRL2 = {f"LRL2 x $\\lambda = {param['logit_L2_beta']}$": L2_loss}
+            LRL2 = {f"LML2 x $\\lambda = {param['logit_L2_beta']}$": L2_loss}
         else:
             LRL2 = {}
 
@@ -159,28 +159,40 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         logits = model.forward(x)
         loss   = BCE_loss(logits=logits, y=y, weights=weights)
         
-        loss = {'BCE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
+        loss = {'BCE': loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.sigmoid(logits))}
 
     elif param['lossfunc'] == 'binary_focal_entropy':
         
         logits = model.forward(x)
         loss   = binary_focal_loss(logits=logits, y=y, gamma=param['gamma'], weights=weights)
         
-        loss = {f"FE ($\\gamma = {param['gamma']}$)": loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
+        loss = {f"FE ($\\gamma = {param['gamma']}$)": loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.sigmoid(logits))}
 
     elif param['lossfunc'] == 'binary_Lq_entropy':
         
         logits = model.forward(x)
         loss   = Lq_binary_loss(logits=logits, y=y, q=param['q'], weights=weights)
         
-        loss = {f"LQ ($\\gamma = {param['q']}$)": loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.sigmoid(logits))}
+        loss = {f"LQ ($\\gamma = {param['q']}$)": loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.sigmoid(logits))}
+
+    elif param['lossfunc'] == 'SWD':
+        
+        # Reweight transport u -> v loss
+        
+        logits = model.forward(x)
+        
+        loss = SWD_reweight_loss(logits=logits, x=x, y=y, weights=weights,
+                                 p=param['SWD_p'], num_slices=param['SWD_num_slices'],
+                                 mode=param['SWD_mode'])
+        
+        loss = {'SWD': loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.sigmoid(logits))}
 
     elif param['lossfunc'] == 'MSE':
         
         y_hat = model.forward(x)
         loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
         
-        loss  = {'MSE': loss, **LZ_helper(), **LR_helper(y_hat), **MI_helper(y_hat)}
+        loss  = {'MSE': loss, **LZ_helper(), **LM_helper(y_hat), **MI_helper(y_hat)}
 
     elif param['lossfunc'] == 'MSE_prob':
         
@@ -188,14 +200,14 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         y_hat  = torch.sigmoid(logits)
         loss   = MSE_loss(y_hat=y_hat, y=y, weights=weights)
         
-        loss  = {'MSE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(y_hat)}
+        loss  = {'MSE': loss, **LZ_helper(), **LM_helper(logits), **MI_helper(y_hat)}
     
     elif param['lossfunc'] == 'MAE':
         
         y_hat = model.forward(x)
         loss  = MSE_loss(y_hat=y_hat, y=y, weights=weights)
         
-        loss  = {'MAE': loss, **LZ_helper(), **LR_helper(y_hat), **MI_helper(y_hat)}
+        loss  = {'MAE': loss, **LZ_helper(), **LM_helper(y_hat), **MI_helper(y_hat)}
     
     elif param['lossfunc'] == 'cross_entropy':
         """
@@ -212,7 +224,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         else:
             loss = binary_cross_entropy_logprob(log_phat_0=log_phat[:,0], log_phat_1=log_phat[:,1], y=y, weights=weights)
         
-        loss  = {'CE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
+        loss  = {'CE': loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.exp(log_phat))}
     
     elif param['lossfunc'] == 'cross_entropy_with_DA':
         """
@@ -230,7 +242,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
 
         CE_DA_loss *= param['DA_beta']
         
-        loss  = {'CE': CE_loss, f"DA x $\\beta = {param['DA_beta']}$": CE_DA_loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
+        loss  = {'CE': CE_loss, f"DA x $\\beta = {param['DA_beta']}$": CE_DA_loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.exp(log_phat))}
 
     elif param['lossfunc'] == 'logit_norm_cross_entropy':
         """
@@ -240,7 +252,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         logits = model.forward(x)
         loss   = multiclass_logit_norm_loss(logit=logits, y=y, num_classes=num_classes, weights=weights, t=param['temperature'])
         
-        loss  = {'LNCE': loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
+        loss  = {'LNCE': loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.exp(log_phat))}
 
     elif param['lossfunc'] == 'focal_entropy':
         """
@@ -251,7 +263,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         log_phat = F.log_softmax(logits, dim=-1)
         loss = multiclass_focal_entropy_logprob(log_phat=log_phat, y=y, num_classes=num_classes, weights=weights, gamma=param['gamma'])
         
-        loss  = {f"FE ($\\gamma = {param['gamma']}$)": loss, **LZ_helper(), **LR_helper(logits), **MI_helper(torch.exp(log_phat))}
+        loss  = {f"FE ($\\gamma = {param['gamma']}$)": loss, **LZ_helper(), **LM_helper(logits), **MI_helper(torch.exp(log_phat))}
         
     elif param['lossfunc'] == 'VAE_background_only':
         
@@ -264,7 +276,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         else:
             loss = log_loss.mean(dim=0)
 
-        loss  = {f"VAE ($\\beta = {param['VAE_beta']}$)": loss, **LR_helper(xhat), **LZ_helper()}
+        loss  = {f"VAE ($\\beta = {param['VAE_beta']}$)": loss, **LM_helper(xhat), **LZ_helper()}
     
     else:
         print(__name__ + f".loss_wrapper: Error with an unknown lossfunc {param['lossfunc']}")
@@ -312,7 +324,31 @@ def MI_loss(X, Z, weights, MI, y):
     # Used by the main optimizer optimizing total cost ~ main loss + MI + ...
     return loss
 
+def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, mode='SWD'):
+    """
+    # Sliced Wasserstein reweight U (y==0) -> V (y==1) transport
+    """
+    u_idx = (y == 0)
+    v_idx = (y == 1)
+    
+    u_values = x[u_idx, :]
+    v_values = x[v_idx, :]
+    
+    LR = torch.exp(logits[u_idx]).squeeze()  # likelihood ratio
+    
+    if weights is not None:
+        u_weights = weights[u_idx] * LR
+        v_weights = weights[v_idx] # Network output for v not needed
+    else:
+        u_weights = LR
+        v_weights = None
+    
+    loss_uv = transport.sliced_wasserstein_distance(u_values=u_values, v_values=v_values,
+                                                    u_weights=u_weights, v_weights=v_weights,
+                                                    p=p, num_slices=num_slices, mode=mode)
 
+    return loss_uv
+    
 def Lq_binary_loss(logits, y, q, weights=None):
     """
     L_q Bernoulli loss

@@ -37,7 +37,7 @@ def rw_transform_with_logits(logits, mode, absMax=30):
         sigmoid_ = aux.sigmoid
         logits   = np.clip(logits, -absMax, absMax)
     
-    if   mode == 'LR':                # LR trick
+    if   mode == 'LR':                 # LR trick
         return exp_(logits)
     elif mode == 'inverse-LR':         # Inverse LR trick
         return exp_(-logits)

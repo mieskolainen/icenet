@@ -18,10 +18,7 @@ from icenet.tools import aux
 from icenet.tools import plots
 from icenet.tools import reweight
 
-from icenet.deep import autogradxgb
-from icenet.deep import optimize
-from icenet.deep import tempscale
-
+from icenet.deep import autogradxgb, optimize, losstools, tempscale
 from icefit import mine, cortools
 
 import ray
@@ -47,31 +44,95 @@ def _hinge_loss(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tenso
     
     return loss.sum() * len(preds)
 
-
-def BCE_loss_with_logits(input: torch.Tensor, target: torch.Tensor, weights: torch.Tensor = None):
+def BCE_loss_with_logits(input: torch.Tensor, target: torch.Tensor, weights: torch.Tensor = None, epsilon=None):
     """
     Numerically stable BCE loss with logits
     https://medium.com/@sahilcarterr/why-nn-bcewithlogitsloss-numerically-stable-6a04f3052967
     """
+    
+    if epsilon is not None: # Label smoothing
+        new_target = target * (1 - epsilon) + 0.5 * epsilon
+    else:
+        new_target = target
+    
     max_val = (-input).clamp_min(0)
-    loss    = (1 - target).mul(input).add(max_val).add((-max_val).exp().add((-input - max_val).exp()).log())
+    loss    = (1 - new_target).mul(input).add(max_val).add((-max_val).exp().add((-input - max_val).exp()).log())
 
     if weights is not None:
         loss.mul_(weights)
     
     return loss
 
+def _sliced_wasserstein(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-12):
+    """
+    Custom sliced Wasserstein loss
+    
+    Negative weights are supported via 'out_weights' variable (update it for each train / eval)
+    """
+    global loss_mode
+    global x
+    global SWD_param
+    global track_loss
+    global out_weights
+
+    track_loss = {}
+    
+    device = preds.device
+    
+    if  out_weights is not None: # Feed in weights outside
+        w = torch.from_numpy(out_weights)
+        w = w / torch.sum(w)
+    elif weights is None:
+        w = torch.ones(len(preds))
+        w = w / torch.sum(w)
+    else:
+        w = weights / torch.sum(weights)
+    
+    # Set computing device
+    targets = targets.type(torch.int32).to(device)
+    w       = w.to(device)
+    
+    loss_str = ''
+    
+    # --------------------------------------------------------------------
+    # Sliced Wasserstein U->V loss
+    
+    x    = torch.tensor(x, dtype=preds.dtype).to(device)
+        
+    loss = losstools.SWD_reweight_loss(
+                    logits=preds, x=x, y=targets, weights=w,
+                    p=SWD_param['p'], num_slices=SWD_param['num_slices'], mode=SWD_param['mode'])
+    
+    txt             = f'SWD'
+    track_loss[txt] = loss.item()
+    loss_str       += f'{txt} = {loss.item():0.5f} | '
+    
+    # --------------------------------------------------------------------
+    # Total loss
+    
+    total_loss        = loss
+    track_loss['sum'] = total_loss.item()
+    
+    # Print
+    loss_str = f'Loss[{loss_mode}]: sum: {total_loss.item():0.5f} | ' + loss_str
+    cprint(loss_str, 'yellow')
+    # --------------------------------------------------------------------
+    
+    # Scale finally to the total number of events (to conform with xgboost internal convention)
+    return total_loss * len(preds)
 
 def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor=None, EPS=1E-12):
     """
-    Custom binary cross entropy loss with
+    Custom binary cross entropy loss with Sliced Wasserstein,
     domain adaptation (DA) and mutual information (MI) regularization
     
     Negative weights are supported via 'out_weights' variable (update it for each train / eval)
     """
     global loss_mode
+    global x
     global MI_x
     global BCE_param
+    global SWD_param
     global MI_param
     global track_loss
     global out_weights
@@ -104,6 +165,12 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
         w_this = w.clone()
         
         param  = BCE_param[key]
+        
+        # Label Smoothing
+        if 'label_eps' in param:
+            epsilon = param['label_eps']
+        else:
+            epsilon = None
         
         # Set labels
         t0 = (targets == param['classes'][0])
@@ -154,23 +221,58 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             wfinal[t1] = m1 * w_this[t1]; wfinal[t1] = wfinal[t1] / torch.sum(wfinal[t1])
             wfinal     = wfinal / torch.sum(wfinal)
             
-            # BCE
-            CE   = BCE_loss_with_logits(input=preds, target=targets_CE, weights=wfinal)
+            # BCE            
+            CE   = BCE_loss_with_logits(input=preds, target=targets_CE, weights=wfinal, epsilon=epsilon)
             loss = loss + CE
         
         loss     = param["beta"] * loss.sum()        
         BCE_loss = BCE_loss + loss
         
-        txt = f'{key} [$\\beta$ = {param["beta"]}]'
+        if 'label_eps' in param:
+            txt = f'BCE {key} [$\\beta$ = {param["beta"]}, $\\epsilon$ = {param["label_eps"]}]'
+        else:
+            txt = f'BCE {key} [$\\beta$ = {param["beta"]}]'
+        
         track_loss[txt] = loss.item()
         loss_str       += f'{txt} = {loss.item():0.5f} | '
     
-    # ------------
-    # Temperature post-calibration
+    # --------------------------------------------------------------------
+    # Temperature post-calibration [just for diagnostics atm]
+    
     if loss_mode == 'eval':
         
         ts = tempscale.LogitsWithTemperature(mode='binary', device=device)
         ts.set_temperature(logits=preds, labels=targets.to(torch.float32), weights=w)
+    
+    # --------------------------------------------------------------------
+    # Sliced Wasserstein reweight U (y==0) -> V (y==1) transport
+    
+    SWD_loss = torch.tensor(0.0).to(device)
+    
+    if SWD_param is not None:
+        
+        # Total maximum is limited, pick random subsample
+        if SWD_param['max_N'] is not None and targets.shape[0] > SWD_param['max_N']:
+            r       = np.random.choice(targets.shape[0], size=SWD_param['max_N'], replace=False)
+            logits_ = preds[r]
+            x_      = x[r]
+            y_      = targets[r]
+            w_      = w[r]
+        else:
+            logits_ = preds
+            x_      = x
+            y_      = targets
+            w_      = w
+        
+        x_ = torch.tensor(x_, dtype=preds.dtype, device=preds.device) # Map to device
+
+        SWD_loss = losstools.SWD_reweight_loss(
+                        logits=logits_, x=x_, y=y_, weights=w_,
+                        p=SWD_param['p'], num_slices=SWD_param['num_slices'], mode=SWD_param['mode'])
+        
+        txt = f'SWD [$\\beta$ = {SWD_param["beta"]}]'
+        track_loss[txt] = SWD_param['beta'] * SWD_loss.item()
+        loss_str       += f'{txt} = {SWD_loss.item():0.5f} | '
     
     # --------------------------------------------------------------------
     ## MI Regularization
@@ -295,7 +397,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     # --------------------------------------------------------------------
     # Total loss
     
-    total_loss        = BCE_loss + MI_loss
+    total_loss        = BCE_loss + SWD_loss + MI_loss
     track_loss['sum'] = total_loss.item()
     
     # Print
@@ -360,14 +462,18 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         trained model
     """
     
+    global x
     global MI_x
+    global SWD_param
     global BCE_param
     global MI_param    
     global loss_mode
     global track_loss
     global out_weights
 
+    x           = None
     MI_x        = None
+    SWD_param   = None
     BCE_param   = None
     MI_param    = None
     loss_mode   = None
@@ -381,6 +487,8 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         from tensorboardX import SummaryWriter
         writer = SummaryWriter(os.path.join(args['modeldir'], param['label']))
     
+    if 'SWD_param' in param:
+        SWD_param = param['SWD_param']
     
     if 'BCE_param' in param:
         
@@ -487,6 +595,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
 
             # !
             loss_mode = 'train'
+            x         = copy.deepcopy(data_trn.x)
             MI_x      = copy.deepcopy(data_trn_MI)
             
             if strs[1] == 'binary_cross_entropy':
@@ -498,6 +607,17 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     skip_hessian = True
 
                 a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, skip_hessian=skip_hessian, device=device)
+                a['params']['disable_default_eval_metric'] = 1
+            
+            elif strs[1] == 'sliced_wasserstein':
+                
+                if len(strs) == 3 and 'hessian' in strs[2]:
+                    print('Using Hessian with custom loss')
+                    skip_hessian = False
+                else:
+                    skip_hessian = True
+
+                a['obj'] = autogradxgb.XgboostObjective(loss_func=_sliced_wasserstein, skip_hessian=skip_hessian, device=device)
                 a['params']['disable_default_eval_metric'] = 1
             
             else:
@@ -543,6 +663,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                 
                 # !
                 loss_mode = 'eval'
+                x         = copy.deepcopy(data_val.x)
                 MI_x      = copy.deepcopy(data_val_MI)
                 
                 a['obj'](preds=preds_eval, targets=deval)[1] / len(data_val.x)

@@ -12,10 +12,14 @@
 #- lzmlp2
 #- lzmlp3
 #- lzmlp4
-#- iceboost_plus
 
+# Neural Nets
+- fastkan0
 - lzmlp0
 - dmlp0
-- fastkan0
+
+# BDT based
+- iceboost_swd
 - iceboost0
+#- iceboost_plus
 - xgb0

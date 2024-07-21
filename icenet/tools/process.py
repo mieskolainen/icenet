@@ -920,6 +920,12 @@ def train_models(data_trn, data_val, args=None):
                 if dtype == 'numpy':
                     inputs['y_soft'] = inputs['y_soft'].detach().cpu().numpy()
     
+    # -------------------------------------------------------------
+
+    cprint(__name__ + f'.train_models: Training models:', 'magenta')
+    cprint(args['active_models'], 'green')
+    print('')
+    
     # Loop over active models
     for i in range(len(args['active_models'])):
 
@@ -1239,6 +1245,10 @@ def evaluate_models(data=None, info=None, args=None):
     # ====================================================================
     # **  MAIN LOOP OVER MODELS **
     #
+    
+    cprint(__name__ + f'.evaluate_models: Evaluating models:', 'magenta')
+    cprint(args['active_models'], 'green')
+    print('')
     
     try:
         

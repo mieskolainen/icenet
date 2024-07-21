@@ -57,6 +57,7 @@ jobs:
       - name: Unit tests
         run: |
           pytest icenet/tools/stx.py -rP
+          pytest icefit/transport.py -rP
       
       ## Integration tests
       - name: Deep Learning system integration test (clone stash)
