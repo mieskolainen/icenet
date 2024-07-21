@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.3
+                0.1.1.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -537,10 +537,7 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">plots</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">reweight</span>
 
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">autogradxgb</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">optimize</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">tempscale</span>
-
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">autogradxgb</span><span class="p">,</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">tempscale</span>
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span><span class="p">,</span> <span class="n">cortools</span>
 
 <span class="kn">import</span> <span class="nn">ray</span>
@@ -566,16 +563,21 @@
     
     <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
 
-
 <div class="viewcode-block" id="BCE_loss_with_logits">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.iceboost.BCE_loss_with_logits">[docs]</a>
-<span class="k">def</span> <span class="nf">BCE_loss_with_logits</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">BCE_loss_with_logits</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Numerically stable BCE loss with logits</span>
 <span class="sd">    https://medium.com/@sahilcarterr/why-nn-bcewithlogitsloss-numerically-stable-6a04f3052967</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">epsilon</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Label smoothing</span>
+        <span class="n">new_target</span> <span class="o">=</span> <span class="n">target</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">epsilon</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_target</span> <span class="o">=</span> <span class="n">target</span>
+    
     <span class="n">max_val</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="nb">input</span><span class="p">)</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">loss</span>    <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">max_val</span><span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="o">-</span><span class="n">max_val</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="o">-</span><span class="nb">input</span> <span class="o">-</span> <span class="n">max_val</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
+    <span class="n">loss</span>    <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">new_target</span><span class="p">)</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">max_val</span><span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="o">-</span><span class="n">max_val</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="o">-</span><span class="nb">input</span> <span class="o">-</span> <span class="n">max_val</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">loss</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
@@ -583,17 +585,76 @@
     <span class="k">return</span> <span class="n">loss</span></div>
 
 
+<span class="k">def</span> <span class="nf">_sliced_wasserstein</span><span class="p">(</span><span class="n">preds</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom sliced Wasserstein loss</span>
+<span class="sd">    </span>
+<span class="sd">    Negative weights are supported via &#39;out_weights&#39; variable (update it for each train / eval)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">loss_mode</span>
+    <span class="k">global</span> <span class="n">x</span>
+    <span class="k">global</span> <span class="n">SWD_param</span>
+    <span class="k">global</span> <span class="n">track_loss</span>
+    <span class="k">global</span> <span class="n">out_weights</span>
+
+    <span class="n">track_loss</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="n">device</span> <span class="o">=</span> <span class="n">preds</span><span class="o">.</span><span class="n">device</span>
+    
+    <span class="k">if</span>  <span class="n">out_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># Feed in weights outside</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">out_weights</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">))</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    
+    <span class="c1"># Set computing device</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">w</span>       <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="n">loss_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># Sliced Wasserstein U-&gt;V loss</span>
+    
+    <span class="n">x</span>    <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">preds</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">SWD_reweight_loss</span><span class="p">(</span>
+                    <span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">targets</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
+                    <span class="n">p</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;num_slices&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
+    
+    <span class="n">txt</span>             <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SWD&#39;</span>
+    <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="n">loss_str</span>       <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span>
+    
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># Total loss</span>
+    
+    <span class="n">total_loss</span>        <span class="o">=</span> <span class="n">loss</span>
+    <span class="n">track_loss</span><span class="p">[</span><span class="s1">&#39;sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    
+    <span class="c1"># Print</span>
+    <span class="n">loss_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Loss[</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">]: sum: </span><span class="si">{</span><span class="n">total_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span> <span class="o">+</span> <span class="n">loss_str</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="n">loss_str</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="c1"># --------------------------------------------------------------------</span>
+    
+    <span class="c1"># Scale finally to the total number of events (to conform with xgboost internal convention)</span>
+    <span class="k">return</span> <span class="n">total_loss</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_binary_cross_entropy</span><span class="p">(</span><span class="n">preds</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Custom binary cross entropy loss with</span>
+<span class="sd">    Custom binary cross entropy loss with Sliced Wasserstein,</span>
 <span class="sd">    domain adaptation (DA) and mutual information (MI) regularization</span>
 <span class="sd">    </span>
 <span class="sd">    Negative weights are supported via &#39;out_weights&#39; variable (update it for each train / eval)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">loss_mode</span>
+    <span class="k">global</span> <span class="n">x</span>
     <span class="k">global</span> <span class="n">MI_x</span>
     <span class="k">global</span> <span class="n">BCE_param</span>
+    <span class="k">global</span> <span class="n">SWD_param</span>
     <span class="k">global</span> <span class="n">MI_param</span>
     <span class="k">global</span> <span class="n">track_loss</span>
     <span class="k">global</span> <span class="n">out_weights</span>
@@ -626,6 +687,12 @@
         <span class="n">w_this</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         
         <span class="n">param</span>  <span class="o">=</span> <span class="n">BCE_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="c1"># Label Smoothing</span>
+        <span class="k">if</span> <span class="s1">&#39;label_eps&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
+            <span class="n">epsilon</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label_eps&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">epsilon</span> <span class="o">=</span> <span class="kc">None</span>
         
         <span class="c1"># Set labels</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">==</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -676,23 +743,58 @@
             <span class="n">wfinal</span><span class="p">[</span><span class="n">t1</span><span class="p">]</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="n">w_this</span><span class="p">[</span><span class="n">t1</span><span class="p">];</span> <span class="n">wfinal</span><span class="p">[</span><span class="n">t1</span><span class="p">]</span> <span class="o">=</span> <span class="n">wfinal</span><span class="p">[</span><span class="n">t1</span><span class="p">]</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">wfinal</span><span class="p">[</span><span class="n">t1</span><span class="p">])</span>
             <span class="n">wfinal</span>     <span class="o">=</span> <span class="n">wfinal</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">wfinal</span><span class="p">)</span>
             
-            <span class="c1"># BCE</span>
-            <span class="n">CE</span>   <span class="o">=</span> <span class="n">BCE_loss_with_logits</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">targets_CE</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">wfinal</span><span class="p">)</span>
+            <span class="c1"># BCE            </span>
+            <span class="n">CE</span>   <span class="o">=</span> <span class="n">BCE_loss_with_logits</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">targets_CE</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">wfinal</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">)</span>
             <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">+</span> <span class="n">CE</span>
         
         <span class="n">loss</span>     <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>        
         <span class="n">BCE_loss</span> <span class="o">=</span> <span class="n">BCE_loss</span> <span class="o">+</span> <span class="n">loss</span>
         
-        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;label_eps&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;BCE </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">, $</span><span class="se">\\</span><span class="s1">epsilon$ = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label_eps&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;BCE </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+        
         <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="n">loss_str</span>       <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span>
     
-    <span class="c1"># ------------</span>
-    <span class="c1"># Temperature post-calibration</span>
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># Temperature post-calibration [just for diagnostics atm]</span>
+    
     <span class="k">if</span> <span class="n">loss_mode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
         
         <span class="n">ts</span> <span class="o">=</span> <span class="n">tempscale</span><span class="o">.</span><span class="n">LogitsWithTemperature</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="n">ts</span><span class="o">.</span><span class="n">set_temperature</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+    
+    <span class="c1"># --------------------------------------------------------------------</span>
+    <span class="c1"># Sliced Wasserstein reweight U (y==0) -&gt; V (y==1) transport</span>
+    
+    <span class="n">SWD_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">SWD_param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        
+        <span class="c1"># Total maximum is limited, pick random subsample</span>
+        <span class="k">if</span> <span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">]:</span>
+            <span class="n">r</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;max_N&#39;</span><span class="p">],</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">logits_</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">x_</span>      <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">y_</span>      <span class="o">=</span> <span class="n">targets</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">w_</span>      <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logits_</span> <span class="o">=</span> <span class="n">preds</span>
+            <span class="n">x_</span>      <span class="o">=</span> <span class="n">x</span>
+            <span class="n">y_</span>      <span class="o">=</span> <span class="n">targets</span>
+            <span class="n">w_</span>      <span class="o">=</span> <span class="n">w</span>
+        
+        <span class="n">x_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">preds</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">preds</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="c1"># Map to device</span>
+
+        <span class="n">SWD_loss</span> <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">SWD_reweight_loss</span><span class="p">(</span>
+                        <span class="n">logits</span><span class="o">=</span><span class="n">logits_</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x_</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w_</span><span class="p">,</span>
+                        <span class="n">p</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;num_slices&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
+        
+        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SWD [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">SWD_param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">SWD_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">loss_str</span>       <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">SWD_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">## MI Regularization</span>
@@ -817,7 +919,7 @@
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># Total loss</span>
     
-    <span class="n">total_loss</span>        <span class="o">=</span> <span class="n">BCE_loss</span> <span class="o">+</span> <span class="n">MI_loss</span>
+    <span class="n">total_loss</span>        <span class="o">=</span> <span class="n">BCE_loss</span> <span class="o">+</span> <span class="n">SWD_loss</span> <span class="o">+</span> <span class="n">MI_loss</span>
     <span class="n">track_loss</span><span class="p">[</span><span class="s1">&#39;sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
     
     <span class="c1"># Print</span>
@@ -887,14 +989,18 @@
 <span class="sd">        trained model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
+    <span class="k">global</span> <span class="n">x</span>
     <span class="k">global</span> <span class="n">MI_x</span>
+    <span class="k">global</span> <span class="n">SWD_param</span>
     <span class="k">global</span> <span class="n">BCE_param</span>
     <span class="k">global</span> <span class="n">MI_param</span>    
     <span class="k">global</span> <span class="n">loss_mode</span>
     <span class="k">global</span> <span class="n">track_loss</span>
     <span class="k">global</span> <span class="n">out_weights</span>
 
+    <span class="n">x</span>           <span class="o">=</span> <span class="kc">None</span>
     <span class="n">MI_x</span>        <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">SWD_param</span>   <span class="o">=</span> <span class="kc">None</span>
     <span class="n">BCE_param</span>   <span class="o">=</span> <span class="kc">None</span>
     <span class="n">MI_param</span>    <span class="o">=</span> <span class="kc">None</span>
     <span class="n">loss_mode</span>   <span class="o">=</span> <span class="kc">None</span>
@@ -908,6 +1014,8 @@
         <span class="kn">from</span> <span class="nn">tensorboardX</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
         <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span>
     
+    <span class="k">if</span> <span class="s1">&#39;SWD_param&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
+        <span class="n">SWD_param</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;SWD_param&#39;</span><span class="p">]</span>
     
     <span class="k">if</span> <span class="s1">&#39;BCE_param&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
         
@@ -1014,6 +1122,7 @@
 
             <span class="c1"># !</span>
             <span class="n">loss_mode</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
+            <span class="n">x</span>         <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_trn</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
             <span class="n">MI_x</span>      <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_trn_MI</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="n">strs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary_cross_entropy&#39;</span><span class="p">:</span>
@@ -1025,6 +1134,17 @@
                     <span class="n">skip_hessian</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">autogradxgb</span><span class="o">.</span><span class="n">XgboostObjective</span><span class="p">(</span><span class="n">loss_func</span><span class="o">=</span><span class="n">_binary_cross_entropy</span><span class="p">,</span> <span class="n">skip_hessian</span><span class="o">=</span><span class="n">skip_hessian</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="s1">&#39;disable_default_eval_metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            
+            <span class="k">elif</span> <span class="n">strs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;sliced_wasserstein&#39;</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="s1">&#39;hessian&#39;</span> <span class="ow">in</span> <span class="n">strs</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using Hessian with custom loss&#39;</span><span class="p">)</span>
+                    <span class="n">skip_hessian</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">skip_hessian</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="n">a</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">autogradxgb</span><span class="o">.</span><span class="n">XgboostObjective</span><span class="p">(</span><span class="n">loss_func</span><span class="o">=</span><span class="n">_sliced_wasserstein</span><span class="p">,</span> <span class="n">skip_hessian</span><span class="o">=</span><span class="n">skip_hessian</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="s1">&#39;disable_default_eval_metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             
             <span class="k">else</span><span class="p">:</span>
@@ -1070,6 +1190,7 @@
                 
                 <span class="c1"># !</span>
                 <span class="n">loss_mode</span> <span class="o">=</span> <span class="s1">&#39;eval&#39;</span>
+                <span class="n">x</span>         <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
                 <span class="n">MI_x</span>      <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_val_MI</span><span class="p">)</span>
                 
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">](</span><span class="n">preds</span><span class="o">=</span><span class="n">preds_eval</span><span class="p">,</span> <span class="n">targets</span><span class="o">=</span><span class="n">deval</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>

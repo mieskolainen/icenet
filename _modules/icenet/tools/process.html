@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.3
+                0.1.1.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -1462,6 +1462,12 @@
                 <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;numpy&#39;</span><span class="p">:</span>
                     <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;y_soft&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
     
+    <span class="c1"># -------------------------------------------------------------</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Training models:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">],</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
     <span class="c1"># Loop over active models</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
 
@@ -1784,6 +1790,10 @@
     <span class="c1"># ====================================================================</span>
     <span class="c1"># **  MAIN LOOP OVER MODELS **</span>
     <span class="c1">#</span>
+    
+    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.evaluate_models: Evaluating models:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">],</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
     <span class="k">try</span><span class="p">:</span>
         
