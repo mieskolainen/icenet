@@ -523,20 +523,12 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="c1">#import numba</span>
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
 <span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
 <span class="kn">import</span> <span class="nn">dcor</span>
-
-<span class="c1"># Needed for tests only</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
 
@@ -1189,18 +1181,31 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">pytest</span>
     
+    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>  <span class="c1"># if you are using multi-GPU.</span>
+        <span class="c1">#np.random.seed(seed)  # Numpy module.</span>
+        <span class="c1">#random.seed(seed)  # Python random module.</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">seed</span> <span class="o">=</span> <span class="mi">1234</span>        
+
+    <span class="n">rho_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
     
     <span class="c1">## Create synthetic Gaussian data</span>
-    <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">)]:</span>
+    <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mf">2e3</span><span class="p">)]:</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*************** statistics N = </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> ***************&#39;</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">rho</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            
+        <span class="k">for</span> <span class="n">rho</span> <span class="ow">in</span> <span class="n">rho_values</span><span class="p">:</span>
             
             <span class="n">EPS</span> <span class="o">=</span> <span class="mf">0.2</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;&lt;&lt;rho = </span><span class="si">{</span><span class="n">rho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&gt;&gt;&gt;&#39;</span><span class="p">)</span>
-
+            
             <span class="c1"># Create correlation via 2D-Cholesky</span>
             <span class="n">z1</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
             <span class="n">z2</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
@@ -1231,15 +1236,13 @@
             
             <span class="c1">## MI with different histogram autobinnings</span>
             <span class="n">automethod</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Scott2D&#39;</span><span class="p">,</span> <span class="s1">&#39;Hacine2D&#39;</span><span class="p">]</span>
-            
+
             <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">automethod</span><span class="p">:</span>
                 <span class="n">MI</span><span class="p">,</span> <span class="n">MI_CI</span> <span class="o">=</span> <span class="n">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">automethod</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="n">MI</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">MI_REF</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Histogram     MI = </span><span class="si">{</span><span class="n">MI</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">, CI = </span><span class="si">{</span><span class="n">MI_CI</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
 
             <span class="c1">## Neural MI</span>
-            <span class="n">EPS</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1"># accept some more tolerance due to fluctuations</span>
-            
             <span class="n">neuromethod</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MINE&#39;</span><span class="p">,</span> <span class="s1">&#39;MINE_EMA&#39;</span><span class="p">,</span> <span class="s1">&#39;DENSITY&#39;</span><span class="p">]</span>
             
             <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
@@ -1247,6 +1250,8 @@
             
             <span class="k">for</span> <span class="n">losstype</span> <span class="ow">in</span> <span class="n">neuromethod</span><span class="p">:</span>
                 
+                <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+                    
                 <span class="c1">## -----------------</span>
                 <span class="n">MI</span><span class="p">,</span><span class="n">MI_err</span><span class="p">,</span><span class="n">model</span> <span class="o">=</span> <span class="n">mine</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">losstype</span><span class="o">=</span><span class="n">losstype</span><span class="p">)</span>
                 <span class="n">device</span> <span class="o">=</span> <span class="n">MI</span><span class="o">.</span><span class="n">device</span>
@@ -1279,6 +1284,18 @@
 
     <span class="kn">import</span> <span class="nn">pytest</span>
 
+    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>  <span class="c1"># if you are using multi-GPU.</span>
+        <span class="c1">#np.random.seed(seed)  # Numpy module.</span>
+        <span class="c1">#random.seed(seed)  # Python random module.</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+        
+    <span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>        
+    <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    
     <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1E-3</span>
 
     <span class="c1">### Both ones</span>
@@ -1375,47 +1392,6 @@
     <span class="k">assert</span>  <span class="n">MI_mine</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span></div>
 
     
-
-
-
-<span class="c1">#if __name__ == &quot;__main__&quot;:</span>
-    <span class="c1">#test_gaussian()</span>
-    <span class="c1">#test_constant()</span>
-
-
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">def test_data():</span>
-
-<span class="sd">    # Read toy dataset</span>
-<span class="sd">    df = pd.read_csv(&quot;https://archive.ics.uci.edu/ml/machine-learning-databases/00451/dataR2.csv&quot;)</span>
-<span class="sd">    #target = df[&#39;Classification&#39;]</span>
-
-<span class="sd">    df.drop([&#39;Classification&#39;], axis=1, inplace=True)</span>
-
-<span class="sd">    # Build MI matrix for each pair of features</span>
-<span class="sd">    D = df.shape[1]</span>
-<span class="sd">    MI   = np.zeros((D,D))</span>
-<span class="sd">    MI_A = np.zeros((D,D))</span>
-<span class="sd">    MI_M = np.zeros((D,D))</span>
-
-<span class="sd">    for i,col_i in enumerate(df):</span>
-<span class="sd">        for j,col_j in enumerate(df):</span>
-
-<span class="sd">            MI[i,j]   = mutual_information(x=df[col_i], y=df[col_j], normalized=None)</span>
-<span class="sd">            MI_A[i,j] = mutual_information(x=df[col_i], y=df[col_j], normalized=&#39;additive&#39;)</span>
-<span class="sd">            MI_M[i,j] = mutual_information(x=df[col_i], y=df[col_j], normalized=&#39;multiplicative&#39;)</span>
-
-<span class="sd">    # Print out</span>
-<span class="sd">    print(&#39;&gt;&gt; Raw Mutual Information&#39;)</span>
-<span class="sd">    print(pd.DataFrame(MI,   columns = df.columns, index = df.columns))</span>
-<span class="sd">    print(&#39;&#39;)</span>
-<span class="sd">    print(&#39;&gt;&gt; Additively Normalized Mutual Information&#39;)</span>
-<span class="sd">    print(pd.DataFrame(MI_A, columns = df.columns, index = df.columns))</span>
-<span class="sd">    print(&#39;&#39;)</span>
-<span class="sd">    print(&#39;&gt;&gt; Multiplicatively Normalized Mutual Information&#39;)</span>
-<span class="sd">    print(pd.DataFrame(MI_M, columns = df.columns, index = df.columns))</span>
-<span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
 
            </div>
