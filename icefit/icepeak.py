@@ -1,4 +1,4 @@
-# Binned histogram chi2/likelihood/Wasserstein fit tools with
+# Binned histogram chi2, Huber, Poisson likelihood fit tools with
 # mystic + iminuit (minuit from python)
 #
 # m.mieskolainen@imperial.ac.uk, 2024
