@@ -524,6 +524,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             if np.sum(mask) == 0: return 1e9
             
             y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            
             residual = (y_pred - counts[key][mask]) / errors[key][mask]
 
             total += np.sum(residual**2)
@@ -543,6 +544,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             if np.sum(mask) == 0: return 1e9
             
             y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            
             T = huber_lossfunc(y_true=counts[key][mask], y_pred=y_pred,
                                sigma=errors[key][mask], delta=delta)
             
@@ -562,7 +564,9 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             if np.sum(mask) == 0: return 1e9
 
             y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            
             valid  = (y_pred > 0)
+            if np.sum(valid) == 0: return 1e9
             
             T1 = counts[key][mask][valid] * np.log(y_pred[valid])
             T2 = y_pred[valid]
@@ -570,22 +574,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             total += (-1)*(np.sum(T1) - np.sum(T2))
 
         return total
-    
-    ### [Wasserstein (1st type) optimal transport distance -- experimental]
-    def wasserstein_loss(par):
-        
-        total = 0
-        
-        # Over histograms
-        for key in counts.keys():
-            
-            mask = fitbin_mask[key]
-            if np.sum(mask) == 0: return 1e9
-            
-            yhat   = fitfunc[key](cbins[key][mask], par, par_fixed)
-            total += wasserstein_distance(yhat, counts[key][mask], u_weights=None, v_weights=None)
 
-        return total
     
     # --------------------------------------------------------------------
     loss_type = techno['loss_type']
@@ -598,8 +587,6 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         loss = huber_loss
     elif loss_type == 'nll':
         loss = poiss_nll_loss
-    elif loss_type == 'wasserstein':
-        loss = wasserstein_loss
     else:
         raise Exception(f'Unknown loss_type chosen <{loss_type}>')
     # --------------------------------------------------------------------

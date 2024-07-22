@@ -76,7 +76,7 @@ fit:
 techno:
   rng_seed: 1234
 
-  loss_type: 'chi2'                # 'chi2', 'huber', 'nll' or 'wasserstein' [experimental]
+  loss_type: 'chi2'                # 'chi2', 'huber', 'nll'
   use_limits: True                 # Use parameter bounds
   zerobin: 0.1                     # Minimum number of counts in a valid bin
   
