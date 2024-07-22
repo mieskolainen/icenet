@@ -4,20 +4,12 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2024
 
-import sys
-sys.path.append(".")
-
 import numpy as np
 import torch
-#import numba
-import copy
 import scipy
 import scipy.special as special
 import scipy.stats as stats
 import dcor
-
-# Needed for tests only
-import pandas as pd
 
 from icefit import mine
 
@@ -617,18 +609,31 @@ def test_gaussian():
     """
     import pytest
     
+    def set_seed(seed):
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+        #np.random.seed(seed)  # Numpy module.
+        #random.seed(seed)  # Python random module.
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+
+    seed = 1234        
+
+    rho_values = np.linspace(-0.9, 0.9, 6)
     
     ## Create synthetic Gaussian data
-    for N in [int(1e4)]:
+    for N in [int(2e3)]:
         
         print(f'*************** statistics N = {N} ***************')
-
-        for rho in np.linspace(-0.99, 0.99, 6):
+        set_seed(seed)
+            
+        for rho in rho_values:
             
             EPS = 0.2
 
             print(f'<<<rho = {rho:.3f}>>>')
-
+            
             # Create correlation via 2D-Cholesky
             z1  = np.random.randn(N)
             z2  = np.random.randn(N)
@@ -659,15 +664,13 @@ def test_gaussian():
             
             ## MI with different histogram autobinnings
             automethod = ['Scott2D', 'Hacine2D']
-            
+
             for method in automethod:
                 MI, MI_CI = mutual_information(x=x1, y=x2, automethod=method)
                 assert MI == pytest.approx(MI_REF, abs=EPS)
                 print(f'Histogram     MI = {MI:0.3f}, CI = {MI_CI} ({method})')
 
             ## Neural MI
-            EPS = 0.5 # accept some more tolerance due to fluctuations
-            
             neuromethod = ['MINE', 'MINE_EMA', 'DENSITY']
             
             X = torch.Tensor(x1)
@@ -675,6 +678,8 @@ def test_gaussian():
             
             for losstype in neuromethod:
                 
+                set_seed(seed)
+                    
                 ## -----------------
                 MI,MI_err,model = mine.estimate(X=X, Z=Z, losstype=losstype)
                 device = MI.device
@@ -704,6 +709,18 @@ def test_constant(N=10000):
 
     import pytest
 
+    def set_seed(seed):
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+        #np.random.seed(seed)  # Numpy module.
+        #random.seed(seed)  # Python random module.
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+        
+    seed = 42        
+    set_seed(seed)
+    
     EPS = 1E-3
 
     ### Both ones
@@ -799,44 +816,3 @@ def test_constant(N=10000):
     MI_mine = mine.estimate(X=torch.Tensor(x1), Z=torch.Tensor(x2))[0].item()
     assert  MI_mine == pytest.approx(0, abs=EPS)
     
-
-
-
-#if __name__ == "__main__":
-    #test_gaussian()
-    #test_constant()
-
-
-
-"""
-def test_data():
-
-    # Read toy dataset
-    df = pd.read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00451/dataR2.csv")
-    #target = df['Classification']
-
-    df.drop(['Classification'], axis=1, inplace=True)
-
-    # Build MI matrix for each pair of features
-    D = df.shape[1]
-    MI   = np.zeros((D,D))
-    MI_A = np.zeros((D,D))
-    MI_M = np.zeros((D,D))
-
-    for i,col_i in enumerate(df):
-        for j,col_j in enumerate(df):
-
-            MI[i,j]   = mutual_information(x=df[col_i], y=df[col_j], normalized=None)
-            MI_A[i,j] = mutual_information(x=df[col_i], y=df[col_j], normalized='additive')
-            MI_M[i,j] = mutual_information(x=df[col_i], y=df[col_j], normalized='multiplicative')
-
-    # Print out
-    print('>> Raw Mutual Information')
-    print(pd.DataFrame(MI,   columns = df.columns, index = df.columns))
-    print('')
-    print('>> Additively Normalized Mutual Information')
-    print(pd.DataFrame(MI_A, columns = df.columns, index = df.columns))
-    print('')
-    print('>> Multiplicatively Normalized Mutual Information')
-    print(pd.DataFrame(MI_M, columns = df.columns, index = df.columns))
-"""

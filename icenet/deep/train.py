@@ -332,7 +332,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         
         loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
         
-        if epoch == 0 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:
             _, train_acc, train_auc                   = optimize.test(model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
             validate_loss, validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
 
@@ -356,7 +356,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         val_aucs.append(validate_auc)
         
         print(__name__)
-        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()[0]:0.4E}', 'yellow')
+        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()[0]:0.4E}', 'yellow')
         if MI is not None:
             print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f}')
             for k in range(len(MI['classes'])):

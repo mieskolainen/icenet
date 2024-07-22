@@ -8,16 +8,19 @@ setup:
 
   xgb_setup_0:
 
-    search_algo: 'Optuna'
+    search_algo: 'Optuna' # 'Basic' (use with grid_search), 'HyperOpt', 'Optuna', 'BayesOpt'
     
     search_metric:
       metric: 'loss'   # 'AUC' or 'loss'
-      mode: 'min'     # 'max', 'min'
+      mode: 'min'      # 'max', 'min'
     
     param:
       
       num_boost_round:
-        type: "tune.choice([600])"
+        type: "tune.choice([500])"
+
+      learning_rate:
+        type: "tune.choice([0.01, 0.05, 0.1])"
 
       ## Tree parameters
       max_depth:
@@ -48,6 +51,6 @@ setup:
 
       colsample_bylevel:
         type: "tune.uniform(0.3, 1.0)"  # Between [0,1], default 1
-
+      
       colsample_bynode:
         type: "tune.uniform(0.3, 1.0)"  # Between [0,1], default 1

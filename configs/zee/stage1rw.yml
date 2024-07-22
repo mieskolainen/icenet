@@ -1,0 +1,32 @@
+# Stage 1 reweighting
+# ----------------------------------------
+
+equal_frac: true                       # Equalize integrated class fractions
+differential: true                     # Differential reweighting
+reference_class: 1                     # Re-weight target class id
+
+# Differential reweighting param
+diff_param:
+  
+  maxevents: null                      # Maximum number of events for the PDF construction
+  renorm_weight_to_count: True         # Renormalize sum(weights) == sum(counts) per class
+  
+  var:  ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
+  type: 'AIRW'                         # 'AIRW', 'pseudo-ND', '2D', '1D'
+  
+  hist_param:
+
+    pseudo_type: 'product'             # 'product', 'geometric_mean'
+    
+    bins:  [[-3.1, 3.1, 50], [0.0001, 50.0, 50], [1.0, 60, 50]] # Make sure the bounds cover the phase space
+    binmode:  ['linear', 'linear', 'linear']     # 'log10' or 'linear' or 'edges' (custom array) binning
+
+    # ! Variable, and binning min/max boundaries are both transformed !
+    transform: ['log10', null, null]   # 'log10', 'sqrt', 'square', null
+    
+    max_reg: 1000.0                    # Maximum weight cut-off regularization
+  
+  AIRW_param:
+    active_model: iceboost3D           # Under models.yml
+    max_reg:      100.0                # Maximum weight cut-off regularization
+    mode:         'LR'                 # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'

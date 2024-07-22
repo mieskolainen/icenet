@@ -3,11 +3,11 @@
 # "Stage 1" model
 #
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb3Drw:
+iceboost3D:
   train:   'xgb'
   predict: 'xgb_logistic'
-  label:   'XGB3DRW'
-  raytune:  xgb_trial_0
+  label:   'ICEBOOST3D'
+  raytune:  xgb_setup_0
   
   # ** Custom set of variables **
   #include_MVA_vars: ['.*']
@@ -21,7 +21,7 @@ xgb3Drw:
     tree_method: 'hist'
     device:      'auto'       # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.1
+    learning_rate: 0.02
     gamma: 1.5
     max_depth: 15
     min_child_weight: 1.0
@@ -77,7 +77,7 @@ xgb0:
     tree_method: 'hist'
     device:      'auto'         # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.1
+    learning_rate: 0.05
     gamma: 1.5
     max_depth: 15
     min_child_weight: 1.0
@@ -123,7 +123,7 @@ iceboost0: &ICEBOOST0
     tree_method: 'hist'
     device:      'auto'         # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.1
+    learning_rate: 0.05
     gamma: 1.5
     max_depth: 15
     min_child_weight: 1.0
@@ -172,11 +172,11 @@ iceboost_swd:
       beta: 1.0
       classes: [0,1]
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-      label_eps: 0.1            # label smoothing epsilon (regularization)
+      label_eps: 0.0           # label smoothing epsilon (regularization)
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
-    beta: 0.05
+    beta: 0.2
     p: 1                        # p-norm (1,2, ...)
     num_slices: 4000            # Number of MC projections (Higher the better) 
     mode: 'EBSW'

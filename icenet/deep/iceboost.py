@@ -643,7 +643,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         # ==============================================
         ## Validate
-        if epoch == 0 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:
             
             # ------- AUC values ------
             if len(args['primary_classes']) >= 2:
@@ -697,7 +697,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
         
-        print(__name__ + f'.train_xgb [{param["label"]}] Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+        print(__name__ + f'.train_xgb [{param["label"]}] Tree {epoch+1:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
         if not args['__raytune_running__']:
             

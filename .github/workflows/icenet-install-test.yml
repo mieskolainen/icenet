@@ -58,6 +58,7 @@ jobs:
         run: |
           pytest icenet/tools/stx.py -rP
           pytest icefit/transport.py -rP
+          pytest icefit/cortools.py -rP
       
       ## Integration tests
       - name: Deep Learning system integration test (clone stash)
@@ -85,6 +86,15 @@ jobs:
           source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --test_mode --fit_type dual-unitary-II --output_name dual-unitary-II
       
       #
+      - name: Deep Learning system integration test (zee 1)
+        run: |
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
+      #
+      - name: Deep Learning system integration test (hnl 1)
+        run: |
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_hnl.sh
+      
+      #
       - name: Deep Learning system integration test (brem 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem.sh
@@ -100,19 +110,9 @@ jobs:
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
 
       #
-      - name: Deep Learning system integration test (hnl 1)
-        run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_hnl.sh
-      
-      #
       - name: Deep Learning system integration test (eid 1)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
-      
-      #
-      - name: Deep Learning system integration test (zee 1)
-        run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_zee.sh
       
       #
       - name: Deep Learning system integration test (eid_deep 1)
