@@ -176,7 +176,7 @@ iceboost_swd:
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
-    beta: 0.01
+    beta: 0.001
     p: 1                 # p-norm (1,2, ...)
     num_slices: 500      # Number of MC projections (Higher the better) 
     mode: 'SWD'          # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
@@ -201,7 +201,7 @@ iceboost_plus:
     
     flat:
       classes: [0,1]
-      beta: 0.01
+      beta: 0.001
       AIRW:
         classes:  [0]      # One (or two) classes
         RW_modes: ['LR']   # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct', 'identity'
@@ -246,7 +246,7 @@ lzmlp0: &LZMLP
     #lossfunc: 'binary_Lq_entropy'     
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 0.01                    # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 0.001                    # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
@@ -334,7 +334,7 @@ fastkan0: &FASTKAN
     #lossfunc: 'binary_Lq_entropy'    # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 0.01                    # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 0.001                    # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
@@ -426,7 +426,7 @@ dmlp0: &DMLP
     #lossfunc: 'binary_Lq_entropy'
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 0.01                    # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 0.001                    # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
