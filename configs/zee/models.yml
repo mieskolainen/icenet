@@ -50,7 +50,7 @@ iceboost3D:
   plot_trees: false
 
   # Read/Write of epochs
-  evalmode: 10                  # Evaluation and saving of the model every n-th epoch (int) during training
+  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
   readmode: -1                  # -1 takes the minimum loss model
 
 
@@ -71,11 +71,11 @@ xgb0:
   
   # booster parameters
   model_param:
-    num_boost_round: 500        # number of epochs (equal to the number of trees!)
+    num_boost_round: 500          # number of epochs (equal to the number of trees!)
     
-    booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
+    booster: 'gbtree'             # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'         # 'auto', 'cpu', 'cuda'
+    device:      'auto'           # 'auto', 'cpu', 'cuda'
     
     learning_rate: 0.08
     gamma: 1.5
@@ -99,7 +99,7 @@ xgb0:
   plot_trees: false
 
   # Read/Write of epochs
-  evalmode: 10                    # Evaluation and saving of the model every n-th epoch (int) during training
+  evalmode: 5                     # Evaluation and saving of the model every n-th epoch (int) during training
   readmode: -1                    # -1 takes the minimum loss model
 
 
@@ -117,25 +117,25 @@ iceboost0: &ICEBOOST0
   
   # booster parameters
   model_param:
-    num_boost_round: 500        # number of epochs (equal to the number of trees!)
+    num_boost_round: 500     # number of epochs (equal to the number of trees!)
     
-    booster: 'gbtree'           # 'gbtree' (default), 'dart' (dropout boosting)
+    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'         # 'auto', 'cpu', 'cuda'
+    device:      'auto'      # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.08
-    gamma: 1.5
-    max_depth: 13
-    min_child_weight: 1.0
-    max_delta_step: 1.0
-    subsample: 1
-
-    colsample_bytree:  0.9
-    colsample_bylevel: 0.9
-    colsample_bynode:  0.9
+    learning_rate: 0.08      # Learning rate (slower -> more conservative updates)
+    gamma: 1.5               # Minimum loss reduction required to make a further partition on a leaf node
+    max_depth: 13            # Maximum depth of a tree (too high may overfit)
+    min_child_weight: 1.0    # Minimum sum of instance weight (hessian) needed in a child (higher -> more conservative)
+    max_delta_step: 1.0      # Constraint on the maximum change in the model's weights
+    subsample: 1             # Subsample ratio of the training instance (=1 uses all data)
     
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
+    colsample_bytree:  0.9   # Specifies the fraction of features to be randomly selected for each tree
+    colsample_bylevel: 0.9   # As 'bytree' but applied to individual tree levels
+    colsample_bynode:  0.9   # The fraction of features to be randomly selected for each split in a tree
+    
+    reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
+    reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
     
     # learning task parameters
     objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
@@ -154,7 +154,7 @@ iceboost0: &ICEBOOST0
   plot_trees: false
 
   # Read/Write of epochs
-  evalmode: 10           # Evaluation and saving of the model every n-th epoch (int) during training
+  evalmode: 5            # Evaluation and saving of the model every n-th epoch (int) during training
   readmode: -1           # -1 takes the minimum loss model
 
 
@@ -180,7 +180,7 @@ iceboost_swd:
     p: 1                 # p-norm (1,2, ...)
     num_slices: 500      # Number of MC projections (Higher the better) 
     mode: 'SWD'          # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
-    max_N: 500000        # Max events limit (500k & 500 slices works with 32 GB Nvidia V100)
+    max_N: 400000        # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
 
 
 # ICEBOOST with an additional re-weighting in-the-loop regularization
@@ -233,13 +233,13 @@ lzmlp0: &LZMLP
   out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
 
   model_param:
-    mlp_dim: [64, 64, 64, 64]     # hidden layer dimensions
+    mlp_dim: [64, 64, 64, 64]         # hidden layer dimensions
     activation: 'silu'
     layer_norm: True
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
     dropout: 0.01
     act_after_norm: True
-  
+    
   # Optimization
   opt_param:  
     lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -248,21 +248,21 @@ lzmlp0: &LZMLP
     
     SWD_beta: 0.01                    # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
-    SWD_num_slices: 1000              # Number of MC projections (higher the better)
+    SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
 
     lipschitz_beta:    5.0e-5         # lipschitz regularization (use with 'lzmlp')
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
     
-    #gamma: -0.5                       # focal_entropy "exponent"
+    #gamma: -0.5                      # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
     
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 300
-    batch_size: 8096
+    epochs: 150
+    batch_size: 4096
     lr: 5.0e-4
     weight_decay: 1.0e-4       # L2-regularization
   
@@ -281,7 +281,7 @@ lzmlp0: &LZMLP
   tensorboard: true
   
   # Read/Write of epochs
-  evalmode: 10                 # Evaluation and saving of the model every n-th epoch (int) during training
+  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
   readmode: -1                 # -1 takes the minimum loss model
   
   eval_batch_size: 4096
@@ -330,13 +330,13 @@ fastkan0: &FASTKAN
   
   # Optimization
   opt_param:  
-    lossfunc: 'binary_cross_entropy' # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    #lossfunc: 'binary_Lq_entropy'     # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    #q: 0.8                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    #lossfunc: 'binary_Lq_entropy'    # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
     SWD_beta: 0.01                    # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
-    SWD_num_slices: 1000              # Number of MC projections (higher the better)
+    SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
     
     #lipshitz_beta:    1.0e-4         # Lipshitz regularization (use with 'lzmlp')
@@ -349,10 +349,10 @@ fastkan0: &FASTKAN
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 300
+    epochs: 150
     batch_size: 4096
     lr: 5.0e-4
-    weight_decay: 1.0e-2       # L2-regularization
+    weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
   scheduler_param:
@@ -368,13 +368,13 @@ fastkan0: &FASTKAN
   tensorboard: true
 
   # Read/Write of epochs
-  evalmode: 10                 # Evaluation and saving of the model every n-th epoch (int) during training
+  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
   readmode: -1                 # -1 takes the minimum loss model
   
   eval_batch_size: 4096
 
   # Deploy (or test) mode device
-  deploy_device: 'cpu'        # 'auto', 'cpu', 'cuda'
+  deploy_device: 'cpu'         # 'auto', 'cpu', 'cuda'
 
 
 ## FastKAN
@@ -419,7 +419,7 @@ dmlp0: &DMLP
     skip_connections: False
     last_tanh: True                   # Extra tanh layer
     last_tanh_scale: 10.0             # Scale after tanh()
-  
+
   # Optimization
   opt_param:  
     lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -428,20 +428,20 @@ dmlp0: &DMLP
     
     SWD_beta: 0.01                    # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
-    SWD_num_slices: 1000              # Number of MC projections (higher the better)
+    SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
-
+    
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ lambda * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ lambda * torch.sum(logits**2)
-
+    
     #gamma: 2                         # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
     
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 300
-    batch_size: 8096
+    epochs: 150
+    batch_size: 4096
     lr: 5.0e-4
     weight_decay: 1.0e-4       # L2-regularization
   
@@ -459,7 +459,7 @@ dmlp0: &DMLP
   tensorboard: true
   
   # Read/Write of epochs
-  evalmode: 10                 # Evaluation and saving of the model every n-th epoch (int) during training
+  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
   readmode: -1                 # -1 takes the minimum loss model
   
   eval_batch_size: 4096

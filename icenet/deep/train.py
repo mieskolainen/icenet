@@ -513,21 +513,29 @@ def torch_construct(X_trn, Y_trn, X_val, Y_val, X_trn_2D, X_val_2D, trn_weights,
         validation_set = optimize.Dataset(X=X_val, Y=Y_val, W=val_weights, Y_DA=Y_val_DA, W_DA=val_weights_DA, X_MI=data_val_MI)
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
-    opt_param    = aux.replace_param(default=param['opt_param'], raytune=config['params'])
+    opt_param = aux.replace_param(default=param['opt_param'], raytune=config['params'])
     
     # N.B. We use 'sampler' with 'BatchSampler', which loads a set of events using multiple event indices (faster) than the default
     # one which takes events one-by-one and concatenates the results (slow).
+    
+    ## ------------------------
+    # If True, then all batches are the same size (i.e. the last small one is skipped)
+    if 'drop_last' in opt_param:
+        drop_last = opt_param['drop_last']
+    else:
+        drop_last = True
+    
     params_train = {'batch_size'  : None,
                     'num_workers' : param['num_workers'],
                     'sampler'     : torch.utils.data.BatchSampler(
-                        torch.utils.data.RandomSampler(training_set), opt_param['batch_size'], drop_last=False
+                        torch.utils.data.RandomSampler(training_set), opt_param['batch_size'], drop_last=drop_last
                     ),
                     'pin_memory'  : True}
     
     params_test  = {'batch_size'  : None,
                     'num_workers' : param['num_workers'],
                     'sampler'     : torch.utils.data.BatchSampler(
-                        torch.utils.data.RandomSampler(validation_set), param['eval_batch_size'], drop_last=False
+                        torch.utils.data.RandomSampler(validation_set), param['eval_batch_size'], drop_last=drop_last
                     ),
                     'pin_memory'  : True}
         

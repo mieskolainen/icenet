@@ -167,7 +167,7 @@ def sliced_W_vectorized(u_values: torch.Tensor, v_values: torch.Tensor,
 
 def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
                                 u_weights: torch.Tensor=None, v_weights: torch.Tensor=None,
-                                p: int=1, num_slices: int=1000, mode='EBSW', vectorized=True):
+                                p: int=1, num_slices: int=1000, mode='SWD', vectorized=True):
     """
     Sliced Wasserstein Distance over arbitrary dimensional samples
     
@@ -187,7 +187,7 @@ def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
         p:           p-norm parameter (p = 1 is 'Earth Movers', 2 = is W-2, ...)       
         num_slices:  number of random MC projections (slices) (higher the better)
         mode:        'SWD'  (basic uniform MC random)
-                     'EBSW' (faster convergence and smaller variance)
+                     'EBSW' (may have faster convergence and smaller variance)
         vectorized:  fully vectorized (may take more GPU/CPU memory, but 10x faster)
     
     Returns:
