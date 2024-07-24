@@ -592,8 +592,9 @@
             <span class="n">process_func</span><span class="o">=</span><span class="n">process_root</span><span class="p">,</span>
             <span class="n">processes</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span>
             <span class="n">root_path</span><span class="o">=</span><span class="n">root_path</span><span class="p">,</span>
-            <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
-
+            <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span>
+            <span class="n">num_cpus</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">])</span>
+    
     <span class="c1"># ----------</span>
 
     <span class="n">X</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
