@@ -533,6 +533,7 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
 
 <span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -542,6 +543,36 @@
 <span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+
+
+<div class="viewcode-block" id="yaml_dump">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.yaml_dump">[docs]</a>
+<span class="k">def</span> <span class="nf">yaml_dump</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dump dictionary to YAML with custom style</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        data: dictionary</span>
+<span class="sd">        filename: full path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Custom representer to force flow style for lists</span>
+    <span class="k">def</span> <span class="nf">flow_style_list_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_sequence</span><span class="p">(</span><span class="s1">&#39;tag:yaml.org,2002:seq&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flow_style</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Custom representer to force block style for dictionaries</span>
+    <span class="k">def</span> <span class="nf">block_style_dict_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="s1">&#39;tag:yaml.org,2002:map&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Register the custom representers</span>
+    <span class="n">yaml</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">flow_style_list_representer</span><span class="p">)</span>
+    <span class="n">yaml</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">block_style_dict_representer</span><span class="p">)</span>
+
+    <span class="c1"># Dump the dictionary to a YAML formatted string with mixed styles</span>
+    <span class="n">yaml_string_mixed</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="c1"># Save the YAML string with mixed styles to a file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">yaml_file</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">yaml_file</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="set_random_seed">
