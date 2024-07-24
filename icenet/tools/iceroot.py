@@ -291,10 +291,12 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
         print('')
         cprint(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
         print('')
-        print(__name__  + f'.load_tree: Reading {len(files)} root files | Conversion to object library "{library}" ')
     else:
         cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}) | Loading variables ({len(load_ids)})', 'green')
-        print(__name__  + f'.load_tree: Reading {len(files)} root files | Conversion to object library "{library}" ')
+        print('')
+    
+    print(__name__  + f'.load_tree: Reading {len(files)} root files | Conversion to object library "{library}" ')
+    print('')
     
     if int(num_cpus) == 0:
         num_workers = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu

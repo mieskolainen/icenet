@@ -45,9 +45,6 @@ def yaml_dump(data: dict, filename: str):
     # Register the custom representers
     yaml.add_representer(list, flow_style_list_representer)
     yaml.add_representer(dict, block_style_dict_representer)
-
-    # Dump the dictionary to a YAML formatted string with mixed styles
-    yaml_string_mixed = yaml.dump(data)
     
     # Save the YAML string with mixed styles to a file
     with open(filename, 'w') as yaml_file:
