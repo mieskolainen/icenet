@@ -19,7 +19,7 @@ from icenet.tools import aux
 from icenet.tools import iceroot
 
 
-def read_single(process_func, process, root_path, param, class_id, dtype=None, num_cpus=0):
+def read_single(process_func, process, root_path, param, class_id, dtype=None, num_cpus=0, verbose=False):
     """
     Loop over different MC / data processes as defined in the yaml files
     
@@ -30,6 +30,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None, n
         param:         parameters of 'process_func'
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
         num_cpus:      number of CPUs used (set 0 for automatic)
+        verbose:       verbose output print
     
     Returns:
         X, Y, W, ids, info (awkward array format)
@@ -63,7 +64,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None, n
     X_uncut, ids = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
                     entry_start=param['entry_start'], entry_stop=param['entry_stop'],
                     maxevents=maxevents, ids=param['load_ids'], library='ak', dtype=dtype,
-                    num_cpus=num_cpus)
+                    num_cpus=num_cpus, verbose=verbose)
     
     N_before = len(X_uncut)
 
@@ -126,7 +127,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None, n
     return {'X': X, 'Y': Y, 'W': W, 'ids': ids, 'info': info}
 
 
-def read_multiple(process_func, processes, root_path, param, class_id, dtype=None, num_cpus=0):
+def read_multiple(process_func, processes, root_path, param, class_id, dtype=None, num_cpus=0, verbose=False):
     """
     Loop over different MC / data processes as defined in the yaml files
     
@@ -137,6 +138,7 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
         param:         parameters of 'process_func'
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
         num_cpus:      number of CPUs used (set 0 for automatic)
+        verbose:       verbose output print
     
     Returns:
         X, Y, W, ids, info (awkward array format)
@@ -147,8 +149,10 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
 
     for i,key in enumerate(processes):
         
-        data = read_single(process_func, processes[key], root_path, param, class_id, dtype, num_cpus)
-        
+        data = read_single(process_func=process_func, processes=processes[key],
+                           root_path=root_path, param=param, class_id=class_id,
+                           dtype=dtype, num_cpus=num_cpus, verbose=verbose)
+
         # Concatenate processes
         if i == 0:
             X = copy.deepcopy(data['X'])
@@ -248,7 +252,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0,
 
 
 def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
-              ids=None, library='np', dtype=None, num_cpus=0):
+              ids=None, library='np', dtype=None, num_cpus=0, verbose=False):
     """
     Load ROOT files
 
@@ -261,7 +265,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
         ids:           Names of the variables to read out from the root tree
         library:       Return type 'np' (jagged numpy) or 'ak' (awkward) of the array
         num_cpus:      Number of processes used (set 0 for automatic)
-        
+        verbose:       Verbose output
+    
     Returns:
         array of type 'library'
     """
@@ -281,11 +286,15 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
     
     load_ids = aux.process_regexp_ids(ids=ids, all_ids=all_ids)
 
-    cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}): \n{all_ids} \n', 'green')
-    print('')
-    cprint(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
-    print('')
-    print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
+    if verbose:
+        cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}): \n{all_ids} \n', 'green')
+        print('')
+        cprint(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
+        print('')
+        print(__name__  + f'.load_tree: Reading {len(files)} root files | Conversion to object library "{library}" ')
+    else:
+        cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}) | Loading variables ({len(load_ids)})', 'green')
+        print(__name__  + f'.load_tree: Reading {len(files)} root files | Conversion to object library "{library}" ')
     
     if int(num_cpus) == 0:
         num_workers = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu

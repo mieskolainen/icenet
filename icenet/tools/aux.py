@@ -14,6 +14,7 @@ import torch
 from datetime import datetime
 import torch
 import random
+import yaml
 
 import numba
 from tqdm import tqdm
@@ -24,6 +25,33 @@ from sklearn import metrics
 import scipy
 from scipy import interpolate
 
+
+def yaml_dump(data: dict, filename: str):
+    """
+    Dump dictionary to YAML with custom style
+    
+    Args:
+        data: dictionary
+        filename: full path
+    """
+    # Custom representer to force flow style for lists
+    def flow_style_list_representer(dumper, data):
+        return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
+
+    # Custom representer to force block style for dictionaries
+    def block_style_dict_representer(dumper, data):
+        return dumper.represent_mapping('tag:yaml.org,2002:map', data, flow_style=False)
+
+    # Register the custom representers
+    yaml.add_representer(list, flow_style_list_representer)
+    yaml.add_representer(dict, block_style_dict_representer)
+
+    # Dump the dictionary to a YAML formatted string with mixed styles
+    yaml_string_mixed = yaml.dump(data)
+    
+    # Save the YAML string with mixed styles to a file
+    with open(filename, 'w') as yaml_file:
+        yaml.dump(data, yaml_file)
 
 def set_random_seed(seed):
     """

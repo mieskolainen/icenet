@@ -214,7 +214,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## 1. Create the first level hash
     
     hash_args = {}
-    
+
     # Critical Python files content
     files = {'cuts':      f'{cwd}/{config_path}/cuts.py',
              'filter':    f'{cwd}/{config_path}/filter.py',
@@ -338,13 +338,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         
         # ----------------------------------------------------------------
         ## Save args to yaml as a checkpoint of the run configuration
-        dir              = aux.makedir(f'{args["plotdir"]}/{runmode}')
-        
-        import yaml
-        
-        args_filename = f'{dir}/args.yml'
-        with open(args_filename, "w", encoding = "utf-8") as file:
-            file.write(yaml.safe_dump(args, sort_keys=False))
+        dir = aux.makedir(f'{args["plotdir"]}/{runmode}')
+        aux.yaml_dump(data=args, filename=f'{dir}/args.yml')
         # ----------------------------------------------------------------
     
     # "Simplified" data reader
@@ -519,9 +514,8 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             gc.enable()
         
         # Save args
-        import yaml
-        with open(cache_filename.replace('.pkl', '.yml'), "w", encoding = "utf-8") as file:
-            file.write(yaml.safe_dump(args, sort_keys=False))
+        fname = cache_filename.replace('.pkl', '.yml')
+        aux.yaml_dump(data=args, filename=fname)
 
     else:
         with open(cache_filename, 'rb') as handle:
@@ -553,9 +547,8 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
             gc.enable()
         
         # Save args
-        import yaml
-        with open(cache_filename.replace('.pkl', '.yml'), "w", encoding = "utf-8") as file:
-            file.write(yaml.safe_dump(args, sort_keys=False))
+        fname = cache_filename.replace('.pkl', '.yml')
+        aux.yaml_dump(data=args, filename=fname)
         
     else:
         with open(cache_filename, 'rb') as handle:
