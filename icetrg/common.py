@@ -109,8 +109,8 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None, max
 
     # Load files
     X,ids = iceroot.load_tree(rootfile=rootfile, tree=tree,
-        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=None, library='np')
-
+        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=None, library='np', num_cpus=args['num_cpus'])
+    
     # @@ Filtering done here @@
     mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=CUT_VARS)

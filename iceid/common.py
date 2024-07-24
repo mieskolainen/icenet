@@ -64,7 +64,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     LOAD_VARS = inputvars.LOAD_VARS # Which variables do we read
     
     X,ids = iceroot.load_tree(rootfile=root_path, tree=args['tree_name'],
-        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=LOAD_VARS, library=library)
+        entry_start=entry_start, entry_stop=entry_stop, maxevents=maxevents, ids=LOAD_VARS, library=library,
+        num_cpus=args['num_cpus'])
     Y = None
     # --------------------------------------------------------------
     

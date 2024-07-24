@@ -570,7 +570,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         deval  = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val if not out_weights_on else None, feature_names=ids_val)
         
         ## What to evaluate
-        if epoch == 0 or (epoch % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:
             evallist = [(dtrain, 'train'), (deval, 'eval')]
         else:
             evallist = [(dtrain, 'train')]

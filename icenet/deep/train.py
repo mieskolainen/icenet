@@ -335,7 +335,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:
             _, train_acc, train_auc                   = optimize.test(model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
             validate_loss, validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
-
+            
             # Temperature calibration
             try:
                 from icenet.deep import tempscale

@@ -792,7 +792,8 @@ def multiprocess_plot_wrapper(p):
 
 
 def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
-             exclude_vals=[None], plot_unweighted=True, title = '', targetdir = '.'):
+             exclude_vals=[None], plot_unweighted=True, title = '', targetdir = '.',
+             num_cpus: int=0):
     """
     Plot all variables.
     """
@@ -826,7 +827,7 @@ def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
     # Start multiprocessing
     cprint(__name__ + f'.plotvars: Multiprocessing {X.shape[1]} plots', 'yellow')
     
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2)
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus)
     tic  = time.time()
     pool.map(multiprocess_plot_wrapper, paramlist)
     pool.close() # no more tasks

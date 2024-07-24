@@ -19,7 +19,7 @@ from icenet.tools import aux
 from icenet.tools import iceroot
 
 
-def read_single(process_func, process, root_path, param, class_id, dtype=None):
+def read_single(process_func, process, root_path, param, class_id, dtype=None, num_cpus=0):
     """
     Loop over different MC / data processes as defined in the yaml files
     
@@ -29,6 +29,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
         root_path:     main path of files
         param:         parameters of 'process_func'
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
+        num_cpus:      number of CPUs used (set 0 for automatic)
     
     Returns:
         X, Y, W, ids, info (awkward array format)
@@ -61,7 +62,8 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     # Load file
     X_uncut, ids = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
                     entry_start=param['entry_start'], entry_stop=param['entry_stop'],
-                    maxevents=maxevents, ids=param['load_ids'], library='ak', dtype=dtype)
+                    maxevents=maxevents, ids=param['load_ids'], library='ak', dtype=dtype,
+                    num_cpus=num_cpus)
     
     N_before = len(X_uncut)
 
@@ -124,7 +126,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     return {'X': X, 'Y': Y, 'W': W, 'ids': ids, 'info': info}
 
 
-def read_multiple(process_func, processes, root_path, param, class_id, dtype=None):
+def read_multiple(process_func, processes, root_path, param, class_id, dtype=None, num_cpus=0):
     """
     Loop over different MC / data processes as defined in the yaml files
     
@@ -134,6 +136,7 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
         root_path:     main path of files
         param:         parameters of 'process_func'
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
+        num_cpus:      number of CPUs used (set 0 for automatic)
     
     Returns:
         X, Y, W, ids, info (awkward array format)
@@ -144,7 +147,7 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
 
     for i,key in enumerate(processes):
         
-        data = read_single(process_func, processes[key], root_path, param, class_id, dtype)
+        data = read_single(process_func, processes[key], root_path, param, class_id, dtype, num_cpus)
         
         # Concatenate processes
         if i == 0:
@@ -245,7 +248,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0,
 
 
 def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
-              ids=None, library='np', dtype=None):
+              ids=None, library='np', dtype=None, num_cpus=0):
     """
     Load ROOT files
 
@@ -257,7 +260,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
         maxevents:     Maximum number of events in total (over all files)
         ids:           Names of the variables to read out from the root tree
         library:       Return type 'np' (jagged numpy) or 'ak' (awkward) of the array
-    
+        num_cpus:      Number of processes used (set 0 for automatic)
+        
     Returns:
         array of type 'library'
     """
@@ -282,6 +286,11 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
     cprint(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
     print('')
     print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
+    
+    if int(num_cpus) == 0:
+        num_workers = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
+    else:
+        num_workers = int(num_cpus)
     
     if   library == 'np':
         
@@ -315,7 +324,6 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
             # ======================================================
             # Multiprocessing version for multiple files
             
-            num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
             ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
             chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
@@ -377,7 +385,6 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
             # ======================================================
             # Multiprocessing version for multiple files
             
-            num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
             ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
             chunk_ind    = aux.split_start_end(range(len(files)), num_workers)

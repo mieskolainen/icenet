@@ -71,8 +71,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
             process_func=process_root,
             processes=proc,
             root_path=root_path,
-            param=param)
-
+            param=param,
+            num_cpus=args['num_cpus'])
+    
     # ----------
 
     X = ak.concatenate(X.values(), axis=0)

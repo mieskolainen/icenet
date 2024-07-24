@@ -71,7 +71,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         proc     = args["input"][key] 
         
         X[key], Y[key], W[key], _, INFO[key] = iceroot.read_multiple(class_id=class_id,
-            process_func=process_root, processes=proc, root_path=root_path, param=param)
+            process_func=process_root, processes=proc, root_path=root_path, param=param,
+            num_cpus=args['num_cpus'])
 
     # =================================================================
     # Sample conditional theory parameters as they are distributed in signal sample
@@ -319,10 +320,15 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
         start_time  = time.time()
         
         big_chunk_size = 10000
-        num_workers    = multiprocessing.cpu_count() // 2
-        big_chunks     = int(np.ceil(len(data.x) / big_chunk_size))
         
-        chunk_ind   = aux.split_start_end(range(len(data.x)), num_workers * big_chunks)
+        if int(args['num_cpus']) == 0:
+            num_workers = multiprocessing.cpu_count() // 2
+        else:
+            num_workers = int(args['num_cpus'])
+        
+        big_chunks = int(np.ceil(len(data.x) / big_chunk_size))
+        chunk_ind  = aux.split_start_end(range(len(data.x)), num_workers * big_chunks)
+        
         print(chunk_ind)
 
         data_graph = []

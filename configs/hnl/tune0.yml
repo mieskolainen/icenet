@@ -4,6 +4,7 @@
 
 rootname: 'hnl'
 rngseed: 123456                       # Fixed seed for training data mixing
+num_cpus: 0                           # 0 for automatic
 inputvars: 'mvavars'                  # Main file input description python file
 
 # ----------------------------------------------------
@@ -11,17 +12,17 @@ mva_param: &MVA_INPUT_PARAM
   use_conditional: false              # Conditional (theory parametric) input
   primary_classes: [0,1]              # Primary class IDs in MVA (train, ROC etc.)
   signal_class: 1                     # Signal class ID
-  #DA_class:    -2                     # Domain Adaptation class
+  #DA_class:    -2                    # Domain Adaptation class
   
   inputvar_scalar:  'MVA_SCALAR_VARS' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
-  #inputvar_jagged:  null              # 'MVA_JAGGED_VARS'
+  #inputvar_jagged:  null             # 'MVA_JAGGED_VARS'
   #jagged_maxdim:    6
   
   varnorm: null                       # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   #varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null                # Not implemented yet
   
-  frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
+  frac: [0.6, 0.1, 0.3]               # Train vs validate/test split fraction
   
   # Imputation
   imputation_param:

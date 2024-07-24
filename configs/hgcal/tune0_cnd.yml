@@ -8,14 +8,15 @@
 
 rootname: 'hgcal_cnd'
 rngseed: 123456                      # Fixed seed for training data mixing
-inputvars: 'mvavars'                  # Main file input description python file
+num_cpus: 0                          # 0 for automatic
+inputvars: 'mvavars'                 # Main file input description python file
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
   use_conditional: false              # Conditional (theory parametric) input
   primary_classes: [0,1]              # Primary class IDs in MVA (train, ROC etc.)
   signal_class: 1                     # Signal class ID
-  #DA_class:    -2                     # Domain Adaptation class
+  #DA_class:    -2                    # Domain Adaptation class
   
   inputvar_scalar:  'MVA_SCALAR_VARS' # 'MVA_SCALAR_VARS' # Input variables, implemented under mvavars.py
   #inputvar_jagged:  null             # 'MVA_JAGGED_VARS'

@@ -44,7 +44,6 @@ roc_paths         = []
 corr_mstats       = []
 ROC_binned_mstats = []
 ROC_binned_mlabel = []
-
 # **************************
 
 def read_cli():
@@ -70,9 +69,11 @@ def read_cli():
     parser.add_argument("--modeltag",        type=str,  default=None)
     parser.add_argument("--run_id",          type=str,  default='latest')
     
+    parser.add_argument("--num_cpus",        type=int,  default=0)
+    
     cli      = parser.parse_args()
     cli_dict = vars(cli)
-
+    
     return cli, cli_dict
 
 
@@ -139,6 +140,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     new_args = {}
     new_args['rootname']  = args['rootname']
     new_args['rngseed']   = args['rngseed']
+    new_args['num_cpus']  = args['num_cpus']
     new_args['inputvars'] = args['inputvars']
     
     # -----------------------------------------------------
@@ -927,6 +929,8 @@ def train_models(data_trn, data_val, args=None):
     print('')
     
     # Loop over active models
+    exceptions = 0
+    
     for i in range(len(args['active_models'])):
 
         # Collect garbage
@@ -1076,9 +1080,13 @@ def train_models(data_trn, data_val, args=None):
         except Exception as e:
             print(e)
             cprint(__name__ + f'.train_models: Exception occured, check the model definition! -- continue', 'red')
-    
+            exceptions += 1
+
     cprint(__name__ + f'.train_models: [done]', 'yellow')
     
+    if exceptions > 0:
+        raise Exception(__name__ + f'.train_models: Number of fatal exceptions = {exceptions} [check your data / model definitions]')
+
     return
 
 
@@ -1406,13 +1414,13 @@ def make_plots(data, args, runmode):
             targetdir = aux.makedir(f'{args["plotdir"]}/{runmode}/distributions/kinematic/')
             plots.plotvars(X = data['data_kin'].x, y = data['data_kin'].y, weights = data['data_kin'].w, ids = data['data_kin'].ids,           
                 targetdir=targetdir, title=f"training re-weight reference class: {args['reweight_param']['reference_class']}",
-                **param)
+                num_cpus=args['num_cpus'], **param)
         
         ### Plot MVA input variable plots
         targetdir = aux.makedir(f'{args["plotdir"]}/{runmode}/distributions/MVA-input/')
         plots.plotvars(X = data['data'].x, y = data['data'].y, weights = data['data'].w,  ids = data['data'].ids,
             targetdir=targetdir, title=f"training re-weight reference class: {args['reweight_param']['reference_class']}",
-            **param)
+            num_cpus=args['num_cpus'], **param)
 
     ### Correlations
     if args['plot_param']['corrmat']['active']:
