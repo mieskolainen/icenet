@@ -3,7 +3,7 @@
 name: icenet
 channels:
   - conda-forge
-  - intel
+#  - intel # Intel has removed channel
   - defaults
 dependencies:
   - python==3.10.11
@@ -13,7 +13,7 @@ dependencies:
   - gxx_linux-64==11.3.0
   - sysroot_linux-64==2.28
   - tbb==2021.9.0
-  - icc_rt==2023.1.0
+#  - icc_rt==2023.1.0
   - cudatoolkit==11.8.0
   - cudatoolkit-dev==11.7.0
   - cudnn==8.9.7.29

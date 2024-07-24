@@ -176,7 +176,7 @@ iceboost_swd:
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
-    beta: 1.0e-4
+    beta: 5.0e-3
     p: 1                 # p-norm (1,2, ...)
     num_slices: 500      # Number of MC projections (Higher the better) 
     mode: 'SWD'          # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
@@ -233,20 +233,20 @@ lzmlp0: &LZMLP
   out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
 
   model_param:
-    mlp_dim: [96, 96, 96, 96, 96]     # hidden layer dimensions
+    mlp_dim: [96, 96, 96, 96]         # hidden layer dimensions
     activation: 'silu'
     layer_norm: True
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
     dropout: 0.01
     act_after_norm: True
-    
+
   # Optimization
   opt_param:  
     lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     #lossfunc: 'binary_Lq_entropy'     
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 5.0e-3                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
@@ -263,7 +263,7 @@ lzmlp0: &LZMLP
     
     epochs: 150
     batch_size: 4096
-    lr: 3.0e-4
+    lr: 1.0e-3
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
@@ -322,7 +322,7 @@ fastkan0: &FASTKAN
     grid_min: -2.0                    # Activation learning param
     grid_max:  2.0                    # 
     num_grids:   8                    # 
-    mlp_dim: [96, 96, 96, 96, 96]     # hidden layer dimensions
+    mlp_dim: [96, 96, 96, 96]         # hidden layer dimensions
     use_base_update: True             # Use "base MLP" in addition
     
     last_tanh: True                   # Extra tanh layer
@@ -334,7 +334,7 @@ fastkan0: &FASTKAN
     #lossfunc: 'binary_Lq_entropy'    # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 5.0e-3                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
@@ -351,7 +351,7 @@ fastkan0: &FASTKAN
     
     epochs: 150
     batch_size: 4096
-    lr: 3.0e-4
+    lr: 1.0e-3
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
@@ -409,7 +409,7 @@ dmlp0: &DMLP
   out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
   
   model_param:
-    mlp_dim: [96, 96, 96, 96, 96]         # hidden layer dimensions
+    mlp_dim: [96, 96, 96, 96]         # hidden layer dimensions
     activation: 'silu'
     layer_norm: True
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
@@ -421,12 +421,12 @@ dmlp0: &DMLP
     last_tanh_scale: 10.0             # Scale after tanh()
 
   # Optimization
-  opt_param:  
+  opt_param:
     lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     #lossfunc: 'binary_Lq_entropy'
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 5.0e-3                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
@@ -442,7 +442,7 @@ dmlp0: &DMLP
     
     epochs: 150
     batch_size: 4096
-    lr: 3.0e-4
+    lr: 1.0e-3
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler

@@ -33,6 +33,7 @@ from icenet.tools import prints
 from icenet.tools import aux
 from icenet.tools import reweight
 from icenet.tools import plots
+from icenet.tools import supertune
 
 import matplotlib.pyplot as plt
 
@@ -55,7 +56,6 @@ def read_cli():
     parser.add_argument("--config",          type=str,  default='tune0.yml')
     parser.add_argument("--datapath",        type=str,  default='')
     parser.add_argument("--datasets",        type=str,  default='')
-    parser.add_argument("--tag",             type=str,  default='tag0')
     
     parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
     parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
@@ -66,15 +66,17 @@ def read_cli():
     parser.add_argument("--grid_nodes",      type=int,  default=1)
     
     parser.add_argument("--inputmap",        type=str,  default=None)
-    parser.add_argument("--modeltag",        type=str,  default=None)
+    parser.add_argument("--modeltag",        type=str,  default='default')
     parser.add_argument("--run_id",          type=str,  default='latest')
     
     parser.add_argument("--num_cpus",        type=int,  default=0)
+    parser.add_argument("--supertune",       type=str,  default=None)
     
     cli      = parser.parse_args()
     cli_dict = vars(cli)
     
     return cli, cli_dict
+
 
 
 def read_config(config_path='configs/xyz/', runmode='all'):
@@ -192,18 +194,27 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     args     = copy.deepcopy(new_args)
 
     # -------------------------------------------------------------------
-    ## Commandline override of yaml variables
+    ## Specific commandline override of yaml variables
     for key in cli_dict.keys():
         if key in args:
             cprint(__name__ + f'.read_config: {config_yaml_file} <{key}> default value cli-override with <{cli_dict[key]}>', 'red')
             args[key] = cli_dict[key]
-    print()
+    
+    # -------------------------------------------------------------------
+    ## Supertune generic commandline override of yaml (dictionary) content
+    
+    if cli_dict['supertune'] is not None:
+        print('')
+        cprint(__name__ + f'.read_config: Replacing default .yml content with supertune syntax')
+        print('')
+        supertune.supertune(cfg=args, config_string=cli_dict['supertune'])
+        print('')
     
     # -------------------------------------------------------------------
     ## 1. Create the first level hash
     
     hash_args = {}
-
+    
     # Critical Python files content
     files = {'cuts':      f'{cwd}/{config_path}/cuts.py',
              'filter':    f'{cwd}/{config_path}/filter.py',

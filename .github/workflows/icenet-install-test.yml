@@ -57,6 +57,7 @@ jobs:
       - name: Unit tests
         run: |
           pytest icenet/tools/stx.py -rP
+          pytest icenet/tools/supertune.py -rP
           pytest icefit/transport.py -rP
           pytest icefit/cortools.py -rP
       
