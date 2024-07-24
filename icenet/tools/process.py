@@ -197,7 +197,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Specific commandline override of yaml variables
     for key in cli_dict.keys():
         if key in args:
-            cprint(__name__ + f'.read_config: {config_yaml_file} <{key}> default value cli-override with <{cli_dict[key]}>', 'red')
+            cprint(__name__ + f'.read_config: {config_yaml_file} "{key}" default value cli-override with value {cli_dict[key]}', 'green')
             args[key] = cli_dict[key]
     
     # -------------------------------------------------------------------
@@ -205,7 +205,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     if cli_dict['supertune'] is not None:
         print('')
-        cprint(__name__ + f'.read_config: Replacing default .yml content with supertune syntax')
+        cprint(__name__ + f'.read_config: {config_yaml_file} default value cli-override with --supertune syntax:', 'green')
         print('')
         args = supertune.supertune(d=args, config_string=cli_dict['supertune'])
         print('')
@@ -214,7 +214,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## 1. Create the first level hash
     
     hash_args = {}
-
+    
     # Critical Python files content
     files = {'cuts':      f'{cwd}/{config_path}/cuts.py',
              'filter':    f'{cwd}/{config_path}/filter.py',

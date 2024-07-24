@@ -4,8 +4,6 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2024
 
-import re
-
 import pytest
 import re
 import ast
@@ -78,16 +76,16 @@ def supertune(d, config_string):
         
         value = parse_value(value_str)
         
+        print(f"supertune: Replacing {keys_str} with value {value}")
         set_nested_dict_value(d, keys, value, indices)
     
     return d
-
 
 @pytest.mark.parametrize("initial, replacement, expected", [
 
     # Basic test cases
     ({'key1': {'key2': 3.14, 'key3': [1, 2, 3]}, 'key5': 10},
-     "key1.key2 = 6.28 key1.key3 = [4, 5, 6] key5 = 42",
+     "key1.key2=6.28 key1.key3 = [4, 5, 6] key5 = 42",
      {'key1': {'key2': 6.28, 'key3': [4, 5, 6]}, 'key5': 42}),
     
     ({'a': {'b': {'c': 1}}},
