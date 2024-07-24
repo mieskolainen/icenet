@@ -66,7 +66,7 @@ def read_cli():
     parser.add_argument("--grid_nodes",      type=int,  default=1)
     
     parser.add_argument("--inputmap",        type=str,  default=None)
-    parser.add_argument("--modeltag",        type=str,  default='default')
+    parser.add_argument("--modeltag",        type=str,  default=None)
     parser.add_argument("--run_id",          type=str,  default='latest')
     
     parser.add_argument("--num_cpus",        type=int,  default=0)
@@ -214,7 +214,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## 1. Create the first level hash
     
     hash_args = {}
-    
+
     # Critical Python files content
     files = {'cuts':      f'{cwd}/{config_path}/cuts.py',
              'filter':    f'{cwd}/{config_path}/filter.py',
