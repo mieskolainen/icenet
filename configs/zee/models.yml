@@ -239,7 +239,7 @@ lzmlp0: &LZMLP
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
     dropout: 0.01
     act_after_norm: True
-
+  
   # Optimization
   opt_param:  
     lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -263,7 +263,7 @@ lzmlp0: &LZMLP
     
     epochs: 150
     batch_size: 4096
-    lr: 1.0e-3
+    lr: 4.0e-4
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
@@ -351,7 +351,7 @@ fastkan0: &FASTKAN
     
     epochs: 150
     batch_size: 4096
-    lr: 1.0e-3
+    lr: 4.0e-4
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
@@ -442,7 +442,7 @@ dmlp0: &DMLP
     
     epochs: 150
     batch_size: 4096
-    lr: 1.0e-3
+    lr: 4.0e-4
     weight_decay: 1.0e-4       # L2-regularization
   
   # Scheduler
@@ -494,7 +494,7 @@ dbnf0:
     
     epochs: 250
     batch_size: 512           # Keep it high!
-    lr: 1.0e-3
+    lr: 4.0e-4
     weight_decay: 0.0         # L2-regularization (0 seems OK) 
     polyak: 0.998
 

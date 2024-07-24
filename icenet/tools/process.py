@@ -62,15 +62,15 @@ def read_cli():
     parser.add_argument("--use_cache",       type=int,  default=1)
     parser.add_argument("--fastplot",        type=int,  default=0)
     
-    parser.add_argument("--grid_id",         type=int,  default=0)
-    parser.add_argument("--grid_nodes",      type=int,  default=1)
+    parser.add_argument("--grid_id",         type=int,  default=0)    # Condor/Oracle execution variables
+    parser.add_argument("--grid_nodes",      type=int,  default=1)    # Condor/Oracle
     
     parser.add_argument("--inputmap",        type=str,  default=None)
-    parser.add_argument("--modeltag",        type=str,  default=None)
+    parser.add_argument("--modeltag",        type=str,  default=None) # Use this for multiple parallel runs
     parser.add_argument("--run_id",          type=str,  default='latest')
     
-    parser.add_argument("--num_cpus",        type=int,  default=0)
-    parser.add_argument("--supertune",       type=str,  default=None)
+    parser.add_argument("--num_cpus",        type=int,  default=0)    # Fixed number of CPUs
+    parser.add_argument("--supertune",       type=str,  default=None) # Generic cli override
     
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -207,7 +207,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         print('')
         cprint(__name__ + f'.read_config: Replacing default .yml content with supertune syntax')
         print('')
-        supertune.supertune(cfg=args, config_string=cli_dict['supertune'])
+        args = supertune.supertune(d=args, config_string=cli_dict['supertune'])
         print('')
     
     # -------------------------------------------------------------------
