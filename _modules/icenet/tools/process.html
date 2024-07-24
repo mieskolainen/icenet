@@ -721,7 +721,7 @@
     <span class="c1">## Specific commandline override of yaml variables</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cli_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: </span><span class="si">{</span><span class="n">config_yaml_file</span><span class="si">}</span><span class="s1"> &lt;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&gt; default value cli-override with &lt;</span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: </span><span class="si">{</span><span class="n">config_yaml_file</span><span class="si">}</span><span class="s1"> &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot; default value cli-override with value </span><span class="si">{</span><span class="n">cli_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
             <span class="n">args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
     
     <span class="c1"># -------------------------------------------------------------------</span>
@@ -729,7 +729,7 @@
     
     <span class="k">if</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;supertune&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: Replacing default .yml content with supertune syntax&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_config: </span><span class="si">{</span><span class="n">config_yaml_file</span><span class="si">}</span><span class="s1"> default value cli-override with --supertune syntax:&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">supertune</span><span class="o">.</span><span class="n">supertune</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">config_string</span><span class="o">=</span><span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;supertune&#39;</span><span class="p">])</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -738,7 +738,7 @@
     <span class="c1">## 1. Create the first level hash</span>
     
     <span class="n">hash_args</span> <span class="o">=</span> <span class="p">{}</span>
-
+    
     <span class="c1"># Critical Python files content</span>
     <span class="n">files</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cuts&#39;</span><span class="p">:</span>      <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s1">/cuts.py&#39;</span><span class="p">,</span>
              <span class="s1">&#39;filter&#39;</span><span class="p">:</span>    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s1">/filter.py&#39;</span><span class="p">,</span>
