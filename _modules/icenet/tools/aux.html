@@ -563,13 +563,13 @@
     <span class="k">def</span> <span class="nf">block_style_dict_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="s1">&#39;tag:yaml.org,2002:map&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="c1"># Register the custom representers</span>
-    <span class="n">yaml</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">flow_style_list_representer</span><span class="p">)</span>
-    <span class="n">yaml</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">block_style_dict_representer</span><span class="p">)</span>
-    
     <span class="k">class</span> <span class="nc">NoSortDumper</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">represent_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="s1">&#39;tag:yaml.org,2002:map&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Register the custom representers with NoSortDumper</span>
+    <span class="n">NoSortDumper</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">flow_style_list_representer</span><span class="p">)</span>
+    <span class="n">NoSortDumper</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">block_style_dict_representer</span><span class="p">)</span>
     
     <span class="c1"># Save the YAML string with mixed styles to a file</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">yaml_file</span><span class="p">:</span>
