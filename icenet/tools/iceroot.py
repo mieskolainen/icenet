@@ -149,7 +149,7 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
 
     for i,key in enumerate(processes):
         
-        data = read_single(process_func=process_func, processes=processes[key],
+        data = read_single(process_func=process_func, process=processes[key],
                            root_path=root_path, param=param, class_id=class_id,
                            dtype=dtype, num_cpus=num_cpus, verbose=verbose)
 
