@@ -42,13 +42,13 @@ def yaml_dump(data: dict, filename: str):
     def block_style_dict_representer(dumper, data):
         return dumper.represent_mapping('tag:yaml.org,2002:map', data, flow_style=False)
 
-    # Register the custom representers
-    yaml.add_representer(list, flow_style_list_representer)
-    yaml.add_representer(dict, block_style_dict_representer)
-    
     class NoSortDumper(yaml.Dumper):
         def represent_dict(self, data):
             return self.represent_mapping('tag:yaml.org,2002:map', data.items(), flow_style=False)
+
+    # Register the custom representers with NoSortDumper
+    NoSortDumper.add_representer(list, flow_style_list_representer)
+    NoSortDumper.add_representer(dict, block_style_dict_representer)
     
     # Save the YAML string with mixed styles to a file
     with open(filename, 'w') as yaml_file:
