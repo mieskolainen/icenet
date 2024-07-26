@@ -36,7 +36,7 @@
             
           </a>
               <div class="version">
-                0.1.1.5
+                0.1.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -3255,12 +3255,6 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.aux.parse_vars">
-<span class="sig-name descname"><span class="pre">parse_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#parse_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.parse_vars" title="Link to this definition">¶</a></dt>
-<dd><p>Parse a series of key-value pairs and return a dictionary</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.pick_ind">
 <span class="sig-name descname"><span class="pre">pick_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minmax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#pick_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.pick_ind" title="Link to this definition">¶</a></dt>
 <dd><p>Return indices between minmax[0] &lt;= x &lt; minmax[1], i.e. [a,b)</p>
@@ -3273,6 +3267,24 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.pick_index">
+<span class="sig-name descname"><span class="pre">pick_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#pick_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.pick_index" title="Link to this definition">¶</a></dt>
+<dd><p>Return indices in all_ids corresponding to vars</p>
+<p>(vars can contain regexp)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all_ids</strong> – list of strings, e.g. [‘a’,’b’,’c’]</p></li>
+<li><p><strong>vars</strong> – list of string to pick, e.g. [‘a’, ‘c’] or [‘.*’]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>index array, variable names list</p>
 </dd>
 </dl>
 </dd></dl>
