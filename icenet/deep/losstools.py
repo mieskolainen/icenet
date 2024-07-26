@@ -349,7 +349,7 @@ def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, mode='SW
     u_values = x[u_idx, :]
     v_values = x[v_idx, :]
     
-    LR = torch.exp(logits[u_idx]).squeeze()  # likelihood ratio
+    LR = torch.exp(logits[u_idx]).squeeze() # likelihood ratio
     
     if weights is not None:
         u_weights = weights[u_idx] * LR

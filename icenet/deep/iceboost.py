@@ -264,14 +264,18 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             y_      = targets
             w_      = w
         
-        x_ = torch.tensor(x_, dtype=preds.dtype, device=preds.device) # Map to device
+        # Pick used variables
+        x_ = torch.tensor(x_[:, SWD_param['x_dim_index']],
+                          dtype=preds.dtype, device=preds.device) # Map to device
 
-        SWD_loss = losstools.SWD_reweight_loss(
+        # Evaluate loss
+        loss     = losstools.SWD_reweight_loss(
                         logits=logits_, x=x_, y=y_, weights=w_,
                         p=SWD_param['p'], num_slices=SWD_param['num_slices'], mode=SWD_param['mode'])
+        SWD_loss = SWD_param["beta"] * loss
         
-        txt = f'SWD [$\\beta$ = {SWD_param["beta"]}]'
-        track_loss[txt] = SWD_param['beta'] * SWD_loss.item()
+        txt             = f'SWD [$\\beta$ = {SWD_param["beta"]}]'
+        track_loss[txt] = SWD_loss.item()
         loss_str       += f'{txt} = {SWD_loss.item():0.5f} | '
     
     # --------------------------------------------------------------------
@@ -489,7 +493,12 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     
     if 'SWD_param' in param:
         SWD_param = param['SWD_param']
-    
+        
+        # Pick variables to use
+        pick_ind, pick_vars  = aux.pick_index(all_ids=data_trn.ids, vars=SWD_param['vars'])
+        print(f'SWD_param: Using variables {pick_vars} ({pick_ind})')
+        SWD_param['x_dim_index'] = pick_ind
+        
     if 'BCE_param' in param:
         
         BCE_param = {}

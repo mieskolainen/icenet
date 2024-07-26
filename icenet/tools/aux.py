@@ -290,18 +290,37 @@ def process_regexp_ids(all_ids, ids=None):
 
     return load_ids
 
-
-def parse_vars(items):
+def pick_index(all_ids: list, vars: list):
     """
-    Parse a series of key-value pairs and return a dictionary
+    Return indices in all_ids corresponding to vars
+    
+    (vars can contain regexp)
+    
+    Args:
+        all_ids: list of strings, e.g. ['a','b','c']
+        vars:    list of string to pick, e.g. ['a', 'c'] or ['.*']
+    
+    Returns:
+        index array, variable names list
     """
-    d = {}
+    
+    var_names = process_regexp_ids(all_ids=all_ids, ids=vars)
+    pick_ind  = np.array(np.where(np.isin(all_ids, var_names))[0], dtype=int)
 
-    if items:
-        for item in items:
-            key, value = parse_var(item)
-            d[key] = value
-    return d
+    return pick_ind, var_names
+
+
+#def parse_vars(items):
+#    """
+#    Parse a series of key-value pairs and return a dictionary
+#    """
+#    d = {}
+#
+#    if items:
+#        for item in items:
+#            key, value = parse_var(item)
+#            d[key] = value
+#    return d
 
 
 def ak2numpy(x: ak.Array, fields: list, null_value=float(-999.0), dtype='float32'):
@@ -936,7 +955,9 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
         list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
         
         if len(list_of_files) == 0:
-            raise Exception(__name__ + f'.create_model_filename: Could not find any files for model "{label}"')
+            txt  = __name__ + f'.create_model_filename: Could not find any files for model "{label}"'
+            txt += f" under path {path}"
+            raise Exception(txt)
         
         # Latest model
         filename = max(list_of_files, key=os.path.getctime)

@@ -12,7 +12,8 @@ import socket
 import copy
 import glob
 from tqdm import tqdm
-            
+import matplotlib.pyplot as plt
+
 from importlib import import_module
 from termcolor import cprint
 import os
@@ -35,10 +36,14 @@ from icenet.tools import reweight
 from icenet.tools import plots
 from icenet.tools import supertune
 
-import matplotlib.pyplot as plt
-
 
 # ******** GLOBALS *********
+from icenet.tools import icelogger
+from icenet.tools.icelogger import icelog
+
+icelogger.set_global_log_file('initial.log')
+LOGGER = icelogger.get_logger()
+
 roc_mstats        = []
 roc_labels        = []
 roc_paths         = []
@@ -76,8 +81,6 @@ def read_cli():
     cli_dict = vars(cli)
     
     return cli, cli_dict
-
-
 
 def read_config(config_path='configs/xyz/', runmode='all'):
     """
@@ -383,39 +386,50 @@ def generic_flow(rootname, func_loader, func_factor):
         func_loader:  data loader (function handle)
         func_factor:  data transformer (function handle)
     """
-    cli, cli_dict  = read_cli()
-    runmode        = cli_dict['runmode']
+    cli, cli_dict = read_cli()
+    runmode       = cli_dict['runmode']
     
-    args, cli      = read_config(config_path=f'configs/{rootname}', runmode=runmode)
-      
-    if runmode == 'genesis':
+    args, cli     = read_config(config_path=f'configs/{rootname}', runmode=runmode)
 
+    if runmode == 'genesis':
+        
+        icelogger.set_global_log_file(f'{args["datadir"]}/icelogger_{args["__hash_genesis__"]}.log')
+        
         read_data(args=args, func_loader=func_loader, runmode=runmode) 
         
     if runmode == 'train' or runmode == 'eval':
 
+        icelogger.set_global_log_file(f'{args["datadir"]}/icelogger_{args["__hash_post_genesis__"]}.log')
+        
         data = read_data_processed(args=args, func_loader=func_loader,
-            func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
+                func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
         
     if runmode == 'train':
+        
+        icelogger.set_global_log_file(f'{args["plotdir"]}/train/icelogger.log')
         
         output_file = f'{args["plotdir"]}/train/stats_train.log'
         prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
         
         make_plots(data=data['trn'], args=args, runmode=runmode)
+        
         train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 
     if runmode == 'eval':
-
+        
+        icelogger.set_global_log_file(f'{args["plotdir"]}/eval/icelogger.log')
+        
         output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
         prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)
         
         make_plots(data=data['tst'], args=args, runmode=runmode)
+        
         evaluate_models(data=data['tst'], info=data['info'], args=args)
-    
+        
     return args, runmode
 
 
+@icelog(LOGGER)
 def read_data(args, func_loader, runmode):
     """
     Load input data and return full dataset arrays
@@ -489,7 +503,7 @@ def read_data(args, func_loader, runmode):
         
         return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
-
+@icelog(LOGGER)
 def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     """
     Read/write (MVA) data and return full processed dataset
@@ -564,7 +578,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     
     return processed_data
 
-
+@icelog(LOGGER)
 def process_data(args, predata, func_factor, mvavars, runmode):
     """
     Process data further
@@ -718,7 +732,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     
     return output
 
-
+@icelog(LOGGER)
 def impute_datasets(data, args, features=None, imputer=None):
     """
     Dataset imputation
@@ -768,7 +782,7 @@ def impute_datasets(data, args, features=None, imputer=None):
     
     return data, imputer
 
-
+@icelog(LOGGER)
 def train_models(data_trn, data_val, args=None):
     """
     Train ML/AI models wrapper with pre-processing.
@@ -1091,9 +1105,9 @@ def train_models(data_trn, data_val, args=None):
     if exceptions > 0:
         raise Exception(__name__ + f'.train_models: Number of fatal exceptions = {exceptions} [check your data / model definitions]')
 
-    return
+    return True
 
-
+@icelog(LOGGER)
 def evaluate_models(data=None, info=None, args=None):
     """
     Evaluate ML/AI models.
@@ -1399,9 +1413,9 @@ def evaluate_models(data=None, info=None, args=None):
     with open(targetfile, 'wb') as file:
         pickle.dump(resdict, file, protocol=pickle.HIGHEST_PROTOCOL)
     
-    return
+    return True
 
-
+@icelog(LOGGER)
 def make_plots(data, args, runmode):
     """
     Basic Q/A-plots
@@ -1432,7 +1446,9 @@ def make_plots(data, args, runmode):
         targetdir = aux.makedir(f'{args["plotdir"]}/{runmode}/distributions/')
         fig,ax    = plots.plot_correlations(X=data['data'].x, weights=data['data'].w, ids=data['data'].ids, y=data['data'].y, targetdir=targetdir)
 
+    return True
 
+@icelog(LOGGER)
 def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     X_kin, ids_kin, X_RAW, ids_RAW):
     """ 
@@ -1459,8 +1475,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     
     if 'OBS_reweight' in args['plot_param'] and args['plot_param']['OBS_reweight']['active']:
         
-        var_names = aux.process_regexp_ids(all_ids=ids_RAW, ids=args['plot_param']['OBS_reweight']['var'])
-        pick_ind  = np.array(np.where(np.isin(ids_RAW, var_names))[0], dtype=int)
+        pick_ind, var_names = aux.pick_index(all_ids=ids_RAW, vars=args['plot_param']['OBS_reweight']['var'])
         
         # -----------------------------------------------
         
@@ -1693,7 +1708,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     
     return True
 
-
+@icelog(LOGGER)
 def plot_XYZ_multiple_models(targetdir, args):
 
     global roc_mstats

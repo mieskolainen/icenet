@@ -1,210 +1,169 @@
-# Optimal Transport (Wasserstein) distance measures
+# Optimal Transport (Wasserstein) distance measures (tests under construction)
 # 
+# run tests with: pytest icefit/transport.py -rP -vv
+#
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import torch
 import pytest
 
-def wasserstein_distance_1D(u_values: torch.Tensor, v_values: torch.Tensor,
-                            u_weights: torch.Tensor=None, v_weights: torch.Tensor=None,
-                            p: int=1, apply_oop=True):
+def quantile_function(qs: torch.Tensor, cumweights: torch.Tensor, values: torch.Tensor):
     """
-    1D Wasserstein distance via sort-CDF
-    
-    (a torch equivalent implementation of scipy.stats.wasserstein_distance)
+    Computes the quantile function of an empirical distribution
     
     Args:
-        u_values:   samples in U (n x dim)
-        v_values:   samples in V (m x dim)
-        u_weights:  sample U weights (n,) (if none, assumed to be unity)
-        v_weights:  sample V weights (m,)
-        p:          p-norm parameter (p = 1 is 'Earth Movers', 2 = is W-2, ...)
-        apply_oop:  apply final 1/p   
+        qs:         quantile positions where the quantile function is evaluated
+        cumweights: cumulative weights of the 1D empirical distribution
+        values:     locations of the 1D empirical distribution
+
+    Returns:
+        quantiles of the distribution
+    """
+    n   = values.shape[0]
+    qs         = qs.T.contiguous()
+    cumweights = cumweights.T.contiguous()
+    
+    idx = torch.searchsorted(cumweights, qs).T.contiguous()
+    
+    return torch.take_along_dim(values, torch.clip(idx, 0, n - 1), dim=0)
+
+
+def wasserstein_distance_1D(u_values: torch.Tensor, v_values: torch.Tensor,
+                            u_weights: torch.Tensor=None, v_weights: torch.Tensor=None,
+                            p: int=1, inverse_power: bool=False, normalize_weights: bool=True,
+                            require_sort: bool=True):
+    """
+    Wasserstein distance over two empirical samples.
+    
+    This function computes with quantile functions (not just CDFs as with special case p=1),
+    thus compatible with arbitrary p.
+    
+    Args:
+        u_values:          sample U vectors (n x dim)
+        v_values:          sample V vectors (m x dim)
+        u_weights:         sample U weights (n,) (if None, assumed to be unit)
+        v_weights:         sample V weights (m,)
+        p:                 p-norm parameter (p = 1 is 'Earth Movers', 2 = is W-2, ...)     
+        num_slices:        number of random MC projections (slices) (higher the better)
+        inverse_power:     apply final inverse power 1/p
+        normalize_weights: normalize per sample (U,V) weights to sum to one  
+        require_sort:      always by default, unless presorted
     
     Returns:
         distance between the empirical sample distributions
     """
-    if u_weights is not None:
-        assert u_values.size(0) == u_weights.size(0), "wasserstein_distance_1D: u_values and u_weights must be the same size."
+
+    def zero_pad(a, pad_width, value=0):
+        """
+        Helper zero-padding function
+        """
+        how_pad = tuple(element for t in pad_width[::-1] for element in t)
+        return torch.nn.functional.pad(a, how_pad, value=value)
     
-    if v_weights is not None:
-        assert v_values.size(0) == v_weights.size(0), "wasserstein_distance_1D: v_values and v_weights must be the same size."
+    n = u_values.shape[0]
+    m = v_values.shape[0]
     
-    # Sort values
-    u_sorter = torch.argsort(u_values)
-    v_sorter = torch.argsort(v_values)
-
-    all_values    = torch.cat((u_values, v_values))
-    all_values, _ = torch.sort(all_values)
-
-    # Compute the differences between pairs of successive values
-    deltas = torch.diff(all_values)
-
-    # Get the respective positions of the values of u and v among the values of both distributions
-    u_cdf_indices = torch.searchsorted(u_values[u_sorter], all_values[:-1], right=True)
-    v_cdf_indices = torch.searchsorted(v_values[v_sorter], all_values[:-1], right=True)
-
-    # Calculate the CDFs of u and v using their weights, if specified
+    if normalize_weights and u_weights is not None:
+        u_weights = u_weights / torch.sum(u_weights)
+    if normalize_weights and v_weights is not None:
+        v_weights = v_weights / torch.sum(v_weights)
+    
     if u_weights is None:
-        u_cdf = u_cdf_indices.float() / u_values.size(0)
-    else:
-        zero = torch.tensor([0.0], dtype=u_values.dtype, device=u_values.device)
-        rest = torch.cumsum(u_weights[u_sorter], dim=0)
-        
-        u_sorted_cumweights = torch.cat((zero, rest))
-        u_cdf = u_sorted_cumweights[u_cdf_indices] / u_sorted_cumweights[-1] # normalize
-
-    if v_weights is None:
-        v_cdf = v_cdf_indices.float() / v_values.size(0)
-    else:
-        zero = torch.tensor([0.0], dtype=v_values.dtype, device=v_values.device)
-        rest = torch.cumsum(v_weights[v_sorter], dim=0)
-        
-        v_sorted_cumweights = torch.cat((zero, rest))
-        v_cdf = v_sorted_cumweights[v_cdf_indices] / v_sorted_cumweights[-1] # normalize
-
-    # Compute the value of the integral based on the CDFs
-    if p == 1:
-        integral = torch.sum(torch.abs(u_cdf - v_cdf) * deltas)
-    elif p == 2:
-        integral = torch.sum((u_cdf - v_cdf).pow(2) * deltas)
-    else:
-        integral = torch.sum(torch.abs(u_cdf - v_cdf).pow(p) * deltas)
-
-    if apply_oop:
-        if p == 1:
-            return integral
-        if p == 2:
-            return torch.sqrt(integral)
-        else:
-            return torch.pow(integral, 1.0 / p)
+        u_weights = torch.ones_like(u_values) / n
+    elif u_weights.ndim != u_values.ndim:
+        u_weights = u_weights[..., None].repeat((1,)*u_weights.ndim + (u_values.shape[-1],))
     
-    # For sliced (multidim) version 1/p is applied after the average
+    if v_weights is None:
+        v_weights = torch.ones_like(v_values) / m
+    elif v_weights.ndim != v_values.ndim:
+        v_weights = v_weights[..., None].repeat((1,)*v_weights.ndim + (v_values.shape[-1],))
+
+    if require_sort:
+        u_sorter  = torch.argsort(u_values, dim=0)
+        u_values  = torch.take_along_dim(u_values, u_sorter, dim=0)
+        u_weights = torch.take_along_dim(u_weights, u_sorter, dim=0)
+        
+        v_sorter  = torch.argsort(v_values, dim=0)
+        v_values  = torch.take_along_dim(v_values, v_sorter, dim=0)
+        v_weights = torch.take_along_dim(v_weights, v_sorter, dim=0)
+
+    u_cumweights = torch.cumsum(u_weights, dim=0)
+    v_cumweights = torch.cumsum(v_weights, dim=0)
+
+    # Compute quantile functions
+    qs = torch.sort(torch.cat((u_cumweights, v_cumweights), dim=0), dim=0).values
+    u_quantiles = quantile_function(qs=qs, cumweights=u_cumweights, values=u_values)
+    v_quantiles = quantile_function(qs=qs, cumweights=v_cumweights, values=v_values)
+    
+    # Boundary conditions
+    qs = zero_pad(qs, pad_width=[(1, 0)] + (qs.ndim - 1) * [(0, 0)])
+    
+    # Measure and integrand
+    delta = qs[1:, ...] - qs[:-1, ...]
+    dq = torch.abs(u_quantiles - v_quantiles)
+
+    if p == 1:
+        return torch.sum(delta * dq, dim=0)
+    
+    if inverse_power:
+        return torch.sum(delta * torch.pow(dq, p), dim=0)**(1.0 / p)
     else:
-        return integral
+        return torch.sum(delta * torch.pow(dq, p), dim=0)
+
 
 def rand_projections(dim: int, N: int=1000, device: str='cpu', dtype=torch.float32):
     """
     Define N random projection directions on the unit sphere S^{dim-1}
+    
+    Normally distributed components and final normalization guarantee uniformity.
     """
     projections = torch.randn((N, dim), dtype=dtype, device=device)
+    return projections / torch.norm(projections, p=2, dim=1, keepdim=True)
 
-    return projections / torch.sqrt(torch.sum(projections ** 2, dim=1, keepdim=True))
-
-def sliced_W_vectorized(u_values: torch.Tensor, v_values: torch.Tensor,
-                        num_slices: int=2000, p: int=1,
-                        u_weights: torch.Tensor=None, v_weights: torch.Tensor=None,
-                        directions: torch.Tensor=None):
-    """
-    Helper function for 'sliced_wasserstein_distance'
-    """
-    
-    device = u_values.device
-    
-    # Get dimensions
-    n_samples_u, dim = u_values.shape
-    n_samples_v = v_values.shape[0]
-    
-    # Generate random projections
-    if directions is None:
-        directions = rand_projections(dim=dim, num_slices=num_slices, device=device)
-    
-    # Project the data
-    u_proj = u_values @ directions.T
-    v_proj = v_values @ directions.T
-    
-    # Prepare weights
-    if u_weights is None:
-        u_weights = torch.ones(n_samples_u, device=device) / n_samples_u
-    else:
-        u_weights = torch.as_tensor(u_weights, dtype=torch.float32, device=device)
-        u_weights /= u_weights.sum()
-    
-    if v_weights is None:
-        v_weights = torch.ones(n_samples_v, device=device) / n_samples_v
-    else:
-        v_weights = torch.as_tensor(v_weights, dtype=torch.float32, device=device)
-        v_weights /= v_weights.sum()
-    
-    # Sort projected data and corresponding weights
-    u_sorted, u_indices = torch.sort(u_proj, dim=0)
-    v_sorted, v_indices = torch.sort(v_proj, dim=0)
-    
-    u_weights_sorted = u_weights[u_indices]
-    v_weights_sorted = v_weights[v_indices]
-    
-    # Compute cumulative weights
-    u_cum_weights = torch.cumsum(u_weights_sorted, dim=0)
-    v_cum_weights = torch.cumsum(v_weights_sorted, dim=0)
-    
-    # Merge and sort all points
-    all_values = torch.cat([u_sorted, v_sorted], dim=0)
-    all_cum_weights = torch.cat([u_cum_weights, v_cum_weights], dim=0)
-    is_u = torch.cat([torch.ones_like(u_sorted, device=device),
-                      torch.zeros_like(v_sorted, device=device)], dim=0)
-    
-    sorted_idx = torch.argsort(all_values, dim=0)
-    all_values = torch.gather(all_values, 0, sorted_idx)
-    all_cum_weights = torch.gather(all_cum_weights, 0, sorted_idx)
-    is_u = torch.gather(is_u, 0, sorted_idx)
-    
-    # CDFs
-    u_cdf = torch.where(is_u == 1, all_cum_weights, torch.zeros_like(all_cum_weights))
-    v_cdf = torch.where(is_u == 0, all_cum_weights, torch.zeros_like(all_cum_weights))
-    u_cdf, _ = torch.cummax(u_cdf, dim=0)
-    v_cdf, _ = torch.cummax(v_cdf, dim=0)
-    
-    # Sum up the areas to get the Wasserstein distances
-    cdf_diff = torch.abs(u_cdf - v_cdf)
-    deltas   = all_values[1:] - all_values[:-1]
-    
-    if   p == 1:
-        return torch.sum(cdf_diff[:-1] * deltas, dim=0)
-    elif p == 2:
-        return torch.sum(cdf_diff[:-1].pow(2) * deltas, dim=0)
-    else:
-        return torch.sum(cdf_diff[:-1].pow(p) * deltas, dim=0)
 
 def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
                                 u_weights: torch.Tensor=None, v_weights: torch.Tensor=None,
-                                p: int=1, num_slices: int=1000, mode='SWD', vectorized=True):
+                                p: int=1, num_slices: int=1000, mode: str='SWD', 
+                                vectorized: bool=True, inverse_power: bool=True):
     """
     Sliced Wasserstein Distance over arbitrary dimensional samples
     
     References:
         https://arxiv.org/abs/1902.00434
-        https://arxiv.org/abs/2304.13586 (EBSW)
+        https://arxiv.org/abs/2304.13586
     
     Notes:
         When using this as a loss function e.g. with neural nets, large
         minibatch sizes may be beneficial or needed.
     
     Args:
-        u_values:    sample U vectors (n x dim)
-        v_values:    sample V vectors (m x dim)
-        u_weights:   sample U weights (n,) (if None, assumed to be unit)
-        v_weights:   sample V weights (m,)
-        p:           p-norm parameter (p = 1 is 'Earth Movers', 2 = is W-2, ...)       
-        num_slices:  number of random MC projections (slices) (higher the better)
-        mode:        'SWD'  (basic uniform MC random)
-                     'EBSW' (may have faster convergence and smaller variance)
-        vectorized:  fully vectorized (may take more GPU/CPU memory, but 10x faster)
-    
+        u_values:      sample U vectors (n x dim)
+        v_values:      sample V vectors (m x dim)
+        u_weights:     sample U weights (n,) (if None, assumed to be unit)
+        v_weights:     sample V weights (m,)
+        p:             p-norm parameter (p = 1 is 'Earth Movers', 2 = is W-2, ...)       
+        num_slices:    number of random MC projections (slices) (higher the better)
+        mode:          'SWD'  (basic uniform MC random)
+        vectorized:    fully vectorized (may take more GPU/CPU memory, but 10x faster)
+        inverse_power: apply final inverse power
+        
     Returns:
         distance between the empirical sample distributions
     """
     
     # Generate a random projection direction
-    dim  = int(u_values.shape[-1])
+    dim        = int(u_values.shape[-1])
     directions = rand_projections(dim=dim, N=num_slices, device=u_values.device)
     
     if vectorized:
         
-        dist = sliced_W_vectorized(u_values  = u_values,  v_values  = v_values,
-                                u_weights = u_weights, v_weights = v_weights,
-                                p = p, directions = directions)    
-    else:
+        u_proj = torch.matmul(u_values, directions.T)
+        v_proj = torch.matmul(v_values, directions.T)
         
+        dist = wasserstein_distance_1D(u_values=u_proj, v_values=v_proj,
+                    u_weights=u_weights, v_weights=v_weights, p=p, inverse_power=False)
+        
+    else:
         dist = torch.zeros(num_slices, device=u_values.device, dtype=u_values.dtype)
         
         for i in range(num_slices):
@@ -215,53 +174,84 @@ def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
             
             # Calculate the 1-dim Wasserstein on the direction
             dist[i] = wasserstein_distance_1D(u_values=u_proj, v_values=v_proj,
-                                        u_weights=u_weights, v_weights=v_weights, p=p,
-                                        apply_oop=False)
+                            u_weights=u_weights, v_weights=v_weights, p=p, inverse_power=False)
     
-    if   mode == 'SWD':  # Standard uniform random
-        dist    = dist.mean()
-
-    elif mode == 'EBSW': # "Energy Based" importance sampling via softmax
-        dist    = dist.view(1, num_slices)
-        weights = torch.softmax(dist, dim=1)
-        dist    = torch.sum(weights*dist, dim=1).mean()
+    if   mode == 'SWD':  # Standard
+        dist = torch.sum(dist) / num_slices
     
     else:
         raise Exception(__name__ + f'.sliced_wasserstein_distance: Unknown "mode" chosen')
     
-    if   p == 1:
-        return dist
-    elif p == 2:
-        return torch.sqrt(dist)
+    if inverse_power:
+        return dist ** (1.0 / p)
     else:
-        return torch.pow(dist, 1.0 / p)
+        return dist
+
 
 def test_1D(EPS=1e-3):
     """
     Test function (fixed reference checked against scikit-learn)
     """
+    from scipy.stats import wasserstein_distance
+    import numpy as np
     
     # -----------------------------------------------
-    # p = 1 case
+    ## p = 1 case checked against scikit-learn
+    
     p = 1
     
     res = wasserstein_distance_1D(torch.tensor([0, 1, 3]), torch.tensor([5, 6, 8]), p=p).item()
-    assert res == pytest.approx(5, abs=EPS)
+    res_scikit = wasserstein_distance(np.array([0, 1, 3]),     np.array([5, 6, 8]))
+    
+    print(f'1D case 1: p = 1 | {res} {res_scikit}')
+    assert res == pytest.approx(res_scikit, abs=EPS)
     
     res = wasserstein_distance_1D(torch.tensor([0, 1]), torch.tensor([0, 1]),
                                   torch.tensor([3, 1]), torch.tensor([2, 2]), p=p).item()
-    assert res == pytest.approx(0.25, abs=EPS)
+    res_scikit = wasserstein_distance(np.array([0, 1]),     np.array([0, 1]),
+                                      np.array([3, 1]),     np.array([2, 2]))
+    
+    print(f'1D case 2: p = 1 | {res} {res_scikit}')
+    assert res == pytest.approx(res_scikit, abs=EPS)
     
     res = wasserstein_distance_1D(torch.tensor([3.4, 3.9, 7.5, 7.8]), torch.tensor([4.5, 1.4]),
-                                  torch.tensor([1.4, 0.9, 3.1, 7.2]), torch.tensor([3.2, 3.5]), p=p).item()
-    assert res == pytest.approx(4.0781, abs=EPS)
+                                  torch.tensor([1.4, 0.9, 3.1, 7.2]), torch.tensor([3.2, 3.5])).item()
+    res_scikit = wasserstein_distance(np.array([3.4, 3.9, 7.5, 7.8]),     np.array([4.5, 1.4]),
+                                      np.array([1.4, 0.9, 3.1, 7.2]),     np.array([3.2, 3.5]))
+    
+    print(f'1D case 3: p = 1 | res = {res} res_scikit = {res_scikit}')
+    assert res == pytest.approx(res_scikit, abs=EPS)
+    
+    # -----------------------------------------------
+    ## p = 1,2 against POT
+    
+    import ot    
+    
+    u_values = torch.tensor([1.0, 2.0])
+    v_values = torch.tensor([3.0, 4.0])
+    
+    u_weights = torch.tensor([0.3, 1.0])
+    v_weights = torch.tensor([1.0, 0.5])
+    
+    # pot library does not normalize, so do it here
+    u_weights /= torch.sum(u_weights)
+    v_weights /= torch.sum(v_weights)
+    
+    for p in [1,2]:
+        
+        res = wasserstein_distance_1D(u_values, v_values, u_weights, v_weights, p=p).item()
+        pot = ot.wasserstein_1d(u_values, v_values, u_weights, v_weights, p=p)
+        
+        print(f'1D case 3: p = {p} | res = {res} pot = {pot}')
+        assert res == pytest.approx(pot, abs=EPS)
 
     # -----------------------------------------------
-    ## p = 2 case
+    ## p = 2 case checked against pre-computed
+    
     p = 2
     
     res = wasserstein_distance_1D(torch.tensor([0, 1, 3]), torch.tensor([5, 6, 8]), p=p).item()
-    assert res == pytest.approx(1.91485, abs=EPS)
+    assert res == pytest.approx(25.0, abs=EPS)
     
     res = wasserstein_distance_1D(torch.tensor([0, 1]), torch.tensor([0, 1]),
                                   torch.tensor([3, 1]), torch.tensor([2, 2]), p=p).item()
@@ -269,13 +259,14 @@ def test_1D(EPS=1e-3):
     
     res = wasserstein_distance_1D(torch.tensor([3.4, 3.9, 7.5, 7.8]), torch.tensor([4.5, 1.4]),
                                   torch.tensor([1.4, 0.9, 3.1, 7.2]), torch.tensor([3.2, 3.5]), p=p).item()
-    assert res == pytest.approx(1.67402, abs=EPS)
+    assert res == pytest.approx(19.09, abs=EPS)
+
 
 def test_swd():
     """
-    Test function
+    Test sliced Wasserstein distance
     """
-        
+    
     def set_seed(seed):
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
@@ -287,56 +278,110 @@ def test_swd():
 
     from time import time
     
+    seed = 42
+    
+    # ---------------------------------------------------------
+    # 2D test
+    
+    n = 200  # number of samples
+    
+    # Mean vectors
+    mu_u = torch.tensor([0, 0], dtype=torch.float32)
+    mu_v = torch.tensor([4, 0], dtype=torch.float32)
+    
+    # Covariance matrices
+    cov_u = torch.tensor([[1.0,    0],
+                          [0,    1.0]], dtype=torch.float32)
+    cov_v = torch.tensor([[1.0, -0.3],
+                          [-0.3, 1.0]], dtype=torch.float32)
+
+    # Function to generate random vectors
+    def generate_random_vectors(mu, cov, num_samples):
+        distribution = torch.distributions.MultivariateNormal(mu, cov)
+        samples = distribution.sample((num_samples,))
+        return samples
+    
+    # Generate random vectors for both distributions
+    set_seed(seed)
+    u_values = generate_random_vectors(mu_u, cov_u, n)
+    v_values = generate_random_vectors(mu_v, cov_v, n)
+    
+    print(u_values.shape)
+    print(v_values.shape)
+
+    
+    # ------------------------------------------------------------
+    # Versus POT
+    
+    import ot
+    
+    num_slices = 200
+    
+    #exact = wasserstein2_distance_gaussian(mu1=mu_u, cov1=cov_u, mu2=mu_v, cov2=cov_v)  
+    
+    for p in [1,2]:
+        
+        pot = ot.sliced_wasserstein_distance(X_s=u_values, X_t=v_values,
+                                             a=torch.ones(n)/n, b=torch.ones(n)/n,
+                                             n_projections=num_slices, p=p)
+        
+        for vectorized in [False, True]:
+            
+            # 'SWD'
+            set_seed(seed)
+            res = sliced_wasserstein_distance(u_values=u_values, v_values=v_values, p=p,
+                                num_slices=num_slices, mode='SWD', vectorized=vectorized).item()
+            print(f'p = {p}: case 2 SWD | res = {res} pot = {pot} (vectorized = {vectorized})')
+            assert res == pytest.approx(pot, abs=0.3)
+    
+    # ---------------------------------------------------------
+    # Fixed values 1D test
+    
     u_values  = torch.tensor([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
     u_weights = torch.tensor([0.2, 0.5, 0.3]) # event weights
     v_values  = torch.tensor([[1.5, 2.5], [3.5, 4.5], [5.5, 6.5]])
     v_weights = torch.tensor([0.3, 0.4, 0.3]) # event weights
+    
     p = 2
-    num_slices = int(1e3)
+    num_slices = 200
     
-    # Fixed input tests for 'SWD' and 'EBSW'
-    seed = 42
-    
+    # 'SWD'
     set_seed(seed)
-    res = sliced_wasserstein_distance(u_values, v_values, u_weights, v_weights, p, num_slices, 'SWD').item()
+    res = sliced_wasserstein_distance(u_values=u_values, v_values=v_values,
+                                      u_weights=u_weights, v_weights=v_weights,
+                                      p=p, num_slices=num_slices, mode='SWD').item()
     print(res)
-    assert res == pytest.approx(0.38, abs=0.05)
-
-    set_seed(seed)
-    res_alt = sliced_wasserstein_distance(u_values, v_values, u_weights, v_weights, p, num_slices, 'EBSW').item()
-    print(res_alt)
-    assert res_alt == pytest.approx(0.38, abs=0.05)
-
-    assert res == pytest.approx(res_alt, abs=0.01)
+    assert res == pytest.approx(0.683, abs=0.05)
     
     # -------------------------------------------------------
-    # Test vectorized versus non-vectorized implementation
+    # Test vectorized versus non-vectorized slicing implementation
 
-    seed = 4321
+    seed = 42
     set_seed(seed)
     
     u_values = torch.randn(100, 4)
     v_values = torch.randn(150, 4)
     
-    u_weights = torch.rand(100)
-    v_weights = torch.rand(150)
-    
-    # Set the seed
-    seed = 1234
+    u_weights = None
+    v_weights = None
     
     for p in [1,2]:
-        for mode in ['SWD', 'EBSW']:
+        for mode in ['SWD']:
             
+            # 'vectorized'
             set_seed(seed)
             tic = time()
-            d     = sliced_wasserstein_distance(u_values, v_values,
-                        u_weights, v_weights, p, num_slices, mode, vectorized=True).item()
+            d     = sliced_wasserstein_distance(u_values=u_values, v_values=v_values,
+                        u_weights=u_weights, v_weights=v_weights,
+                        p=p, num_slices=num_slices, mode=mode, vectorized=True).item()
             toc = time() - tic
             
+            # 'non-vectorized'
             set_seed(seed)
             tic_alt = time()
-            d_alt = sliced_wasserstein_distance(u_values, v_values,
-                        u_weights, v_weights, p, num_slices, mode, vectorized=False).item()
+            d_alt = sliced_wasserstein_distance(u_values=u_values, v_values=v_values,
+                        u_weights=u_weights, v_weights=v_weights,
+                        p=p, num_slices=num_slices, mode=mode, vectorized=False).item()
             toc_alt = time() - tic_alt
             
             print(f'p = {p} ({mode}) || D = {d} (vectorized, {toc:0.2e} sec) | D = {d_alt} (non-vectorized, {toc_alt:0.2e} sec)')
