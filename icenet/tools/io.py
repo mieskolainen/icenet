@@ -12,9 +12,6 @@ import os
 import psutil
 import subprocess
 import re
-from datetime import datetime
-
-from termcolor import colored, cprint
 
 # MVA imputation
 from sklearn.impute import KNNImputer
@@ -34,6 +31,10 @@ import base64
 from icenet.tools import aux
 from icenet.tools import stx
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def rootsafe(txt):
     """
@@ -118,7 +119,7 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
         files: full filenames including the path
     """
     print("")
-    print(__name__ + f".glob_expand_files: Supported syntax: <filename_*>, <filename_0>, <filename_[0-99]>, <filename_{{0,3,4}}>")
+    print(f"Supported syntax: <filename_*>, <filename_0>, <filename_[0-99]>, <filename_{{0,3,4}}>")
     print("See https://docs.python.org/3/library/glob.html and brace expansion (be careful, do not use [,] brackets in your filenames)")
     print("")
     
@@ -136,7 +137,7 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
 
     if (len(datasets) == 1) and ('[' in datasets[0]) and (']' in datasets[0]):
 
-        print(__name__ + f'.glob_expand_files: Parsing of range [first-last] ...')
+        print(f'Parsing of range [first-last] ...')
 
         res   = re.findall(r'\[.*?\]', datasets[0])[0]
         temp  = res[1:-1]
@@ -145,7 +146,7 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
         first   = int(numbers[0])
         last    = int(numbers[1])
 
-        print(__name__ + f'.glob_expand_files: Obtained range of files: [{first}, {last}]')
+        print(f'Obtained range of files: [{first}, {last}]')
 
         # Split and add
         parts = datasets[0].split(res)
@@ -188,10 +189,10 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
 
 
 def showmem(color='red'):
-    cprint(__name__ + f""".showmem: Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
+    print(f"""Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
 
 def showmem_cuda(device, color='red'):
-    cprint(__name__ + f".showmem_cuda: Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %] | VRAM usage: {get_gpu_memory_map()} GB [total VRAM {torch_cuda_total_memory(device):0.2f} GB]", color)
+    print(f"Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %] | VRAM usage: {get_gpu_memory_map()} GB [total VRAM {torch_cuda_total_memory(device):0.2f} GB]", color)
 
 
 def get_gpu_memory_map():
@@ -239,9 +240,9 @@ def checkinfnan(x, value = 0):
     x[nan_ind] = value
 
     if np.sum(inf_ind) > 0:
-        print(colored(__name__ + f'.checkinfnan: Inf found, replacing with {value}', 'red'))
+        print(f'Inf found, replacing with {value}', 'red')
     if np.sum(nan_ind) > 0:
-        print(colored(__name__ + f'.checkinfnan: NaN found, replacing with {value}', 'red'))    
+        print(f'NaN found, replacing with {value}', 'red')    
     return x
 
 
@@ -263,7 +264,7 @@ class fastarray1:
     #
     def add(self, x):
         if self.size == self.capacity:
-            print(f'fastarray1.add: increasing current capacity = {self.capacity} to 2x')
+            print(f'increasing current capacity = {self.capacity} to 2x')
             self.capacity *= 2
             newdata = np.zeros((self.capacity))
             newdata[:self.size] = self.data
@@ -451,7 +452,7 @@ def split_data_simple(X, frac, permute=True):
     X_val = X[N_trn:N_trn + N_val]
     X_tst = X[N - N_tst:]
     
-    print(__name__ + f".split_data: fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
+    print(f"fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
     
     return X_trn, X_val, X_tst
 
@@ -518,7 +519,7 @@ def split_data(X, Y, W, ids, frac=[0.5, 0.1, 0.4], permute=True):
     tst = IceXYW(x = X_tst, y = Y_tst, w=W_tst, ids=ids)
     # --------------------------------------------------------
     
-    print(__name__ + f".split_data: fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
+    print(f"fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
     
     return trn, val, tst
 
@@ -554,7 +555,7 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
         nan_ind = np.isnan(np.array(X[:,j], dtype=np.float32))
         found   = np.sum(nan_ind)
         if found > 0:
-            cprint(__name__ + f'.impute_data: Column {j} Number of {nan_ind} NaN found ({found/len(X):0.3E}) [{labels[j]}]', 'red')
+            print(f'Column {j} Number of {nan_ind} NaN found ({found/len(X):0.3E}) [{labels[j]}]', 'red')
     
     # Loop over dimensions
     for j in dim:
@@ -570,7 +571,7 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
             M_tot += M
 
             if (M/N > 0):
-                print(__name__ + f'.impute_data: Column {j} fraction [{M/N:0.3E}] with value {z} [{labels[j]}]')
+                print(f'Column {j} fraction [{M/N:0.3E}] with value {z} [{labels[j]}]')
 
         if (M_tot == N): # Protection, if all are now NaN
             # Set to zero so Imputer Function below does not remove the full column!!
@@ -584,7 +585,7 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
         
         found = np.sum(inf_ind)
         if found > 0:
-            cprint(__name__ + f'.impute_data: Column {j} Number of {found} Inf found ({found/len(X):0.3E}) [{labels[j]}]', 'red')
+            print(f'Column {j} Number of {found} Inf found ({found/len(X):0.3E}) [{labels[j]}]', 'red')
     
     if imputer == None:
 
@@ -606,7 +607,7 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
     imputer.fit(X[:,dim])
     X[:,dim] = imputer.transform(X[:,dim])
     
-    print(__name__ + '.impute_data: [done] \n')
+    print('[done] \n')
     
     return X, imputer
 

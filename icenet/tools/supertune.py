@@ -8,6 +8,10 @@ import pytest
 import re
 import ast
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def set_nested_dict_value(d, keys, value, indices=None):
     """
@@ -76,7 +80,7 @@ def supertune(d, config_string):
         
         value = parse_value(value_str)
         
-        print(f"supertune: Replacing {keys_str} with value {value}")
+        print(f"Replacing {keys_str} with value {value}")
         set_nested_dict_value(d, keys, value, indices)
     
     return d

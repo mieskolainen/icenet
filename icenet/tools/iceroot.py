@@ -10,14 +10,16 @@ import multiprocessing
 import os
 import copy
 import gc
-
 from tqdm import tqdm
-from termcolor import cprint
 
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import iceroot
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def read_single(process_func, process, root_path, param, class_id, dtype=None, num_cpus=0, verbose=False):
     """
@@ -36,7 +38,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None, n
         X, Y, W, ids, info (awkward array format)
     """
 
-    print(__name__ + f'.read_single: {process}')
+    print(f'{process}')
 
     # --------------------
     
@@ -76,7 +78,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None, n
     
     eff_acc = N_after / N_before
     
-    print(__name__ + f'.read_single: efficiency x acceptance = {eff_acc:0.6f}')
+    print(f'efficiency x acceptance = {eff_acc:0.6f}')
 
     Y = class_id * ak.Array(np.ones(N_after, dtype=np.int32))
 
@@ -106,7 +108,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None, n
     
     if model_param is not None:
         
-        print(__name__ + f'.read_single: Adding conditional theory (model) parameters')
+        print(f'Adding conditional theory (model) parameters')
         print(model_param)
         
         for var in model_param.keys():
@@ -201,9 +203,9 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
             num_events[i] = len(events.arrays(key_name))
             
             if verbose:
-                print(__name__ + f'.load_tree_stats: {rootfile[i]}')
-                print(__name__ + f'.load_tree_stats: keys(): {events.keys()}')
-                print(__name__ + f'.load_tree_stats: values(): {events.values()}')
+                print(f'{rootfile[i]}')
+                print(f'keys(): {events.keys()}')
+                print(f'values(): {events.values()}')
             
             file.close()
 
@@ -225,7 +227,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0,
         X
     """
     if label is not None:
-        cprint( __name__ + f'.events_to_jagged_numpy: Loading: {label}', 'yellow')
+        print(f'Loading: {label}', 'yellow')
 
     # -------------------------------
     if entry_start is None:
@@ -246,7 +248,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0,
         X[:,j] = np.asarray(events.arrays(ids[j],
                     entry_start=entry_start, entry_stop=entry_stop_final, library="np", how=list))
     
-    cprint( __name__ + f'.events_to_jagged_numpy: Entry_start = {entry_start}, entry_stop = {entry_stop}, maxevents = {maxevents} | realized = {len(X)} ({100*len(X)/N_all:0.3f} % | available = {N_all})', 'green')
+    print(f'Entry_start = {entry_start}, entry_stop = {entry_stop}, maxevents = {maxevents} | realized = {len(X)} ({100*len(X)/N_all:0.3f} % | available = {N_all})', 'green')
     
     return X, ids
 
@@ -274,7 +276,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
     if type(rootfile) is not list:
         rootfile = [rootfile]
 
-    cprint(__name__ + f'.load_tree: Opening rootfile {rootfile} with a tree key <{tree}>', 'yellow')
+    print(f'Opening rootfile {rootfile} with a tree key <{tree}>', 'yellow')
 
     # Add Tree handles here using the string-syntax of uproot {file:tree}
     files = [rootfile[i] + f':{tree}' for i in range(len(rootfile))]
@@ -287,15 +289,15 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
     load_ids = aux.process_regexp_ids(ids=ids, all_ids=all_ids)
 
     if verbose:
-        cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}): \n{all_ids} \n', 'green')
+        print(f'All variables ({len(all_ids)}): \n{all_ids} \n', 'green')
         print('')
-        cprint(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
+        print(f'Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
         print('')
     else:
-        cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}) | Loading variables ({len(load_ids)})', 'green')
+        print(f'All variables ({len(all_ids)}) | Loading variables ({len(load_ids)})', 'green')
         print('')
     
-    print(__name__  + f'.load_tree: Reading {len(files)} root files | Conversion to object library "{library}" ')
+    print(f'Reading {len(files)} root files | Conversion to object library "{library}" ')
     print('')
     
     if int(num_cpus) == 0:
@@ -307,7 +309,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
         
         if maxevents is None:
             maxevents = int(1e10)
-            cprint(__name__ + f'.load_tree: maxevents is None, setting maxevents = {maxevents}', 'red')
+            print(f'maxevents is None, setting maxevents = {maxevents}', 'red')
         
         # Non-multiprocessed version for single files
         if len(files) == 1:
@@ -324,9 +326,9 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
 
                 if (maxevents is not None) and (len(X) >= maxevents):
                     X = X[0:maxevents]
-                    cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
+                    print(f'Maximum event count {maxevents} reached', 'red')
             
-            print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+            print(f'Total number of entries = {len(X)}')        
             
             return X, load_ids
 
@@ -341,18 +343,18 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
             submaxevents = aux.split_size(range(maxevents), num_workers)
             futures      = []
             
-            print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
+            print(f'submaxevents per ray process: {submaxevents}')
 
             for k in range(num_workers):    
                 futures.append(read_file_np.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]],
                                                    load_ids, entry_start, entry_stop, submaxevents[k], dtype))
 
-            print(__name__ + f'.load_tree: Get futures')
+            print(f'Get futures')
             results = ray.get(futures) # synchronous read-out
             ray.shutdown()
             
             # Combine future returned sub-arrays
-            print(__name__ + f'.load_tree: Concatenating results from futures')
+            print(f'Concatenating results from futures')
             
             # We concatenate one-by-one, to save memory
             for k in tqdm(range(len(results))):
@@ -362,7 +364,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
                 gc.collect()
                 io.showmem()
         
-        print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+        print(f'Total number of entries = {len(X)}')        
         
         return X, load_ids
 
@@ -370,7 +372,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
 
         if maxevents is None:
             maxevents = int(1e10)
-            cprint(__name__ + f'.load_tree: maxevents is None, setting maxevents = {maxevents}', 'red')
+            print(f'maxevents is None, setting maxevents = {maxevents}', 'red')
         
         # Non-multiprocessed version for single files
         
@@ -389,7 +391,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
                 
                 if (maxevents is not None) and (len(X) > maxevents):
                     X = X[0:maxevents]
-                    cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached (had {num_events})', 'red')
+                    print(f'Maximum event count {maxevents} reached (had {num_events})', 'red')
         
         else:
             
@@ -402,18 +404,18 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
             submaxevents = aux.split_size(range(maxevents), num_workers)
             futures      = []
             
-            print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
+            print(f'submaxevents per ray process: {submaxevents}')
 
             for k in range(num_workers):    
                 futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]],
                                                    load_ids, entry_start, entry_stop, submaxevents[k], dtype))
 
-            print(__name__ + f'.load_tree: Get futures')
+            print(f'Get futures')
             results = ray.get(futures) # synchronous read-out
             ray.shutdown()
             
             # Combine future returned sub-arrays
-            print(__name__ + f'.load_tree: Concatenating results from futures')
+            print(f'Concatenating results from futures')
 
             # We concatenate one-by-one, to save memory
             for k in tqdm(range(len(results))):
@@ -423,7 +425,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
                 gc.collect()
                 io.showmem()
         
-        print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+        print(f'Total number of entries = {len(X)}')        
             
         return X, ak.fields(X)
         
@@ -470,7 +472,7 @@ def read_file_np(files, ids, entry_start, entry_stop, maxevents, dtype=None):
             
             if (maxevents is not None) and (len(X) >= maxevents):
                 X = X[0:maxevents]
-                cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
+                print(f'Maximum event count {maxevents} reached', 'red')
                 break
     
     return X
@@ -516,7 +518,7 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents, dtype=None):
             
             if (maxevents is not None) and (len(X) >= maxevents):
                 X = X[0:maxevents]
-                cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
+                print(__name__ + f'Maximum event count {maxevents} reached', 'red')
                 break
     return X
 

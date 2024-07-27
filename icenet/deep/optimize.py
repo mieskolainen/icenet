@@ -3,19 +3,18 @@
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
-from termcolor import colored,cprint
-
 import torch
 import torch.nn as nn
-import copy
 
-from icenet.deep import losstools
-from icenet.deep import deeptools
-from icenet.tools import aux
-from icenet.tools import io
+from icenet.deep import losstools, deeptools
+from icenet.tools import aux, io
 
 from tqdm import tqdm
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 class Dataset(torch.utils.data.Dataset):
     
@@ -398,21 +397,21 @@ def model_to_cuda(model, device_type='auto'):
     # Try special map (.to() does not map all variables)
     try:
         model = model.to_device(device=device)
-        print(__name__ + f'.model_to_cuda: Mapping special to <{device}>')
+        print(f'Mapping special to <{device}>')
     except:
         True
     
     # Multi-GPU setup
     if torch.cuda.device_count() > 1:
-        print(__name__ + f'.model_to_cuda: Multi-GPU {torch.cuda.device_count()}')
+        print(f'Multi-GPU {torch.cuda.device_count()}')
         model = nn.DataParallel(model)
 
-    print(__name__ + f'.model_to_cuda: Computing device <{device}> chosen')
+    print(f'Computing device <{device}> chosen')
     
     if GPU_chosen:
         used  = io.get_gpu_memory_map()[0]
         total = io.torch_cuda_total_memory(device)
-        cprint(__name__ + f'.model_to_cuda: device <{device}> VRAM in use: {used:0.2f} / {total:0.2f} GB', 'yellow')
+        print(f'device <{device}> VRAM in use: {used:0.2f} / {total:0.2f} GB', 'yellow')
         print('')
 
     return model, device

@@ -15,7 +15,6 @@ from termcolor import cprint
 import matplotlib.pyplot as plt
 
 from scipy import interpolate
-from scipy.stats import wasserstein_distance
 import scipy.special as special
 import scipy.integrate as integrate
 
@@ -23,9 +22,8 @@ from scipy.optimize import minimize
 from mystic.solvers import diffev2
 from mystic.solvers import fmin_powell
 
-
 from iceplot import iceplot
-from icefit import statstools
+
 
 def get_function_maps():
     """
@@ -645,27 +643,27 @@ def edge_cases(par, cov, techno, num_counts_in_fit, chi2, ndof):
     """
     
     if cov is None:
-        cprint('edge_cases: Uncertainty estimation failed (Minuit cov = None), return cov = -1', 'red')
+        print('Uncertainty estimation failed (Minuit cov = None), return cov = -1', 'red')
         cov = -1 * np.ones((len(par), len(par)))
     
     if  num_counts_in_fit < techno['min_count']:
-        cprint(f'edge_cases: Input histogram count < min_count = {techno["min_count"]} ==> fit not reliable', 'red')
+        print(f'Input histogram count < min_count = {techno["min_count"]} ==> fit not reliable', 'red')
         if techno['set_to_nan']:
-            cprint('--> Setting parameters to NaN', 'red')
+            print('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
     if ndof < techno['min_ndof']:
-        cprint(f'edge_cases: Fit ndf = {ndof} < {techno["min_ndof"]} ==> fit not reliable', 'red')
+        print(f'Fit ndf = {ndof} < {techno["min_ndof"]} ==> fit not reliable', 'red')
         if techno['set_to_nan']:
-            cprint('--> Setting parameters to NaN', 'red')
+            print('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
     elif (chi2 / ndof) > techno['max_chi2']:
-        cprint(f'edge_cases: Fit chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesfull', 'red')
+        print(f'Fit chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesfull', 'red')
         if techno['set_to_nan']:
-            cprint('--> Setting parameters to NaN', 'red')
+            print('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
@@ -774,13 +772,13 @@ def optimizer_execute(trials, loss, param, techno):
     # Finalize with stat. uncertainty analysis [migrad << hesse << minos (best)]
     if techno['minos']:
         try:
-            print(f'binned_1D_fit: Computing MINOS stat. uncertainties')
+            print(f'Computing MINOS stat. uncertainties')
             m1.minos()
         except:
-            cprint(f'binned_1D_fit: Error occured with MINOS stat. uncertainty estimation, trying HESSE', 'red')
+            print(f'Error occured with MINOS stat. uncertainty estimation, trying HESSE', 'red')
             m1.hesse()
     else:
-        print('binned_1D_fit: Computing HESSE stat. uncertainties')
+        print('Computing HESSE stat. uncertainties')
         m1.hesse()
 
     return m1
@@ -833,11 +831,11 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
         
         # Protect for nan/inf
         if np.sum(~np.isfinite(y[key])) > 0:
-            print(__name__ + f'.analyze_1D_fit: Evaluated function [{key}] contain nan/inf values (set to 0.0)')
+            print(f'Evaluated function [{key}] contain nan/inf values (set to 0.0)')
             y[key][~np.isfinite(y[key])] = 0.0
     
-    print(__name__ + f'.analyze_1D_fit: Input bin count sum: {np.sum(counts):0.1f} (full range)')
-    print(__name__ + f'.analyze_1D_fit: Input bin count sum: {np.sum(counts[fitbin_mask]):0.1f} (in fit)')    
+    print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
+    print(f'Input bin count sum: {np.sum(counts[fitbin_mask]):0.1f} (in fit)')    
     
     # --------------------------------------------------------------------
     # Compute count value integrals inside fitrange
@@ -889,7 +887,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
             N_err[key] = np.mean([np.abs(N_med - N_low), np.abs(N_med - N_high)])
             
         else:
-            print('analyze_1D_fit: Missing covariance matrix, using Poisson (or weighted count) error as a proxy')
+            print('Missing covariance matrix, using Poisson (or weighted count) error as a proxy')
             
             N_sum = np.sum(counts[fitbin_mask])
             if N_sum > 0:

@@ -12,6 +12,10 @@ import torch
 from torch import nn, optim
 from torch.nn import functional as F
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 class LogitsWithTemperature(nn.Module):
     """
@@ -61,7 +65,7 @@ class LogitsWithTemperature(nn.Module):
         before_temperature_nll = torch.sum(weights * nll_criterion(logits, labels)).item()
         before_temperature_ece = ece_criterion_before(logits, labels).item()
         print(f'Before temperature scale: NLL: {before_temperature_nll:0.4f}, ECE: {ece_criterion_before.ECE.item():0.4f}, ECE2: {ece_criterion_before.ECE2.item():0.4f}')
-        ece_criterion_before.print_results()
+        ece_criterion_before.print()
         
         # Optimize the temperature parameter
         optimizer = optim.LBFGS([self.temperature], lr = lr, max_iter = max_iter)
@@ -84,10 +88,10 @@ class LogitsWithTemperature(nn.Module):
         after_temperature_ece = ece_criterion_after(self.temperature_scale(logits), labels).item()
         
         print('')
-        print(f'Optimal temperature: {self.temperature.item():0.4f}')
+        print(f'Optimal temperature: {self.temperature.item():0.4f}', 'green')
         print(f'After temperature scale: NLL: {after_temperature_nll:0.4f}, ECE: {ece_criterion_after.ECE.item():0.4f}, ECE2: {ece_criterion_after.ECE2.item():0.4f}')
         
-        ece_criterion_after.print_results()
+        ece_criterion_after.print()
         
         return ece_criterion_before, ece_criterion_after
 
@@ -189,7 +193,7 @@ class ModelWithTemperature(nn.Module):
         before_temperature_nll = torch.sum(weights * nll_criterion(logits, labels)).item()
         before_temperature_ece = ece_criterion_before(logits, labels).item()
         print(f'Before temperature scale: NLL: {before_temperature_nll:0.4f}, ECE: {ece_criterion_before.ECE.item():0.4f}, ECE2: {ece_criterion_before.ECE2.item():0.4f}')
-        ece_criterion_before.print_results()
+        ece_criterion_before.print()
         
         # Optimize the temperature parameter
         optimizer = optim.LBFGS([self.temperature], lr = lr, max_iter = max_iter)
@@ -215,7 +219,7 @@ class ModelWithTemperature(nn.Module):
         print(f'Optimal temperature: {self.temperature.item():0.4f}')
         print(f'After temperature scale: NLL: {after_temperature_nll:0.4f}, ECE: {ece_criterion_after.ECE.item():0.4f}, ECE2: {ece_criterion_after.ECE2.item():0.4f}')
         
-        ece_criterion_after.print_results()
+        ece_criterion_after.print()
         
         return ece_criterion_before, ece_criterion_after
 
@@ -249,7 +253,7 @@ class _ECELoss(nn.Module):
         self.ECE2        = 0
     
     
-    def print_results(self):
+    def print(self):
         """
         For terminal print out
         """

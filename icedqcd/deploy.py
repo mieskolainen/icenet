@@ -16,13 +16,16 @@ import gc
 
 from importlib import import_module
 from datetime import datetime
-from termcolor import colored, cprint
 
 from icedqcd import common
 from icenet.tools import iceroot, io, aux, process
 from icenet.deep import predict
 from tqdm import tqdm
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def f2s(value, decimals=2):
     """
@@ -62,10 +65,10 @@ def zscore_normalization(X, args):
     Z-score normalization
     """
     if   args['varnorm'] == 'zscore':                            
-        print(__name__ + f'.process_data: Z-score normalizing variables ...')
+        print(f'Z-score normalizing variables ...')
         X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
 
-        print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
+        print(f'X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
         X = io.apply_zscore(X, X_mu, X_std)
 
     return X
@@ -77,9 +80,9 @@ def process_data(args):
     rootname  = args["rootname"]
     inputvars = import_module("configs." + rootname + "." + args["inputvars"])
     
-    cprint(__name__ + f'.process_data:', 'green')
+    print(f'Processing data', 'green')
     print(args)
-
+    
     ## ** Special YAML loader here **
     from libs.ccorp.ruamel.yaml.include import YAML
     yaml = YAML()
@@ -148,7 +151,7 @@ def process_data(args):
 
         try:
             file_id = all_file_id[args['grid_id']]
-            print(__name__ + f".deploy: file_id = {file_id} (grid_id = {args['grid_id']})")
+            print(f"file_id = {file_id} (grid_id = {args['grid_id']})")
             
         except Exception as e:
             logging.debug('Subfolder already saturated -- no processing under this grid PC node -- continue')
@@ -176,7 +179,7 @@ def process_data(args):
                 total_num_events += len(X_nocut)
 
             except Exception as e:
-                cprint(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}": ' + str(e), 'red')
+                print(f'A fatal error in iceroot.load_tree with a file "{filename}": ' + str(e), 'red')
                 
                 # Write to log-file
                 logging.debug(f'{filename} | A fatal error in iceroot.load_tree: ' + str(e))
@@ -187,7 +190,7 @@ def process_data(args):
 
             if args['use_conditional']:
 
-                print(__name__ + f'.process_data: Initializing conditional theory (model) parameters')
+                print(f'Initializing conditional theory (model) parameters')
                 for var in mc_param.keys():
                     # Create new 'record' (column) to ak-array and init to zero
                     col_name          = f'MODEL_{var}'
@@ -325,7 +328,7 @@ def process_data(args):
             aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0]) # Create dir
             outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
             
-            print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
+            print(f'Saving root output to "{outputfile}"')
 
             with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
                 rfile[f"Events"] = ALL_scores

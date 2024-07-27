@@ -7,20 +7,24 @@ import psutil
 from typing import List
 from prettytable import PrettyTable
 
-from termcolor import colored, cprint
-from icenet.tools import aux
+from termcolor import colored
+from icenet.tools import aux, io
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def print_RAM_usage():
     """ 
     """
-    cprint(__name__ + f""".prints: Process RAM usage: {io.process_memory_use():0.2f} GB [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
+    print(f"""Process RAM usage: {io.process_memory_use():0.2f} GB [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
 
 
 def printbar(marker='-', marks = 75):
     """ Print bar.
     """
-    for i in range(marks):
+    for _ in range(marks):
         print(marker, end='')
     print('')
 
@@ -128,9 +132,7 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, out
         prettyprint table of stats
     """
     
-    print('\n')
-    print(__name__ + f'.print_variables:')
-
+    print('')
     print(f'Excluding values: {exclude_vals}')
     
     table = PrettyTable(["i", "variable", "min", "Q1", "Q5", "med", "Q95", "Q99", "max", "# unique", "mean", "std", "#Inf", "#NaN"]) 

@@ -8,10 +8,13 @@ import copy
 import pandas as pd
 from importlib import import_module
 
-from termcolor import colored, cprint
-
 from icenet.tools import io
 from icenet.tools import aux
+
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 # GLOBALS
 #from configs.hnl.cuts import *
@@ -53,7 +56,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     for f in mcfiles:
         new_frame = copy.deepcopy(pd.read_parquet(f))
         frames.append(new_frame)
-        print(__name__ + f'.load_root_file: {f} | N = {len(new_frame)}')
+        print(f'{f} | N = {len(new_frame)}')
     
     frame = pd.concat(frames)
     
@@ -67,11 +70,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     ## Print some diagnostics
     label_type = frame['label_type'].to_numpy().astype(int)
     
-    print(__name__ + f'.load_root_file: Number of events: {len(X)}')
+    print(f'Number of events: {len(X)}')
     
     for c in np.unique(Y):
-        print(__name__ + f'.load_root_file: class[{c}] has unique "label_type" = {np.unique(label_type[Y==c])}')        
-        print(__name__ + f'.load_root_file: class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3f}, std(event_weight) = {np.std(W[Y==c]):0.3f}')
+        print(f'class[{c}] has unique "label_type" = {np.unique(label_type[Y==c])}')        
+        print(f'class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3f}, std(event_weight) = {np.std(W[Y==c]):0.3f}')
     
     ## ** Set all weights to one **
     W   = np.ones(len(W))

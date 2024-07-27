@@ -176,13 +176,13 @@ iceboost_swd:
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
-    beta: 3.0e-2
+    beta: 0.1
     p: 1                 # p-norm (1,2, ...)
     num_slices: 500      # Number of MC projections (Higher the better) 
     mode: 'SWD'          # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
     max_N: 400000        # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
-    vars: ['.*']         # Use all variables in SWD
-    #vars: ['fixedGridRhoAll', 'probe_eta', 'probe_pt'] # Use specific ones
+    #vars: ['.*']         # Use all variables in SWD
+    vars: ['fixedGridRhoAll', 'probe_eta', 'probe_pt'] # Use specific ones
 
 
 # ICEBOOST with an additional re-weighting in-the-loop regularization

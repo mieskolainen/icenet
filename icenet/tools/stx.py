@@ -10,6 +10,11 @@ import pprint
 from icenet.tools import aux
 from functools import reduce
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
+
 def print_stats(mask, text):
     """
     Print filter mask category statistics
@@ -57,7 +62,7 @@ def filter_constructor(filters, X, ids, y=None):
         # Special always passing classes
         if 'diplomat_classes' in input_set.keys():
             for c in input_set['diplomat_classes']:
-                print(__name__ + f'.filter_constructor: Passing through diplomat class "{c}"')
+                print(f'Passing through diplomat class "{c}"')
                 cind = (y == c)
                 mask[:, cind] = True
         
@@ -137,7 +142,7 @@ def filter_constructor(filters, X, ids, y=None):
                         pick_ind.append(i)
                 dimgrid = dimgrid[pick_ind, :]
             
-            print(__name__ + f'.filter_constructor: Filter combinations {dimgrid.shape} combined with {name} and match {match} (running index)')
+            print(f'Filter combinations {dimgrid.shape} combined with {name} and match {match} (running index)')
             print(dimgrid)
             
             # Loop over all combinations
@@ -318,7 +323,6 @@ def apply_cutflow(cut, names, xcorr_flow=True, EPS=1E-12):
     Returns:
         mask            : boolean mask of size number of events (1 = pass, 0 = fail)
     """
-    print(__name__ + '.apply_cutflow: \n')
     
     N    = len(cut[0])
     mask = np.ones(N, dtype=bool)
@@ -345,8 +349,8 @@ def print_parallel_cutflow(masks, names, EPS=1E-12):
         cut   : list of pre-calculated cuts, each list element is a boolean array with size of num of events
         names : list of names (description of each cut, for printout only)
     """
-    print('\n')
-    print(__name__ + '.print_parallel_cutflow: Computing N-point parallel flow <xcorr_flow = True>')
+    print('')
+    print(f'Computing N-point parallel flow <xcorr_flow = True>')
     vec = np.zeros((len(masks[0]), len(masks)))
     for j in range(vec.shape[1]):
         vec[:,j] = np.array(masks[j])
@@ -356,7 +360,7 @@ def print_parallel_cutflow(masks, names, EPS=1E-12):
     print(f'Number of boolean combinations for {names}: \n')
     for i in range(BMAT.shape[0]):
         print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / (len(intmat) + EPS):.4f})')
-    print('\n')
+    print('')
 
 
 def parse_boolean_exptree(instring):
@@ -642,7 +646,7 @@ def eval_boolean_syntax(expr, X, ids, verbose=False):
     output   = eval_boolean_exptree(root=treeobj, X=X, ids=ids)
 
     if verbose:
-        print(__name__ + f'.eval_boolean_syntax:')
+        print('')
         print(treeobj)
         print(f'Selection fraction: {np.sum(output) / len(output):0.4e}')
     

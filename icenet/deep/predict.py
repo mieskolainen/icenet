@@ -14,18 +14,21 @@ from tqdm import tqdm
 import xgboost
 
 # icenet
-from icenet.tools import stx
-from icenet.tools import aux
-from icenet.tools import aux_torch
+from icenet.tools import stx, aux, aux_torch
 
 from icenet.algo  import flr
 from icenet.deep  import optimize
 from icenet.deep  import dbnf
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
+
 
 def pred_cut(ids, param):
 
-    print(__name__ + f'.pred_cut: Evaluate <{param["label"]}> cut model ...')
+    print(f'Evaluate [{param["label"]}] cut model ...')
 
     # Get feature name variables
     index = ids.index(param['variable'])
@@ -48,7 +51,7 @@ def pred_cut(ids, param):
 
 def pred_cutset(ids, param):
 
-    print(__name__ + f'.pred_cutset: Evaluate [{param["label"]}] fixed cutset model ...')
+    print(f'Evaluate [{param["label"]}] fixed cutset model ...')
     cutstring = param['cutstring']
     print(f'cutstring: "{cutstring}"')
 
@@ -70,7 +73,7 @@ def pred_cutset(ids, param):
 
 def pred_graph_xgb(args, param):
     
-    print(__name__ + f'.pred_graph_xgb: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     device = param['deploy_device'] if 'deploy_device' in param else param['device']
     
@@ -116,7 +119,7 @@ def pred_graph_xgb(args, param):
 
 def pred_torch_graph(args, param, batch_size=5000, return_model=False):
     
-    print(__name__ + f'.pred_torch_graph: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
                                             label=param['label'], epoch=param['readmode'])
@@ -156,7 +159,7 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
 
 def pred_torch_generic(args, param, return_model=False):
     
-    print(__name__ + f'.pred_torch_generic: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
                                             label=param['label'], epoch=param['readmode'])
@@ -188,7 +191,7 @@ def pred_torch_generic(args, param, return_model=False):
 
 def pred_torch_scalar(args, param, return_model=False):
     
-    print(__name__ + f'.pred_torch_scalar: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
                                             label=param['label'], epoch=param['readmode'])
@@ -220,7 +223,7 @@ def pred_torch_scalar(args, param, return_model=False):
 
 def pred_flow(args, param, n_dims, return_model=False):
 
-    print(__name__ + f'.pred_flow: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     # Load models
     param['model_param']['n_dims'] = n_dims # Set input dimension
@@ -248,7 +251,7 @@ def pred_flow(args, param, n_dims, return_model=False):
 
 def pred_xgb(args, param, feature_names=None, return_model=False):
     
-    print(__name__ + f'.pred_xgb: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
                                          label=param['label'], epoch=param['readmode'], filetype='.pkl')
@@ -269,7 +272,7 @@ def pred_xgb(args, param, feature_names=None, return_model=False):
 
 def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
     
-    print(__name__ + f'.pred_xgb_scalar: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
                                          label=param['label'], epoch=param['readmode'], filetype='.pkl')
@@ -292,7 +295,7 @@ def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
     Same as pred_xgb_scalar but a sigmoid function applied
     """
     
-    print(__name__ + f'.pred_xgb_logistic: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
                                          label=param['label'], epoch=param['readmode'], filetype='.pkl')
@@ -311,7 +314,7 @@ def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
 
 def pred_flr(args, param):
 
-    print(__name__ + f'.pred_flr: Evaluate [{param["label"]}] model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
     with open(f"{args['modeldir']}/{param['label']}/{param['label']}_0.pkl", 'rb') as file:
         model = pickle.load(file)

@@ -15,7 +15,6 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 from importlib import import_module
-from termcolor import cprint
 import os
 import copy
 import sys
@@ -28,14 +27,12 @@ import icenet.deep.iceboost as iceboost
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
-from icenet.tools import stx
-from icenet.tools import io
-from icenet.tools import prints
-from icenet.tools import aux
-from icenet.tools import reweight
-from icenet.tools import plots
-from icenet.tools import supertune
+from icenet.tools import stx, io, prints, aux, reweight, plots, supertune
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 # ******** GLOBALS *********
 from icenet.tools import icelogger
@@ -151,7 +148,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # -----------------------------------------------------
     # Runmode setup
     
-    cprint(__name__ + f'.read_config: runmode = "{runmode}"', 'magenta')
+    print(f'runmode = "{runmode}"', 'magenta')
     
     if   runmode == 'genesis':
         new_args.update(args['genesis_runmode'])
@@ -191,7 +188,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         new_args['plot_param']['ROC_binned']['active'] = False
         new_args['plot_param']['MVA_2D']['active']     = False
         
-        print(__name__ + f'.read_config: fastplot mode on (turning off slow plots)')
+        print(f'fastplot mode on (turning off slow plots)')
     
     old_args = copy.deepcopy(args)
     args     = copy.deepcopy(new_args)
@@ -200,7 +197,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     ## Specific commandline override of yaml variables
     for key in cli_dict.keys():
         if key in args:
-            cprint(__name__ + f'.read_config: {config_yaml_file} "{key}" default value cli-override with value {cli_dict[key]}', 'green')
+            print(f'{config_yaml_file} "{key}" default value cli-override with value {cli_dict[key]}', 'green')
             args[key] = cli_dict[key]
     
     # -------------------------------------------------------------------
@@ -208,7 +205,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     if cli_dict['supertune'] is not None:
         print('')
-        cprint(__name__ + f'.read_config: {config_yaml_file} default value cli-override with --supertune syntax:', 'green')
+        print(f'{config_yaml_file} default value cli-override with --supertune syntax:', 'green')
         print('')
         args = supertune.supertune(d=args, config_string=cli_dict['supertune'])
         print('')
@@ -227,7 +224,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         if os.path.exists(files[key]):
             hash_args[f'__hash__{key}'] = io.make_hash_sha256_file(files[key])
         else:
-            cprint(__name__ + f".read_config: Did not find: {files[key]} [may cause crash]", 'red')
+            print(f"Did not find: {files[key]} [may cause crash]", 'red')
     
     # Genesis parameters as the first one
     hash_args.update(old_args['genesis_runmode'])
@@ -241,8 +238,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # Finally create the hash
     args['__hash_genesis__'] = io.make_hash_sha256_object(hash_args)
     
-    cprint(__name__ + f'.read_config: Generated config hashes', 'magenta')
-    cprint(f'[__hash_genesis__]      : {args["__hash_genesis__"]}     ', 'magenta')
+    print(f'.read_config: Generated config hashes', 'magenta')
+    print(f'[__hash_genesis__]      : {args["__hash_genesis__"]}     ', 'magenta')
     
     # -------------------------------------------------------------------
     ## 2. Create the second level hash (depends on all previous) + other parameters
@@ -279,7 +276,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         # Finally create hash
         args['__hash_post_genesis__'] = args['__hash_genesis__'] + '__' + io.make_hash_sha256_object(hash_args)
 
-        cprint(f'[__hash_post_genesis__] : {args["__hash_post_genesis__"]}', 'magenta')
+        print(f'[__hash_post_genesis__] : {args["__hash_post_genesis__"]}', 'magenta')
 
     # -------------------------------------------------------------------
     ## Update variables to args dictionary (and create directories)
@@ -367,11 +364,11 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     print('')
     print(" torch.__version__: " + torch.__version__)
 
-    cprint(__name__ + f'.read_config: Setting random seed', 'yellow')
+    print(f'Setting random seed', 'yellow')
     aux.set_random_seed(args['rngseed'])
     
     # ------------------------------------------------
-    print(__name__ + f'.read_config: Created arguments dictionary with runmode = <{runmode}> :')    
+    print(f'Created arguments dictionary with runmode = <{runmode}> :')    
     # ------------------------------------------------
     
     return args, cli
@@ -463,7 +460,7 @@ def read_data(args, func_loader, runmode):
         ids  = predata['ids']
         info = predata['info']
 
-        cprint(__name__ + f'.read_data: Saving to path: "{cache_directory}"', 'yellow')
+        print(f'Saving to path: "{cache_directory}"', 'yellow')
         C = get_chunk_ind(N=len(X))
         
         for i in tqdm(range(len(C))):
@@ -479,11 +476,11 @@ def read_data(args, func_loader, runmode):
     else:
         
         if runmode == "genesis": # Genesis mode does not need this
-            cprint(__name__ + f'.read_data: "genesis" already done and the cache files are ready.', 'green')
+            print(f'"genesis" already done and the cache files are ready.', 'green')
             return
         
         num_files = io.count_files_in_dir(cache_directory)
-        cprint(__name__ + f'.read_data: Loading from path: "{cache_directory}"', 'yellow')
+        print(f'Loading from path: "{cache_directory}"', 'yellow')
         
         for i in tqdm(range(num_files)):
             
@@ -520,7 +517,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
         predata = read_data(args=args, func_loader=func_loader, runmode=runmode) 
         
         with open(cache_filename, 'wb') as handle:
-            cprint(__name__ + f'.read_data_processed: Saving <DATA> to a file: "{cache_filename}"', 'yellow')
+            print(f'Saving <DATA> to a file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -533,7 +530,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
 
     else:
         with open(cache_filename, 'rb') as handle:
-            cprint(__name__ + f'.read_data_processed: Loading <DATA> from a file: "{cache_filename}"', 'yellow')
+            print(f'Loading <DATA> from a file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -553,7 +550,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
         processed_data = process_data(args=args, predata=predata, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
         
         with open(cache_filename, 'wb') as handle:
-            cprint(__name__ + f'.read_data_processed: Saving <PROCESSED DATA> to a file: "{cache_filename}"', 'yellow')
+            print(f'Saving <PROCESSED DATA> to a file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -566,7 +563,7 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
         
     else:
         with open(cache_filename, 'rb') as handle:
-            cprint(__name__ + f'.read_data_processed: Loading <PROCESSED DATA> from a file: "{cache_filename}"', 'yellow')
+            print(f'Loading <PROCESSED DATA> from a file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -601,7 +598,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
                 index.append(i)
                 idxvar.append(ids[i])
             else:
-                print(__name__ + f'.process_data: Removing conditional variable "{ids[i]}" (use_conditional == False)')
+                print(f'Removing conditional variable "{ids[i]}" (use_conditional == False)')
         
         if   isinstance(X, np.ndarray):
             X   = X[:,np.array(index, dtype=int)]
@@ -614,14 +611,14 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         else:
             raise Exception(__name__ + f'.process_data: Unknown X type (should be numpy array or awkward array)')
     
-    print(__name__ + f'.process_data: ids = {ids}')
+    print(f'ids = {ids}')
     
     # ----------------------------------------------------------
     
     # 1. Split done inside common.py already
     if 'running_split' in info:
         
-        cprint(__name__ + f'.process_data: Using pre-defined [train, validate, test] split', 'magenta')
+        print(f'Using pre-defined [train, validate, test] split', 'magenta')
         
         ind_trn = info['running_split']['trn']
         ind_val = info['running_split']['val']
@@ -633,7 +630,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     
     # 2. Split into training, validation, test here
     else:
-        cprint(__name__ + f'.process_data: Splitting into [train, validate, test] = {args["frac"]}', 'magenta')
+        print(f'Splitting into [train, validate, test] = {args["frac"]}', 'magenta')
         
         permute = args['permute'] if 'permute' in args else True
         trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'], permute=permute)
@@ -652,8 +649,8 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     ### Split and factor data
     output = {'info': info}
     
-    if   runmode == 'train':
-
+    if runmode == 'train':
+        
         ### Compute reweighting weights (before funcfactor because we need all the variables !)
         if args['reweight']:
             
@@ -663,7 +660,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
                 fmodel = f'{args["datadir"]}/{args["reweight_file"]}'
             
             if args['reweight_mode'] == 'load':
-                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
+                print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
@@ -672,11 +669,11 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             val.w,_    = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
             
             if args['reweight_mode'] == 'write':
-                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
+                print(f'Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
                 pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Compute different data representations
-        cprint(__name__ + f'.process_data: Compute representations [common.func_factor]', 'green')
+        print(f'Compute representations [common.func_factor]', 'green')
         
         output['trn'] = func_factor(x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args)
         output['val'] = func_factor(x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
@@ -689,7 +686,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             
             fmodel = f'{args["modeldir"]}/imputer.pkl'
             
-            cprint(__name__ + f'.process_data: Saving imputer to: {fmodel}', 'green')
+            print(f'Saving imputer to: {fmodel}', 'green')
             pickle.dump(imputer, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
     elif runmode == 'eval':
@@ -703,7 +700,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
                 fmodel = f'{args["datadir"]}/{args["reweight_file"]}' 
             
             if args['reweight_mode'] == 'load':
-                cprint(__name__ + f'.process_data: Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
+                print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
@@ -711,11 +708,11 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             tst.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
             
             if args['reweight_mode'] == 'write':
-                cprint(__name__ + f'.process_data: Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
+                print(f'Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
                 pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Compute different data representations
-        cprint(__name__ + f'.process_data: Compute representations [common.func_factor]', 'green')
+        print(f'Compute representations [common.func_factor]', 'green')
         
         output['tst'] = func_factor(x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
         
@@ -724,7 +721,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             
             fmodel = f'{args["modeldir"]}/imputer.pkl'
             
-            cprint(__name__ + f'.process_data: Loading imputer from: {fmodel}', 'green')
+            print(f'Loading imputer from: {fmodel}', 'green')
             imputer = pickle.load(open(fmodel, 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
         
@@ -756,7 +753,7 @@ def impute_datasets(data, args, features=None, imputer=None):
     if args['values'] is not None:
         
         special_values = args['values'] # possible special values
-        cprint(__name__ + f'.impute_datasets: Imputing data for special values {special_values} in variables {features}', 'yellow')
+        print(f'Imputing data for special values {special_values} in variables {features}', 'yellow')
         
         # Parameters
         param = {
@@ -771,14 +768,14 @@ def impute_datasets(data, args, features=None, imputer=None):
         data.x, imputer = io.impute_data(X=data.x, imputer=imputer, **param)
 
     else:
-        cprint(__name__ + f'.impute_datasets: Imputing data for Inf/Nan in variables {features}', 'yellow')
+        print(f'Imputing data for Inf/Nan in variables {features}', 'yellow')
 
         for j in dim:        
             mask  = np.logical_not(np.isfinite(data.x[:,j]))
             found = np.sum(mask)
             if found > 0:
                 data.x[mask, j] = args['fill_value']    
-                cprint(__name__ + f'.impute_datasets: Column {j} Number of {found} ({found/len(data.x):0.3E}) NaN/Inf found in [{data.ids[j]}]', 'red')
+                print(f'Column {j} Number of {found} ({found/len(data.x):0.3E}) NaN/Inf found in [{data.ids[j]}]', 'red')
     
     return data, imputer
 
@@ -794,7 +791,7 @@ def train_models(data_trn, data_val, args=None):
         Saves trained models to disk
     """
 
-    cprint(__name__ + f'.train_models: ', 'yellow')
+    print(f'Training models ...', 'yellow')
     print('')
     
     # -----------------------------
@@ -817,8 +814,9 @@ def train_models(data_trn, data_val, args=None):
     
     # @@ Tensor normalization @@
     if data_trn['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
-            
-        print('\nZ-score normalizing tensor variables ...')
+        
+        print('')
+        print('Z-score normalizing tensor variables ...')
         X_mu_tensor, X_std_tensor = io.calc_zscore_tensor(data_trn['data_tensor'])
         
         data_trn['data_tensor'] = io.apply_zscore_tensor(data_trn['data_tensor'], X_mu_tensor, X_std_tensor)
@@ -832,7 +830,7 @@ def train_models(data_trn, data_val, args=None):
     # @@ Truncate outliers (component by component) from the training set @@
     if args['outlier_param']['algo'] == 'truncate' :
         
-        print(__name__ + f'.train_models: Truncating outlier variable values with {args["outlier_param"]}')
+        print(f'Truncating outlier variable values with {args["outlier_param"]}')
         
         for j in range(data_trn['data'].x.shape[1]):
             
@@ -856,13 +854,13 @@ def train_models(data_trn, data_val, args=None):
         # Same for anomalous event weights
         if data_trn['data'].w is not None and args['outlier_param']['truncate_weights']:
             
-            print(__name__ + f'.train_models: Truncating outlier event weights with {args["outlier_param"]}')
+            print(f'Truncating outlier event weights with {args["outlier_param"]}')
 
             # Train sample
             minval = np.percentile(data_trn['data'].w, args['outlier_param']['qmin'])
             maxval = np.percentile(data_trn['data'].w, args['outlier_param']['qmax'])
 
-            print(__name__ + f'.train_models: Before: min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
+            print(f'Before: min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
 
             # -----
             
@@ -873,7 +871,7 @@ def train_models(data_trn, data_val, args=None):
             minval = np.percentile(data_trn['data'].w, args['outlier_param']['qmin'])
             maxval = np.percentile(data_trn['data'].w, args['outlier_param']['qmax'])
 
-            print(__name__ + f'.train_models: After:  min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
+            print(f'After:  min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
             
             # Validation sample
             if args['outlier_param']['process_validate']:
@@ -881,25 +879,26 @@ def train_models(data_trn, data_val, args=None):
                 minval = np.percentile(data_val['data'].w, args['outlier_param']['qmin'])
                 maxval = np.percentile(data_val['data'].w, args['outlier_param']['qmax'])
 
-                print(__name__ + f'.train_models: Before: min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
+                print(f'Before: min event weight: {minval:0.3E} | max event weight: {maxval:0.3E}')
 
                 data_val['data'].w[data_val['data'].w < minval] = minval
                 data_val['data'].w[data_val['data'].w > maxval] = maxval
 
         else:
-            print(__name__ + f'.train_models: Not truncating outlier event weights {args["outlier_param"]}')
+            print(f'Not truncating outlier event weights {args["outlier_param"]}')
     
     # -------------------------------------------------------------
     # @@ Variable normalization @@
     if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
         
-        cprint('\nZ-score normalizing variables ...', 'magenta')
+        print('')
+        print('Z-score normalizing variables ...', 'magenta')
         
         if  args['varnorm'] == 'zscore-weighted':
-            cprint('Using events weights with Z-score ["zscore-weighted"]', 'green')
+            print('Using events weights with Z-score ["zscore-weighted"]', 'green')
             X_mu, X_std = io.calc_zscore(X=data_trn['data'].x, weights=data_trn['data'].w)
         else:
-            cprint('Not using event weights with Z-score [to activate use "zscore-weighted"]', 'green')
+            print('Not using event weights with Z-score [to activate use "zscore-weighted"]', 'green')
             X_mu, X_std = io.calc_zscore(X=data_trn['data'].x)
 
         data_trn['data'].x  = io.apply_zscore(data_trn['data'].x, X_mu, X_std)
@@ -914,7 +913,8 @@ def train_models(data_trn, data_val, args=None):
 
     elif args['varnorm'] == 'madscore' :
         
-        cprint('\nMAD-score normalizing variables ...', 'magenta')
+        print('')
+        print('MAD-score normalizing variables ...', 'magenta')
         X_m, X_mad         = io.calc_madscore(data_trn['data'].x)
         
         data_trn['data'].x = io.apply_zscore(data_trn['data'].x, X_m, X_mad)
@@ -932,7 +932,7 @@ def train_models(data_trn, data_val, args=None):
     def set_distillation_drain(ID, param, inputs, dtype='torch'):
         if 'distillation' in args and args['distillation']['drains'] is not None:
             if ID in args['distillation']['drains']:
-                cprint(__name__ + f'.train_models: Creating soft distillation drain for the model <{ID}>', 'yellow')
+                print(f'Creating soft distillation drain for the model <{ID}>', 'yellow')
                 
                 # By default to torch
                 inputs['y_soft'] = torch.tensor(y_soft, dtype=torch.float)
@@ -942,8 +942,8 @@ def train_models(data_trn, data_val, args=None):
     
     # -------------------------------------------------------------
 
-    cprint(__name__ + f'.train_models: Training models:', 'magenta')
-    cprint(args['active_models'], 'green')
+    print(f'Training models:', 'magenta')
+    print(args['active_models'], 'green')
     print('')
     
     # Loop over active models
@@ -1078,7 +1078,7 @@ def train_models(data_trn, data_val, args=None):
                 if len(args['primary_classes']) != 2:
                     raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
                 
-                cprint(__name__ + f'.train.models: Computing distillation soft targets from the source <{ID}> ', 'yellow')
+                print(f'Computing distillation soft targets from the source <{ID}> ', 'yellow')
 
                 if   param['train'] == 'xgb':
                     XX, XX_ids = aux.red(data_trn['data'].x, data_trn['data'].ids, param)
@@ -1093,14 +1093,14 @@ def train_models(data_trn, data_val, args=None):
             # --------------------------------------------------------
 
         except KeyboardInterrupt:
-            cprint(__name__ + f'.train_models: CTRL+C catched -- continue with the next model', 'red')
+            print(f'CTRL+C catched -- continue with the next model', 'red')
         
         except Exception as e:
             print(e)
-            cprint(__name__ + f'.train_models: Exception occured, check the model definition! -- continue', 'red')
+            print(f'Exception occured, check the model definition! -- continue', 'red')
             exceptions += 1
 
-    cprint(__name__ + f'.train_models: [done]', 'yellow')
+    print(f'[done]', 'yellow')
     
     if exceptions > 0:
         raise Exception(__name__ + f'.train_models: Number of fatal exceptions = {exceptions} [check your data / model definitions]')
@@ -1119,7 +1119,7 @@ def evaluate_models(data=None, info=None, args=None):
         Saves evaluation plots to the disk
     """
 
-    cprint(__name__ + f'.evaluate_models: ', 'yellow')
+    print(f'Evaluation models ...', 'yellow')
     print('')
     
     # -----------------------------
@@ -1221,7 +1221,7 @@ def evaluate_models(data=None, info=None, args=None):
         ### Tensor variable normalization
         if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
             
-            cprint('\nZ-score normalizing tensor variables ...', 'magenta')
+            print('\nZ-score normalizing tensor variables ...', 'magenta')
             Z_data = pickle.load(open(args["modeldir"] + '/zscore_tensor.pkl', 'rb'))
             X_mu_tensor  = Z_data['X_mu_tensor']
             X_std_tensor = Z_data['X_std_tensor']
@@ -1231,7 +1231,7 @@ def evaluate_models(data=None, info=None, args=None):
         ### Variable normalization
         if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
             
-            cprint('\nZ-score normalizing variables ...', 'magenta')
+            print('\nZ-score normalizing variables ...', 'magenta')
             Z_data = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
             X_mu   = Z_data['X_mu']
             X_std  = Z_data['X_std']
@@ -1243,7 +1243,7 @@ def evaluate_models(data=None, info=None, args=None):
 
         elif args['varnorm'] == 'madscore':
             
-            cprint('\nMAD-score normalizing variables ...', 'magenta')
+            print('\nMAD-score normalizing variables ...', 'magenta')
             Z_data = pickle.load(open(args["modeldir"] + '/madscore.pkl', 'rb'))
             X_m    = Z_data['X_m']
             X_mad  = Z_data['X_mad']
@@ -1252,9 +1252,10 @@ def evaluate_models(data=None, info=None, args=None):
             
             output_file = f'{args["plotdir"]}/eval/stats_variables_{args["varnorm"]}.log'
             prints.print_variables(X, ids, weights, output_file=output_file)
-            
-    except:
-        cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
+        
+    except Exception as e:
+        print(e)
+        print(f'Exception occured in variable normalization. Continue without!', 'red')
     
     # --------------------------------------------------------------------
     # For pytorch based
@@ -1272,8 +1273,8 @@ def evaluate_models(data=None, info=None, args=None):
     # **  MAIN LOOP OVER MODELS **
     #
     
-    cprint(__name__ + f'.evaluate_models: Evaluating models:', 'magenta')
-    cprint(args['active_models'], 'green')
+    print(f'Evaluating models:', 'magenta')
+    print(args['active_models'], 'green')
     print('')
     
     try:
@@ -1388,7 +1389,7 @@ def evaluate_models(data=None, info=None, args=None):
     
     except Exception as e:
         print(e)
-        cprint(__name__ + f'.train_models: Exception occured, check the problem! -- continue', 'red')
+        print(f'Exception occured, check the problem! -- continue', 'red')
     
     
     ## Multiple model comparisons
@@ -1407,7 +1408,7 @@ def evaluate_models(data=None, info=None, args=None):
                'info':              info}
     
     targetfile = targetdir + '/eval_results.pkl'
-    print(__name__ + f'.evaluate_models: Saving pickle output to:')
+    print(f'Saving pickle output to:')
     print(f'{targetfile}')
     
     with open(targetfile, 'wb') as file:
@@ -1475,6 +1476,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     
     if 'OBS_reweight' in args['plot_param'] and args['plot_param']['OBS_reweight']['active']:
         
+        print('OBS_reweight')
+        
         pick_ind, var_names = aux.pick_index(all_ids=ids_RAW, vars=args['plot_param']['OBS_reweight']['var'])
         
         # -----------------------------------------------
@@ -1505,7 +1508,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             for m in range(mask_filterset.shape[0]):
                 
                 if np.sum(mask_filterset[m,:]) == 0:
-                    cprint(f'OBS_reweight: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                    print(f'OBS_reweight: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
                     continue
                 
                 ## Plot over different temperature values
@@ -1531,9 +1534,11 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     
     if 'ROC' in args['plot_param'] and args['plot_param']['ROC']['active']:
 
+        print('ROC')
+        
         def plot_helper(mask, sublabel, pathlabel):
             
-            print(__name__ + f'.plot_XYZ_wrap: Computing aux.Metric for {sublabel}')
+            print(f'Computing aux.Metric for {sublabel}')
             
             metric = aux.Metric(y_true=y[mask], y_pred=y_pred[mask],
                 weights=weights[mask] if weights is not None else None,
@@ -1563,7 +1568,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             for m in range(mask_filterset.shape[0]):
                 
                 if np.sum(mask_filterset[m,:]) == 0:
-                    cprint(f'ROC: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                    print(f'ROC: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
                     continue
                 
                 plot_helper(mask=mask_filterset[m,:], sublabel=text_filterset[m], pathlabel=path_filterset[m])
@@ -1571,6 +1576,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     # --------------------------------------
     ### ROC binned plots (no filterset selection supported here)
     if 'ROC_binned' in args['plot_param'] and args['plot_param']['ROC_binned']['active']:
+        
+        print('ROC_binned')
         
         for i in range(100): # Loop over plot types
             
@@ -1615,6 +1622,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     ### MVA-output 1D-plot
     if 'MVA_output' in args['plot_param'] and args['plot_param']['MVA_output']['active']:
 
+        print('MVA_output')
+        
         def plot_helper(mask, sublabel, pathlabel):
             
             inputs = {'y_pred':     y_pred[mask],
@@ -1639,7 +1648,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             for m in range(mask_filterset.shape[0]):
                 
                 if np.sum(mask_filterset[m,:]) == 0:
-                    cprint(f'MVA_output: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                    print(f'MVA_output: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
                     continue
                 
                 plot_helper(mask=mask_filterset[m,:], sublabel=text_filterset[m], pathlabel=path_filterset[m])
@@ -1648,6 +1657,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     ### MVA-output 2D correlation plots
     if 'MVA_2D' in args['plot_param'] and args['plot_param']['MVA_2D']['active']:
 
+        print('MVA_2D')
+        
         for i in range(100): # Loop over plot types
             
             pid = f'plot[{i}]'
@@ -1699,9 +1710,9 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 mask_filterset, text_filterset, path_filterset = stx.filter_constructor(filters=filters, X=X_RAW, y=y, ids=ids_RAW)
                 
                 for m in range(mask_filterset.shape[0]):
-                
+                    
                     if np.sum(mask_filterset[m,:]) == 0:
-                        cprint(f'MVA_2D: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
+                        print(f'MVA_2D: mask[{m}] has no events passing -- skip [{text_filterset[m]}]', 'red')
                         continue
                     
                     plot_helper(mask=mask_filterset[m,:], pick_ind=pick_ind, sublabel=text_filterset[m], pathlabel=path_filterset[m])
@@ -1716,8 +1727,6 @@ def plot_XYZ_multiple_models(targetdir, args):
     global roc_paths
     global ROC_binned_mstats
 
-    cprint(__name__ + f'.plot_XYZ_multiple_models: ', 'green')
-    
     # ===================================================================
     # Plot correlation coefficient comparisons
 
@@ -1726,6 +1735,7 @@ def plot_XYZ_multiple_models(targetdir, args):
     ### MVA-output 2D correlation plots
     if args['plot_param']['MVA_2D']['active']:
 
+        print('MVA_2D:')
         pprint(corr_mstats)
         
         for i in range(100): # Loop over plot indexes
@@ -1749,6 +1759,7 @@ def plot_XYZ_multiple_models(targetdir, args):
     ### Plot all ROC curves
     if args['plot_param']['ROC']['active']:
         
+        print('ROC:')
         pprint(roc_mstats)
         
         # We have the same number of filterset (category) entries for each model, pick the first
@@ -1757,7 +1768,7 @@ def plot_XYZ_multiple_models(targetdir, args):
         # Direct collect:  Plot all models per filter category
         for filterset_key in roc_mstats.keys():
 
-            cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve [{filterset_key}]', 'green')
+            print(f'Plot ROC curve [{filterset_key}]', 'green')
 
             path_label = roc_paths[filterset_key][dummy]
             plots.ROC_plot(roc_mstats[filterset_key], roc_labels[filterset_key],
@@ -1767,7 +1778,7 @@ def plot_XYZ_multiple_models(targetdir, args):
         # Inverse collect: Plot all filter categories ROCs per model
         for model_index in range(len(roc_mstats[list(roc_mstats)[dummy]])):
             
-            cprint(__name__ + f'.plot_XYZ_multiple_models: Plot ROC curve for the model [{model_index}]', 'green')
+            print(f'Plot ROC curve for the model [{model_index}]', 'green')
 
             rocs_       = [roc_mstats[filterset_key][model_index] for filterset_key in roc_mstats.keys()]
             labels_     = list(roc_mstats.keys())
@@ -1782,6 +1793,8 @@ def plot_XYZ_multiple_models(targetdir, args):
 
     ### Plot all 1D-binned ROC curves
     if args['plot_param']['ROC_binned']['active']:
+        
+        print('ROC_binned:')
         
         for i in range(100):
             pid = f'plot[{i}]'
@@ -1816,6 +1829,6 @@ def plot_XYZ_multiple_models(targetdir, args):
                     # title = f'BINNED MVA: {var[0]}$ \\in [{edges[b]:0.1f}, {edges[b+1]:0.1f})$'
                     # plots.MVA_plot(xy, legs, title=title, filename=targetdir + f'/MVA/--ALL--/MVA-binned[{i}]-bin[{b}]')
 
-    print(__name__ + f'.plot_XYZ_multiple_models: [done]')
+    print(f'[done]')
 
     return True

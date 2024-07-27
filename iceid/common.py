@@ -2,23 +2,20 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2024
 
-import copy
 import numpy as np
 import uproot
 from importlib import import_module
-from termcolor import colored, cprint
-import multiprocessing
 import time
-from tqdm import tqdm
 import ray
 import os
 
-from icenet.tools import io
-from icenet.tools import aux
-from icenet.tools import prints
-from icenet.tools import iceroot
-
+from icenet.tools import io, aux, prints, iceroot
 from iceid import graphio
+
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 # Globals
 from configs.eid.mctargets import *
@@ -50,8 +47,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     FILTERFUNC = globals()[args['filterfunc']]
     # -----------------------------------------------
 
-    print('\n')
-    cprint( __name__ + f'.load_root_file: Loading root file {root_path}', 'yellow')
+    print('')
+    print(f'Loading root file {root_path}', 'yellow')
     
     # Check is it MC (based on the first file and first event)
     file   = uproot.open(root_path[0])
@@ -69,7 +66,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     Y = None
     # --------------------------------------------------------------
     
-    print(__name__ + f'.load_root_file: X.shape = {X.shape}')
+    print(f'X.shape = {X.shape}')
     io.showmem()
     prints.printbar()
 
@@ -79,14 +76,14 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     if isMC:
 
         # @@ MC class target definition here @@
-        cprint(__name__ + f'.load_root_file: Computing MC <targetfunc> ...', 'yellow')
+        print(f'Computing MC <targetfunc> ...', 'yellow')
         Y = TARFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow']).astype(np.int32)
-        print(__name__ + f'.load_root_file: Y.shape = {Y.shape}')
+        print(__name__ + f'Y.shape = {Y.shape}')
         
         # @@ MC filtering done here @@
-        cprint(__name__ + f'.load_root_file: Computing MC <filterfunc> ...', 'yellow')
+        print(f'Computing MC <filterfunc> ...', 'yellow')
         mask_mc = FILTERFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-        cprint(__name__ + f'.load_root_file: <filterfunc> | before: {len(X)}, after: {sum(mask_mc)} events', 'green')
+        print(f'<filterfunc> | before: {len(X)}, after: {sum(mask_mc)} events', 'green')
         prints.printbar()
         
         X = X[mask_mc]
@@ -95,9 +92,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     # =================================================================
 
     # @@ Observable cut selections done here @@
-    cprint(colored(__name__ + f'.load_root_file: Computing <cutfunc> ...'), 'yellow')
+    print(f'Computing <cutfunc> ...', 'yellow')
     cmask = CUTFUNC(X=X, ids=ids, xcorr_flow=args['xcorr_flow'])
-    cprint(__name__ + f".load_root_file: <cutfunc> | before: {len(X)}, after: {np.sum(cmask)} events \n", 'green')
+    print(f"<cutfunc> | before: {len(X)}, after: {np.sum(cmask)} events \n", 'green')
     
     X = X[cmask]
     if isMC: Y = Y[cmask]

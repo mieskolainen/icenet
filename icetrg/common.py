@@ -4,14 +4,14 @@
 # m.mieskolainen@imperial.ac.uk
 
 import numpy as np
-import copy
 from importlib import import_module
-from termcolor import colored, cprint
 
-from icenet.tools import io
-from icenet.tools import aux
-from icenet.tools import prints
-from icenet.tools import iceroot
+from icenet.tools import io, aux, prints, iceroot
+
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 # GLOBALS
 from configs.trg.cuts import *
@@ -114,7 +114,7 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None, max
     # @@ Filtering done here @@
     mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=CUT_VARS)
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(mask)} events ', 'green')
+    print(f'isMC = {isMC} | <filterfunc> before: {len(X)}, after: {sum(mask)} events ', 'green')
     
     X   = X[mask]
     prints.printbar()
@@ -122,8 +122,8 @@ def process_root(rootfile, tree, isMC, args, entry_start=0, entry_stop=None, max
     # @@ Observable cut selections done here @@
     mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args['xcorr_flow'])
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=CUT_VARS)
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>    before: {len(X)}, after: {sum(mask)} events \n", 'green')
-
+    print(f"isMC = {isMC} | <cutfunc>    before: {len(X)}, after: {sum(mask)} events \n", 'green')
+    
     X   = X[mask]
     io.showmem()
     prints.printbar()

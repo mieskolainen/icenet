@@ -15,16 +15,20 @@ from datetime import datetime
 import torch
 import random
 import yaml
+import inspect
 
 import numba
 from tqdm import tqdm
-from termcolor import cprint
 
 import sklearn
 from sklearn import metrics
 import scipy
 from scipy import interpolate
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def yaml_dump(data: dict, filename: str):
     """
@@ -58,7 +62,7 @@ def set_random_seed(seed):
     """
     Set random seeds
     """
-    print(__name__ + f'.set_random_seed: {seed} (random, numpy, torch)')
+    print(f'{seed} (random, numpy, torch)')
     
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -214,10 +218,10 @@ def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='i
         reduced.sort() # Make it deterministic order
         
         if verbose:
-            cprint(__name__ + f'.red: Included input variables: {np.array(ids)[mask]}', 'yellow')
-            cprint(__name__ + f'.red: Excluded input variables: {reduced}', 'red')
+            print(f'Included input variables: {np.array(ids)[mask]}', 'yellow')
+            print(f'Excluded input variables: {reduced}', 'red')
     else:
-        cprint(__name__ + f'.red: Using a full set of input variables', 'red')
+        print(f'Using a full set of input variables', 'red')
     
     if   mode == 'X':
         return X[:, mask]
@@ -411,7 +415,7 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
     mem_size = N*D*32/8/1024**3 # 32 bit
     if dtype == 'float64': mem_size *= 2
     
-    print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}] ({mem_size:0.3f} GB)')
+    print(f'Creating a matrix with dimensions [{N} x {D}] ({mem_size:0.3f} GB)')
 
     # Pre-processing of jagged variable names
     jvname = []
@@ -471,7 +475,7 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
                 k += jagged_dim[j]
 
     elapsed = time.time() - t
-    print(__name__ + f'.jagged2matrix: Processing took {elapsed:0.1f} sec')
+    print(f'Processing took {elapsed:0.1f} sec')
 
     return shared_array
 
@@ -501,7 +505,7 @@ def jagged2tensor(X, ids, xyz, x_binedges, y_binedges, dtype='float32'):
             T[i,c,:,:] = arrays2matrix(x_arr=X[i,ind[0]], y_arr=X[i,ind[1]], z_arr=X[i,ind[2]], 
                 x_binedges=x_binedges, y_binedges=y_binedges)
 
-    print(__name__ + f'.jagged2tensor: Returning tensor with shape {T.shape}')
+    print(f'Returning tensor with shape {T.shape}')
 
     return T
 
@@ -530,7 +534,7 @@ def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges, dtype='float32'):
         for i in range(len(x_ind)):
             A[x_ind[i], y_ind[i]] += z_arr[i]
     except:
-        print(__name__ + f'.arrays2matrix: not valid input (returning 0-matrix)')
+        print(f'Not valid input (returning 0-matrix)')
 
     return A
 
@@ -641,11 +645,11 @@ def count_targets(events, ids, entry_start=0, entry_stop=None, new=False, librar
         vec = np.array([events.array(name, entry_start=entry_start, entrystop=entry_stop) for name in ids])
     vec = vec.T
     
-    print(__name__ + f'.count_targets: vec.shape = {vec.shape}')
+    print(f'vec.shape = {vec.shape}')
 
     intmat = binaryvec2int(vec)
     BMAT   = generatebinary(K)
-    print(__name__ + f'.count_targets: {ids}')
+    print(f'{ids}')
     for i in range(BMAT.shape[0]):
         print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
     
@@ -849,7 +853,7 @@ def generatebinary(N, M=None, verbose=False):
         K += binomial(N,k)
 
     if verbose:
-        print(__name__ + f'.generatebinary: Binary matrix dimension {K} x {N}')
+        print(f'Binary matrix dimension {K} x {N}')
 
     X = np.zeros((K, N), dtype=np.uint8)
     ivals = np.zeros(K, dtype = np.double)
@@ -950,12 +954,12 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
         return f'{path}/{label}_{i}{filetype}'
     
     if epoch is None or epoch == -1:
-        cprint(__name__ + f'.create_model_filename: Loading the latest model by timestamp', 'yellow')
+        print(f'Loading the latest model by timestamp', 'yellow')
 
         list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
         
         if len(list_of_files) == 0:
-            txt  = __name__ + f'.create_model_filename: Could not find any files for model "{label}"'
+            txt  = f'Could not find any files for model "{label}"'
             txt += f" under path {path}"
             raise Exception(txt)
         
@@ -979,7 +983,7 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
             
             except Exception as e:
                 print(e)
-                cprint(__name__ + f'.create_model_filename: Problem in finding the model [{label}] with the minimum validation loss', 'red')
+                print(f'Problem in finding the model [{label}] with the minimum validation loss', 'red')
         
         if succeeded:
             # Take the minimum validation loss epoch index
@@ -987,17 +991,17 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
             idx    = np.argmin(losses)
             
             str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
-            cprint(__name__ + f'.create_model_filename: {str}', 'magenta')
+            print(f'{str}', 'magenta')
             
             filename = createfilename(idx)
         # ----------------------------------------------------
         
     else:
-        cprint(__name__ + f'.create_model_filename: Loading the model with the provided epoch = {epoch}', 'yellow')
+        print(f'Loading the model with the provided epoch = {epoch}', 'yellow')
         filename = createfilename(epoch)
     
     dt = datetime.fromtimestamp(getmtime(filename))
-    cprint(__name__ + f'.create_model_filename: Found a model file: {filename} (modified {dt})', 'green')
+    print(f'Found a model file: {filename} (modified {dt})', 'green')
     
     return filename
 
@@ -1094,7 +1098,7 @@ class Metric:
         # Invalid input
         if self.num_classes <= 1:
             if verbose:
-                print(__name__ + f'.Metric: only one class present cannot evaluate metrics (return -1)')
+                print(f'only one class present cannot evaluate metrics (return -1)')
 
             return # Return None
         
@@ -1175,7 +1179,7 @@ class Metric:
                     else:
                         trials += 1
                 if trials > max_trials:
-                    print(__name__ + f'.Metric: bootstrap failed (check the input per class statistics)')
+                    print(f'bootstrap failed (check the input per class statistics)')
                     continue
                 # ------------------
                 
@@ -1238,7 +1242,7 @@ def compute_metrics(class_ids, y_true, y_pred, weights):
     # Fix NaN
     num_nan = np.sum(~np.isfinite(y_pred))
     if num_nan > 0:
-        print(__name__ + f'.compute_metrics: Found {num_nan} NaN/Inf (set to zero)')
+        print(f'Found {num_nan} NaN/Inf (set to zero)')
         y_pred[~np.isfinite(y_pred)] = 0 # Set to zero
     
     try:
@@ -1260,7 +1264,7 @@ def compute_metrics(class_ids, y_true, y_pred, weights):
             acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)
     
     except Exception as e:
-        print(__name__ + f'.compute_metrics: Unable to compute ROC-metrics: {e}')
+        print(f'Unable to compute ROC-metrics: {e}')
         for c in class_ids:
             print(f'num of class[{c}] = {np.sum(y_true == c)}')
 

@@ -8,7 +8,6 @@ import awkward as ak
 import torch
 import gc
 from pprint import pprint
-from termcolor import cprint
 import copy
 from prettytable import PrettyTable
 import multiprocessing
@@ -23,6 +22,10 @@ from icenet.tools import aux
 from icenet.tools import reweight
 from icenet.tools import prints
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def binengine(bindef, x):
     """
@@ -43,7 +46,7 @@ def binengine(bindef, x):
     """
     
     if len(x) == 0:
-        print(__name__ + f'.binengine: Input is zero-array, returning [0,0]')
+        print(f'Input is zero-array, returning [0,0]')
         return np.array([0,0])
 
     def mylinspace(minval, maxval, nbin):
@@ -282,11 +285,11 @@ def binned_2D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, label, weights=None,
                 else:
                     met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind])
 
-                print(__name__ + f'.binned_2D_AUC: {string} | AUC = {met.auc:.5f}')
+                print(f'{string} | AUC = {met.auc:.5f}')
                 AUC[i,j] = met.auc
 
             else:
-                print(__name__ + f'.binned_2D_AUC: {string} | No events found in this cell!')
+                print(f'{string} | No events found in this cell!')
     
     # Evaluate total performance
     met = aux.Metric(y_true=y, y_pred=y_pred, weights=weights)
@@ -355,10 +358,10 @@ def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None,
 
                 AUC[i] = met.auc
                 METS.append(met)
-                print(__name__ + f'.binned_1D_AUC: {string} | AUC = {AUC[i]}')
+                print(f'{string} | AUC = {AUC[i]}')
             else:
                 METS.append(None)
-                print(__name__ + f'.binned_1D_AUC: {string} | No events found in this cell!')
+                print(f'{string} | No events found in this cell!')
 
             LABELS.append(f'{VAR}$ \\in [{range_[0]:.1f},{range_[1]:.1f})$')
 
@@ -412,7 +415,7 @@ def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, edges=80,
             ind = (y == k)
 
             if np.sum(ind) == 0:
-                print(__name__ + f'.density_MVA_wclass: No samples for class {k} -- continue')
+                print(f'No samples for class {k} -- continue')
                 continue
             
             w = weights[ind] if weights is not None else None
@@ -436,10 +439,11 @@ def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, edges=80,
                 outputdir = aux.makedir(f'{path}')
                 savepath  = f'{outputdir}/MVA-output__{mode}__{scale}.pdf'
                 plt.savefig(savepath, bbox_inches='tight')
-                cprint(__name__ + f'.density_MVA_wclass: Saved: "{savepath}"', 'green')
+                print(f'Saved: "{savepath}"', 'green')
+            
             except Exception as e:
-                cprint(e, 'red')
-                cprint(__name__ + f'.density_MVA_wclass: Plotting failed for {label} -- continue', 'red')
+                print(e, 'red')
+                print(f'Plotting failed for {label} -- continue', 'red')
                 continue
         
         # --------        
@@ -459,7 +463,8 @@ def plot_correlation_comparison(corr_mstats, targetdir, xlim=None):
     Returns:
         plots saved to a directory
     """
-    print(__name__ + f'.plot_correlation_comparison ...')
+    
+    print(f'Plotting correlation comparisons ...')
 
     class_ids = {}
     
@@ -580,7 +585,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         w = weights[ind] if weights is not None else None
         
         if np.sum(ind) == 0:
-            print(__name__ + f'.density_COR_wclass: No samples for class {k} -- continue')
+            print(f'No samples for class {k} -- continue')
             continue
 
         # Loop over variables
@@ -653,7 +658,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     # -----
 
                     plt.savefig(savepath, bbox_inches='tight')
-                    cprint(__name__ + f'.density_COR_wclass: Saved: "{savepath}"', 'green')
+                    print(f'Saved: "{savepath}"', 'green')
                     
                     # -----                    
                     fig.clf()
@@ -661,7 +666,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     gc.collect()
                 
                 except: # Matplotlib LogNorm() can be buggy
-                    print(__name__ + f'.density_COR_wclass: Failed to produce plot {savepath}')
+                    print(f'Failed to produce plot {savepath}')
     pprint(output)
 
     return output
@@ -711,7 +716,7 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
         outputdir = aux.makedir(f'{path}/{label}')
         savepath = f'{outputdir}/var-{var}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
-        cprint(__name__ + f'.density_COR: Saved: "{savepath}"', 'green')
+        print(f'Saved: "{savepath}"', 'green')
 
         # -----                    
         fig.clf()
@@ -798,7 +803,7 @@ def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
     Plot all variables.
     """
     
-    print(__name__ + f'.plotvars: Creating plots | exclude_vals = {exclude_vals} ...')
+    print(f'Creating plots | exclude_vals = {exclude_vals} ...')
     
     # Chunked loop [parallel processing]
     param = {
@@ -825,7 +830,7 @@ def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
         paramlist[-1]['weights'] = weights
     
     # Start multiprocessing
-    cprint(__name__ + f'.plotvars: Multiprocessing {X.shape[1]} plots', 'yellow')
+    print(f'Multiprocessing {X.shape[1]} plots', 'yellow')
     
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus)
     tic  = time.time()
@@ -853,8 +858,8 @@ def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
         gc.collect()
     
     except Exception as e:
-        cprint(e, 'red')
-        cprint(__name__ + f'.plotvar: Problem plotting variable "{var}"', 'red')
+        print(e, 'red')
+        print(f'Problem plotting variable "{var}"', 'red')
 
 
 def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5,
@@ -877,7 +882,7 @@ def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x
         ind = (y == c)
         
         if np.sum(ind) == 0:
-            print(__name__ + f'.plot_reweight_result: No samples for class {c} -- continue')
+            print(f'No samples for class {c} -- continue')
             continue
         
         # Compute histograms with numpy (we use nbins and range() for speed)
@@ -955,7 +960,7 @@ def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetd
         C[np.abs(C) < round_threshold] = np.nan
         C *= 100
         toc = time.time()
-        print(__name__ + f'.plot_correlations: Computing C-matrix (took {toc-tic:0.2f} sec)')
+        print(f'Computing C-matrix (took {toc-tic:0.2f} sec)')
 
         # Compute suitable figsize
         size = np.ceil(C.shape[0] / 3)
@@ -980,7 +985,7 @@ def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetd
                 fname = targetdir + f'{label}-correlation-matrix.png'
                 plt.savefig(fname=fname, pad_inches=0.2, dpi=300, bbox_inches='tight')
             toc = time.time()
-            print(__name__ + f'.plot_correlations: Saved: "{fname} (took {toc-tic:0.2f} sec)"')
+            print(f'Saved: "{fname} (took {toc-tic:0.2f} sec)"')
 
     return figs, axs
 
@@ -1051,7 +1056,7 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
             marker = 'None'
             
             if metrics[i] is None:
-                print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
+                print(f'metrics[{i}] ({labels[i]}) is None, continue without')
                 continue
             
             fpr        = metrics[i].fpr
@@ -1137,7 +1142,7 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
 
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-            cprint(__name__ + f'.ROC_plot: Saved: ' + filename + '.pdf','green')
+            print(f'Saved: ' + filename + '.pdf','green')
         
         if k == 1: # Log-Linear
             
@@ -1168,13 +1173,13 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
     for i in range(len(metrics)):
 
         if metrics[i] is None:
-            print(__name__ + f'.MVA_plot: Error: metrics[{i}] ({labels[i]}) is None (check per class statistics), return -1')
+            print(f'Error: metrics[{i}] ({labels[i]}) is None (check per class statistics), return -1')
             return -1
         else:
             class_ids = metrics[i].class_ids
         
         if len(metrics[i].mva_hist) != len(class_ids):
-            print(__name__ + f'.MVA_plot: Error: num_classes != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
+            print(f'Error: num_classes != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
             return -1
     
     for k in [0,1]: # linear & log
@@ -1192,11 +1197,11 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             for i in range(len(metrics)):
 
                 if metrics[i] is None:
-                    print(__name__ + f'.MVA_plot: metrics[{i}] is None, continue without')
+                    print(f'metrics[{i}] is None, continue without')
                     continue
 
                 if len(metrics[i].mva_bins) == 0:
-                    print(__name__ + f'.MVA_plot: len(metrics[{i}].mva_bins) == 0, continue without')
+                    print(f'len(metrics[{i}].mva_bins) == 0, continue without')
                     continue
 
                 bins       = metrics[i].mva_bins
@@ -1221,7 +1226,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             #plt.xlim(0.0, 1.0)
             #ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-            cprint(__name__ + f'.MVA_plot: Saved: ' + filename + '.pdf','green')
+            print(f'Saved: ' + filename + '.pdf','green')
         
         if k == 1:
             #plt.ylim(0.0, 1.0)
@@ -1254,7 +1259,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
         npoints:    number of points to draw
     """
     
-    print(__name__ + f'.plot_contour_grid: Evaluating, X.shape = {X.shape}...')
+    print(f'Evaluating, X.shape = {X.shape}...')
     MAXP = min(npoints, X.shape[0])
     D    = X.shape[1]
     pad  = 0.5
@@ -1283,7 +1288,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             elif transform == 'numpy':
                 Z = pred_func(XX)
             else:
-                raise Exception(__name__ + f'.plot_decision_contour: Unknown matrix type = {matrix}')
+                raise Exception(__name__ + f'.plot_decision_contour: Unknown matrix type = {transform}')
 
             Z = Z.reshape(PX.shape)
             
@@ -1304,7 +1309,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             
             filename = targetdir + f'{dim1}-{dim2}.pdf'
             plt.savefig(filename, bbox_inches='tight')
-            cprint(__name__ + f'.plot_contour_grid: Saved: ' + filename,'green')
+            print(f'Saved: ' + filename,'green')
             
             # --------        
             fig.clf()
@@ -1371,7 +1376,7 @@ def table_writer(filename, label, sublabel, tau, chi2_table, print_to_screen=Fal
         text_file.write('\n')
         text_file.write('\n')
         if print_to_screen:
-            cprint(chi2_table, 'magenta')
+            print(chi2_table, 'magenta')
             print('')
 
 
@@ -1381,7 +1386,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     Plot AI based reweighting results
     """
     
-    cprint(f'label = {label} | sublabel = {sublabel} | tau = {tau}', 'green')
+    print(f'label = {label} | sublabel = {sublabel} | tau = {tau}', 'green')
     
     dir       = aux.makedir(f'{targetdir}/{label}/{sublabel}')
     local_dir = aux.makedir(dir + f'/tau_{tau:0.2f}')
@@ -1406,14 +1411,14 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     
     THRESH = 1E-5
     if min_y_pred < (-THRESH) or max_y_pred > (1.0 + THRESH):
-        print(__name__ + f'.plot_AIRW: Detected raw logit output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+        print(f'Detected raw logit output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
         logits = y_pred[y == C0]
         probs  = aux.sigmoid(logits)
-        print(__name__ + f'.plot_AIRW: Corresponding probability output [{np.min(probs):0.4f}, {np.max(probs):0.4f}]')
+        print(f'Corresponding probability output [{np.min(probs):0.4f}, {np.max(probs):0.4f}]')
     else:
-        print(__name__ + f'.plot_AIRW: Detected probability output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+        print(f'Detected probability output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
         logits = aux.inverse_sigmoid(p = y_pred[y == C0], EPS=EPS)
-        print(__name__ + f'.plot_AIRW: Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
+        print(f'Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
     
     # 1. Apply temperature scaling
     logits /= tau
@@ -1443,7 +1448,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
     
     if RN_ID is not None:
-        cprint(__name__ + f'.plot_AIRW: Renormalizing with class [{RN_ID}] weight sum', 'yellow')
+        print(f'Renormalizing with class [{RN_ID}] weight sum', 'yellow')
         
         sum_before = AIw0.sum()
         print(f'Sum before: {sum_before:0.1f}')
@@ -1502,7 +1507,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         paramlist[-1]['AIw0']    = AIw0
     
     # Start multiprocessing
-    cprint(__name__ + f'.plot_AIRW: Multiprocessing {len(pick_ind)} plots', 'yellow')
+    print(f'Multiprocessing {len(pick_ind)} plots', 'yellow')
     
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2)
     tic  = time.time()

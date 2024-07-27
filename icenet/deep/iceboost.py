@@ -8,18 +8,18 @@ import torch
 import os
 import xgboost
 import copy
-from termcolor import cprint
 from tqdm import tqdm
 import pickle
 
 # icenet
-from icenet.tools import stx
-from icenet.tools import aux
-from icenet.tools import plots
-from icenet.tools import reweight
-
+from icenet.tools import aux, stx, plots, reweight
 from icenet.deep import autogradxgb, optimize, losstools, tempscale
 from icefit import mine, cortools
+
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 import ray
 from ray import tune
@@ -115,7 +115,7 @@ def _sliced_wasserstein(preds: torch.Tensor, targets: torch.Tensor, weights: tor
     
     # Print
     loss_str = f'Loss[{loss_mode}]: sum: {total_loss.item():0.5f} | ' + loss_str
-    cprint(loss_str, 'yellow')
+    print(loss_str, 'yellow')
     # --------------------------------------------------------------------
     
     # Scale finally to the total number of events (to conform with xgboost internal convention)
@@ -178,11 +178,11 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
         
         # Check that there are some events
         if torch.sum(t0) < 1:
-            print(__name__  + f": BCE[{key}] No events from class [{param['classes'][0]}] - skip loss term")
+            print(f"BCE[{key}] No events from class [{param['classes'][0]}] - skip loss term")
             continue
         
         if torch.sum(t1) < 1:
-            print(__name__  + f": BCE[{key}] No events from class [{param['classes'][1]}] - skip loss term")
+            print(f"BCE[{key}] No events from class [{param['classes'][1]}] - skip loss term")
             continue
         
         # Now re-weight the target(s) based on the model predictions
@@ -333,7 +333,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                 
                 # Minimum number of events per category cutoff
                 if reg_param['min_count'] is not None and np.sum(mm_) < reg_param['min_count']:
-                    cprint(__name__ + f" MI_reg: {np.sum(mm_)} < {reg_param['min_count']} = reg_param['min_count'] (class [{c}] | category [{m}]) -- skip", 'red')
+                    print(f"MI_reg: {np.sum(mm_)} < {reg_param['min_count']} = reg_param['min_count'] (class [{c}] | category [{m}]) -- skip", 'red')
                     continue
                 
                 ## Non-Linear Distance Correlation
@@ -392,7 +392,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             
             k += 1
         
-        cprint(f'RAW {reg_param["losstype"]} = {values}', 'yellow')
+        print(f'RAW {reg_param["losstype"]} = {values}', 'yellow')
         
         txt = f'{reg_param["losstype"]} [$\\beta$ = {MI_param["beta"]}]'
         track_loss[txt] = MI_loss.item()
@@ -406,7 +406,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     
     # Print
     loss_str = f'Loss[{loss_mode}]: sum: {total_loss.item():0.5f} | ' + loss_str
-    cprint(loss_str, 'yellow')
+    print(loss_str, 'yellow')
     # --------------------------------------------------------------------
     
     # Scale finally to the total number of events (to conform with xgboost internal convention)
@@ -505,13 +505,13 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         for key in param['BCE_param'].keys():
             
-            cprint(__name__ + f'.train_xgb: Setting BCE event filters [{key}]', 'green')
+            print(f'Setting BCE event filters [{key}]', 'green')
 
             BCE_param[key] = create_filters(param=param['BCE_param'][key], data_trn=data_trn, data_val=data_val)
 
     if 'MI_param' in param:
         
-        cprint(__name__ + f'.train_xgb: Setting MI event filters', 'green')
+        print(f'Setting MI event filters', 'green')
         
         MI_param = copy.deepcopy(param['MI_param']) #! important
         MI_param = create_filters(param=MI_param, data_trn=data_trn, data_val=data_val)
@@ -521,7 +521,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     if param['model_param']['device'] == 'auto':
         param['model_param'].update({'device': 'cuda' if torch.cuda.is_available() else 'cpu'})
     
-    print(__name__ + f'.train_xgb: Training <{param["label"]}> classifier ...')
+    print(f'Training <{param["label"]}> classifier ...')
 
     ### ** Optimization hyperparameters [possibly from Raytune] **
     param['model_param'] = aux.replace_param(default=param['model_param'], raytune=config['params'])
@@ -538,7 +538,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     # ---------------------------------------------------------
     # Choose weight mode
     if np.min(w_trn) < 0.0 or np.min(w_val) < 0.0:
-        print(__name__ + f'.train_xgb: Negative weights in the sample -- handled via custom loss')
+        print(f'Negative weights in the sample -- handled via custom loss')
         out_weights_on = True
         
         if not use_custom:
@@ -706,7 +706,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
         
-        print(__name__ + f'.train_xgb [{param["label"]}] Tree {epoch+1:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+        print(f'[{param["label"]}] Tree {epoch+1:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
         
         if not args['__raytune_running__']:
             
@@ -775,7 +775,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         ## Plot decision trees
         if ('plot_trees' in param) and param['plot_trees']:
             try:
-                print(__name__ + f'.train_xgb: Plotting decision trees ...')
+                print(f'Plotting decision trees ...')
                 model.feature_names = ids_trn # Make it explicit
                 
                 path = aux.makedir(f'{args["plotdir"]}/train/xgboost-treeviz/{param["label"]}')
@@ -786,7 +786,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     plt.savefig(f'{path}/tree_{i}.pdf', bbox_inches='tight')
                     plt.close()
             except:
-                print(__name__ + f'.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
+                print(f'Could not plot the decision trees (try: conda install python-graphviz)')
         
         #model.feature_names = None # Set original default ones
         

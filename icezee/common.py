@@ -4,14 +4,16 @@
 
 import numpy as np
 import copy
-import pickle
 from importlib import import_module
 import pandas as pd
 
-from termcolor import colored, cprint
-
 from icenet.tools import io
 from icenet.tools import aux
+
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 # GLOBALS
 #from configs.zee.cuts import *
@@ -34,7 +36,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     for f in mcfiles:
         new_frame = copy.deepcopy(pd.read_parquet(f))
         frames.append(new_frame)
-        cprint(__name__ + f'.load_helper: {f} | N = {len(new_frame)}', 'yellow')
+        print(f'{f} | N = {len(new_frame)}', 'yellow')
         ids = list(new_frame.keys()); ids.sort()
         print(ids)
     
@@ -62,7 +64,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     for f in datafiles:
         new_frame = copy.deepcopy(pd.read_parquet(f))
         frames.append(new_frame)
-        cprint(__name__ + f'.load_helper: {f} | N = {len(new_frame)}', 'yellow')
+        print(__name__ + f'.load_helper: {f} | N = {len(new_frame)}', 'yellow')
         ids = list(new_frame.keys()); ids.sort()
         print(ids)
     
@@ -75,7 +77,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     NEW_LOAD_VARS = copy.deepcopy(LOAD_VARS)
     for i in range(len(LOAD_VARS)):
         if LOAD_VARS[i] == 'probe_pfChargedIso':
-            cprint(f'Changing variable {LOAD_VARS[i]} name in data', 'red')
+            print(f'Changing variable {LOAD_VARS[i]} name in data', 'red')
             NEW_LOAD_VARS[i] = 'probe_pfChargedIsoPFPV'
     # -------------------------------------------------------------------------
     
@@ -102,7 +104,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     if args['drop_negative']:
         ind = W < 0
         if np.sum(ind) > 0:
-            cprint(__name__ + f'.load_helper: Dropping negative weight events ({np.sum(ind)/len(ind):0.3f})', 'red')
+            print(f'Dropping negative weight events ({np.sum(ind)/len(ind):0.3f})', 'red')
             X = X[~ind]
             W = W[~ind] # Boolean NOT
             Y = Y[~ind]
@@ -118,7 +120,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     # Apply maxevents cutoff
     maxevents = np.min([maxevents, len(X)])
     if maxevents < len(X):
-        print(__name__ + f'.load_root_file: Applying maxevents cutoff {maxevents}')
+        print(f'Applying maxevents cutoff {maxevents}')
         X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
     
     # Re-nenormalize MC to the event count
@@ -127,10 +129,10 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     ## -------------------------------------------------
 
     ## Print some diagnostics
-    print(__name__ + f'.load_helper: Number of events: {len(X)}')
+    print(f'Number of events: {len(X)}')
     
     for c in np.unique(Y):
-        print(__name__ + f'.load_helper: class[{c}] | N = {np.sum(Y == c)} | weight[mean,std,min,max] = {np.mean(W[Y==c]):0.3E}, {np.std(W[Y==c]):0.3E}, {np.min(W[Y==c]):0.3E}, {np.max(W[Y==c]):0.3E}')
+        print(f'class[{c}] | N = {np.sum(Y == c)} | weight[mean,std,min,max] = {np.mean(W[Y==c]):0.3E}, {np.std(W[Y==c]):0.3E}, {np.min(W[Y==c]):0.3E}, {np.max(W[Y==c]):0.3E}')
     
     return X,Y,W,ids
 
@@ -162,7 +164,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
 
     if maxevents is None:
         maxevents = int(1e10)
-        cprint(__name__ + f'.load_root_file: "maxevents" is None, set {maxevents}', 'yellow')
+        print(f'"maxevents" is None, set {maxevents}', 'yellow')
     
     # -------------------------------------------------------------------------
     # We do splitting according to dictionary (trn, val, tst) structure
@@ -256,10 +258,10 @@ def splitfactor(x, y, w, ids, args):
         try:
             ind = data.find_ind(v)
         except:
-            cprint(__name__ + f'.splitfactor: Could not find variable "{v}" -- continue', 'red')
+            print(f'Could not find variable "{v}" -- continue', 'red')
             continue
         
-        cprint(__name__ + f'.splitfactor: Pre-transforming variable "{v}" with log1p', 'magenta')
+        print(f'Pre-transforming variable "{v}" with log1p', 'magenta')
         
         data.x[:,ind] = np.log1p(data.x[:,ind])
         

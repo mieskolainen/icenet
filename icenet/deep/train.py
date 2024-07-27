@@ -13,7 +13,6 @@ import copy
 import multiprocessing
 
 from tqdm import tqdm
-from termcolor import cprint
 from matplotlib import pyplot as plt
 
 # icenet
@@ -40,6 +39,10 @@ from icefit import mine
 
 from icenet.optim import adam
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 # Raytune
 import ray
@@ -189,7 +192,7 @@ def raytune_main(inputs, train_func=None):
     else:
         raise Exception(__name__ + f".raytune_main: Unknown 'search_algo' (use 'Basic', 'HyperOpt', 'Optuna', 'BayesOpt')")
     
-    cprint(__name__ + f'.raytune_main: Optimization algorithm: {algo}', 'yellow')
+    print(f'Optimization algorithm: {algo}', 'yellow')
     
     # Raytune scheduler
     scheduler = ASHAScheduler()
@@ -198,7 +201,7 @@ def raytune_main(inputs, train_func=None):
     inputs['args']['__raytune_running__'] = True
     
     # Raytune main setup
-    print(__name__ + f'.raytune_main: Launching tune ...')
+    print(f'Launching tune ...')
     
     param_space = {
         "scaling_config": ScalingConfig(
@@ -226,9 +229,9 @@ def raytune_main(inputs, train_func=None):
     best_result = results.get_best_result(metric=metric, mode=mode)
     
     print('-----------------')
-    cprint(__name__ + f'.raytune_main: Best result config: \n\n{best_result.config}',  'green')
+    print(f'Best result config: \n\n{best_result.config}',  'green')
     print('')
-    cprint(__name__ + f'.raytune_main: Best result metrics:\n\n{best_result.metrics}', 'green')
+    print(f'Best result metrics:\n\n{best_result.metrics}', 'green')
     print('-----------------')
     
     # Set the best config, training functions will update the parameters
@@ -267,14 +270,14 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     # Create scheduler
     scheduler = deeptools.set_scheduler(optimizer=optimizer, param=scheduler_param)
     
-    cprint(__name__ + f'.torch_loop: Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
+    print(f'Number of free model parameters = {aux_torch.count_parameters_torch(model)}', 'yellow')
     
     
     # --------------------------------------------------------------------
     ## Mutual information regularization
     if 'MI_param' in param:
         
-        cprint(__name__ + f'.torch_loop: Using MI regularization', 'yellow')
+        print(f'Using MI regularization', 'yellow')
         
         # Create network and set parameters
         MI         = copy.deepcopy(param['MI_param']) # ! important
@@ -291,7 +294,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         MI['model'] = []
         MI['MI_lb'] = []
 
-        print(__name__ + f'.torch_loop: MINE estimator input_size: {input_size}')
+        print(f'MINE estimator input_size: {input_size}')
         
         for k in range(len(MI['classes'])):
             MI_model         = mine.MINENet(input_size=input_size, **MI)
@@ -356,11 +359,11 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         val_aucs.append(validate_auc)
         
         print(__name__)
-        cprint(f'.torch_loop: [{param["label"]}] Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()[0]:0.4E}', 'yellow')
+        print(f'[{param["label"]}] Epoch {epoch+1:03d} / {opt_param["epochs"]:03d} | Train: {optimize.printloss(loss)} (loss) {train_acc:.4f} (acc) {train_auc:.4f} (AUC) | Eval: {optimize.printloss(validate_loss)} (loss) {validate_acc:.4f} (acc) {validate_auc:.4f} (AUC) | lr = {scheduler.get_last_lr()[0]:0.4E}', 'yellow')
         if MI is not None:
-            print(f'.torch_loop: Final MI network_loss = {MI["network_loss"]:0.4f}')
+            print(f'Final MI network_loss = {MI["network_loss"]:0.4f}')
             for k in range(len(MI['classes'])):
-                print(f'.torch_loop: k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
+                print(f'k = {k}: MI_lb value = {MI["MI_lb"][k]:0.4f}')
         
         # Update scheduler
         scheduler.step()
@@ -429,7 +432,7 @@ def train_torch_graph(config={'params': {}}, data_trn=None, data_val=None, args=
     Returns:
         trained model
     """
-    print(__name__ + f'.train_torch_graph: Training <{param["label"]}> classifier ...')
+    print(f'Training <{param["label"]}> classifier ...')
     print(config)
     
     # Construct model
@@ -465,7 +468,7 @@ def train_torch_generic(X_trn=None, Y_trn=None, X_val=None, Y_val=None,
     Returns:
         trained model
     """
-    print(__name__ + f'.train_torch_generic: Training <{param["label"]}> classifier ...')
+    print(f'Training <{param["label"]}> classifier ...')
 
     model, train_loader, test_loader = \
         torch_construct(X_trn=X_trn, Y_trn=Y_trn, X_val=X_val, Y_val=Y_val, X_trn_2D=X_trn_2D, X_val_2D=X_val_2D, \
@@ -555,7 +558,7 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     Returns:
         Trained model
     """
-    print(__name__ + f'.train_cutset: Training <{param["label"]}> classifier ...')
+    print(f'Training <{param["label"]}> classifier ...')
     print(config)
     
     model_param = aux.replace_param(default=param['model_param'], raytune=config['params'])
@@ -589,7 +592,7 @@ def train_cutset(config={'params': {}}, data_trn=None, data_val=None, args=None,
     loss  = eval(param['opt_param']['lossfunc'])
     # -------------------------------------------------------
     
-    cprint(__name__ + f'.train_cutset: (eff_s: {eff_s:0.3E}, eff_b: {eff_b:0.3E}) | loss: {loss:0.3f} | AUC = {metrics.auc:0.4f}', 'yellow')
+    print(f'(eff_s: {eff_s:0.3E}, eff_b: {eff_b:0.3E}) | loss: {loss:0.3f} | AUC = {metrics.auc:0.4f}', 'yellow')
     
     if args['__raytune_running__']:
         #with ray.tune.checkpoint_dir(epoch) as checkpoint_dir:
@@ -619,7 +622,7 @@ def train_flr(config={'params': {}}, data_trn=None, args=None, param=None):
     Returns:
         trained model
     """
-    print(__name__ + f'.train_flr: Training <{param["label"]}> classifier ...')
+    print(f'Training <{param["label"]}> classifier ...')
 
     savedir = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
     
@@ -646,7 +649,7 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
     # Set input dimensions
     param['model_param']['n_dims'] = data_trn.x.shape[1]
 
-    print(__name__ + f'.train_flow: Training [{param["label"]}] classifier ...')
+    print(f'Training [{param["label"]}] classifier ...')
     
     for classid in range(len(args['primary_classes'])):
         
@@ -676,7 +679,7 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
                                       early_stopping = param['scheduler_param']['early_stopping'],
                                       threshold_mode = 'abs')
         
-        cprint(__name__ + f'.train_flow: Training density for class = {classid}', 'magenta')
+        print(f'Training density for class = {classid}', 'magenta')
         
         modeldir  = aux.makedir(f"{args['modeldir']}/{param['label']}")
         save_name = f'{param["label"]}_class_{classid}'
@@ -702,7 +705,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     if param['xgb']['model_param']['tree_method'] == 'auto':
         param['xgb']['model_param'].update({'tree_method' : 'gpu_hist' if torch.cuda.is_available() else 'hist'})
     
-    print(__name__ + f'.train_graph_xgb: Training [{param["label"]}] classifier ...')
+    print(f'Training [{param["label"]}] classifier ...')
 
     # --------------------------------------------------------------------
     ### Train GNN
@@ -724,7 +727,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
     if Z == 0:
         raise Exception(__name__ + '.train_graph_xgb: Could not auto-detect latent space dimension')
     else:
-        print(__name__  + f'.train_graph_xgb: Latent z-space dimension = {Z} auto-detected')
+        print(f'Latent z-space dimension = {Z} auto-detected')
     
     # -------------------------
     ## Evaluate GNN output
@@ -749,7 +752,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         x_val[i,:] = np.c_[xconv, [data_val[i].u.numpy()]]
         y_val[i]   = data_val[i].y.numpy()
     
-    print(__name__ + f'.train_graph_xgb: After extension: {x_trn.shape}')
+    print(f'After extension: {x_trn.shape}')
 
     # Create all feature names
     ids = []
@@ -832,7 +835,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         with open(savedir + f"{param['xgb']['label']}_{epoch}.pkl", 'wb') as file:
             pickle.dump({'model': model, 'ids': ids, 'losses': losses, 'param': param}, file, protocol=pickle.HIGHEST_PROTOCOL)
         
-        print(__name__ + f'.train_graph_xgb: Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+        print(f'Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
     
     # -------------------------------------------
     # Plot evolution
@@ -858,7 +861,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         targetdir = aux.makedir(f'{args["plotdir"]}/train/xgboost-treeviz/{param["xgb"]["label"]}')
         
         try:
-            print(__name__ + f'.train_graph_xgb: Plotting decision trees ...')
+            print(f'Plotting decision trees ...')
             model.feature_names = ids
             for i in tqdm(range(num_epochs)):
                 xgboost.plot_tree(model, num_trees=i)
@@ -866,7 +869,7 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
                 fig.set_size_inches(60, 20) # Higher reso
                 plt.savefig(f'{targetdir}/tree_{i}.pdf', bbox_inches='tight'); plt.close()
         except:
-            print(__name__ + f'.train_graph_xgb: Could not plot the decision trees (try: conda install python-graphviz)')
+            print(f'Could not plot the decision trees (try: conda install python-graphviz)')
         
     model.feature_names = None # Set original default ones
 

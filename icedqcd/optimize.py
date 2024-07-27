@@ -3,12 +3,8 @@
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
-import awkward as ak
-from tqdm import tqdm
 import pickle
-from pprint import pprint
 import os
-from termcolor import colored, cprint
 from datetime import datetime
 from scanf import scanf
 import copy
@@ -18,10 +14,14 @@ from scipy.optimize import curve_fit
 from scipy import interpolate
 from scipy.stats import ncx2,norm
 
-from icenet.tools import aux, io
+from icenet.tools import aux
 from icefit import cortools, statstools
 from icedqcd import limits
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 latex_header = \
 """
@@ -67,7 +67,7 @@ def plot_ROC_fit(i, fpr, tpr, tpr_err, fpr_err, roc_obj, roc_label, names, args,
     try:
         popt, pcov = curve_fit(f=func_binormal, xdata=fpr, ydata=tpr)#, sigma=tpr_err)
     except:
-        cprint(__name__ + f".plot_ROC_fit: Problem with curve_fit", 'red')
+        print(f"Problem with curve_fit", 'red')
         print(f'fpr = {fpr}')
         print(f'tpr = {tpr}')
         return
@@ -142,7 +142,7 @@ def find_filter(rd, model_param, args):
     GBX_filter_key = None
     param_point    = {}
     
-    cprint(__name__ + f'.find_filter: Signal: {model_param}', 'yellow')
+    print(f'Signal: {model_param}', 'yellow')
 
     # --------------
     
@@ -156,13 +156,13 @@ def find_filter(rd, model_param, args):
         
         if matches == len(model_POI): # all parameters match
             GEN_filter_key = filter
-            cprint(f'Found GEN filter: {GEN_filter_key}' , 'green')
+            print(f'Found GEN filter: {GEN_filter_key}' , 'green')
             break
     
     if GEN_filter_key is None:
-        cprint(f'ERROR: No matching GEN filter for the signal: {model_param}, exit', 'red')
+        print(f'ERROR: No matching GEN filter for the signal: {model_param}, exit', 'red')
         exit()
-        
+    
     # --------------
     
     for filter in rd['roc_mstats'].keys():
@@ -172,11 +172,11 @@ def find_filter(rd, model_param, args):
             
             if np.round(param_value, 3) == np.round(param_point[box_POI[1]], 3):
                 BOX_filter_key = filter
-                cprint(f'Found BOX filter: {BOX_filter_key}' , 'green')
+                print(f'Found BOX filter: {BOX_filter_key}' , 'green')
                 break
     
     if BOX_filter_key is None:
-        cprint(f'ERROR: No matching BOX filter for the signal: {model_param}, exit', 'red')
+        print(f'ERROR: No matching BOX filter for the signal: {model_param}, exit', 'red')
         exit()
     
     # --------------
@@ -191,11 +191,11 @@ def find_filter(rd, model_param, args):
         if matches == len(model_POI): # all parameters match
             GBX_filter_key = filter
             
-            cprint(f'Found GBX filter: {GBX_filter_key}' , 'green')
+            print(f'Found GBX filter: {GBX_filter_key}' , 'green')
             break
     
     if GBX_filter_key is None:
-        cprint(f'ERROR: No matching GBX filter for the signal: {model_param}, exit', 'red')
+        print(f'ERROR: No matching GBX filter for the signal: {model_param}, exit', 'red')
         exit()
     
     # Sort alphabetically by parameter name
@@ -281,7 +281,7 @@ def optimize_selection(args):
     # Load evaluation data
     
     targetfile = f'{args["plotdir"]}/eval/eval_results.pkl'
-    cprint(__name__ + f'.optimize_selection: Loading "{targetfile}" ...', 'yellow')
+    print(f'Loading "{targetfile}" ...', 'yellow')
     
     with open(targetfile, 'rb') as file:
         rd = pickle.load(file)

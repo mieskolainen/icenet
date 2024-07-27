@@ -7,6 +7,10 @@ import numpy as np
 
 from icenet.tools import aux
 
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 def weight2onehot(weights, y, num_classes):
     """
@@ -22,7 +26,7 @@ def weight2onehot(weights, y, num_classes):
         try:
             one_hot_weights[y == i, i] = weights[y == i]
         except:
-            print(__name__ + f'.weight2onehot: Failed with class = {i} (zero samples)')
+            print(f'Failed with class = {i} (zero samples)')
     return one_hot_weights
 
 
@@ -49,7 +53,7 @@ def load_torch_checkpoint(path='/', label='mynet', epoch=-1):
     filename = aux.create_model_filename(path=path, label=label, epoch=epoch, filetype='.pth')
     
     # Load the model (always first to CPU memory)
-    print(__name__ + f'.load_torch_checkpoint: Loading model "{filename}" to CPU memory ...')
+    print(f'Loading model "{filename}" to CPU memory ...')
 
     checkpoint = torch.load(filename, map_location ='cpu')
     model      = checkpoint['model']
@@ -78,7 +82,7 @@ def load_torch_model(model, optimizer, filename, device='cpu', param=None, load_
     """ PyTorch model loader
     """
     def f():
-        print(__name__ + f'.load_torch_model: Loading model to "{device}" memory ...')
+        print(f'Loading model to "{device}" memory ...')
         checkpoint = torch.load(filename, map_location = device)
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])

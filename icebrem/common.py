@@ -4,20 +4,18 @@
 
 import copy
 import numpy as np
-import uproot
 from importlib import import_module
-from termcolor import colored, cprint
-import multiprocessing
-import time
-from tqdm import tqdm
-import ray
-import os
 import awkward as ak
 
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import prints
 from icenet.tools import iceroot
+
+# ------------------------------------------
+from icenet.tools.iceprint import iceprint
+print = iceprint
+# ------------------------------------------
 
 # Globals
 from configs.brem.mctargets import *
@@ -87,7 +85,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
 
     # ----------
     
-    print(__name__ + f'.common.load_root_file: Event counts per class')
+    print(f'Event counts per class')
     unique, counts = np.unique(Y, return_counts=True)
     print(np.asarray((unique, counts)).T)
     
@@ -108,7 +106,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None,
     fmask = FILTERFUNC(X=X, isMC=isMC, class_id=class_id, xcorr_flow=args['xcorr_flow'])
     stats['filterfunc'] = {'before': len(X), 'after': sum(fmask)}
     
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(fmask)} events ({sum(fmask)/(len(X)+1E-12):0.6f})', 'green')
+    print(f'isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(fmask)} events ({sum(fmask)/(len(X)+1E-12):0.6f})', 'green')
     prints.printbar()
     
     X_new = X[fmask]
@@ -117,7 +115,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None,
     cmask = CUTFUNC(X=X_new, xcorr_flow=args['xcorr_flow'])
     stats['cutfunc'] = {'before': len(X_new), 'after': sum(cmask)}
     
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X_new)}, after: {sum(cmask)} events ({sum(cmask)/(len(X_new)+1E-12):0.6f}) \n", 'green')
+    print(f"isMC = {isMC} | <cutfunc>     before: {len(X_new)}, after: {sum(cmask)} events ({sum(cmask)/(len(X_new)+1E-12):0.6f}) \n", 'green')
     prints.printbar()
     io.showmem()
     
@@ -143,7 +141,8 @@ def splitfactor(x, y, w, ids, args):
     Returns:
         dictionary with different data representations
     """
-    cprint(__name__ + f'.splitfactor', 'green')
+    
+    print(f'Transform data into different datatypes', 'green')
 
     # ----------
     # Init
@@ -197,5 +196,4 @@ def splitfactor(x, y, w, ids, args):
         'data_deps': data_deps,
         'data_tensor': data_tensor,
         'data_graph': data_graph
-        }
-
+    }
