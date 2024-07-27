@@ -36,7 +36,7 @@ def iceprint(message, color='white', file=None):
     
     if file is None:
         
-        if message == '' or message == '\n':
+        if type(message) is str and (message == '' or message == '\n'):
             print(message)
         
         # String
