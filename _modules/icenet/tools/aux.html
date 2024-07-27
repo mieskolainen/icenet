@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -534,16 +534,20 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
 
 <span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">cprint</span>
 
 <span class="kn">import</span> <span class="nn">sklearn</span>
 <span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="yaml_dump">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.yaml_dump">[docs]</a>
@@ -582,7 +586,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set random seeds</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.set_random_seed: </span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s1"> (random, numpy, torch)&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s1"> (random, numpy, torch)&#39;</span><span class="p">)</span>
     
     <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
@@ -765,10 +769,10 @@
         <span class="n">reduced</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span> <span class="c1"># Make it deterministic order</span>
         
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Included input variables: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Excluded input variables: </span><span class="si">{</span><span class="n">reduced</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Included input variables: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Excluded input variables: </span><span class="si">{</span><span class="n">reduced</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.red: Using a full set of input variables&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using a full set of input variables&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
     
     <span class="k">if</span>   <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">mask</span><span class="p">]</span>
@@ -980,7 +984,7 @@
     <span class="n">mem_size</span> <span class="o">=</span> <span class="n">N</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="mi">32</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="mi">1024</span><span class="o">**</span><span class="mi">3</span> <span class="c1"># 32 bit</span>
     <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;float64&#39;</span><span class="p">:</span> <span class="n">mem_size</span> <span class="o">*=</span> <span class="mi">2</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Creating a matrix with dimensions [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">mem_size</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> GB)&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Creating a matrix with dimensions [</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">mem_size</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> GB)&#39;</span><span class="p">)</span>
 
     <span class="c1"># Pre-processing of jagged variable names</span>
     <span class="n">jvname</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1040,7 +1044,7 @@
                 <span class="n">k</span> <span class="o">+=</span> <span class="n">jagged_dim</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
 
     <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2matrix: Processing took </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Processing took </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">shared_array</span></div>
 
@@ -1073,7 +1077,7 @@
             <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">c</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">arrays2matrix</span><span class="p">(</span><span class="n">x_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">z_arr</span><span class="o">=</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">ind</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> 
                 <span class="n">x_binedges</span><span class="o">=</span><span class="n">x_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">y_binedges</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.jagged2tensor: Returning tensor with shape </span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Returning tensor with shape </span><span class="si">{</span><span class="n">T</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">T</span></div>
 
@@ -1105,7 +1109,7 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_ind</span><span class="p">)):</span>
             <span class="n">A</span><span class="p">[</span><span class="n">x_ind</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">z_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.arrays2matrix: not valid input (returning 0-matrix)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Not valid input (returning 0-matrix)&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">A</span></div>
 
@@ -1237,11 +1241,11 @@
         <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">events</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entrystop</span><span class="o">=</span><span class="n">entry_stop</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
     <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: vec.shape = </span><span class="si">{</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;vec.shape = </span><span class="si">{</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">intmat</span> <span class="o">=</span> <span class="n">binaryvec2int</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
     <span class="n">BMAT</span>   <span class="o">=</span> <span class="n">generatebinary</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.count_targets: </span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
     
@@ -1481,7 +1485,7 @@
         <span class="n">K</span> <span class="o">+=</span> <span class="n">binomial</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.generatebinary: Binary matrix dimension </span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Binary matrix dimension </span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s1"> x </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">K</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
     <span class="n">ivals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
@@ -1606,12 +1610,12 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">filetype</span><span class="si">}</span><span class="s1">&#39;</span>
     
     <span class="k">if</span> <span class="n">epoch</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">epoch</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.create_model_filename: Loading the latest model by timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading the latest model by timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
         <span class="n">list_of_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_*</span><span class="si">{</span><span class="n">filetype</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">txt</span>  <span class="o">=</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.create_model_filename: Could not find any files for model &quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">txt</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Could not find any files for model &quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
             <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; under path </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
         
@@ -1635,7 +1639,7 @@
             
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.create_model_filename: Problem in finding the model [</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">] with the minimum validation loss&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Problem in finding the model [</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">] with the minimum validation loss&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">succeeded</span><span class="p">:</span>
             <span class="c1"># Take the minimum validation loss epoch index</span>
@@ -1643,17 +1647,17 @@
             <span class="n">idx</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
             
             <span class="nb">str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Found the best model at epoch [</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s1">] with validation loss = </span><span class="si">{</span><span class="n">losses</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.create_model_filename: </span><span class="si">{</span><span class="nb">str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
             
             <span class="n">filename</span> <span class="o">=</span> <span class="n">createfilename</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
         <span class="c1"># ----------------------------------------------------</span>
         
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.create_model_filename: Loading the model with the provided epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading the model with the provided epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">createfilename</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
     
     <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.create_model_filename: Found a model file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (modified </span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found a model file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (modified </span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">filename</span></div>
 
@@ -1759,7 +1763,7 @@
         <span class="c1"># Invalid input</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: only one class present cannot evaluate metrics (return -1)&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;only one class present cannot evaluate metrics (return -1)&#39;</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="c1"># Return None</span>
         
@@ -1840,7 +1844,7 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">trials</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">trials</span> <span class="o">&gt;</span> <span class="n">max_trials</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Metric: bootstrap failed (check the input per class statistics)&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;bootstrap failed (check the input per class statistics)&#39;</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="c1"># ------------------</span>
                 
@@ -1912,7 +1916,7 @@
     <span class="c1"># Fix NaN</span>
     <span class="n">num_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_pred</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">num_nan</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_metrics: Found </span><span class="si">{</span><span class="n">num_nan</span><span class="si">}</span><span class="s1"> NaN/Inf (set to zero)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found </span><span class="si">{</span><span class="n">num_nan</span><span class="si">}</span><span class="s1"> NaN/Inf (set to zero)&#39;</span><span class="p">)</span>
         <span class="n">y_pred</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Set to zero</span>
     
     <span class="k">try</span><span class="p">:</span>
@@ -1934,7 +1938,7 @@
             <span class="n">acc</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
     
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.compute_metrics: Unable to compute ROC-metrics: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unable to compute ROC-metrics: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">class_ids</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;num of class[</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">] = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 

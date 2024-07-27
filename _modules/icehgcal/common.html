@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -522,7 +522,6 @@
 <span class="c1"># Mikael Mieskolainen, 2023</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
-
 <span class="kn">import</span> <span class="nn">pprint</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
@@ -530,8 +529,6 @@
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
@@ -540,6 +537,11 @@
 
 <span class="kn">from</span> <span class="nn">icehgcal</span> <span class="kn">import</span> <span class="n">preprocess</span>
 <span class="kn">from</span> <span class="nn">icehgcal</span> <span class="kn">import</span> <span class="n">graphio</span>
+
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># Globals</span>
 <span class="kn">from</span> <span class="nn">configs.hgcal.mctargets</span> <span class="kn">import</span> <span class="o">*</span>
@@ -560,7 +562,7 @@
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">)):</span>
 
         <span class="k">if</span> <span class="n">runmode</span> <span class="o">!=</span> <span class="s2">&quot;genesis&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data_tracklet: Data not in cache (or __use_cache__ == False) but --runmode is not &quot;genesis&quot;&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Data not in cache (or __use_cache__ == False) but --runmode is not &quot;genesis&quot;&#39;</span><span class="p">)</span>
         
         <span class="n">data</span>      <span class="o">=</span> <span class="n">preprocess</span><span class="o">.</span><span class="n">event_loop</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">],</span> <span class="n">graph_param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">],</span> <span class="n">maxevents</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">])</span> 
         <span class="n">X</span>         <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data_trackster</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">graph_param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -568,14 +570,14 @@
         <span class="c1"># Pickle to disk</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">],</span> <span class="n">fp</span><span class="p">)</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data_tracklet: Saved output to cache: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saved output to cache: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data_tracklet: Loading from cache: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading from cache: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
             <span class="n">X</span><span class="p">,</span> <span class="n">genesis_args</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
 
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data_tracklet: Cached data was generated with arguments:&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cached data was generated with arguments:&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
             <span class="n">pprint</span><span class="p">(</span><span class="n">genesis_args</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">X</span></div>
@@ -592,7 +594,7 @@
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight&#39;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;equal_frac&#39;</span><span class="p">]:</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_tracklet_data: Computing binary edge ratio balancing re-weights ...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing binary edge ratio balancing re-weights ...&#39;</span><span class="p">)</span>
 
             <span class="c1"># Count number of false/true edges</span>
             <span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
@@ -603,7 +605,7 @@
             <span class="c1"># Re-weight</span>
             <span class="n">EQ</span> <span class="o">=</span> <span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">num</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;reweight_param&#39;</span><span class="p">][</span><span class="s1">&#39;reference_class&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="n">num</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_tracklet_data: EQ = </span><span class="si">{</span><span class="n">EQ</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;EQ = </span><span class="si">{</span><span class="n">EQ</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="c1"># Apply weights</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))):</span>
@@ -720,7 +722,7 @@
 <span class="sd">    # @@ Filtering done here @@</span>
 <span class="sd">    mask = FILTERFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args[&#39;xcorr_flow&#39;])</span>
 <span class="sd">    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f&#39;&lt;filter&gt;_{isMC}&#39;, varlist=CUT_VARS)</span>
-<span class="sd">    cprint(__name__ + f&#39;.process_root: isMC = {isMC} | &lt;filterfunc&gt; before: {len(X)}, after: {sum(mask)} events &#39;, &#39;green&#39;)</span>
+<span class="sd">    print(f&#39;isMC = {isMC} | &lt;filterfunc&gt; before: {len(X)}, after: {sum(mask)} events &#39;, &#39;green&#39;)</span>
 <span class="sd">    </span>
 <span class="sd">    X   = X[mask]</span>
 <span class="sd">    prints.printbar()</span>
@@ -728,7 +730,7 @@
 <span class="sd">    # @@ Observable cut selections done here @@</span>
 <span class="sd">    mask = CUTFUNC(X=X, ids=ids, isMC=isMC, xcorr_flow=args[&#39;xcorr_flow&#39;])</span>
 <span class="sd">    plots.plot_selection(X=X, mask=mask, ids=ids, args=args, label=f&#39;&lt;cutfunc&gt;_{isMC}&#39;, varlist=CUT_VARS)</span>
-<span class="sd">    cprint(__name__ + f&quot;.process_root: isMC = {isMC} | &lt;cutfunc&gt;: before: {len(X)}, after: {sum(mask)} events \n&quot;, &#39;green&#39;)</span>
+<span class="sd">    print(f&quot;isMC = {isMC} | &lt;cutfunc&gt;: before: {len(X)}, after: {sum(mask)} events \n&quot;, &#39;green&#39;)</span>
 
 <span class="sd">    X   = X[mask]</span>
 <span class="sd">    io.showmem()</span>

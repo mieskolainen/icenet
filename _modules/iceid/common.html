@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -521,23 +521,20 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">import</span> <span class="nn">ray</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
-
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">prints</span><span class="p">,</span> <span class="n">iceroot</span>
 <span class="kn">from</span> <span class="nn">iceid</span> <span class="kn">import</span> <span class="n">graphio</span>
+
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># Globals</span>
 <span class="kn">from</span> <span class="nn">configs.eid.mctargets</span> <span class="kn">import</span> <span class="o">*</span>
@@ -571,8 +568,8 @@
     <span class="n">FILTERFUNC</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]]</span>
     <span class="c1"># -----------------------------------------------</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Loading root file </span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading root file </span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="c1"># Check is it MC (based on the first file and first event)</span>
     <span class="n">file</span>   <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">root_path</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -590,7 +587,7 @@
     <span class="n">Y</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># --------------------------------------------------------------</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
 
@@ -600,14 +597,14 @@
     <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span>
 
         <span class="c1"># @@ MC class target definition here @@</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;targetfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing MC &lt;targetfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">Y</span> <span class="o">=</span> <span class="n">TARFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Y.shape = </span><span class="si">{</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Y.shape = </span><span class="si">{</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="c1"># @@ MC filtering done here @@</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing MC &lt;filterfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing MC &lt;filterfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">mask_mc</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &lt;filterfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">mask_mc</span><span class="p">)</span><span class="si">}</span><span class="s1"> events&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;filterfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">mask_mc</span><span class="p">)</span><span class="si">}</span><span class="s1"> events&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
         
         <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">mask_mc</span><span class="p">]</span>
@@ -616,9 +613,9 @@
     <span class="c1"># =================================================================</span>
 
     <span class="c1"># @@ Observable cut selections done here @@</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Computing &lt;cutfunc&gt; ...&#39;</span><span class="p">),</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing &lt;cutfunc&gt; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="n">cmask</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.load_root_file: &lt;cutfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cmask</span><span class="p">)</span><span class="si">}</span><span class="s2"> events </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&lt;cutfunc&gt; | before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cmask</span><span class="p">)</span><span class="si">}</span><span class="s2"> events </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     
     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">cmask</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">isMC</span><span class="p">:</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">cmask</span><span class="p">]</span>

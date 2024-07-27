@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -535,13 +535,16 @@
 
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 
 <span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">common</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">process</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">predict</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="f2s">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.f2s">[docs]</a>
@@ -592,10 +595,10 @@
 <span class="sd">    Z-score normalization</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span><span class="p">:</span>                            
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data: Z-score normalizing variables ...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Z-score normalizing variables ...&#39;</span><span class="p">)</span>
         <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/zscore.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data: X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> | X_mu.shape = </span><span class="si">{</span><span class="n">X_mu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> | X_std.shape = </span><span class="si">{</span><span class="n">X_std</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> | X_mu.shape = </span><span class="si">{</span><span class="n">X_mu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> | X_std.shape = </span><span class="si">{</span><span class="n">X_std</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">apply_zscore</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">X</span></div>
@@ -610,9 +613,9 @@
     <span class="n">rootname</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span>
     <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">rootname</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
     
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data:&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Processing data&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-
+    
     <span class="c1">## ** Special YAML loader here **</span>
     <span class="kn">from</span> <span class="nn">libs.ccorp.ruamel.yaml.include</span> <span class="kn">import</span> <span class="n">YAML</span>
     <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
@@ -681,7 +684,7 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">file_id</span> <span class="o">=</span> <span class="n">all_file_id</span><span class="p">[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;grid_id&#39;</span><span class="p">]]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.deploy: file_id = </span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2"> (grid_id = </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;grid_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_id = </span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2"> (grid_id = </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;grid_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Subfolder already saturated -- no processing under this grid PC node -- continue&#39;</span><span class="p">)</span>
@@ -709,7 +712,7 @@
                 <span class="n">total_num_events</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_nocut</span><span class="p">)</span>
 
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data: A fatal error in iceroot.load_tree with a file &quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&quot;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A fatal error in iceroot.load_tree with a file &quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&quot;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
                 
                 <span class="c1"># Write to log-file</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> | A fatal error in iceroot.load_tree: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
@@ -720,7 +723,7 @@
 
             <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]:</span>
 
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data: Initializing conditional theory (model) parameters&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initializing conditional theory (model) parameters&#39;</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">mc_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="c1"># Create new &#39;record&#39; (column) to ak-array and init to zero</span>
                     <span class="n">col_name</span>          <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;MODEL_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -858,7 +861,7 @@
             <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">basepath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># Create dir</span>
             <span class="n">outputfile</span> <span class="o">=</span> <span class="n">basepath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.root&#39;</span><span class="p">,</span> <span class="s1">&#39;-icenet.root&#39;</span><span class="p">)</span>
             
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data: Saving root output to &quot;</span><span class="si">{</span><span class="n">outputfile</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving root output to &quot;</span><span class="si">{</span><span class="n">outputfile</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
             <span class="k">with</span> <span class="n">uproot</span><span class="o">.</span><span class="n">recreate</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">uproot</span><span class="o">.</span><span class="n">ZLIB</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="k">as</span> <span class="n">rfile</span><span class="p">:</span>
                 <span class="n">rfile</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Events&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ALL_scores</span>

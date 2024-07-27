@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -522,12 +522,8 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">scanf</span> <span class="kn">import</span> <span class="n">scanf</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -537,10 +533,14 @@
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ncx2</span><span class="p">,</span><span class="n">norm</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">cortools</span><span class="p">,</span> <span class="n">statstools</span>
 <span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">limits</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <span class="n">latex_header</span> <span class="o">=</span> \
 <span class="sd">&quot;&quot;&quot;</span>
@@ -594,7 +594,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">func_binormal</span><span class="p">,</span> <span class="n">xdata</span><span class="o">=</span><span class="n">fpr</span><span class="p">,</span> <span class="n">ydata</span><span class="o">=</span><span class="n">tpr</span><span class="p">)</span><span class="c1">#, sigma=tpr_err)</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.plot_ROC_fit: Problem with curve_fit&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problem with curve_fit&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;fpr = </span><span class="si">{</span><span class="n">fpr</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;tpr = </span><span class="si">{</span><span class="n">tpr</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span>
@@ -672,7 +672,7 @@
     <span class="n">GBX_filter_key</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">param_point</span>    <span class="o">=</span> <span class="p">{}</span>
     
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.find_filter: Signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
     <span class="c1"># --------------</span>
     
@@ -686,13 +686,13 @@
         
         <span class="k">if</span> <span class="n">matches</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_POI</span><span class="p">):</span> <span class="c1"># all parameters match</span>
             <span class="n">GEN_filter_key</span> <span class="o">=</span> <span class="nb">filter</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found GEN filter: </span><span class="si">{</span><span class="n">GEN_filter_key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found GEN filter: </span><span class="si">{</span><span class="n">GEN_filter_key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
             <span class="k">break</span>
     
     <span class="k">if</span> <span class="n">GEN_filter_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR: No matching GEN filter for the signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">, exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR: No matching GEN filter for the signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">, exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="n">exit</span><span class="p">()</span>
-        
+    
     <span class="c1"># --------------</span>
     
     <span class="k">for</span> <span class="nb">filter</span> <span class="ow">in</span> <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;roc_mstats&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -702,11 +702,11 @@
             
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">param_value</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">param_point</span><span class="p">[</span><span class="n">box_POI</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">3</span><span class="p">):</span>
                 <span class="n">BOX_filter_key</span> <span class="o">=</span> <span class="nb">filter</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found BOX filter: </span><span class="si">{</span><span class="n">BOX_filter_key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found BOX filter: </span><span class="si">{</span><span class="n">BOX_filter_key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
                 <span class="k">break</span>
     
     <span class="k">if</span> <span class="n">BOX_filter_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR: No matching BOX filter for the signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">, exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR: No matching BOX filter for the signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">, exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="n">exit</span><span class="p">()</span>
     
     <span class="c1"># --------------</span>
@@ -721,11 +721,11 @@
         <span class="k">if</span> <span class="n">matches</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_POI</span><span class="p">):</span> <span class="c1"># all parameters match</span>
             <span class="n">GBX_filter_key</span> <span class="o">=</span> <span class="nb">filter</span>
             
-            <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found GBX filter: </span><span class="si">{</span><span class="n">GBX_filter_key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found GBX filter: </span><span class="si">{</span><span class="n">GBX_filter_key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
             <span class="k">break</span>
     
     <span class="k">if</span> <span class="n">GBX_filter_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR: No matching GBX filter for the signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">, exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR: No matching GBX filter for the signal: </span><span class="si">{</span><span class="n">model_param</span><span class="si">}</span><span class="s1">, exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="n">exit</span><span class="p">()</span>
     
     <span class="c1"># Sort alphabetically by parameter name</span>
@@ -814,7 +814,7 @@
     <span class="c1"># Load evaluation data</span>
     
     <span class="n">targetfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/eval/eval_results.pkl&#39;</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.optimize_selection: Loading &quot;</span><span class="si">{</span><span class="n">targetfile</span><span class="si">}</span><span class="s1">&quot; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading &quot;</span><span class="si">{</span><span class="n">targetfile</span><span class="si">}</span><span class="s1">&quot; ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">targetfile</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
         <span class="n">rd</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>

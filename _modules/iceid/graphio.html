@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -525,7 +525,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span>   <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">import</span> <span class="nn">ray</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span>   <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">Data</span>
@@ -534,6 +533,10 @@
 <span class="kn">from</span>   <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span>   <span class="nn">icenet.tools.icevec</span> <span class="kn">import</span> <span class="n">vec4</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="parse_tensor_data">
 <a class="viewcode-back" href="../../modules/iceid.html#iceid.graphio.parse_tensor_data">[docs]</a>
@@ -572,7 +575,7 @@
     <span class="n">phi_binedges</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;image_param&#39;</span><span class="p">][</span><span class="s1">&#39;phi_bins&#39;</span><span class="p">]</span>    
 
     <span class="c1"># Pick tensor data out</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor: jagged2tensor processing ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;jagged2tensor processing ...&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="n">tensor</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">jagged2tensor</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_image</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">newvars</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="p">,</span> <span class="n">x_binedges</span><span class="o">=</span><span class="n">eta_binedges</span><span class="p">,</span> <span class="n">y_binedges</span><span class="o">=</span><span class="n">phi_binedges</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">tensor</span></div>
@@ -710,7 +713,7 @@
         
         <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_attr</span><span class="o">=</span><span class="n">edge_attr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">))</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.parse_graph_data: Empty ECAL events: </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="o">/</span><span class="n">num_events</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>        
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Empty ECAL events: </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">num_empty_ECAL</span><span class="o">/</span><span class="n">num_events</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> (using only global data u)&#39;</span><span class="p">)</span>        
     
     <span class="k">return</span> <span class="n">dataset</span></div>
 

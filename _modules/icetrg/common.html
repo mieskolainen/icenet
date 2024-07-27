@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -523,14 +523,14 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">prints</span><span class="p">,</span> <span class="n">iceroot</span>
+
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># GLOBALS</span>
 <span class="kn">from</span> <span class="nn">configs.trg.cuts</span> <span class="kn">import</span> <span class="o">*</span>
@@ -638,7 +638,7 @@
     <span class="c1"># @@ Filtering done here @@</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="c1">#plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args[&#39;plotdir&#39;], label=f&#39;&lt;filterfunc&gt;_{isMC}&#39;, varlist=CUT_VARS)</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_root: isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s1"> | &lt;filterfunc&gt; before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">}</span><span class="s1"> events &#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s1"> | &lt;filterfunc&gt; before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">}</span><span class="s1"> events &#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     
     <span class="n">X</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
@@ -646,8 +646,8 @@
     <span class="c1"># @@ Observable cut selections done here @@</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="c1">#plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args[&#39;plotdir&#39;], label=f&#39;&lt;cutfunc&gt;_{isMC}&#39;, varlist=CUT_VARS)</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.process_root: isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s2"> | &lt;cutfunc&gt;    before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">}</span><span class="s2"> events </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s2"> | &lt;cutfunc&gt;    before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">}</span><span class="s2"> events </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    
     <span class="n">X</span>   <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>

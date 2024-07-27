@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -529,14 +529,16 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">gc</span>
-
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">cprint</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="read_single">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.iceroot.read_single">[docs]</a>
@@ -557,7 +559,7 @@
 <span class="sd">        X, Y, W, ids, info (awkward array format)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_single: </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># --------------------</span>
     
@@ -597,7 +599,7 @@
     
     <span class="n">eff_acc</span> <span class="o">=</span> <span class="n">N_after</span> <span class="o">/</span> <span class="n">N_before</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_single: efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;efficiency x acceptance = </span><span class="si">{</span><span class="n">eff_acc</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">Y</span> <span class="o">=</span> <span class="n">class_id</span> <span class="o">*</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N_after</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
 
@@ -627,7 +629,7 @@
     
     <span class="k">if</span> <span class="n">model_param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_single: Adding conditional theory (model) parameters&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Adding conditional theory (model) parameters&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">model_param</span><span class="p">)</span>
         
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">model_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -728,9 +730,9 @@
             <span class="n">num_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">key_name</span><span class="p">))</span>
             
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: </span><span class="si">{</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: keys(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree_stats: values(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;keys(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;values(): </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             
             <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -755,7 +757,7 @@
 <span class="sd">        X</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.events_to_jagged_numpy: Loading: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
     <span class="c1"># -------------------------------</span>
     <span class="k">if</span> <span class="n">entry_start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -776,7 +778,7 @@
         <span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
                     <span class="n">entry_start</span><span class="o">=</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="n">entry_stop_final</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="nb">list</span><span class="p">))</span>
     
-    <span class="n">cprint</span><span class="p">(</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.events_to_jagged_numpy: Entry_start = </span><span class="si">{</span><span class="n">entry_start</span><span class="si">}</span><span class="s1">, entry_stop = </span><span class="si">{</span><span class="n">entry_stop</span><span class="si">}</span><span class="s1">, maxevents = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> | realized = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">/</span><span class="n">N_all</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> % | available = </span><span class="si">{</span><span class="n">N_all</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Entry_start = </span><span class="si">{</span><span class="n">entry_start</span><span class="si">}</span><span class="s1">, entry_stop = </span><span class="si">{</span><span class="n">entry_stop</span><span class="si">}</span><span class="s1">, maxevents = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> | realized = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">/</span><span class="n">N_all</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1"> % | available = </span><span class="si">{</span><span class="n">N_all</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span></div>
 
@@ -807,7 +809,7 @@
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">rootfile</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
         <span class="n">rootfile</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfile</span><span class="p">]</span>
 
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Opening rootfile </span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1"> with a tree key &lt;</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Opening rootfile </span><span class="si">{</span><span class="n">rootfile</span><span class="si">}</span><span class="s1"> with a tree key &lt;</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
     <span class="c1"># Add Tree handles here using the string-syntax of uproot {file:tree}</span>
     <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfile</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;:</span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfile</span><span class="p">))]</span>
@@ -820,15 +822,15 @@
     <span class="n">load_ids</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">process_regexp_ids</span><span class="p">(</span><span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">all_ids</span><span class="o">=</span><span class="n">all_ids</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: All variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">all_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;All variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">all_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">load_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">): </span><span class="se">\n</span><span class="si">{</span><span class="n">load_ids</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: All variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">) | Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;All variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">) | Loading variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">load_ids</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span>  <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Reading </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span><span class="si">}</span><span class="s1"> root files | Conversion to object library &quot;</span><span class="si">{</span><span class="n">library</span><span class="si">}</span><span class="s1">&quot; &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Reading </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span><span class="si">}</span><span class="s1"> root files | Conversion to object library &quot;</span><span class="si">{</span><span class="n">library</span><span class="si">}</span><span class="s1">&quot; &#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_cpus</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -840,7 +842,7 @@
         
         <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">maxevents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e10</span><span class="p">)</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: maxevents is None, setting maxevents = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;maxevents is None, setting maxevents = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         
         <span class="c1"># Non-multiprocessed version for single files</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -857,9 +859,9 @@
 
                 <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">maxevents</span><span class="p">):</span>
                     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
-                    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
             
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Total number of entries = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>        
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total number of entries = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>        
             
             <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">load_ids</span>
 
@@ -874,18 +876,18 @@
             <span class="n">submaxevents</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_size</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">maxevents</span><span class="p">),</span> <span class="n">num_workers</span><span class="p">)</span>
             <span class="n">futures</span>      <span class="o">=</span> <span class="p">[]</span>
             
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: submaxevents per ray process: </span><span class="si">{</span><span class="n">submaxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;submaxevents per ray process: </span><span class="si">{</span><span class="n">submaxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_workers</span><span class="p">):</span>    
                 <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">read_file_np</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
                                                    <span class="n">load_ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">submaxevents</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">dtype</span><span class="p">))</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Get futures&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Get futures&#39;</span><span class="p">)</span>
             <span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span> <span class="c1"># synchronous read-out</span>
             <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
             
             <span class="c1"># Combine future returned sub-arrays</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Concatenating results from futures&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Concatenating results from futures&#39;</span><span class="p">)</span>
             
             <span class="c1"># We concatenate one-by-one, to save memory</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">))):</span>
@@ -895,7 +897,7 @@
                 <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
                 <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Total number of entries = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total number of entries = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>        
         
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">load_ids</span>
 
@@ -903,7 +905,7 @@
 
         <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">maxevents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e10</span><span class="p">)</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: maxevents is None, setting maxevents = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;maxevents is None, setting maxevents = </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         
         <span class="c1"># Non-multiprocessed version for single files</span>
         
@@ -922,7 +924,7 @@
                 
                 <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxevents</span><span class="p">):</span>
                     <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
-                    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached (had </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached (had </span><span class="si">{</span><span class="n">num_events</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         
         <span class="k">else</span><span class="p">:</span>
             
@@ -935,18 +937,18 @@
             <span class="n">submaxevents</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_size</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">maxevents</span><span class="p">),</span> <span class="n">num_workers</span><span class="p">)</span>
             <span class="n">futures</span>      <span class="o">=</span> <span class="p">[]</span>
             
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: submaxevents per ray process: </span><span class="si">{</span><span class="n">submaxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;submaxevents per ray process: </span><span class="si">{</span><span class="n">submaxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_workers</span><span class="p">):</span>    
                 <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">read_file_ak</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">chunk_ind</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
                                                    <span class="n">load_ids</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">submaxevents</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">dtype</span><span class="p">))</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Get futures&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Get futures&#39;</span><span class="p">)</span>
             <span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span> <span class="c1"># synchronous read-out</span>
             <span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
             
             <span class="c1"># Combine future returned sub-arrays</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Concatenating results from futures&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Concatenating results from futures&#39;</span><span class="p">)</span>
 
             <span class="c1"># We concatenate one-by-one, to save memory</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">))):</span>
@@ -956,7 +958,7 @@
                 <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
                 <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Total number of entries = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total number of entries = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>        
             
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         
@@ -1004,7 +1006,7 @@
             
             <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">maxevents</span><span class="p">):</span>
                 <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
                 <span class="k">break</span>
     
     <span class="k">return</span> <span class="n">X</span>
@@ -1050,7 +1052,7 @@
             
             <span class="k">if</span> <span class="p">(</span><span class="n">maxevents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">maxevents</span><span class="p">):</span>
                 <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
-                <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_tree: Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Maximum event count </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1"> reached&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
                 <span class="k">break</span>
     <span class="k">return</span> <span class="n">X</span>
 

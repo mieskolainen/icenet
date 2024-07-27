@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -529,6 +529,11 @@
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
+
 <div class="viewcode-block" id="print_stats">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.stx.print_stats">[docs]</a>
 <span class="k">def</span> <span class="nf">print_stats</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
@@ -581,7 +586,7 @@
         <span class="c1"># Special always passing classes</span>
         <span class="k">if</span> <span class="s1">&#39;diplomat_classes&#39;</span> <span class="ow">in</span> <span class="n">input_set</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">input_set</span><span class="p">[</span><span class="s1">&#39;diplomat_classes&#39;</span><span class="p">]:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.filter_constructor: Passing through diplomat class &quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Passing through diplomat class &quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
                 <span class="n">cind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span>
                 <span class="n">mask</span><span class="p">[:,</span> <span class="n">cind</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         
@@ -661,7 +666,7 @@
                         <span class="n">pick_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                 <span class="n">dimgrid</span> <span class="o">=</span> <span class="n">dimgrid</span><span class="p">[</span><span class="n">pick_ind</span><span class="p">,</span> <span class="p">:]</span>
             
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.filter_constructor: Filter combinations </span><span class="si">{</span><span class="n">dimgrid</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> combined with </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> and match </span><span class="si">{</span><span class="n">match</span><span class="si">}</span><span class="s1"> (running index)&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Filter combinations </span><span class="si">{</span><span class="n">dimgrid</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> combined with </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> and match </span><span class="si">{</span><span class="n">match</span><span class="si">}</span><span class="s1"> (running index)&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">dimgrid</span><span class="p">)</span>
             
             <span class="c1"># Loop over all combinations</span>
@@ -857,7 +862,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        mask            : boolean mask of size number of events (1 = pass, 0 = fail)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.apply_cutflow: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="n">N</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
@@ -887,8 +891,8 @@
 <span class="sd">        cut   : list of pre-calculated cuts, each list element is a boolean array with size of num of events</span>
 <span class="sd">        names : list of names (description of each cut, for printout only)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.print_parallel_cutflow: Computing N-point parallel flow &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing N-point parallel flow &lt;xcorr_flow = True&gt;&#39;</span><span class="p">)</span>
     <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">)))</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
         <span class="n">vec</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masks</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
@@ -898,7 +902,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of boolean combinations for </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">: </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BMAT</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BMAT</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="si">:</span><span class="s1">&gt;10</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intmat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intmat</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">EPS</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 
 
 
@@ -1202,7 +1206,7 @@
     <span class="n">output</span>   <span class="o">=</span> <span class="n">eval_boolean_exptree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">treeobj</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.eval_boolean_syntax:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">treeobj</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Selection fraction: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="si">:</span><span class="s1">0.4e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     

@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -523,20 +523,18 @@
 
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">ray</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
+
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># Globals</span>
 <span class="kn">from</span> <span class="nn">configs.brem.mctargets</span> <span class="kn">import</span> <span class="o">*</span>
@@ -608,7 +606,7 @@
 
     <span class="c1"># ----------</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.common.load_root_file: Event counts per class&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Event counts per class&#39;</span><span class="p">)</span>
     <span class="n">unique</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">((</span><span class="n">unique</span><span class="p">,</span> <span class="n">counts</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
     
@@ -632,7 +630,7 @@
     <span class="n">fmask</span> <span class="o">=</span> <span class="n">FILTERFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="n">isMC</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="n">class_id</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;filterfunc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;before&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="s1">&#39;after&#39;</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">fmask</span><span class="p">)}</span>
     
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_root: isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s1"> | &lt;filterfunc&gt;  before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">fmask</span><span class="p">)</span><span class="si">}</span><span class="s1"> events (</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">fmask</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">+</span><span class="mf">1E-12</span><span class="p">)</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s1"> | &lt;filterfunc&gt;  before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">fmask</span><span class="p">)</span><span class="si">}</span><span class="s1"> events (</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">fmask</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">+</span><span class="mf">1E-12</span><span class="p">)</span><span class="si">:</span><span class="s1">0.6f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
     
     <span class="n">X_new</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">fmask</span><span class="p">]</span>
@@ -641,7 +639,7 @@
     <span class="n">cmask</span> <span class="o">=</span> <span class="n">CUTFUNC</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_new</span><span class="p">,</span> <span class="n">xcorr_flow</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;xcorr_flow&#39;</span><span class="p">])</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;cutfunc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;before&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_new</span><span class="p">),</span> <span class="s1">&#39;after&#39;</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">cmask</span><span class="p">)}</span>
     
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.process_root: isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s2"> | &lt;cutfunc&gt;     before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">cmask</span><span class="p">)</span><span class="si">}</span><span class="s2"> events (</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">cmask</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span><span class="o">+</span><span class="mf">1E-12</span><span class="p">)</span><span class="si">:</span><span class="s2">0.6f</span><span class="si">}</span><span class="s2">) </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;isMC = </span><span class="si">{</span><span class="n">isMC</span><span class="si">}</span><span class="s2"> | &lt;cutfunc&gt;     before: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span><span class="si">}</span><span class="s2">, after: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">cmask</span><span class="p">)</span><span class="si">}</span><span class="s2"> events (</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">cmask</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span><span class="o">+</span><span class="mf">1E-12</span><span class="p">)</span><span class="si">:</span><span class="s2">0.6f</span><span class="si">}</span><span class="s2">) </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
     <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
     
@@ -670,7 +668,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dictionary with different data representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.splitfactor&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Transform data into different datatypes&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
 
     <span class="c1"># ----------</span>
     <span class="c1"># Init</span>
@@ -724,8 +723,7 @@
         <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span> <span class="n">data_deps</span><span class="p">,</span>
         <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span>
         <span class="s1">&#39;data_graph&#39;</span><span class="p">:</span> <span class="n">data_graph</span>
-        <span class="p">}</span></div>
-
+    <span class="p">}</span></div>
 
 </pre></div>
 

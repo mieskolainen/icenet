@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -527,18 +527,18 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">xgboost</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">cprint</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 
 <span class="c1"># icenet</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">stx</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">plots</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">reweight</span>
-
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">stx</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">reweight</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">autogradxgb</span><span class="p">,</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">tempscale</span>
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span><span class="p">,</span> <span class="n">cortools</span>
+
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <span class="kn">import</span> <span class="nn">ray</span>
 <span class="kn">from</span> <span class="nn">ray</span> <span class="kn">import</span> <span class="n">tune</span>
@@ -637,7 +637,7 @@
     
     <span class="c1"># Print</span>
     <span class="n">loss_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Loss[</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">]: sum: </span><span class="si">{</span><span class="n">total_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span> <span class="o">+</span> <span class="n">loss_str</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="n">loss_str</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">loss_str</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="c1"># --------------------------------------------------------------------</span>
     
     <span class="c1"># Scale finally to the total number of events (to conform with xgboost internal convention)</span>
@@ -700,11 +700,11 @@
         
         <span class="c1"># Check that there are some events</span>
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span>  <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;: BCE[</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">] No events from class [</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">] - skip loss term&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BCE[</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">] No events from class [</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">] - skip loss term&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span>  <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;: BCE[</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">] No events from class [</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">] - skip loss term&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BCE[</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">] No events from class [</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">] - skip loss term&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         
         <span class="c1"># Now re-weight the target(s) based on the model predictions</span>
@@ -855,7 +855,7 @@
                 
                 <span class="c1"># Minimum number of events per category cutoff</span>
                 <span class="k">if</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]:</span>
-                    <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; MI_reg: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> = reg_param[&#39;min_count&#39;] (class [</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">] | category [</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s2">]) -- skip&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MI_reg: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mm_</span><span class="p">)</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s1">&#39;min_count&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> = reg_param[&#39;min_count&#39;] (class [</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">] | category [</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s2">]) -- skip&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
                     <span class="k">continue</span>
                 
                 <span class="c1">## Non-Linear Distance Correlation</span>
@@ -914,7 +914,7 @@
             
             <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
         
-        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;RAW </span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s2">&quot;losstype&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">values</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;RAW </span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s2">&quot;losstype&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">values</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         
         <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">reg_param</span><span class="p">[</span><span class="s2">&quot;losstype&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">MI_param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
         <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">MI_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
@@ -928,7 +928,7 @@
     
     <span class="c1"># Print</span>
     <span class="n">loss_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Loss[</span><span class="si">{</span><span class="n">loss_mode</span><span class="si">}</span><span class="s1">]: sum: </span><span class="si">{</span><span class="n">total_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span> <span class="o">+</span> <span class="n">loss_str</span>
-    <span class="n">cprint</span><span class="p">(</span><span class="n">loss_str</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">loss_str</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     <span class="c1"># --------------------------------------------------------------------</span>
     
     <span class="c1"># Scale finally to the total number of events (to conform with xgboost internal convention)</span>
@@ -1032,13 +1032,13 @@
         
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;BCE_param&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Setting BCE event filters [</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Setting BCE event filters [</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
 
             <span class="n">BCE_param</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_filters</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;BCE_param&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">],</span> <span class="n">data_trn</span><span class="o">=</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="n">data_val</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;MI_param&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
         
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Setting MI event filters&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Setting MI event filters&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         
         <span class="n">MI_param</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;MI_param&#39;</span><span class="p">])</span> <span class="c1">#! important</span>
         <span class="n">MI_param</span> <span class="o">=</span> <span class="n">create_filters</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">MI_param</span><span class="p">,</span> <span class="n">data_trn</span><span class="o">=</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="n">data_val</span><span class="p">)</span>
@@ -1048,7 +1048,7 @@
     <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;device&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
         <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cuda&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">})</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Training &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; classifier ...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Training &lt;</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt; classifier ...&#39;</span><span class="p">)</span>
 
     <span class="c1">### ** Optimization hyperparameters [possibly from Raytune] **</span>
     <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">replace_param</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">],</span> <span class="n">raytune</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">])</span>
@@ -1065,7 +1065,7 @@
     <span class="c1"># ---------------------------------------------------------</span>
     <span class="c1"># Choose weight mode</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">w_trn</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">w_val</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Negative weights in the sample -- handled via custom loss&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Negative weights in the sample -- handled via custom loss&#39;</span><span class="p">)</span>
         <span class="n">out_weights_on</span> <span class="o">=</span> <span class="kc">True</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">use_custom</span><span class="p">:</span>
@@ -1233,7 +1233,7 @@
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;AUC/validation&#39;</span><span class="p">,</span>  <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>   <span class="n">epoch</span><span class="p">)</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;AUC/train&#39;</span><span class="p">,</span>       <span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>   <span class="n">epoch</span><span class="p">)</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb [</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">] Tree </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1"> | Train: loss = </span><span class="si">{</span><span class="n">trn_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1"> | Eval: loss = </span><span class="si">{</span><span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">] Tree </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1"> | Train: loss = </span><span class="si">{</span><span class="n">trn_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1"> | Eval: loss = </span><span class="si">{</span><span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
             
@@ -1302,7 +1302,7 @@
         <span class="c1">## Plot decision trees</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;plot_trees&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">)</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;plot_trees&#39;</span><span class="p">]:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Plotting decision trees ...&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Plotting decision trees ...&#39;</span><span class="p">)</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="n">ids_trn</span> <span class="c1"># Make it explicit</span>
                 
                 <span class="n">path</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/xgboost-treeviz/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -1313,7 +1313,7 @@
                     <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/tree_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
                     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Could not plot the decision trees (try: conda install python-graphviz)&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Could not plot the decision trees (try: conda install python-graphviz)&#39;</span><span class="p">)</span>
         
         <span class="c1">#model.feature_names = None # Set original default ones</span>
         

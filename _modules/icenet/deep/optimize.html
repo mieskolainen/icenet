@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -522,19 +522,18 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span><span class="n">cprint</span>
-
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">copy</span>
 
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">losstools</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">deeptools</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">deeptools</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">io</span>
 
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="Dataset">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.Dataset">[docs]</a>
@@ -946,21 +945,21 @@
     <span class="c1"># Try special map (.to() does not map all variables)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: Mapping special to &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mapping special to &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="kc">True</span>
     
     <span class="c1"># Multi-GPU setup</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: Multi-GPU </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Multi-GPU </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">DataParallel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: Computing device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; chosen&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; chosen&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">GPU_chosen</span><span class="p">:</span>
         <span class="n">used</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_gpu_memory_map</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">total</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">torch_cuda_total_memory</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.model_to_cuda: device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; VRAM in use: </span><span class="si">{</span><span class="n">used</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> GB&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; VRAM in use: </span><span class="si">{</span><span class="n">used</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> GB&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">device</span></div>

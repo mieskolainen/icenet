@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -523,14 +523,16 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
-
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
+<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># GLOBALS</span>
 <span class="c1">#from configs.zee.cuts import *</span>
@@ -555,7 +557,7 @@
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">mcfiles</span><span class="p">:</span>
         <span class="n">new_frame</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
         <span class="n">frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_frame</span><span class="o">.</span><span class="n">keys</span><span class="p">());</span> <span class="n">ids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
     
@@ -583,7 +585,7 @@
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">datafiles</span><span class="p">:</span>
         <span class="n">new_frame</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
         <span class="n">frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1"> | N = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_frame</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_frame</span><span class="o">.</span><span class="n">keys</span><span class="p">());</span> <span class="n">ids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
     
@@ -596,7 +598,7 @@
     <span class="n">NEW_LOAD_VARS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">LOAD_VARS</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">LOAD_VARS</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">LOAD_VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;probe_pfChargedIso&#39;</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Changing variable </span><span class="si">{</span><span class="n">LOAD_VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> name in data&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Changing variable </span><span class="si">{</span><span class="n">LOAD_VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> name in data&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
             <span class="n">NEW_LOAD_VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;probe_pfChargedIsoPFPV&#39;</span>
     <span class="c1"># -------------------------------------------------------------------------</span>
     
@@ -623,7 +625,7 @@
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;drop_negative&#39;</span><span class="p">]:</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="n">W</span> <span class="o">&lt;</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: Dropping negative weight events (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping negative weight events (</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span>
             <span class="n">W</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span> <span class="c1"># Boolean NOT</span>
             <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="o">~</span><span class="n">ind</span><span class="p">]</span>
@@ -639,7 +641,7 @@
     <span class="c1"># Apply maxevents cutoff</span>
     <span class="n">maxevents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">maxevents</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)])</span>
     <span class="k">if</span> <span class="n">maxevents</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: Applying maxevents cutoff </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Applying maxevents cutoff </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">],</span> <span class="n">W</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxevents</span><span class="p">]</span>
     
     <span class="c1"># Re-nenormalize MC to the event count</span>
@@ -648,10 +650,10 @@
     <span class="c1">## -------------------------------------------------</span>
 
     <span class="c1">## Print some diagnostics</span>
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_helper: class[</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">] | N = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="si">}</span><span class="s1"> | weight[mean,std,min,max] = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;class[</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">] | N = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="si">}</span><span class="s1"> | weight[mean,std,min,max] = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">W</span><span class="p">[</span><span class="n">Y</span><span class="o">==</span><span class="n">c</span><span class="p">])</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">ids</span></div>
 
@@ -686,7 +688,7 @@
 
     <span class="k">if</span> <span class="n">maxevents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">maxevents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e10</span><span class="p">)</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.load_root_file: &quot;maxevents&quot; is None, set </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&quot;maxevents&quot; is None, set </span><span class="si">{</span><span class="n">maxevents</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1"># We do splitting according to dictionary (trn, val, tst) structure</span>
@@ -783,10 +785,10 @@
 <span class="sd">        try:</span>
 <span class="sd">            ind = data.find_ind(v)</span>
 <span class="sd">        except:</span>
-<span class="sd">            cprint(__name__ + f&#39;.splitfactor: Could not find variable &quot;{v}&quot; -- continue&#39;, &#39;red&#39;)</span>
+<span class="sd">            print(f&#39;Could not find variable &quot;{v}&quot; -- continue&#39;, &#39;red&#39;)</span>
 <span class="sd">            continue</span>
 <span class="sd">        </span>
-<span class="sd">        cprint(__name__ + f&#39;.splitfactor: Pre-transforming variable &quot;{v}&quot; with log1p&#39;, &#39;magenta&#39;)</span>
+<span class="sd">        print(f&#39;Pre-transforming variable &quot;{v}&quot; with log1p&#39;, &#39;magenta&#39;)</span>
 <span class="sd">        </span>
 <span class="sd">        data.x[:,ind] = np.log1p(data.x[:,ind])</span>
 <span class="sd">        </span>

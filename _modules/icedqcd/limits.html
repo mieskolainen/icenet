@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.7
+                0.1.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -524,13 +524,11 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">uproot</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
 <span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FuncFormatter</span>
-                    
+
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">RectBivariateSpline</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">ticker</span><span class="p">,</span> <span class="n">cm</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
@@ -1023,7 +1021,7 @@
     <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;cosmetics&#39;</span><span class="p">][</span><span class="s1">&#39;portal&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;vector&#39;</span><span class="p">:</span>
         <span class="n">create_limit_plots_vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="n">savepath</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plots not implemented for portal </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;cosmetics&#39;</span><span class="p">][</span><span class="s1">&#39;portal&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plots not implemented for portal </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;cosmetics&#39;</span><span class="p">][</span><span class="s1">&#39;portal&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
     
     <span class="c1">## Produce tables</span>
     <span class="n">create_limit_tables</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="n">savepath</span><span class="p">)</span>
