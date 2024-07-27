@@ -17,7 +17,7 @@ COLORS = {
     'reset': '\033[0m'
 }
 
-def iceprint(message, color='white', file=None):
+def iceprint(message, color='white', file=None, end=None):
     
     # Get the caller frame
     caller_frame = inspect.currentframe().f_back
@@ -37,15 +37,15 @@ def iceprint(message, color='white', file=None):
     if file is None:
         
         if type(message) is str and (message == '' or message == '\n'):
-            print(message)
+            print(message, end=end)
         
         # String
         elif type(message) is str:
-            print(f"{color_code}{prefix}: {message}{reset_code}")
+            print(f"{color_code}{prefix}: {message}{reset_code}", end=end)
         
         # Print objects on a separate line
         else:
             print(f"{prefix}:")
-            print(f"{color_code}{message}{reset_code}")
+            print(f"{color_code}{message}{reset_code}", end=end)
     else:
         print(message, file=file)
