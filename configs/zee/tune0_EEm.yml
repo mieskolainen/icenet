@@ -138,7 +138,7 @@ deploy_runmode:
   #mc_param: !include configs/dqcd/mc_param.yml
   
   models:  !include configs/zee/models.yml
-  active_models: &ACTIVE_MODELS !include configs/zee/active_models.yml
+  active_models: *ACTIVE_MODELS
 
 
 # ----------------------------------------------------
