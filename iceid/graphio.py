@@ -15,8 +15,7 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 def parse_tensor_data(X, ids, image_vars, args):

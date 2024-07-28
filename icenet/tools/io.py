@@ -13,6 +13,7 @@ import psutil
 import subprocess
 import re
 
+
 # MVA imputation
 from sklearn.impute import KNNImputer
 from sklearn.impute import SimpleImputer
@@ -32,8 +33,7 @@ from icenet.tools import aux
 from icenet.tools import stx
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 def rootsafe(txt):

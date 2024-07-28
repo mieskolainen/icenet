@@ -15,11 +15,11 @@ iceboost3D:
   
   # booster parameters
   model_param:
-    num_boost_round: 500      # number of epochs (equal to the number of trees!)
+    num_boost_round: 550          # number of epochs (equal to the number of trees!)
     
-    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    booster: 'gbtree'             # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
-    device:      'auto'       # 'auto', 'cpu', 'cuda'
+    device:      'auto'           # 'auto', 'cpu', 'cuda'
     
     learning_rate: 0.05
     gamma: 1.5
@@ -46,12 +46,22 @@ iceboost3D:
       beta: 1.0
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
+  # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
+  SWD_param:
+    beta: 1.0e-3
+    p: 1                  # p-norm (1,2, ...)
+    num_slices: 500       # Number of MC projections (Higher the better) 
+    mode: 'SWD'           # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
+    max_N: 400000         # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
+    var: ['.*']           # Use all variables in SWD
+    norm_weights: False   # Normalization enforced (if False, model should learn to keep the normalization)
+  
   tensorboard: true
   plot_trees: false
 
   # Read/Write of epochs
-  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1                  # -1 takes the minimum loss model
+  evalmode: 5             # Evaluation and saving of the model every n-th epoch (int) during training
+  readmode: -1            # -1 takes the minimum loss model
 
 
 # ------------------------------------------------
@@ -71,7 +81,7 @@ xgb0:
   
   # booster parameters
   model_param:
-    num_boost_round: 120          # number of epochs (equal to the number of trees!)
+    num_boost_round: 550          # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'             # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
@@ -117,7 +127,7 @@ iceboost0: &ICEBOOST0
   
   # booster parameters
   model_param:
-    num_boost_round: 500     # number of epochs (equal to the number of trees!)
+    num_boost_round: 550     # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
@@ -163,7 +173,7 @@ iceboost0: &ICEBOOST0
 iceboost_swd:
 
   <<: *ICEBOOST0
-
+  
   label: 'ICEBOOST-SWD'
 
   # BCE loss domains [use with custom:binary_cross_entropy]
@@ -176,39 +186,14 @@ iceboost_swd:
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
-    beta: 0.1
-    p: 1                 # p-norm (1,2, ...)
-    num_slices: 500      # Number of MC projections (Higher the better) 
-    mode: 'SWD'          # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
-    max_N: 400000        # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
-    #vars: ['.*']         # Use all variables in SWD
-    vars: ['fixedGridRhoAll', 'probe_eta', 'probe_pt'] # Use specific ones
-
-
-# ICEBOOST with an additional re-weighting in-the-loop regularization
-# 
-iceboost_plus:
-  
-  <<: *ICEBOOST0
-
-  label: 'ICEBOOST-PLUS'
-  
-  # BCE loss domains
-  BCE_param:
-    main:
-      classes: [0,1]
-      beta: 1.0
-      
-      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-    
-    flat:
-      classes: [0,1]
-      beta: 0.001
-      AIRW:
-        classes:  [0]      # One (or two) classes
-        RW_modes: ['LR']   # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct', 'identity'
-
-      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+    beta: 5.0e-2
+    p: 1                   # p-norm (1,2, ...)
+    num_slices: 500        # Number of MC projections (Higher the better) 
+    mode: 'SWD'            # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
+    max_N: 400000          # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
+    var: ['.*']            # Use all variables in SWD
+    #var: ['fixedGridRhoAll', 'probe_eta', 'probe_pt'] # Use specific ones
+    norm_weights: False    # Normalization enforced (if False, model should learn to keep the normalization)
 
 
 # -----------------------------------------------------------------------------
@@ -248,10 +233,11 @@ lzmlp0: &LZMLP
     #lossfunc: 'binary_Lq_entropy'     
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 5.0e-3                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 5.0e-2                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic)
+    SWD_norm_weights: False           # Normalization enforced
 
     lipschitz_beta:    5.0e-5         # lipschitz regularization (use with 'lzmlp')
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
@@ -336,10 +322,11 @@ fastkan0: &FASTKAN
     #lossfunc: 'binary_Lq_entropy'    # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 5.0e-3                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 5.0e-2                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic)
+    SWD_norm_weights: False           # Normalization enforced
     
     #lipshitz_beta: 1.0e-4            # Lipshitz regularization (use with 'lzmlp')
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
@@ -428,11 +415,12 @@ dmlp0: &DMLP
     #lossfunc: 'binary_Lq_entropy'
     #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 5.0e-3                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 5.0e-2                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 10000             # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic)
-    
+    SWD_norm_weights: False           # Normalization enforced
+
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ lambda * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ lambda * torch.sum(logits**2)
     

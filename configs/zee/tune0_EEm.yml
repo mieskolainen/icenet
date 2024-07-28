@@ -65,10 +65,13 @@ train_runmode:
 
   ## Reweighting setup
   reweight: true
-  reweight_mode: 'write'              # 'write', 'load'
-  reweight_file: null                 # null for automatic, or string for specific
   
-  reweight_param: &REWEIGHT_PARAM !include configs/zee/stage1rw.yml
+  # 'write' (train PDF model and apply), 'load' (load PDF model and apply),
+  # 'write-skip' (train PDF model but do not apply), 'load-skip' (load PDF model but do not apply)
+  reweight_mode: 'write'
+  reweight_file: null           # null for automatic, or string for specific
+  
+  reweight_param: !include configs/zee/stage1rw.yml
   
   ## Outlier protection in the training
   outlier_param:
@@ -116,14 +119,27 @@ eval_runmode:
   modeltag:  null
   
   reweight: true
-  reweight_mode: 'load'          # 'write', 'load'
-  reweight_file: null                 # null for automatic, or string for specific
-  
-  reweight_param: *REWEIGHT_PARAM
+  reweight_mode: 'load'          # 'write', 'load', 'write-skip', 'load-skip'
+  reweight_file: null            # null for automatic, or string for specific
+
+  reweight_param: !include configs/zee/stage1rw.yml
 
   models:  !include configs/zee/models.yml
   active_models: *ACTIVE_MODELS
 
 # ----------------------------------------------------
-plot_param: !include configs/zee/plots.yml
+deploy_runmode:
+  
+  <<: *MVA_INPUT_PARAM
 
+  maxevents: null
+  modeltag:  null
+  
+  #mc_param: !include configs/dqcd/mc_param.yml
+  
+  models:  !include configs/zee/models.yml
+  active_models: &ACTIVE_MODELS !include configs/zee/active_models.yml
+
+
+# ----------------------------------------------------
+plot_param: !include configs/zee/plots.yml

@@ -23,9 +23,9 @@ from icenet.tools import reweight
 from icenet.tools import prints
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 def binengine(bindef, x):
     """

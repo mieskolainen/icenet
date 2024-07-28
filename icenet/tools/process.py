@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 from importlib import import_module
 import os
 import copy
-import sys
 import pickle
 import xgboost
 
@@ -27,19 +26,15 @@ import icenet.deep.iceboost as iceboost
 import icenet.deep.train as train
 import icenet.deep.predict as predict
 
-from icenet.tools import stx, io, prints, aux, reweight, plots, supertune
+from icenet.tools import iceprint, stx, io, prints, aux, reweight, plots, supertune
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 # ******** GLOBALS *********
-from icenet.tools import icelogger
-from icenet.tools.icelogger import icelog
-
-icelogger.set_global_log_file('initial.log')
-LOGGER = icelogger.get_logger()
+from icenet import LOGGER, icelogger
 
 roc_mstats        = []
 roc_labels        = []
@@ -78,6 +73,7 @@ def read_cli():
     cli_dict = vars(cli)
     
     return cli, cli_dict
+
 
 def read_config(config_path='configs/xyz/', runmode='all'):
     """
@@ -376,7 +372,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
 def generic_flow(rootname, func_loader, func_factor):
     """
-    Generic (data -- train -- evaluation) workflow
+    Generic (read data -- train models -- evaluate models) workflow
     
     Args:
         rootname:     name of the workflow config folder
@@ -390,20 +386,18 @@ def generic_flow(rootname, func_loader, func_factor):
 
     if runmode == 'genesis':
         
-        icelogger.set_global_log_file(f'{args["datadir"]}/icelogger_{args["__hash_genesis__"]}.log')
+        icelogger.set_global_log_file(f'{args["datadir"]}/genesis_{args["__hash_genesis__"]}.log')
         
         read_data(args=args, func_loader=func_loader, runmode=runmode) 
         
     if runmode == 'train' or runmode == 'eval':
 
-        icelogger.set_global_log_file(f'{args["datadir"]}/icelogger_{args["__hash_post_genesis__"]}.log')
+        icelogger.set_global_log_file(f'{args["plotdir"]}/{runmode}/execution.log')
         
         data = read_data_processed(args=args, func_loader=func_loader,
                 func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
         
     if runmode == 'train':
-        
-        icelogger.set_global_log_file(f'{args["plotdir"]}/train/icelogger.log')
         
         output_file = f'{args["plotdir"]}/train/stats_train.log'
         prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
@@ -414,19 +408,17 @@ def generic_flow(rootname, func_loader, func_factor):
 
     if runmode == 'eval':
         
-        icelogger.set_global_log_file(f'{args["plotdir"]}/eval/icelogger.log')
-        
         output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
         prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)
         
         make_plots(data=data['tst'], args=args, runmode=runmode)
         
         evaluate_models(data=data['tst'], info=data['info'], args=args)
-        
+    
     return args, runmode
 
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def read_data(args, func_loader, runmode):
     """
     Load input data and return full dataset arrays
@@ -452,13 +444,13 @@ def read_data(args, func_loader, runmode):
         
         # func_loader does the multifile processing
         load_args = {'entry_start': 0, 'entry_stop': None, 'maxevents': args['maxevents'], 'args': args}
-        predata   = func_loader(root_path=args['root_files'], **load_args)
+        data   = func_loader(root_path=args['root_files'], **load_args)
         
-        X    = predata['X']
-        Y    = predata['Y']
-        W    = predata['W']
-        ids  = predata['ids']
-        info = predata['info']
+        X    = data['X']
+        Y    = data['Y']
+        W    = data['W']
+        ids  = data['ids']
+        info = data['info']
 
         print(f'Saving to path: "{cache_directory}"', 'yellow')
         C = get_chunk_ind(N=len(X))
@@ -471,7 +463,9 @@ def read_data(args, func_loader, runmode):
         gc.collect()
         io.showmem()
         
-        return predata
+        print('[done]')
+        
+        return data
         
     else:
         
@@ -486,7 +480,7 @@ def read_data(args, func_loader, runmode):
             
             with open(f'{cache_directory}/output_{i}.pkl', 'rb') as handle:
                 X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)
-                        
+
                 if i > 0:
                     X = np.concatenate((X, X_), axis=0) # awkward will cast numpy automatically
                     Y = np.concatenate((Y, Y_), axis=0)
@@ -496,58 +490,64 @@ def read_data(args, func_loader, runmode):
                 
                 gc.collect() # important!
         
+        print('[done]')
+        
         io.showmem()
         
         return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     """
     Read/write (MVA) data and return full processed dataset
     """
 
     # --------------------------------------------------------------------
-    # 'PREDATA': Raw input reading and processing
+    # 'DATA': Raw input reading and processing
     
     cache_filename = f'{args["datadir"]}/data_{runmode}_{args["__hash_genesis__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
-        # Read it
-        predata = read_data(args=args, func_loader=func_loader, runmode=runmode) 
+        print(f'File "{cache_filename}" for <DATA> does not exist, creating.', 'yellow')
+        
+        data = read_data(args=args, func_loader=func_loader, runmode=runmode) 
         
         with open(cache_filename, 'wb') as handle:
             print(f'Saving <DATA> to a file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
-            pickle.dump(predata, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
             gc.enable()
         
         # Save args
         fname = cache_filename.replace('.pkl', '.yml')
         aux.yaml_dump(data=args, filename=fname)
-
+        
     else:
         with open(cache_filename, 'rb') as handle:
             print(f'Loading <DATA> from a file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
-            predata = pickle.load(handle)
+            data = pickle.load(handle)
             gc.enable()
-
+    
     io.showmem()
+    print('[done]')
     
     # --------------------------------------------------------------------
-    # 'DATA': Further processing step
+    # 'PROCESSED DATA': Further processing step
     
     cache_filename = f'{args["datadir"]}/processed_data_{runmode}_{args["__hash_post_genesis__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
-
+        
+        print(f'File "{cache_filename}" for <PROCESSED DATA> does not exist, creating.', 'yellow')
+        
         # Process it
-        processed_data = process_data(args=args, predata=predata, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
+        processed_data = process_data(args=args, predata=data, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
         
         with open(cache_filename, 'wb') as handle:
             print(f'Saving <PROCESSED DATA> to a file: "{cache_filename}"', 'yellow')
@@ -572,10 +572,11 @@ def read_data_processed(args, func_loader, func_factor, mvavars, runmode):
     
     gc.collect()
     io.showmem()
+    print('[done]')
     
     return processed_data
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def process_data(args, predata, func_factor, mvavars, runmode):
     """
     Process data further
@@ -659,16 +660,21 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             else:
                 fmodel = f'{args["datadir"]}/{args["reweight_file"]}'
             
-            if args['reweight_mode'] == 'load':
+            if 'load' in args['reweight_mode']:
                 print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
             
-            trn.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args, x_val=val.x, y_val=val.y, w_val=val.w)
-            val.w,_    = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args)
+            # -----------------------
+            # ** Special mode **
+            skip_reweights = True if 'skip' in args['reweight_mode'] else False
+            # -----------------------
             
-            if args['reweight_mode'] == 'write':
+            trn.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=trn.ids, args=args, x_val=val.x, y_val=val.y, w_val=val.w, skip_reweights=skip_reweights)
+            val.w, _   = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args, skip_reweights=skip_reweights)
+            
+            if 'write' in args['reweight_mode']:
                 print(f'Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
                 pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
@@ -699,15 +705,20 @@ def process_data(args, predata, func_factor, mvavars, runmode):
             else:    
                 fmodel = f'{args["datadir"]}/{args["reweight_file"]}' 
             
-            if args['reweight_mode'] == 'load':
+            if 'load' in args['reweight_mode']:
                 print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
             
-            tst.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args)
+            # -----------------------
+            # ** Special mode **
+            skip_reweights = True if 'skip' in args['reweight_mode'] else False
+            # -----------------------
             
-            if args['reweight_mode'] == 'write':
+            tst.w, pdf = reweight.compute_ND_reweights(pdf=pdf, x=tst.x, y=tst.y, w=tst.w, ids=tst.ids, args=args, skip_reweights=skip_reweights)
+            
+            if 'write' in args['reweight_mode']:
                 print(f'Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
                 pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
@@ -729,7 +740,7 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     
     return output
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def impute_datasets(data, args, features=None, imputer=None):
     """
     Dataset imputation
@@ -779,7 +790,7 @@ def impute_datasets(data, args, features=None, imputer=None):
     
     return data, imputer
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def train_models(data_trn, data_val, args=None):
     """
     Train ML/AI models wrapper with pre-processing.
@@ -1107,7 +1118,7 @@ def train_models(data_trn, data_val, args=None):
 
     return True
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def evaluate_models(data=None, info=None, args=None):
     """
     Evaluate ML/AI models.
@@ -1389,8 +1400,8 @@ def evaluate_models(data=None, info=None, args=None):
     
     except Exception as e:
         print(e)
-        print(f'Exception occured, check the problem! -- continue', 'red')
-    
+        print(f'Exception occured, check the problem -- exit', 'red')
+        exit()
     
     ## Multiple model comparisons
     plot_XYZ_multiple_models(targetdir=targetdir, args=args)
@@ -1414,9 +1425,11 @@ def evaluate_models(data=None, info=None, args=None):
     with open(targetfile, 'wb') as file:
         pickle.dump(resdict, file, protocol=pickle.HIGHEST_PROTOCOL)
     
+    print(f'[done]', 'yellow')
+    
     return True
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def make_plots(data, args, runmode):
     """
     Basic Q/A-plots
@@ -1449,7 +1462,7 @@ def make_plots(data, args, runmode):
 
     return True
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     X_kin, ids_kin, X_RAW, ids_RAW):
     """ 
@@ -1719,7 +1732,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     
     return True
 
-@icelog(LOGGER)
+@iceprint.icelog(LOGGER)
 def plot_XYZ_multiple_models(targetdir, args):
 
     global roc_mstats

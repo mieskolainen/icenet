@@ -15,8 +15,7 @@ from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e9), null_value=-999.0):

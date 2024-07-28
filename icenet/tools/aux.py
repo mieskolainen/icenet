@@ -15,7 +15,6 @@ from datetime import datetime
 import torch
 import random
 import yaml
-import inspect
 
 import numba
 from tqdm import tqdm
@@ -26,9 +25,9 @@ import scipy
 from scipy import interpolate
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 def yaml_dump(data: dict, filename: str):
     """

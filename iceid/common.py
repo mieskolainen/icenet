@@ -13,8 +13,7 @@ from icenet.tools import io, aux, prints, iceroot
 from iceid import graphio
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 # Globals

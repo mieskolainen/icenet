@@ -12,8 +12,7 @@ from icenet.tools import io
 from icenet.tools import aux
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 # GLOBALS

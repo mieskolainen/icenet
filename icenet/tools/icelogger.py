@@ -3,7 +3,6 @@
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import logging
-from functools import wraps
 
 class SingletonLogger:
     _instance = None
@@ -50,13 +49,3 @@ def get_logger():
 def set_global_log_file(log_file):
     SingletonLogger.get_instance().set_log_file(log_file)
 
-def icelog(logger):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            logger.info(f'Calling function {func.__name__} with args: {args}, kwargs: {kwargs}')
-            result = func(*args, **kwargs)
-            logger.info(f'Function {func.__name__} returned {result}')
-            return result
-        return wrapper
-    return decorator

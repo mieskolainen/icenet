@@ -9,8 +9,7 @@ from importlib import import_module
 from icenet.tools import io, aux, prints, iceroot
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 # GLOBALS

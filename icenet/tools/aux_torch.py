@@ -8,9 +8,9 @@ import numpy as np
 from icenet.tools import aux
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 def weight2onehot(weights, y, num_classes):
     """

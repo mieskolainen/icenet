@@ -30,7 +30,7 @@ def quantile_function(qs: torch.Tensor, cumweights: torch.Tensor, values: torch.
 
 def wasserstein_distance_1D(u_values: torch.Tensor, v_values: torch.Tensor,
                             u_weights: torch.Tensor=None, v_weights: torch.Tensor=None,
-                            p: int=1, inverse_power: bool=False, normalize_weights: bool=True,
+                            p: int=1, inverse_power: bool=False, norm_weights: bool=True,
                             require_sort: bool=True):
     """
     Wasserstein distance over two empirical samples.
@@ -46,7 +46,7 @@ def wasserstein_distance_1D(u_values: torch.Tensor, v_values: torch.Tensor,
         p:                 p-norm parameter (p = 1 is 'Earth Movers', 2 = is W-2, ...)     
         num_slices:        number of random MC projections (slices) (higher the better)
         inverse_power:     apply final inverse power 1/p
-        normalize_weights: normalize per sample (U,V) weights to sum to one  
+        norm_weights:      normalize per sample (U,V) weights to sum to one
         require_sort:      always by default, unless presorted
     
     Returns:
@@ -63,9 +63,9 @@ def wasserstein_distance_1D(u_values: torch.Tensor, v_values: torch.Tensor,
     n = u_values.shape[0]
     m = v_values.shape[0]
     
-    if normalize_weights and u_weights is not None:
+    if norm_weights and u_weights is not None:
         u_weights = u_weights / torch.sum(u_weights)
-    if normalize_weights and v_weights is not None:
+    if norm_weights and v_weights is not None:
         v_weights = v_weights / torch.sum(v_weights)
     
     if u_weights is None:
@@ -124,12 +124,14 @@ def rand_projections(dim: int, N: int=1000, device: str='cpu', dtype=torch.float
 def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
                                 u_weights: torch.Tensor=None, v_weights: torch.Tensor=None,
                                 p: int=1, num_slices: int=1000, mode: str='SWD', 
+                                norm_weights: bool=True,
                                 vectorized: bool=True, inverse_power: bool=True):
     """
     Sliced Wasserstein Distance over arbitrary dimensional samples
     
     References:
         https://arxiv.org/abs/1902.00434
+        https://arxiv.org/abs/2211.08775
         https://arxiv.org/abs/2304.13586
     
     Notes:
@@ -144,6 +146,7 @@ def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
         p:             p-norm parameter (p = 1 is 'Earth Movers', 2 = is W-2, ...)       
         num_slices:    number of random MC projections (slices) (higher the better)
         mode:          'SWD'  (basic uniform MC random)
+        norm_weights:  normalize per sample (U,V) weights to sum to one
         vectorized:    fully vectorized (may take more GPU/CPU memory, but 10x faster)
         inverse_power: apply final inverse power
         
@@ -161,7 +164,9 @@ def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
         v_proj = torch.matmul(v_values, directions.T)
         
         dist = wasserstein_distance_1D(u_values=u_proj, v_values=v_proj,
-                    u_weights=u_weights, v_weights=v_weights, p=p, inverse_power=False)
+                    u_weights=u_weights, v_weights=v_weights, p=p,
+                    norm_weights=norm_weights,
+                    inverse_power=False)
         
     else:
         dist = torch.zeros(num_slices, device=u_values.device, dtype=u_values.dtype)
@@ -174,7 +179,9 @@ def sliced_wasserstein_distance(u_values: torch.Tensor, v_values: torch.Tensor,
             
             # Calculate the 1-dim Wasserstein on the direction
             dist[i] = wasserstein_distance_1D(u_values=u_proj, v_values=v_proj,
-                            u_weights=u_weights, v_weights=v_weights, p=p, inverse_power=False)
+                            u_weights=u_weights, v_weights=v_weights, p=p,
+                            norm_weights=norm_weights,
+                            inverse_power=False)
     
     if   mode == 'SWD':  # Standard
         dist = torch.sum(dist) / num_slices

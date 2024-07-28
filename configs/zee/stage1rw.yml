@@ -2,14 +2,14 @@
 # ----------------------------------------
 
 equal_frac: true                       # Equalize integrated class fractions
-differential: true                     # Differential reweighting
+differential: true                     # Differential reweighting (true, false)
 reference_class: 1                     # Re-weight target class id
 
 # Differential reweighting param
 diff_param:
-  
+
   maxevents: null                      # Maximum number of events for the PDF construction
-  renorm_weight_to_count: True         # Renormalize sum(weights) == sum(counts) per class
+  renorm_weight_to_count: true         # Renormalize sum(weights) == sum(counts) per class
   
   var:  ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
   type: 'AIRW'                         # 'AIRW', 'pseudo-ND', '2D', '1D'
@@ -20,7 +20,7 @@ diff_param:
     
     bins:  [[-3.1, 3.1, 50], [0.0001, 50.0, 50], [1.0, 60, 50]] # Make sure the bounds cover the phase space
     binmode:  ['linear', 'linear', 'linear']     # 'log10' or 'linear' or 'edges' (custom array) binning
-
+    
     # ! Variable, and binning min/max boundaries are both transformed !
     transform: ['log10', null, null]   # 'log10', 'sqrt', 'square', null
     
@@ -30,3 +30,54 @@ diff_param:
     active_model: iceboost3D           # Under models.yml
     max_reg:      100.0                # Maximum weight cut-off regularization
     mode:         'LR'                 # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
+
+# ---------------------------------------------------------------------
+# NOTES:
+#
+# Recipe for conditional 2-step re-weighter: p0 (source pdf) --> p1 (target pdf)
+# 
+# weights ~ p1(x|z) / p0(x|z) = p1(x,z) / p0(x,z) x p0(z) / p1(z)
+# 
+# Note that the marginals p1(z) and p0(z) are *not* aligned to be the same via
+# a generic conditional re-weighting, only p1(x|z) and p0(x|z).
+# 
+# However, if p0(z) = p1(z) i.e. their ratio = 1, then conditional and joint ratios
+# turn out to be the same, because p1(x|z) / p0(x|z) = p1(x,z) / p0(x,z).
+# ---------------------------------------------------------------------
+# 
+# 
+# Stage 1 model training:
+# ---------------------------------
+# 
+# >  train_mode.reweight_param.reweight                   = true
+# >  train_mode.reweight_param.reweight_mode              = 'write-skip'
+# >  train_mode.reweight_param.differential               = true
+# >  train_mode.reweight_param.equal_frac                 = true
+# >  train_mode.reweight_param.diff_param.type            = 'AIRW'
+# >  train_mode.reweight_param.var                        = ['z0', 'z1', ..., 'z{m-1}']
+# >  train_mode.reweight_param.diff_param.AIRW_param.mode = (irrelevant because of 'write-skip')
+# 
+# Stage 2 model training:
+# ---------------------------------
+# 
+# >  Train a classifier with input variables:
+#    concat([x,z]) = ['x0', 'x1', ..., 'x{n-1}', 'z0', 'z1', ..., 'z{m-1}']
+# 
+# Stage 1 model applied in evaluation:
+# ---------------------------------
+# 
+# >  eval_mode.reweight_param.reweight                    = true
+# >  eval_mode.reweight_param.reweight_mode               = 'load'
+# >  eval_mode.reweight_param.differential                = true
+# >  eval_mode.reweight_param.equal_frac                  = true
+# >  eval_mode.reweight_param.diff_param.type             = 'AIRW'
+# >  eval_mode.reweight_param.diff_param.AIRW_param.mode  = 'inverse-LR'
+# 
+# Stage 2 model applied in evaluation:
+# ---------------------------------
+# 
+# >  plot_param.OBS_reweight.transform_mode               = 'LR'
+# 
+# N.B. dataset event weights are automatically propagated through multiplicatively.
+# 
+# ---------------------------------------------------------------------

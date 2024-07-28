@@ -17,8 +17,7 @@ from icenet.deep import autogradxgb, optimize, losstools, tempscale
 from icefit import mine, cortools
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 import ray
@@ -185,19 +184,6 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
             print(f"BCE[{key}] No events from class [{param['classes'][1]}] - skip loss term")
             continue
         
-        # Now re-weight the target(s) based on the model predictions
-        # (a specific type of regularization -- experimental)
-        if 'AIRW' in param:
-            
-            for i in param['AIRW']['classes']:
-                
-                t_i     = (targets == param['AIRW']['classes'][i])
-                RW_mode = param['AIRW']['RW_modes'][i]
-                
-                # Multiply existing weights
-                p_map        = reweight.rw_transform_with_logits(preds[t_i], mode=RW_mode)
-                w_this[t_i] *= p_map
-        
         targets_CE = targets.clone()
         targets_CE[t0] = 0
         targets_CE[t1] = 1
@@ -242,7 +228,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     if loss_mode == 'eval':
         
         ts = tempscale.LogitsWithTemperature(mode='binary', device=device)
-        ts.set_temperature(logits=preds, labels=targets.to(torch.float32), weights=w)
+        ts.calibrate(logits=preds, labels=targets.to(torch.float32), weights=w)
     
     # --------------------------------------------------------------------
     # Sliced Wasserstein reweight U (y==0) -> V (y==1) transport
@@ -269,9 +255,11 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
                           dtype=preds.dtype, device=preds.device) # Map to device
 
         # Evaluate loss
-        loss     = losstools.SWD_reweight_loss(
+        loss = losstools.SWD_reweight_loss(
                         logits=logits_, x=x_, y=y_, weights=w_,
-                        p=SWD_param['p'], num_slices=SWD_param['num_slices'], mode=SWD_param['mode'])
+                        p=SWD_param['p'], num_slices=SWD_param['num_slices'],
+                        norm_weights=SWD_param['norm_weights'], mode=SWD_param['mode'])
+        
         SWD_loss = SWD_param["beta"] * loss
         
         txt             = f'SWD [$\\beta$ = {SWD_param["beta"]}]'
@@ -495,7 +483,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         SWD_param = param['SWD_param']
         
         # Pick variables to use
-        pick_ind, pick_vars  = aux.pick_index(all_ids=data_trn.ids, vars=SWD_param['vars'])
+        pick_ind, pick_vars  = aux.pick_index(all_ids=data_trn.ids, vars=SWD_param['var'])
         print(f'SWD_param: Using variables {pick_vars} ({pick_ind})')
         SWD_param['x_dim_index'] = pick_ind
         

@@ -7,8 +7,6 @@ import awkward as ak
 import ray
 from tqdm import tqdm
 
-from termcolor import colored, cprint
-
 import torch
 from   torch_geometric.data import Data
 

@@ -40,8 +40,7 @@ from icefit import mine
 from icenet.optim import adam
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 # Raytune
@@ -293,7 +292,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
 
         MI['model'] = []
         MI['MI_lb'] = []
-
+        
         print(f'MINE estimator input_size: {input_size}')
         
         for k in range(len(MI['classes'])):
@@ -343,7 +342,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             try:
                 from icenet.deep import tempscale
                 tt = tempscale.ModelWithTemperature(model=model, device=device, mode='softmax' if model.out_dim > 1 else 'binary')
-                tt.set_temperature(valid_loader=test_loader)
+                tt.calibrate(valid_loader=test_loader)
             except Exception as e:
                 print(e)
                 print('Could not evaluate temperature scaling -- skip')

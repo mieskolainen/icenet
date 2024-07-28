@@ -12,8 +12,7 @@ from icenet.tools import aux, io
 from tqdm import tqdm
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 class Dataset(torch.utils.data.Dataset):

@@ -20,8 +20,7 @@ from icehgcal import preprocess
 from icehgcal import graphio
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 # Globals

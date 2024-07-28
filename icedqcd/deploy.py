@@ -23,8 +23,7 @@ from icenet.deep import predict
 from tqdm import tqdm
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 def f2s(value, decimals=2):

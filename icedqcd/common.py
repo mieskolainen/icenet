@@ -19,8 +19,7 @@ from icefit import dequantize
 from icedqcd import graphio
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 # GLOBALS

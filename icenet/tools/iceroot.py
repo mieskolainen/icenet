@@ -17,9 +17,9 @@ from icenet.tools import aux
 from icenet.tools import iceroot
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 def read_single(process_func, process, root_path, param, class_id, dtype=None, num_cpus=0, verbose=False):
     """

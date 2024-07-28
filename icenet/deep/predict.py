@@ -21,8 +21,7 @@ from icenet.deep  import optimize
 from icenet.deep  import dbnf
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 

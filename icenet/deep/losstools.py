@@ -112,6 +112,7 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
             beta  = param['SWD_beta']
             value = beta * SWD_reweight_loss(logits=logits, x=x, y=y, weights=weights,
                                     p=param['SWD_p'], num_slices=param['SWD_num_slices'],
+                                    norm_weights=param['SWD_norm_weights'],
                                     mode=param['SWD_mode'])
 
             return {f'SWD x $\\beta = {beta}$': value}
@@ -339,7 +340,7 @@ def MI_loss(X, Z, weights, MI, y):
     # Used by the main optimizer optimizing total cost ~ main loss + MI + ...
     return loss
 
-def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, mode='SWD'):
+def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, norm_weights=True, mode='SWD'):
     """
     # Sliced Wasserstein reweight U (y==0) -> V (y==1) transport
     """
@@ -360,7 +361,9 @@ def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, mode='SW
     
     loss_uv = transport.sliced_wasserstein_distance(u_values=u_values, v_values=v_values,
                                                     u_weights=u_weights, v_weights=v_weights,
-                                                    p=p, num_slices=num_slices, mode=mode)
+                                                    p=p, num_slices=num_slices,
+                                                    norm_weights=norm_weights,
+                                                    mode=mode)
 
     return loss_uv
     

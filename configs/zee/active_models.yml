@@ -16,7 +16,6 @@
 # BDT based
 - iceboost_swd
 - iceboost0
-#- iceboost_plus
 - xgb0
 
 # Neural Nets

@@ -11,9 +11,9 @@ from termcolor import colored
 from icenet.tools import aux, io
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 def print_RAM_usage():
     """ 

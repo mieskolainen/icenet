@@ -13,8 +13,7 @@ from icenet.tools import prints
 from icenet.tools import iceroot
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 # Globals

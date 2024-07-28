@@ -19,9 +19,8 @@ from icefit import cortools, statstools
 from icedqcd import limits
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
-# ------------------------------------------
+from icenet import print
+# --------------------------------------------
 
 latex_header = \
 """

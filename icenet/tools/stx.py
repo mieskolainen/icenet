@@ -11,8 +11,7 @@ from icenet.tools import aux
 from functools import reduce
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 def print_stats(mask, text):

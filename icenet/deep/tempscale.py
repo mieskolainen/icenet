@@ -13,8 +13,7 @@ from torch import nn, optim
 from torch.nn import functional as F
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
 
 class LogitsWithTemperature(nn.Module):
@@ -36,7 +35,7 @@ class LogitsWithTemperature(nn.Module):
         """
         return logits / self.temperature
 
-    def set_temperature(self, logits: torch.Tensor, labels: torch.Tensor,
+    def calibrate(self, logits: torch.Tensor, labels: torch.Tensor,
                         weights: torch.Tensor=None, lr: float=0.01, max_iter: int=50):
         """
         Tune the temperature of the model with NLL loss (using the validation set)
@@ -123,8 +122,8 @@ class ModelWithTemperature(nn.Module):
         Temperature scaling on logits
         """
         return logits / self.temperature
-
-    def set_temperature(self, valid_loader, lr: float=0.01, max_iter: int=50):
+    
+    def calibrate(self, valid_loader, lr: float=0.01, max_iter: int=50):
         """
         Tune the temperature of the model with NLL loss (using the validation set)
         

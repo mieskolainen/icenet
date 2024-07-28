@@ -6,16 +6,15 @@ import numpy as np
 import awkward as ak
 import torch
 import matplotlib.pyplot as plt
-from termcolor import colored, cprint
 import copy
 
 from icenet.tools import aux, io, prints
 from icenet.deep  import iceboost, predict
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 def rw_transform_with_logits(logits, mode, absMax=30):
     """
@@ -37,6 +36,8 @@ def rw_transform_with_logits(logits, mode, absMax=30):
         exp_     = np.exp
         sigmoid_ = aux.sigmoid
         logits   = np.clip(logits, -absMax, absMax)
+    
+    print(f'Reweight transform with mode: {mode}')
     
     if   mode == 'LR':                 # LR trick
         return exp_(logits)
@@ -71,6 +72,8 @@ def rw_transform(phat, mode, EPS=1E-12):
         phat = torch.clip(phat, EPS, 1-EPS)
     else:
         phat = np.clip(phat, EPS, 1-EPS)
+    
+    print(f'Reweight transform with mode: {mode}')
     
     if   mode == 'LR':                    # LR trick
         return phat / (1.0 - phat)
@@ -172,7 +175,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
             binedges[i] = np.array(d)
             
         else:
-            raise Exception(__name__ + ': Unknown re-weight binning mode')
+            raise Exception(__name__ + ': Unknown reweight binning mode')
     
     rwparam = {
         'y':               y,
@@ -203,7 +206,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
     ### Compute factorized 1D x 1D product
     elif diff_args['type'] == 'pseudo-ND':
         
-        print(f'pseudo-ND (2D for now) re-weighting with: [{variables[0]}, {variables[1]}] ...')
+        print(f'pseudo-ND (2D for now) reweighting with: [{variables[0]}, {variables[1]}] ...')
         
         if pdf is None: # Not given by user
             pdf = {}
@@ -233,7 +236,7 @@ def histogram_helper(x, y, w, ids, pdf, args, EPS):
     ### Compute 1D-PDFs for each class
     elif diff_args['type'] == '1D':
         
-        print(f'1D re-weighting with: {variables[0]} ...')
+        print(f'1D reweighting with: {variables[0]} ...')
         
         if pdf is None: # Not given by user
             pdf = {}
@@ -372,13 +375,13 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
             print(f'Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
         
         # Get weights after the re-weighting transform
-        LR = rw_transform_with_logits(logits=logits, mode=RW_mode)
+        AI_w = rw_transform_with_logits(logits=logits, mode=RW_mode)
         
         # Apply maximum weight regularization
-        LR = np.clip(LR, 0.0, MAX_REG)
+        AI_w = np.clip(AI_w, 0.0, MAX_REG)
         
-        # Apply multiplicatively to weights
-        wnew[ind] = wnew[ind] * LR
+        # Apply multiplicatively to event weights
+        wnew[ind] = wnew[ind] * AI_w
         # -----------------------------------------------
     
     # Transform weights into weights doublet
@@ -390,8 +393,21 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
     
     return weights_doublet, pdf
 
+
+def doublet_helper(x, y, w, class_ids):
+
+    weights_doublet = {}
     
-def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12, x_val=None, y_val=None, w_val=None):
+    for c in class_ids:
+        weights_doublet[c] = np.zeros(len(x))                   # init with zeros
+        sample_weights     = w[y==c] if w is not None else 1.0  # Feed in the input weights
+        weights_doublet[c][y == c] = sample_weights
+
+    return weights_doublet    
+
+
+def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12,
+                         x_val=None, y_val=None, w_val=None, skip_reweights=False):
     """
     Compute N-dim reweighting coefficients
     
@@ -411,7 +427,7 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12, x_val=None, y_
         weights : 1D-array of re-weights
         pdf     : computed pdfs
     """
-    
+        
     use_ak = True if isinstance(x, ak.Array) else False
     
     if use_ak:
@@ -446,19 +462,23 @@ def compute_ND_reweights(x, y, w, ids, args, pdf=None, EPS=1e-12, x_val=None, y_
                 ind = (y == c)
                 weights_doublet[c][ind] /= np.sum(weights_doublet[c][ind])
                 weights_doublet[c][ind] *= np.sum(ind)
-    
+
+        # ---------------------------------------------------------------
+        # Special mode -- allows to only train pdf but then do not apply
+        if skip_reweights:
+            print(f'Special mode [skip_reweights] active: differential reweight model not applied', 'red')    
+            weights_doublet = doublet_helper(x=x, y=y, w=w, class_ids=class_ids)
+        
+        # ---------------------------------------------------------------
+        
     # No differential re-weighting    
     else:
         print(f"No differential reweighting")
         print(f"Reference [target] class: [{args['reweight_param']['reference_class']}] | Found classes {class_ids} from y")
-        weights_doublet = {}
-        
-        for c in class_ids:
-            weights_doublet[c] = np.zeros(len(x))                   # init with zeros
-            sample_weights     = w[y==c] if w is not None else 1.0  # Feed in the input weights
-            weights_doublet[c][y == c] = sample_weights
+
+        weights_doublet = doublet_helper(x=x, y=y, w=w, class_ids=class_ids)
     
-    # -------------------------------------------------
+    # --------------------------------------------------------
     
     ### Apply class balance equalizing weight
     if (args['reweight_param']['equal_frac'] == True):

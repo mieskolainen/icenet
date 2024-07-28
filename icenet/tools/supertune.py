@@ -9,9 +9,9 @@ import re
 import ast
 
 # ------------------------------------------
-from icenet.tools.iceprint import iceprint
-print = iceprint
+from icenet import print
 # ------------------------------------------
+
 
 def set_nested_dict_value(d, keys, value, indices=None):
     """
