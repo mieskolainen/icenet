@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.8
+                0.1.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -559,8 +559,7 @@
 <span class="kn">from</span> <span class="nn">icenet.optim</span> <span class="kn">import</span> <span class="n">adam</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
-<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># Raytune</span>
@@ -829,7 +828,7 @@
 
         <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">MI</span><span class="p">[</span><span class="s1">&#39;MI_lb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-
+        
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MINE estimator input_size: </span><span class="si">{</span><span class="n">input_size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MI</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">])):</span>
@@ -879,7 +878,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">tempscale</span>
                 <span class="n">tt</span> <span class="o">=</span> <span class="n">tempscale</span><span class="o">.</span><span class="n">ModelWithTemperature</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">out_dim</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;binary&#39;</span><span class="p">)</span>
-                <span class="n">tt</span><span class="o">.</span><span class="n">set_temperature</span><span class="p">(</span><span class="n">valid_loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">)</span>
+                <span class="n">tt</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">valid_loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not evaluate temperature scaling -- skip&#39;</span><span class="p">)</span>

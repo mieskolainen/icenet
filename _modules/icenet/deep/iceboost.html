@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.8
+                0.1.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -536,8 +536,7 @@
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span><span class="p">,</span> <span class="n">cortools</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet.tools.iceprint</span> <span class="kn">import</span> <span class="n">iceprint</span>
-<span class="nb">print</span> <span class="o">=</span> <span class="n">iceprint</span>
+<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <span class="kn">import</span> <span class="nn">ray</span>
@@ -707,19 +706,6 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BCE[</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">] No events from class [</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;classes&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">] - skip loss term&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         
-        <span class="c1"># Now re-weight the target(s) based on the model predictions</span>
-        <span class="c1"># (a specific type of regularization -- experimental)</span>
-        <span class="k">if</span> <span class="s1">&#39;AIRW&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
-            
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;AIRW&#39;</span><span class="p">][</span><span class="s1">&#39;classes&#39;</span><span class="p">]:</span>
-                
-                <span class="n">t_i</span>     <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">==</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;AIRW&#39;</span><span class="p">][</span><span class="s1">&#39;classes&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">RW_mode</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;AIRW&#39;</span><span class="p">][</span><span class="s1">&#39;RW_modes&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-                
-                <span class="c1"># Multiply existing weights</span>
-                <span class="n">p_map</span>        <span class="o">=</span> <span class="n">reweight</span><span class="o">.</span><span class="n">rw_transform_with_logits</span><span class="p">(</span><span class="n">preds</span><span class="p">[</span><span class="n">t_i</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="n">RW_mode</span><span class="p">)</span>
-                <span class="n">w_this</span><span class="p">[</span><span class="n">t_i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">p_map</span>
-        
         <span class="n">targets_CE</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="n">targets_CE</span><span class="p">[</span><span class="n">t0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">targets_CE</span><span class="p">[</span><span class="n">t1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -764,7 +750,7 @@
     <span class="k">if</span> <span class="n">loss_mode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
         
         <span class="n">ts</span> <span class="o">=</span> <span class="n">tempscale</span><span class="o">.</span><span class="n">LogitsWithTemperature</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">ts</span><span class="o">.</span><span class="n">set_temperature</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">ts</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># Sliced Wasserstein reweight U (y==0) -&gt; V (y==1) transport</span>
@@ -791,9 +777,11 @@
                           <span class="n">dtype</span><span class="o">=</span><span class="n">preds</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">preds</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="c1"># Map to device</span>
 
         <span class="c1"># Evaluate loss</span>
-        <span class="n">loss</span>     <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">SWD_reweight_loss</span><span class="p">(</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">SWD_reweight_loss</span><span class="p">(</span>
                         <span class="n">logits</span><span class="o">=</span><span class="n">logits_</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x_</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w_</span><span class="p">,</span>
-                        <span class="n">p</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;num_slices&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
+                        <span class="n">p</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;num_slices&#39;</span><span class="p">],</span>
+                        <span class="n">norm_weights</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;norm_weights&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
+        
         <span class="n">SWD_loss</span> <span class="o">=</span> <span class="n">SWD_param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss</span>
         
         <span class="n">txt</span>             <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SWD [$</span><span class="se">\\</span><span class="s1">beta$ = </span><span class="si">{</span><span class="n">SWD_param</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
@@ -1022,7 +1010,7 @@
         <span class="n">SWD_param</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;SWD_param&#39;</span><span class="p">]</span>
         
         <span class="c1"># Pick variables to use</span>
-        <span class="n">pick_ind</span><span class="p">,</span> <span class="n">pick_vars</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">pick_index</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;vars&#39;</span><span class="p">])</span>
+        <span class="n">pick_ind</span><span class="p">,</span> <span class="n">pick_vars</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">pick_index</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">])</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SWD_param: Using variables </span><span class="si">{</span><span class="n">pick_vars</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">pick_ind</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
         <span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;x_dim_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pick_ind</span>
         

@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.8
+                0.1.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -648,6 +648,7 @@
             <span class="n">beta</span>  <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;SWD_beta&#39;</span><span class="p">]</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">SWD_reweight_loss</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
                                     <span class="n">p</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;SWD_p&#39;</span><span class="p">],</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;SWD_num_slices&#39;</span><span class="p">],</span>
+                                    <span class="n">norm_weights</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;SWD_norm_weights&#39;</span><span class="p">],</span>
                                     <span class="n">mode</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;SWD_mode&#39;</span><span class="p">])</span>
 
             <span class="k">return</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;SWD x $</span><span class="se">\\</span><span class="s1">beta = </span><span class="si">{</span><span class="n">beta</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
@@ -881,7 +882,7 @@
 
 <div class="viewcode-block" id="SWD_reweight_loss">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.losstools.SWD_reweight_loss">[docs]</a>
-<span class="k">def</span> <span class="nf">SWD_reweight_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;SWD&#39;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">SWD_reweight_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">norm_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;SWD&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    # Sliced Wasserstein reweight U (y==0) -&gt; V (y==1) transport</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -902,7 +903,9 @@
     
     <span class="n">loss_uv</span> <span class="o">=</span> <span class="n">transport</span><span class="o">.</span><span class="n">sliced_wasserstein_distance</span><span class="p">(</span><span class="n">u_values</span><span class="o">=</span><span class="n">u_values</span><span class="p">,</span> <span class="n">v_values</span><span class="o">=</span><span class="n">v_values</span><span class="p">,</span>
                                                     <span class="n">u_weights</span><span class="o">=</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="o">=</span><span class="n">v_weights</span><span class="p">,</span>
-                                                    <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+                                                    <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span>
+                                                    <span class="n">norm_weights</span><span class="o">=</span><span class="n">norm_weights</span><span class="p">,</span>
+                                                    <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">loss_uv</span></div>
 
