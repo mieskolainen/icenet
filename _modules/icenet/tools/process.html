@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.9
+                0.1.2.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -815,7 +815,8 @@
         <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plotdir&#39;</span><span class="p">]</span>  <span class="o">+=</span> <span class="n">conditional_tag</span>
         
         <span class="c1"># Add runtime and hostname tag</span>
-        <span class="n">run_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">aux</span><span class="o">.</span><span class="n">get_datetime</span><span class="p">()</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">run_id</span>     <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">aux</span><span class="o">.</span><span class="n">get_datetime</span><span class="p">()</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">run_id_now</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span> <span class="ow">or</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;deploy&#39;</span><span class="p">:</span>
             
@@ -850,7 +851,8 @@
                 <span class="n">run_id</span> <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span>
         
         <span class="c1"># Store it</span>
-        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">run_id</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">run_id</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;run_id_now&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_id_now</span>
         
         <span class="c1">## ** Create and set folders **</span>
         <span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1650,13 +1652,15 @@
         
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured, check the model definition! -- continue&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
             <span class="n">exceptions</span> <span class="o">+=</span> <span class="mi">1</span>
-
+    
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[done]&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">exceptions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Number of fatal exceptions = </span><span class="si">{</span><span class="n">exceptions</span><span class="si">}</span><span class="s1"> [check your data / model definitions]&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Number of fatal exceptions = </span><span class="si">{</span><span class="n">exceptions</span><span class="si">}</span><span class="s1"> [check your data / model definitions -- some model did not train]&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -1697,11 +1701,7 @@
 
     <span class="k">global</span> <span class="n">ROC_binned_mstats</span>
     <span class="k">global</span> <span class="n">ROC_binned_mlabel</span>
-
-    <span class="c1">#mva_mstats = []</span>
-    <span class="c1">#MVA_binned_mstats = []</span>
-    <span class="c1">#MVA_binned_mlabel = []</span>
-
+    
     <span class="n">ROC_binned_mstats</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">ROC_binned_mlabel</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -1833,6 +1833,8 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">],</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
+    <span class="n">exceptions</span> <span class="o">=</span> <span class="mi">0</span>
+    
     <span class="k">try</span><span class="p">:</span>
         
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
@@ -1945,8 +1947,10 @@
     
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured, check the problem -- exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-        <span class="n">exit</span><span class="p">()</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured, check your steering cards! -- continue&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+        <span class="n">exceptions</span> <span class="o">+=</span> <span class="mi">1</span>
     
     <span class="c1">## Multiple model comparisons</span>
     <span class="n">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
@@ -1971,6 +1975,9 @@
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">resdict</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[done]&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">exceptions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.evaluate_models: Number of fatal exceptions = </span><span class="si">{</span><span class="n">exceptions</span><span class="si">}</span><span class="s1"> [check your input -- results or labelling may be corrupted now]&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -2059,7 +2066,7 @@
             <span class="n">chi2_table</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_AIRW</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span>
                                          <span class="n">pick_ind</span><span class="o">=</span><span class="n">pick_ind</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span>
                                          <span class="n">param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">],</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
-                                         <span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/OBS_reweight&#39;</span><span class="p">)</span>
+                                         <span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/OBS_reweight&#39;</span><span class="p">,</span> <span class="n">num_cpus</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">])</span>
             
             <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">chi2_table</span><span class="o">=</span><span class="n">chi2_table</span><span class="p">)</span>
         
@@ -2300,8 +2307,8 @@
     <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
     <span class="c1">### MVA-output 2D correlation plots</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_2D&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
-
+    <span class="k">if</span> <span class="s1">&#39;MVA_2D&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_2D&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+        
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MVA_2D:&#39;</span><span class="p">)</span>
         <span class="n">pprint</span><span class="p">(</span><span class="n">corr_mstats</span><span class="p">)</span>
         
@@ -2324,7 +2331,7 @@
     
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1">### Plot all ROC curves</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="s1">&#39;ROC&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ROC:&#39;</span><span class="p">)</span>
         <span class="n">pprint</span><span class="p">(</span><span class="n">roc_mstats</span><span class="p">)</span>
@@ -2359,7 +2366,7 @@
     <span class="c1"># plots.MVA_plot(mva_mstats, mva_labels, title = &#39;&#39;, filename=aux.makedir(targetdir + &#39;/MVA/--ALL--&#39;) + &#39;/MVA&#39;)</span>
 
     <span class="c1">### Plot all 1D-binned ROC curves</span>
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC_binned&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="s1">&#39;ROC_binned&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;ROC_binned&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ROC_binned:&#39;</span><span class="p">)</span>
         

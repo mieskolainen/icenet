@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.9
+                0.1.2.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -605,6 +605,26 @@
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
+<div class="viewcode-block" id="q_exp">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.q_exp">[docs]</a>
+<span class="k">def</span> <span class="nf">q_exp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    q-exponent</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">exp_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span>
+    <span class="k">return</span> <span class="n">exp_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1E-4</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="q_log">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.q_log">[docs]</a>
+<span class="k">def</span> <span class="nf">q_log</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    q-logarithm</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">log_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span>    
+    <span class="k">return</span> <span class="n">log_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1E-4</span> <span class="k">else</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="inverse_sigmoid">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.inverse_sigmoid">[docs]</a>
 <span class="k">def</span> <span class="nf">inverse_sigmoid</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-9</span><span class="p">):</span>
@@ -889,19 +909,30 @@
 
 <div class="viewcode-block" id="ak2numpy">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.ak2numpy">[docs]</a>
-<span class="k">def</span> <span class="nf">ak2numpy</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">ak2numpy</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">null_value</span><span class="p">:</span> <span class="nb">float</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unzip awkward array to numpy array per column (awkward Record)</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        x:      awkward array</span>
-<span class="sd">        fields: record field names to extract</span>
+<span class="sd">        x:            awkward array</span>
+<span class="sd">        fields:       record field names to extract</span>
+<span class="sd">        null_value:   missing element value</span>
+<span class="sd">        dtype:        final numpy array dtype</span>
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        numpy array with columns ordered as &#39;fields&#39; parameter</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">null_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)),</span> <span class="n">null_value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)):</span>
-        <span class="n">out</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">fields</span><span class="p">[</span><span class="n">i</span><span class="p">]]))</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">fields</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">isMaskedArray</span><span class="p">(</span><span class="n">y</span><span class="p">):</span> <span class="c1"># Process missing elements</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">null_value</span><span class="p">)</span>
+        
+        <span class="n">out</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+    
     <span class="k">return</span> <span class="n">out</span></div>
 
 
@@ -909,7 +940,7 @@
 <div class="viewcode-block" id="jagged_ak_to_numpy">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged_ak_to_numpy">[docs]</a>
 <span class="k">def</span> <span class="nf">jagged_ak_to_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_maxdim</span><span class="p">,</span>
-                       <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
+                       <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="p">:</span> <span class="nb">float</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform jagged awkward array to fixed dimensional numpy data</span>
 <span class="sd">    </span>
@@ -958,7 +989,7 @@
 <div class="viewcode-block" id="jagged2matrix">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.jagged2matrix">[docs]</a>
 <span class="k">def</span> <span class="nf">jagged2matrix</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">scalar_vars</span><span class="p">,</span> <span class="n">jagged_vars</span><span class="p">,</span> <span class="n">jagged_dim</span><span class="p">,</span>
-    <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="mf">999.0</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;columnar&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
+    <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="p">:</span> <span class="nb">float</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;columnar&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform a &quot;jagged&quot; event container to a matrix (rows ~ event, columns ~ variables)</span>
 <span class="sd">    </span>

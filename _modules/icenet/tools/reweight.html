@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.1.9
+                0.1.2.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -559,6 +559,8 @@
         <span class="n">logits</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="o">-</span><span class="n">absMax</span><span class="p">,</span> <span class="n">absMax</span><span class="p">)</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Reweight transform with mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Simplified functions based on ratios of sigmoids</span>
     
     <span class="k">if</span>   <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;LR&#39;</span><span class="p">:</span>                 <span class="c1"># LR trick</span>
         <span class="k">return</span> <span class="n">exp_</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
