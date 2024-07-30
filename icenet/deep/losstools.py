@@ -189,8 +189,8 @@ def loss_wrapper(model, x, y, num_classes, weights, param, y_DA=None, w_DA=None,
         logits = model.forward(x)
         loss   = Lq_binary_loss(logits=logits, y=y, q=param['q'], weights=weights)
         
-        loss = {f"LQ ($\\gamma = {param['q']}$)": loss, **SWD_helper(logits), **LZ_helper(), **LM_helper(logits), **MI_helper(torch.sigmoid(logits))}
-
+        loss = {f"LQ ($q = {param['q']}$)": loss, **SWD_helper(logits), **LZ_helper(), **LM_helper(logits), **MI_helper(torch.sigmoid(logits))}
+    
     elif param['lossfunc'] == 'SWD':
         
         # Reweight transport u -> v loss

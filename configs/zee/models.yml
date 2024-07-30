@@ -231,7 +231,7 @@ lzmlp0: &LZMLP
   opt_param:  
     #lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     lossfunc: 'binary_Lq_entropy'     
-    q: 0.9                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    q: 0.85                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
     SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
@@ -261,7 +261,7 @@ lzmlp0: &LZMLP
     #period: 30
     
     type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
-    step_size: 200             # Number of epochs for drop
+    step_size: 80             # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
@@ -320,7 +320,7 @@ fastkan0: &FASTKAN
   opt_param:  
     #lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     lossfunc: 'binary_Lq_entropy'    # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    q: 0.9                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    q: 0.85                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
     SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
@@ -349,7 +349,7 @@ fastkan0: &FASTKAN
     #period: 30
     
     type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
-    step_size: 200             # Number of epochs for drop
+    step_size: 80             # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
@@ -413,7 +413,7 @@ dmlp0: &DMLP
   opt_param:
     #lossfunc: 'binary_cross_entropy' # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
     lossfunc: 'binary_Lq_entropy'
-    q: 0.9                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    q: 0.85                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
     SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
@@ -441,7 +441,7 @@ dmlp0: &DMLP
     #period: 30
     
     type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
-    step_size: 200             # Number of epochs for drop
+    step_size: 80             # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'

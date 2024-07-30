@@ -1458,7 +1458,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         
         sum_after = AIw0.sum()
         print(f'Sum(after):  {sum_after:0.1f}')
-        ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.2f})'
+        ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.2f}'
         print(ratio)
         print('')
         
