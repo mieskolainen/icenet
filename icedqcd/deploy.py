@@ -23,7 +23,7 @@ from icenet.deep import predict
 from tqdm import tqdm
 
 # ------------------------------------------
-from icenet import print
+#from icenet import print # (reservation)
 # ------------------------------------------
 
 def f2s(value, decimals=2):

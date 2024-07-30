@@ -244,29 +244,29 @@ def splitfactor(x, y, w, ids, args):
     data.x = data.x.astype(np.float32)
     
     # -------------------------------------------------------------------------
-    ### ** DEBUG TEST -- special transform for "zero-inflated" variables **
-    """
-    special_var = ['probe_esEffSigmaRR',
-                   'probe_pfChargedIso',
-                   'probe_ecalPFClusterIso',
-                   'probe_trkSumPtHollowConeDR03',
-                   'probe_trkSumPtSolidConeDR04']
+    ### ** Special transform for specific MVA input variables **
     
-    for i, v in enumerate(special_var):
+    if args['pre_transform']['active']:
         
-        try:
-            ind = data.find_ind(v)
-        except:
-            print(f'Could not find variable "{v}" -- continue', 'red')
-            continue
+        var  = args['pre_transform']['var']
+        func = args['pre_transform']['func']
         
-        print(f'Pre-transforming variable "{v}" with log1p', 'magenta')
-        
-        data.x[:,ind] = np.log1p(data.x[:,ind])
-        
-        # Change the variable name
-        data.ids[ind] = f'DQL__{v}'
-    """
+        for i, v in enumerate(var):
+            
+            try:
+                ind = data.find_ind(v)
+            except:
+                print(f'Could not find variable "{v}" -- continue', 'red')
+                continue
+            
+            print(f'Pre-transform: {func[i]} of variable "{v}"', 'magenta')
+            
+            x = data.x[:,ind] # x used in the transform
+            data.x[:,ind] = eval(func[i])
+            
+            # Change the variable name [+ have the same original variables in data_kin]
+            data.ids[ind] = f'TRF__{v}'
+    
     # -------------------------------------------------------------------------
     
     return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

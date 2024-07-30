@@ -39,6 +39,8 @@ def rw_transform_with_logits(logits, mode, absMax=30):
     
     print(f'Reweight transform with mode: {mode}')
     
+    # Simplified functions based on ratios of sigmoids
+    
     if   mode == 'LR':                 # LR trick
         return exp_(logits)
     elif mode == 'inverse-LR':         # Inverse LR trick

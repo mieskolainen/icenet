@@ -220,7 +220,7 @@ lzmlp0: &LZMLP
   out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
 
   model_param:
-    mlp_dim: [96, 96, 96, 96]         # hidden layer dimensions
+    mlp_dim: [96, 96, 96]             # hidden layer dimensions
     activation: 'silu'
     layer_norm: True
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
@@ -229,11 +229,11 @@ lzmlp0: &LZMLP
   
   # Optimization
   opt_param:  
-    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    #lossfunc: 'binary_Lq_entropy'     
-    #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    #lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'binary_Lq_entropy'     
+    q: 0.9                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 1.0e-3                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 1000              # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic)
@@ -249,10 +249,10 @@ lzmlp0: &LZMLP
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 150
+    epochs: 200
     batch_size: 4096
     lr: 4.0e-4
-    weight_decay: 1.0e-4       # L2-regularization
+    weight_decay: 1.0e-2       # L2-regularization
   
   # Scheduler
   scheduler_param:
@@ -310,7 +310,7 @@ fastkan0: &FASTKAN
     grid_min: -2.0                    # Activation learning param
     grid_max:  2.0                    # 
     num_grids:   8                    # 
-    mlp_dim: [96, 96, 96, 96]         # hidden layer dimensions
+    mlp_dim: [96, 96, 96]             # hidden layer dimensions
     use_base_update: True             # Use "base MLP" in addition
     
     last_tanh: True                   # Extra tanh layer
@@ -318,11 +318,11 @@ fastkan0: &FASTKAN
   
   # Optimization
   opt_param:  
-    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    #lossfunc: 'binary_Lq_entropy'    # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    #lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'binary_Lq_entropy'    # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    q: 0.9                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 1.0e-3                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 1000              # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic)
@@ -338,10 +338,10 @@ fastkan0: &FASTKAN
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 150
+    epochs: 200
     batch_size: 4096
     lr: 4.0e-4
-    weight_decay: 1.0e-4       # L2-regularization
+    weight_decay: 1.0e-2       # L2-regularization
   
   # Scheduler
   scheduler_param:
@@ -398,7 +398,7 @@ dmlp0: &DMLP
   out_dim: 1   # We want to use sigmoid 1D-output model, comment out for default softmax multiclass
   
   model_param:
-    mlp_dim: [96, 96, 96, 96]         # hidden layer dimensions
+    mlp_dim: [96, 96, 96]             # hidden layer dimensions
     activation: 'silu'
     layer_norm: True
     batch_norm: False                 # normalization layers & dropout can be ill-posed here (operators not 1-to-1 compatible with weighted events)
@@ -408,19 +408,19 @@ dmlp0: &DMLP
     skip_connections: False
     last_tanh: True                   # Extra tanh layer
     last_tanh_scale: 10.0             # Scale after tanh()
-
+  
   # Optimization
   opt_param:
-    lossfunc: 'binary_cross_entropy'  # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
-    #lossfunc: 'binary_Lq_entropy'
-    #q: 0.8                           # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
+    #lossfunc: 'binary_cross_entropy' # binary_cross_entropy, cross_entropy, focal_entropy, logit_norm_cross_entropy
+    lossfunc: 'binary_Lq_entropy'
+    q: 0.9                            # Lq exponent (q < 1 -> high density vals emphasized, q > 1 then low emphasized) 
     
-    SWD_beta: 1.0e-3                  # Sliced Wasserstein [reweighting regularization]
+    SWD_beta: 1.0e-4                  # Sliced Wasserstein [reweighting regularization]
     SWD_p: 1                          # p-norm (1,2,..), 1 perhaps more robust
     SWD_num_slices: 1000              # Number of MC projections (higher the better)
     SWD_mode: 'SWD'                   # 'SWD' (basic)
     SWD_norm_weights: True            # Normalization enforced
-    
+
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ lambda * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ lambda * torch.sum(logits**2)
     
@@ -430,10 +430,10 @@ dmlp0: &DMLP
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 150
+    epochs: 200
     batch_size: 4096
     lr: 4.0e-4
-    weight_decay: 1.0e-4       # L2-regularization
+    weight_decay: 1.0e-2       # L2-regularization
   
   # Scheduler
   scheduler_param:

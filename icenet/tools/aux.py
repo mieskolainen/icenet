@@ -77,6 +77,20 @@ def get_datetime():
     """
     return str(datetime.now()).replace(' ', '_').replace(':','-').split('.')[0]
 
+def q_exp(x, q: float=1.0):
+    """
+    q-exponent
+    """    
+    exp_ = torch.exp if type(x) is torch.Tensor else np.exp
+    return exp_(x) if np.abs(q - 1.0) < 1E-4 else (1 + (1-q)*x)**(1.0 / (1-q))
+
+def q_log(x, q: float=1.0):
+    """
+    q-logarithm
+    """    
+    log_ = torch.log if type(x) is torch.Tensor else np.log    
+    return log_(x) if np.abs(q - 1.0) < 1E-4 else (x**(1-q) - 1) / (1-q)
+
 def inverse_sigmoid(p: np.ndarray, EPS=1E-9):
     """
     Stable inverse sigmoid function
@@ -326,24 +340,35 @@ def pick_index(all_ids: list, vars: list):
 #    return d
 
 
-def ak2numpy(x: ak.Array, fields: list, null_value=float(-999.0), dtype='float32'):
+def ak2numpy(x: ak.Array, fields: list, null_value: float=-999.0, dtype='float32'):
     """
     Unzip awkward array to numpy array per column (awkward Record)
     
     Args:
-        x:      awkward array
-        fields: record field names to extract
+        x:            awkward array
+        fields:       record field names to extract
+        null_value:   missing element value
+        dtype:        final numpy array dtype
+    
     Returns:
         numpy array with columns ordered as 'fields' parameter
     """
-    out = null_value * np.ones((len(x), len(fields)), dtype=dtype)
+    out = np.full((len(x), len(fields)), null_value, dtype=dtype)
+    
     for i in range(len(fields)):
-        out[:,i] = ak.flatten(ak.unzip(x[fields[i]]))
+        
+        y = ak.to_numpy(x[fields[i]], allow_missing=True)
+        
+        if np.ma.isMaskedArray(y): # Process missing elements
+            y = np.ma.filled(y, fill_value=null_value)
+        
+        out[:,i] = y
+    
     return out
 
 
 def jagged_ak_to_numpy(arr, scalar_vars, jagged_vars, jagged_maxdim,
-                       entry_start=None, entry_stop=None, null_value=float(-999.0), dtype='float32'):
+                       entry_start=None, entry_stop=None, null_value: float=-999.0, dtype='float32'):
     """
     Transform jagged awkward array to fixed dimensional numpy data
     
@@ -389,7 +414,7 @@ def jagged_ak_to_numpy(arr, scalar_vars, jagged_vars, jagged_maxdim,
 
 
 def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
-    entry_start=None, entry_stop=None, null_value=float(-999.0), mode='columnar', dtype='float32'):
+    entry_start=None, entry_stop=None, null_value: float=-999.0, mode: str='columnar', dtype='float32'):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     

@@ -1381,7 +1381,7 @@ def table_writer(filename, label, sublabel, tau, chi2_table, print_to_screen=Fal
 
 
 def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
-              label, sublabel, param, tau=1.0, targetdir=None):
+              label, sublabel, param, tau=1.0, targetdir=None, num_cpus=0):
     """
     Plot AI based reweighting results
     """
@@ -1451,18 +1451,20 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         print(f'Renormalizing with class [{RN_ID}] weight sum', 'yellow')
         
         sum_before = AIw0.sum()
-        print(f'Sum before: {sum_before:0.1f}')
+        print(f'Sum(before): {sum_before:0.1f}')
         
         AIw0 /= np.sum(AIw0)                # Normalize
         AIw0 *= np.sum(weights[y == RN_ID]) # Scale
         
         sum_after = AIw0.sum()
-        print(f'Sum after:  {sum_after:0.1f} (after / before = {sum_after/sum_before:0.2f})')
+        print(f'Sum(after):  {sum_after:0.1f}')
+        ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.2f})'
+        print(ratio)
         print('')
-
+        
         # Print stats
         prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
-            header=f'Step 5. Total weights sum renormalized [wrt. class ID = {RN_ID}]', write_mode='a')
+            header=f'Step 5. Total weights sum renormalized [wrt. class ID = {RN_ID}] | {ratio}', write_mode='a')
     
     # ===================================================
     # Visualization
@@ -1507,9 +1509,10 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         paramlist[-1]['AIw0']    = AIw0
     
     # Start multiprocessing
-    print(f'Multiprocessing {len(pick_ind)} plots', 'yellow')
-    
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2)
+    num_workers = multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus
+    print(f'Multiprocessing {len(pick_ind)} plots with {num_workers} processes', 'yellow')
+
+    pool = multiprocessing.Pool(processes=num_workers)
     tic  = time.time()
     r    = pool.map(multiprocess_AIRW_wrapper, paramlist)
     pool.close() # no more tasks

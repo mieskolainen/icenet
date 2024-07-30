@@ -21,11 +21,11 @@ def print_RAM_usage():
     print(f"""Process RAM usage: {io.process_memory_use():0.2f} GB [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
 
 
-def printbar(marker='-', marks = 75):
+def printbar(marker='-', marks:int = 75):
     """ Print bar.
     """
-    for _ in range(marks):
-        print(marker, end='')
+    txt = marker*marks
+    print(txt)
     print('')
 
 

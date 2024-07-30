@@ -46,7 +46,7 @@ genesis_runmode:
                'tst': ['Data_test_EB.parquet']}
   
   drop_negative: true                 # Drop negative weight (MC) events
-  
+
   tree_name:  null                    # 'ntuplizer/tree'
   targetfunc: null                    # Training target,    implemented under mctargets.py
   filterfunc: 'filter_nofilter'       # Training filtering, implemented under mcfilter.py
@@ -61,6 +61,22 @@ train_runmode:
 
   <<: *MVA_INPUT_PARAM
   
+  pre_transform: &PRE_TRANSFORM       # Done inside common.py
+
+    active: False
+    
+    var: ['probe_esEffSigmaRR',
+          'probe_pfChargedIso',
+          'probe_ecalPFClusterIso',
+          'probe_trkSumPtHollowConeDR03',
+          'probe_trkSumPtSolidConeDR04']
+    func:
+          ['np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)']
+
   maxevents: null
   modeltag:  null
 
@@ -115,7 +131,10 @@ train_runmode:
 eval_runmode:
 
   <<: *MVA_INPUT_PARAM
-
+  
+  pre_transform: 
+    <<: *PRE_TRANSFORM
+  
   maxevents: null
   modeltag:  null
   
@@ -134,6 +153,9 @@ deploy_runmode:
   
   <<: *MVA_INPUT_PARAM
 
+  pre_transform: 
+    <<: *PRE_TRANSFORM
+  
   maxevents: null
   modeltag:  null
   

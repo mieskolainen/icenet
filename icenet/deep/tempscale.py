@@ -215,7 +215,7 @@ class ModelWithTemperature(nn.Module):
         after_temperature_ece = ece_criterion_after(self.temperature_scale(logits), labels).item()
         
         print('')
-        print(f'Optimal temperature: {self.temperature.item():0.4f}')
+        print(f'Optimal temperature: {self.temperature.item():0.4f}', 'green')
         print(f'After temperature scale: NLL: {after_temperature_nll:0.4f}, ECE: {ece_criterion_after.ECE.item():0.4f}, ECE2: {ece_criterion_after.ECE2.item():0.4f}')
         
         ece_criterion_after.print()

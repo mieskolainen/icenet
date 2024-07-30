@@ -291,7 +291,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         args['plotdir']  += conditional_tag
         
         # Add runtime and hostname tag
-        run_id = f'{aux.get_datetime()}_{socket.gethostname().split(".")[0]}'
+        run_id     = f'{aux.get_datetime()}_{socket.gethostname().split(".")[0]}'
+        run_id_now = copy.deepcopy(run_id)
         
         if runmode == 'eval' or runmode == 'deploy':
             
@@ -326,7 +327,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
                 run_id = cli_dict['run_id']
         
         # Store it
-        args['run_id']   = run_id
+        args['run_id']     = run_id
+        args['run_id_now'] = run_id_now
         
         ## ** Create and set folders **
         args['modeldir'] = aux.makedir(f"{args['modeldir']}/{run_id}")
@@ -1108,13 +1110,15 @@ def train_models(data_trn, data_val, args=None):
         
         except Exception as e:
             print(e)
+            prints.printbar('*')
             print(f'Exception occured, check the model definition! -- continue', 'red')
+            prints.printbar('*')
             exceptions += 1
-
+    
     print(f'[done]', 'yellow')
     
     if exceptions > 0:
-        raise Exception(__name__ + f'.train_models: Number of fatal exceptions = {exceptions} [check your data / model definitions]')
+        raise Exception(__name__ + f'.train_models: Number of fatal exceptions = {exceptions} [check your data / model definitions -- some model did not train]')
 
     return True
 
@@ -1152,11 +1156,7 @@ def evaluate_models(data=None, info=None, args=None):
 
     global ROC_binned_mstats
     global ROC_binned_mlabel
-
-    #mva_mstats = []
-    #MVA_binned_mstats = []
-    #MVA_binned_mlabel = []
-
+    
     ROC_binned_mstats = {}
     ROC_binned_mlabel = {}
 
@@ -1288,6 +1288,8 @@ def evaluate_models(data=None, info=None, args=None):
     print(args['active_models'], 'green')
     print('')
     
+    exceptions = 0
+    
     try:
         
         for i in range(len(args['active_models'])):
@@ -1400,8 +1402,10 @@ def evaluate_models(data=None, info=None, args=None):
     
     except Exception as e:
         print(e)
-        print(f'Exception occured, check the problem -- exit', 'red')
-        exit()
+        prints.printbar('*')
+        print(f'Exception occured, check your steering cards! -- continue', 'red')
+        prints.printbar('*')
+        exceptions += 1
     
     ## Multiple model comparisons
     plot_XYZ_multiple_models(targetdir=targetdir, args=args)
@@ -1426,6 +1430,9 @@ def evaluate_models(data=None, info=None, args=None):
         pickle.dump(resdict, file, protocol=pickle.HIGHEST_PROTOCOL)
     
     print(f'[done]', 'yellow')
+    
+    if exceptions > 0:
+        raise Exception(__name__ + f'.evaluate_models: Number of fatal exceptions = {exceptions} [check your input -- results or labelling may be corrupted now]')
     
     return True
 
@@ -1508,7 +1515,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             chi2_table = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
                                          pick_ind=pick_ind, label=label, sublabel=sublabel,
                                          param=args['plot_param']['OBS_reweight'], tau=tau,
-                                         targetdir=targetdir + '/OBS_reweight')
+                                         targetdir=targetdir + '/OBS_reweight', num_cpus=args['num_cpus'])
             
             plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
         
@@ -1746,8 +1753,8 @@ def plot_XYZ_multiple_models(targetdir, args):
     from pprint import pprint
 
     ### MVA-output 2D correlation plots
-    if args['plot_param']['MVA_2D']['active']:
-
+    if 'MVA_2D' in args['plot_param'] and args['plot_param']['MVA_2D']['active']:
+        
         print('MVA_2D:')
         pprint(corr_mstats)
         
@@ -1770,7 +1777,7 @@ def plot_XYZ_multiple_models(targetdir, args):
     
     # -------------------------------------------------------------------
     ### Plot all ROC curves
-    if args['plot_param']['ROC']['active']:
+    if 'ROC' in args['plot_param'] and args['plot_param']['ROC']['active']:
         
         print('ROC:')
         pprint(roc_mstats)
@@ -1805,7 +1812,7 @@ def plot_XYZ_multiple_models(targetdir, args):
     # plots.MVA_plot(mva_mstats, mva_labels, title = '', filename=aux.makedir(targetdir + '/MVA/--ALL--') + '/MVA')
 
     ### Plot all 1D-binned ROC curves
-    if args['plot_param']['ROC_binned']['active']:
+    if 'ROC_binned' in args['plot_param'] and args['plot_param']['ROC_binned']['active']:
         
         print('ROC_binned:')
         

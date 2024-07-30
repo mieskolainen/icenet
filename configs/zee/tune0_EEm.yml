@@ -43,7 +43,7 @@ genesis_runmode:
   datafile:   {'trn': ['Data_train_EEm.parquet'],
                'val': ['Data_val_EEm.parquet'],   
                'tst': ['Data_test_EEm.parquet']}
-  
+
   drop_negative: true                 # Drop negative weight (MC) events
   
   tree_name:  null                    # 'ntuplizer/tree'
@@ -62,6 +62,22 @@ train_runmode:
 
   maxevents: null
   modeltag:  null
+
+  pre_transform: &PRE_TRANSFORM       # Done inside common.py
+
+    active: False
+    
+    var: ['probe_esEffSigmaRR',
+          'probe_pfChargedIso',
+          'probe_ecalPFClusterIso',
+          'probe_trkSumPtHollowConeDR03',
+          'probe_trkSumPtSolidConeDR04']
+    func:
+          ['np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)']
 
   ## Reweighting setup
   reweight: true
@@ -114,6 +130,9 @@ train_runmode:
 eval_runmode:
 
   <<: *MVA_INPUT_PARAM
+  
+  pre_transform: 
+    <<: *PRE_TRANSFORM
 
   maxevents: null
   modeltag:  null
@@ -131,7 +150,10 @@ eval_runmode:
 deploy_runmode:
   
   <<: *MVA_INPUT_PARAM
-
+  
+  pre_transform: 
+    <<: *PRE_TRANSFORM
+  
   maxevents: null
   modeltag:  null
   
