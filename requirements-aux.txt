@@ -1,5 +1,5 @@
 # XGBOOST
-xgboost==2.0.3
+xgboost==2.1.0
 
 # TENSORFLOW
 tensorflow==2.16.1
