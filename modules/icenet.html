@@ -3030,6 +3030,20 @@ returns the loss. Optional for most optimizers.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.concatenate_and_clean">
+<span class="sig-name descname"><span class="pre">concatenate_and_clean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#concatenate_and_clean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.concatenate_and_clean" title="Link to this definition">¶</a></dt>
+<dd><p>Concatenate a list of arrays and clean memory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>array_list</strong> – a list of Awkward or numpy arrays</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>concatenated array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.count_targets">
 <span class="sig-name descname"><span class="pre">count_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#count_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.count_targets" title="Link to this definition">¶</a></dt>
 <dd><p>Targets statistics printout</p>
@@ -3321,6 +3335,25 @@ Output: [{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10}, {11}]</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.aux.recursive_concatenate">
+<span class="sig-name descname"><span class="pre">recursive_concatenate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#recursive_concatenate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.recursive_concatenate" title="Link to this definition">¶</a></dt>
+<dd><p>Concatenate a list of arrays in a recursive way
+(to avoid possible problems with one big concatenation e.g. with Awkward)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array_list</strong> – a list of Awkward or Numpy arrays</p></li>
+<li><p><strong>axis</strong> – axis to concatenate over</p></li>
+<li><p><strong>max_batch_size</strong> – maximum number of list elements per concatenation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>concatenated array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.aux.red">
 <span class="sig-name descname"><span class="pre">red</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'exclude_MVA_vars'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'include_MVA_vars'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#red"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.red" title="Link to this definition">¶</a></dt>
 <dd><p>Reduce the input set variables of X (start with all include, then evaluate exclude, then evaluate include)</p>
@@ -3607,7 +3640,6 @@ split_start_end(range(5,25), 3) returns [[5, 12], [12, 19], [19, 25]]</p>
 <dt class="sig sig-object py" id="icenet.tools.iceroot.read_multiple">
 <span class="sig-name descname"><span class="pre">read_multiple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/iceroot.html#read_multiple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.iceroot.read_multiple" title="Link to this definition">¶</a></dt>
 <dd><p>Loop over different MC / data processes as defined in the yaml files</p>
-<p>[awkward compatible only]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4809,11 +4841,6 @@ Add new plot types here, steered from plots.yml</p>
 <span class="sig-name descname"><span class="pre">read_data_processed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data_processed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data_processed" title="Link to this definition">¶</a></dt>
 <dd><p>Read/write (MVA) data and return full processed dataset</p>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.process.recursive_concatenate">
-<span class="sig-name descname"><span class="pre">recursive_concatenate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#recursive_concatenate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.recursive_concatenate" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.train_models">
