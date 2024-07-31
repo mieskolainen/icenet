@@ -7,6 +7,7 @@ rngseed: 123456                       # Fixed seed for training data mixing
 num_cpus: 0                           # 0 for automatic
 inputvars: 'mvavars'                  # Main file input description python file
 
+
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
   use_conditional: false              # Conditional (theory parametric) input
@@ -52,7 +53,7 @@ genesis_runmode:
   cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
-  pickle_size: 1000000                # Number of entries (events) per pickle file
+  pickle_size: 10000000               # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
@@ -63,6 +64,9 @@ train_runmode:
   maxevents: null
   modeltag:  null
 
+  tech: &TECH
+    concat_max_pickle: 32           # (technical) [Recursive] concatenation max size, adjust this if encounter problems e.g. with awkward ("127 limit")
+  
   pre_transform: &PRE_TRANSFORM       # Done inside common.py
 
     active: False
@@ -137,6 +141,8 @@ eval_runmode:
   maxevents: null
   modeltag:  null
   
+  tech: *TECH
+
   reweight: true
   reweight_mode: 'load'          # 'write', 'load', 'write-skip', 'load-skip'
   reweight_file: null            # null for automatic, or string for specific

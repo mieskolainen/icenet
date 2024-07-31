@@ -425,22 +425,66 @@ def generic_flow(rootname, func_loader, func_factor):
 
 # -------------------------------------------------------------------
 
-def concatenate_data(data):
+def recursive_concatenate(array_list, max_batch_size: int):
+    
+    n = len(array_list)
+    
+    # Base case
+    if n == 1:
+        return array_list[0]
+    
+    # Concatenate directly
+    elif n <= max_batch_size:
+        if isinstance(array_list[0], ak.Array):
+            return ak.concatenate(array_list, axis=0)
+        else:
+            return np.concatenate(array_list, axis=0)
+    
+    # Split the list into two halves and recursively concatenate each half
+    else:
+        mid   = (n + 1) // 2  # handle odd length
+        left  = recursive_concatenate(array_list[:mid], max_batch_size)
+        right = recursive_concatenate(array_list[mid:], max_batch_size)
+        if isinstance(left, ak.Array) or isinstance(right, ak.Array):
+            return ak.concatenate([left, right], axis=0)
+        else:
+            return np.concatenate([left, right], axis=0)
+
+
+def concatenate_data(data, max_batch_size: int=32):
     """
-    Helper function to concatenate arrays
+    Helper function to concatenate arrays with a specified maximum batch size
     """
     X_all, Y_all, W_all = [], [], []
     
-    print('Concatenating arrays ...')
+    print('Appending arrays to lists ...')
     tic = time.time()
     
+    N = 0
     for X_, Y_, W_ in tqdm(data):
+        
         X_all.append(X_)
         Y_all.append(Y_)
         W_all.append(W_)
-    X = np.concatenate(X_all, axis=0) # awkward casts this
-    Y = np.concatenate(Y_all, axis=0)
-    W = np.concatenate(W_all, axis=0)
+
+        N += len(X_)
+        
+    toc = time.time() - tic
+    print(f'Appending took {toc:0.2f} sec')
+    
+    print('Executing array concatenation ...')    
+    tic = time.time()
+
+    X = recursive_concatenate(X_all, max_batch_size)
+    Y = recursive_concatenate(Y_all, max_batch_size)
+    W = recursive_concatenate(W_all, max_batch_size)
+    
+    N_final = len(X)
+
+    if N_final != N:
+        msg = f'Error with N ({N}) != N_final ({N_final})'
+        print(msg)
+        raise Exception(f'Error occured in concatenation: {msg}')
     
     toc = time.time() - tic
     print(f'Concatenation took {toc:0.2f} sec')
@@ -465,6 +509,8 @@ def read_data(args, func_loader, runmode):
         args:         main argument dictionary
         func_loader:  application specific root file loader function
     """
+    
+    num_cpus = args['num_cpus']
     
     def get_chunk_ind(N):
         chunks = int(np.ceil(N / args['pickle_size']))
@@ -491,7 +537,31 @@ def read_data(args, func_loader, runmode):
         info = data['info']
 
         C = get_chunk_ind(N=len(X))
+        
         print(f'Saving {len(C)} pickle files to path: "{cache_directory}"', 'yellow')
+
+        ## New code
+        
+        def save_pickle(i):
+            with open(f'{cache_directory}/output_{i}.pkl', 'wb') as handle:
+                pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], 
+                            handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        tic = time.time()
+        
+        # Create a thread pool
+        max_workers = multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus
+        max_workers = min(len(C), max_workers)
+        
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Map the save_pickle function to each index in the range
+            list(tqdm(executor.map(save_pickle, range(len(C))), total=len(C)))
+
+        toc = time.time() - tic
+        print(f'Saving took {toc:0.2f} sec')
+        
+        """
+        # OLD code
         
         tic = time.time()
         
@@ -502,6 +572,7 @@ def read_data(args, func_loader, runmode):
         
         toc = time.time() - tic
         print(f'Saving took {toc:0.2f} sec')
+        """
         
         gc.collect()
         io.showmem()
@@ -523,9 +594,6 @@ def read_data(args, func_loader, runmode):
         should keep memory in control (vs. ProcessPool uses processes, but memory can be a problem)
         """
         
-        num_cpus    = args['num_cpus']
-        max_workers = multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus
-        
         files        = os.listdir(cache_directory)
         sorted_files = sorted(files, key=lambda x: int(os.path.splitext(x)[0].split('_')[1]))
         
@@ -540,6 +608,9 @@ def read_data(args, func_loader, runmode):
         data = [None] * num_files
         
         tic = time.time()
+        
+        max_workers = multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus
+        max_workers = min(num_files, max_workers)
         
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_index = {executor.submit(load_file_wrapper, i, fp): i for i, fp in enumerate(filepaths)}
@@ -557,7 +628,7 @@ def read_data(args, func_loader, runmode):
         toc = time.time() - tic
         print(f'Loading took {toc:0.2f} sec')
         
-        X, Y, W = concatenate_data(data)
+        X, Y, W = concatenate_data(data=data, max_batch_size=args['tech']['concat_max_pickle'])
         gc.collect()  # Call garbage collection once after the loop
         
         """
@@ -584,9 +655,8 @@ def read_data(args, func_loader, runmode):
         print(f'Took {toc:0.2f} sec')
         """
         
-        print('[done]')
-        
         io.showmem()
+        print('[done]')
         
         return {'X':X, 'Y':Y, 'W':W, 'ids':ids, 'info':info}
 

@@ -97,12 +97,12 @@ genesis_runmode:
   inputmap:  "mc_input.yml"
   tree_name:  null #'ntuplizer/tree'
   
-  filterfunc: 'filter_standard'      # Filter cuts, implemented under filter.py
-  cutfunc:    'cut_fiducial'         # Basic cuts,  implemented under cuts.py
-  targetfunc:  null                  # -- not active --
+  filterfunc: 'filter_standard'  # Filter cuts, implemented under filter.py
+  cutfunc:    'cut_fiducial'     # Basic cuts,  implemented under cuts.py
+  targetfunc:  null              # -- not active --
   
-  xcorr_flow: True                   # Full N-point correlations computed between cuts
-  pickle_size: 10000                 # Number of entries (events) per pickle file
+  xcorr_flow: True               # Full N-point correlations computed between cuts
+  pickle_size: 100000            # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
@@ -112,6 +112,9 @@ train_runmode:
 
   maxevents: null
   modeltag:  null
+  
+  tech: &TECH
+    concat_max_pickle: 32           # (technical) [Recursive] concatenation max size, adjust this if encounter problems e.g. with awkward ("127 limit")
   
   # Conditional (theory parametric) dequantization
   conditional_param:
@@ -206,6 +209,8 @@ eval_runmode:
 
   maxevents: null
   modeltag:  null
+  
+  tech: *TECH
   
   # Conditional (theory parametric) dequantization
   conditional_param:
