@@ -21,8 +21,6 @@ mva_param: &MVA_INPUT_PARAM
   inputvar_image: null                # Image variables, set 'CMSSW_MVA_IMAGE_VARS'
 
   varnorm: null                       # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
-  varnorm_tensor: null                # Tensor variable normalization
-  #varnorm_graph: null                # Not implemented yet
   
   frac: [0.6, 0.1, 0.3]               # Train vs validate/test split fraction
   
@@ -31,7 +29,7 @@ mva_param: &MVA_INPUT_PARAM
     active: true                      # True / False
     var: 'CMSSW_MVA_SCALAR_VARS'      # Array of variables to be imputated
     algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
-    fill_value: -99                   # For constant imputation
+    fill_value: -10                   # For constant imputation
     knn_k: 8                          # Number of nearest neighbours considered
     values: [-999, -666, -10]         # Special values which indicate the need for imputation, if null, then only Inf/Nan are imputed
   
@@ -39,7 +37,7 @@ mva_param: &MVA_INPUT_PARAM
 genesis_runmode:
 
   maxevents:  null
-  inputmap: null #"mc_input.yml"
+  inputmap:   null
   tree_name:  'ntuplizer/tree'
   
   targetfunc: 'target_e'              # Training target,    implemented under mctargets.py
@@ -47,8 +45,7 @@ genesis_runmode:
   cutfunc:    'cut_standard'          # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
-  pickle_size: 100000                 # Number of entries (events) per pickle file
-
+  pickle_size: 1000000                # Number of entries (events) per pickle file
 
 # ----------------------------------------------------
 train_runmode:
@@ -71,40 +68,35 @@ train_runmode:
     equal_frac: true           # Equalize integrated class fractions
     differential: true         # Differential reweighting
     reference_class: 0         # Reference (target) class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
-    
-    # -----------------------------
-    # Differential reweighting
 
     # Note about asymmetry: Keep the reference class as 0 == background, because signal
     # MC has much longer tail over pt. Thus, it is not possible to re-weight background
     # to signal very easily, but it is possible to re-weight signal to background.
     # This is seen by inspecting the re-weighted distributions with small and large statistics.
-
+    
+    # Differential reweighting param
     diff_param:
 
-      maxevents: null               # Maximum number of events for the PDF construction
-      renorm_weight_to_count: True  # Renormalize sum(weights) == sum(counts) per class
+      maxevents: 1000000              # Maximum number of events for the PDF construction
+      renorm_weight_to_count: True    # Renormalize sum(weights) == sum(counts) per class
 
-      var:  ['trk_pt', 'trk_eta']
+      var:  ['gsf_pt', 'gsf_eta']
       type: '2D'                    # 'AIRW', 'pseudo-ND', '2D', '1D'
       
       hist_param:
 
         pseudo_type: 'product'                    # 'product', 'geometric_mean'
-        
-        bins:  [[0.1, 20.0, 20], [-2.5, 2.5, 20]] # Make sure the bounds cover the phase space
+
+        bins:  [[0.1, 20.0, 40], [-2.5, 2.5, 40]] # Make sure the bounds cover the phase space
         binmode:  ['log10', 'linear']             # 'log10' or 'linear' or 'edges' (custom array) binning
-        
-        # ! Variable, and binning min/max boundaries are both transformed !
-        transform: [null, null]   # 'log10', 'sqrt', 'square', null
-        
+        transform: [null, null]                   # 'log10', 'sqrt', 'square', null
+
         max_reg:      10.0        # Maximum weight cut-off regularization
       
       AIRW_param:
         active_model: xgb3Drw     # Under models.yml
         max_reg:      10.0        # Maximum weight cut-off regularization
         mode:         'LR'        # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
-  
   
   ## Outlier protection in the training
   outlier_param:
@@ -114,7 +106,6 @@ train_runmode:
 
     truncate_weights: True # Truncate outlier event weights
     process_validate: True # Protect also validation sample
-  
 
   # ** Activate models here **
   # Give all models some unique identifier and label
@@ -139,8 +130,8 @@ eval_runmode:
   tech: *TECH
   
   reweight: false
-  reweight_mode: 'load' # 'write', 'load'
-  reweight_file: null                 # null for automatic, or string for specific
+  reweight_mode: 'load'  # 'write', 'load'
+  reweight_file: null    # null for automatic, or string for specific
   
   reweight_param: *REWEIGHT_PARAM
 
