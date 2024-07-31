@@ -10,6 +10,7 @@ import multiprocessing
 import os
 import copy
 import gc
+import time
 from tqdm import tqdm
 
 from icenet.tools import io
@@ -24,6 +25,8 @@ from icenet import print
 def read_single(process_func, process, root_path, param, class_id, dtype=None, num_cpus=0, verbose=False):
     """
     Loop over different MC / data processes as defined in the yaml files
+    
+    [awkward compatible only]
     
     Args:
         process_func:  data processing function
@@ -133,6 +136,8 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
     """
     Loop over different MC / data processes as defined in the yaml files
     
+    [awkward compatible only]
+    
     Args:
         process_func:  data processing function
         processes:     MC processes dictionary (from yaml)
@@ -150,12 +155,17 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
     X,Y,W,ids,info = None,None,None,None,{}
 
     for i,key in enumerate(processes):
-        
+
         data = read_single(process_func=process_func, process=processes[key],
                            root_path=root_path, param=param, class_id=class_id,
                            dtype=dtype, num_cpus=num_cpus, verbose=verbose)
 
-        # Concatenate processes
+        # Concatenate processes one-by-one
+        #
+        # N.B. this could be perhaps optimized time-wise by appending (X,Y,W) to a list
+        #      and single final concatenation, but naively may consume 2x memory
+        tic = time.time()
+        
         if i == 0:
             X = copy.deepcopy(data['X'])
             Y = copy.deepcopy(data['Y'])
@@ -165,6 +175,9 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
             Y = ak.concatenate((Y, data['Y']), axis=0)
             W = ak.concatenate((W, data['W']), axis=0)
 
+        toc = time.time() - tic
+        print(f'Concatenate of the process took: {toc:0.2f} sec')
+        
         ids       = copy.deepcopy(data['ids']) # Same for all processes
         info[key] = copy.deepcopy(data['info'])
         

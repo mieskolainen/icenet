@@ -624,7 +624,7 @@ def read_data(args, func_loader, runmode):
                 
                 finally:
                     del future  # Ensure the future is deleted to free memory
-
+        
         toc = time.time() - tic
         print(f'Loading took {toc:0.2f} sec')
         
