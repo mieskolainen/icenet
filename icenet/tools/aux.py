@@ -15,6 +15,7 @@ from datetime import datetime
 import torch
 import random
 import yaml
+import gc
 
 import numba
 from tqdm import tqdm
@@ -56,6 +57,64 @@ def yaml_dump(data: dict, filename: str):
     # Save the YAML string with mixed styles to a file
     with open(filename, 'w') as yaml_file:
         yaml.dump(data, yaml_file, Dumper=NoSortDumper)
+
+
+def recursive_concatenate(array_list, axis: int=0, max_batch_size: int = 32):
+    """
+    Concatenate a list of arrays in a recursive way
+    (to avoid possible problems with one big concatenation e.g. with Awkward)
+    
+    Args:
+        array_list:      a list of Awkward or Numpy arrays
+        axis:            axis to concatenate over
+        max_batch_size:  maximum number of list elements per concatenation
+    
+    Returns:
+        concatenated array
+    """
+    
+    n = len(array_list)
+    
+    # Base case
+    if n == 1:
+        return array_list[0]
+    
+    # Concatenate directly
+    elif n <= max_batch_size:
+        if isinstance(array_list[0], ak.Array):
+            return ak.concatenate(array_list, axis=axis)
+        else:
+            return np.concatenate(array_list, axis=axis)
+    
+    # Split the list into two halves and recursively concatenate each half
+    else:
+        mid   = (n + 1) // 2  # handle odd length
+        left  = recursive_concatenate(array_list[:mid], max_batch_size)
+        right = recursive_concatenate(array_list[mid:], max_batch_size)
+        if isinstance(left, ak.Array) or isinstance(right, ak.Array):
+            return ak.concatenate([left, right], axis=axis)
+        else:
+            return np.concatenate([left, right], axis=axis)
+
+
+def concatenate_and_clean(array_list: list, axis: int=0):
+    """
+    Concatenate a list of arrays and clean memory
+    
+    Args:
+        array_list: a list of Awkward or numpy arrays
+    Returns:
+        concatenated array
+    """
+    if isinstance(array_list[0], ak.Array):
+        result = ak.concatenate(array_list, axis=axis)
+    else:
+        result = np.concatenate(array_list, axis=axis)
+    
+    del array_list
+    gc.collect()
+    
+    return result
 
 def set_random_seed(seed):
     """

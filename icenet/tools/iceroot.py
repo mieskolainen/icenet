@@ -136,8 +136,6 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
     """
     Loop over different MC / data processes as defined in the yaml files
     
-    [awkward compatible only]
-    
     Args:
         process_func:  data processing function
         processes:     MC processes dictionary (from yaml)
@@ -152,39 +150,41 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
     """
 
     # Combine results
-    X,Y,W,ids,info = None,None,None,None,{}
+    X_list, Y_list, W_list, ids, info = [], [], [], None, {}
 
-    for i,key in enumerate(processes):
+    for i, key in enumerate(processes):
+        data = read_single(
+            process_func=process_func, process=processes[key],
+            root_path=root_path, param=param, class_id=class_id,
+            dtype=dtype, num_cpus=num_cpus, verbose=verbose
+        )
 
-        data = read_single(process_func=process_func, process=processes[key],
-                           root_path=root_path, param=param, class_id=class_id,
-                           dtype=dtype, num_cpus=num_cpus, verbose=verbose)
+        # Append data to the lists
+        X_list.append(data['X'])
+        Y_list.append(data['Y'])
+        W_list.append(data['W'])
 
-        # Concatenate processes one-by-one
-        #
-        # N.B. this could be perhaps optimized time-wise by appending (X,Y,W) to a list
-        #      and single final concatenation, but naively may consume 2x memory
-        tic = time.time()
-        
+        # Assuming ids are the same for all processes
         if i == 0:
-            X = copy.deepcopy(data['X'])
-            Y = copy.deepcopy(data['Y'])
-            W = copy.deepcopy(data['W'])
-        else:
-            X = ak.concatenate((X, data['X']), axis=0)
-            Y = ak.concatenate((Y, data['Y']), axis=0)
-            W = ak.concatenate((W, data['W']), axis=0)
-
-        toc = time.time() - tic
-        print(f'Concatenate of the process took: {toc:0.2f} sec')
+            ids = copy.deepcopy(data['ids'])
         
-        ids       = copy.deepcopy(data['ids']) # Same for all processes
         info[key] = copy.deepcopy(data['info'])
-        
-        del data # free memory
-        gc.collect()
-        io.showmem()
 
+        io.showmem()
+        gc.collect() #!
+
+    # Concatenate all lists into final arrays
+    tic = time.time()
+    
+    X = aux.concatenate_and_clean(X_list, axis=0)
+    Y = aux.concatenate_and_clean(Y_list, axis=0)
+    W = aux.concatenate_and_clean(W_list, axis=0)
+    
+    toc = time.time() - tic
+    print(f'Final concatenation took: {toc:0.2f} sec')
+    
+    io.showmem()
+    
     return X,Y,W,ids,info
 
 
@@ -369,13 +369,16 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
             # Combine future returned sub-arrays
             print(f'Concatenating results from futures')
             
-            # We concatenate one-by-one, to save memory
-            for k in tqdm(range(len(results))):
-                X = copy.deepcopy(results[k]) if (k == 0) else np.concatenate((X, results[k]), axis=0)
-
-                results[k] = None # free memory
-                gc.collect()
-                io.showmem()
+            X = aux.concatenate_and_clean(results, axis=0)
+            io.showmem()
+            
+            # Concatenate one-by-one
+            #for k in tqdm(range(len(results))):
+            #    X = copy.deepcopy(results[k]) if (k == 0) else np.concatenate((X, results[k]), axis=0)
+            #
+            #    results[k] = None # free memory
+            #    gc.collect()
+            #    io.showmem()
         
         print(f'Total number of entries = {len(X)}')        
         
@@ -430,13 +433,16 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
             # Combine future returned sub-arrays
             print(f'Concatenating results from futures')
 
-            # We concatenate one-by-one, to save memory
-            for k in tqdm(range(len(results))):
-                X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
-
-                results[k] = None # free memory
-                gc.collect()
-                io.showmem()
+            X = aux.concatenate_and_clean(results, axis=0)
+            io.showmem()
+            
+            # Concatenate one-by-one
+            #for k in tqdm(range(len(results))):
+            #    X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
+            #
+            #    results[k] = None # free memory
+            #    gc.collect()
+            #    io.showmem()
         
         print(f'Total number of entries = {len(X)}')        
             

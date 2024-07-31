@@ -425,32 +425,6 @@ def generic_flow(rootname, func_loader, func_factor):
 
 # -------------------------------------------------------------------
 
-def recursive_concatenate(array_list, max_batch_size: int):
-    
-    n = len(array_list)
-    
-    # Base case
-    if n == 1:
-        return array_list[0]
-    
-    # Concatenate directly
-    elif n <= max_batch_size:
-        if isinstance(array_list[0], ak.Array):
-            return ak.concatenate(array_list, axis=0)
-        else:
-            return np.concatenate(array_list, axis=0)
-    
-    # Split the list into two halves and recursively concatenate each half
-    else:
-        mid   = (n + 1) // 2  # handle odd length
-        left  = recursive_concatenate(array_list[:mid], max_batch_size)
-        right = recursive_concatenate(array_list[mid:], max_batch_size)
-        if isinstance(left, ak.Array) or isinstance(right, ak.Array):
-            return ak.concatenate([left, right], axis=0)
-        else:
-            return np.concatenate([left, right], axis=0)
-
-
 def concatenate_data(data, max_batch_size: int=32):
     """
     Helper function to concatenate arrays with a specified maximum batch size
@@ -468,16 +442,16 @@ def concatenate_data(data, max_batch_size: int=32):
         W_all.append(W_)
 
         N += len(X_)
-        
+    
     toc = time.time() - tic
     print(f'Appending took {toc:0.2f} sec')
     
     print('Executing array concatenation ...')    
     tic = time.time()
 
-    X = recursive_concatenate(X_all, max_batch_size)
-    Y = recursive_concatenate(Y_all, max_batch_size)
-    W = recursive_concatenate(W_all, max_batch_size)
+    X = aux.recursive_concatenate(X_all, axis=0, max_batch_size=max_batch_size)
+    Y = aux.recursive_concatenate(Y_all, axis=0, max_batch_size=max_batch_size)
+    W = aux.recursive_concatenate(W_all, axis=0, max_batch_size=max_batch_size)
     
     N_final = len(X)
 
@@ -488,8 +462,9 @@ def concatenate_data(data, max_batch_size: int=32):
     
     toc = time.time() - tic
     print(f'Concatenation took {toc:0.2f} sec')
-    
+
     return X, Y, W
+
 
 def load_file_wrapper(index, filepath):
     """
