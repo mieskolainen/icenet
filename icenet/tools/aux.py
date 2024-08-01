@@ -89,8 +89,8 @@ def recursive_concatenate(array_list, max_batch_size: int=32, axis: int=0):
     # Split the list into two halves and recursively concatenate each half
     else:
         mid   = (n + 1) // 2  # handle odd length
-        left  = recursive_concatenate(array_list[:mid], max_bath_size=max_batch_size, axis=axis)
-        right = recursive_concatenate(array_list[mid:], max_bath_size=max_batch_size, axis=axis)
+        left  = recursive_concatenate(array_list[:mid], max_batch_size=max_batch_size, axis=axis)
+        right = recursive_concatenate(array_list[mid:], max_batch_size=max_batch_size, axis=axis)
         if isinstance(left, ak.Array) or isinstance(right, ak.Array):
             return ak.concatenate([left, right], axis=axis)
         else:
