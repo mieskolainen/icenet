@@ -59,15 +59,15 @@ def yaml_dump(data: dict, filename: str):
         yaml.dump(data, yaml_file, Dumper=NoSortDumper)
 
 
-def recursive_concatenate(array_list, axis: int=0, max_batch_size: int = 32):
+def recursive_concatenate(array_list, max_batch_size: int=32, axis: int=0):
     """
     Concatenate a list of arrays in a recursive way
     (to avoid possible problems with one big concatenation e.g. with Awkward)
     
     Args:
         array_list:      a list of Awkward or Numpy arrays
-        axis:            axis to concatenate over
         max_batch_size:  maximum number of list elements per concatenation
+        axis:            axis to concatenate over
     
     Returns:
         concatenated array
@@ -89,8 +89,8 @@ def recursive_concatenate(array_list, axis: int=0, max_batch_size: int = 32):
     # Split the list into two halves and recursively concatenate each half
     else:
         mid   = (n + 1) // 2  # handle odd length
-        left  = recursive_concatenate(array_list[:mid], max_batch_size)
-        right = recursive_concatenate(array_list[mid:], max_batch_size)
+        left  = recursive_concatenate(array_list[:mid], max_bath_size=max_batch_size, axis=axis)
+        right = recursive_concatenate(array_list[mid:], max_bath_size=max_batch_size, axis=axis)
         if isinstance(left, ak.Array) or isinstance(right, ak.Array):
             return ak.concatenate([left, right], axis=axis)
         else:
