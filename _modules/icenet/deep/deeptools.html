@@ -526,6 +526,25 @@
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 <span class="kn">import</span> <span class="nn">math</span>
 
+
+<div class="viewcode-block" id="sigmoid_schedule">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.sigmoid_schedule">[docs]</a>
+<span class="k">def</span> <span class="nf">sigmoid_schedule</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">N_max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">clip_min</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    https://arxiv.org/abs/2305.18900</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+    
+    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="n">N_max</span>
+    <span class="n">v_start</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">start</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+    <span class="n">v_end</span>   <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">end</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+    <span class="n">output</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">((</span><span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">+</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+    <span class="n">output</span>  <span class="o">=</span> <span class="p">(</span><span class="n">v_end</span> <span class="o">-</span> <span class="n">output</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">v_end</span> <span class="o">-</span> <span class="n">v_start</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">clip_min</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="Multiply">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.Multiply">[docs]</a>
 <span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
