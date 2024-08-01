@@ -7,6 +7,22 @@ import torch
 import torch.nn as nn
 import math
 
+
+def sigmoid_schedule(t, N_max=1, start=0, end=3, tau=0.7, clip_min=1e-9):
+    """
+    https://arxiv.org/abs/2305.18900
+    """
+    def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
+    
+    t = t / N_max
+    v_start = sigmoid(start / tau)
+    v_end   = sigmoid(end / tau)
+    output  = sigmoid((t * (end - start) + start) / tau)
+    output  = (v_end - output) / (v_end - v_start)
+    return np.clip(output, clip_min, 1.0)
+
+
 class Multiply(nn.Module):
     """
     Multiplication with a non-learnable constant alpha

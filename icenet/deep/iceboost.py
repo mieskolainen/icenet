@@ -13,7 +13,7 @@ import pickle
 
 # icenet
 from icenet.tools import aux, stx, plots, reweight
-from icenet.deep import autogradxgb, optimize, losstools, tempscale
+from icenet.deep import autogradxgb, optimize, losstools, tempscale, deeptools
 from icefit import mine, cortools
 
 # ------------------------------------------
@@ -560,7 +560,31 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     X_trn, ids_trn = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, verbose=True)  # variable reduction
     X_val, ids_val = aux.red(X=data_val.x, ids=data_val.ids, param=param, verbose=False) # variable reduction
     
+    # -------------------------------------------
+    # Special optimization parameters
+    
+    noise_reg = None
+    
+    if 'opt_param' in param:
+        
+        if 'noise_reg' in param['opt_param'] and param['opt_param']['noise_reg'] > 0.0:
+            X_trn_orig = copy.deepcopy(X_trn)
+            noise_reg  = param['opt_param']['noise_reg']
+    
+    # -------------------------------------------
+    
     for epoch in range(0, num_epochs):
+        
+        # ---------------------------------------
+        # "Scheduled noise regularization"
+        
+        if noise_reg is not None:
+            sigma2 = noise_reg * deeptools.sigmoid_schedule(t=epoch, N_max=num_epochs)
+            X_trn  = np.sqrt(1-sigma2) * X_trn_orig + np.sqrt(sigma2) * np.random.normal(size=X_trn.shape)
+            
+            print(f'Noise regularization sigma2 = {sigma2:0.4f}')
+        
+        # ---------------------------------------
         
         # Create input xgboost frames
         dtrain = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)    

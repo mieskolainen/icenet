@@ -332,6 +332,10 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         if MI is not None: # Reset diagnostics
             MI['MI_lb'] = np.zeros(len(MI['classes']))
         
+        # Set current epoch (for special scheduling reasons)
+        opt_param['current_epoch'] = epoch
+        
+        # Train        
         loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
         
         if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:

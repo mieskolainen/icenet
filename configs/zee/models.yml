@@ -152,6 +152,10 @@ iceboost0: &ICEBOOST0
     
     eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
 
+  # Special optimization
+  opt_param:
+    noise_reg: 0.1           # Scheduled noise regularization
+  
   # BCE loss domains [use with custom:binary_cross_entropy]
   BCE_param:
     main:
@@ -243,6 +247,8 @@ lzmlp0: &LZMLP
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
     
+    noise_reg: 0.1                    # Scheduled noise regularization
+
     #gamma: -0.5                      # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
     
@@ -331,6 +337,8 @@ fastkan0: &FASTKAN
     #lipshitz_beta: 1.0e-4            # Lipshitz regularization (use with 'lzmlp')
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
+
+    noise_reg: 0.1                    # Scheduled noise regularization
 
     #gamma: 2                         # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
@@ -424,6 +432,8 @@ dmlp0: &DMLP
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ lambda * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ lambda * torch.sum(logits**2)
     
+    noise_reg: 0.1                    # Scheduled noise regularization
+
     #gamma: 2                         # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
     

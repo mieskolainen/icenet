@@ -448,7 +448,7 @@ def concatenate_data(data, max_batch_size: int=32):
     
     print('Executing array concatenation ...')    
     tic = time.time()
-
+    
     X = aux.recursive_concatenate(X_all, max_batch_size=max_batch_size, axis=0)
     Y = aux.recursive_concatenate(Y_all, max_batch_size=max_batch_size, axis=0)
     W = aux.recursive_concatenate(W_all, max_batch_size=max_batch_size, axis=0)

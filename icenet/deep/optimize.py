@@ -160,16 +160,18 @@ def process_batch(batch, x, y, w, y_DA=None, w_DA=None, MI=None, DA_active=False
     return x, y, w, y_DA, w_DA
 
 
-def train(model, loader, optimizer, device, opt_param, MI=None):
+def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None, epoch: int=0):
     """
     Pytorch based training routine.
     
     Args:
-        model     : pytorch geometric model
-        loader    : pytorch geometric dataloader
+        model     : pytorch model
+        loader    : pytorch dataloader
         optimizer : pytorch optimizer
         device    : 'cpu' or 'device'
         opt_param : optimization parameters
+        MI        : MI parameters
+        epoch     : current epoch counter
     
     Returns
         trained model (return implicit via input arguments)
@@ -191,6 +193,15 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         for k in range(len(MI['model'])):
             MI['model'][k].eval()
 
+    # -------------------------------------------------------------------
+    # Scheduled noise regularization
+    
+    sigma2 = None
+    if 'noise_reg' in opt_param and opt_param['noise_reg'] > 0.0:
+        noise_reg = param['opt_param']['noise_reg']
+        sigma2 = noise_reg * deeptools.sigmoid_schedule(t=opt_param['current_epoch'], N_max=opt_param['epochs'])
+    # -------------------------------------------------------------------
+    
     for _, batch in tqdm(enumerate(loader)):
         
         batch_ = batch2tensor(batch, device)
@@ -201,8 +212,15 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         # Clear gradients
         optimizer.zero_grad() # !
         
+        # ---------------------------------------------------------------
+        # Add scheduled noise regularization
+        
+        if sigma2 is not None and isinstance(x, torch.Tensor):
+            x = np.sqrt(1 - sigma2)*x + np.sqrt(sigma2)*torch.randn_like(x)
+        # ---------------------------------------------------------------
+        
         loss_tuple = losstools.loss_wrapper(model=model, x=x, y=y, weights=w, y_DA=y_DA, w_DA=w_DA,
-                                        num_classes=model.C, param=opt_param, MI=MI)  
+                        num_classes=model.C, param=opt_param, MI=MI)  
 
         ## Create combined loss
         loss = 0
@@ -250,7 +268,7 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
         MI_lb = np.zeros(len(MI['classes']))
 
         for i, batch in enumerate(loader):
-
+            
             batch_ = batch2tensor(batch, device)
 
             x, y, w, y_DA, w_DA = None,None,None,None,None
@@ -288,16 +306,17 @@ def train(model, loader, optimizer, device, opt_param, MI=None):
     return {'sum': total_loss, **component_losses}
 
 
-def test(model, loader, device, opt_param, MI=None, compute_loss=False):
+def test(model, loader, device, opt_param: dict, MI: dict=None, compute_loss: bool=False):
     """
     Pytorch based testing routine.
     
     Args:
-        model     : pytorch geometric model
-        loader    : pytorch geometric dataloader
-        device    : 'cpu' or 'device'
-        opt_param :
-        MI        :
+        model        : pytorch model
+        loader       : pytorch dataloader
+        device       : 'cpu' or 'device'
+        opt_param    : optimization parameters
+        MI           : MI parameters
+        compute_loss : compute the loss
     
     Returns
         loss dictionary, accuracy, AUC
@@ -377,7 +396,7 @@ def test(model, loader, device, opt_param, MI=None, compute_loss=False):
         return {f'sum': total_loss, **component_losses}, accsum, aucsum
 
 
-def model_to_cuda(model, device_type='auto'):
+def model_to_cuda(model, device_type: str='auto'):
     """ Wrapper function to handle CPU/GPU setup
     """
     GPU_chosen = False

@@ -185,6 +185,7 @@ def main():
 
                 # =========================================================================
                 ### Train all model over this block of data
+                
                 for ID in model.keys():
                     cprint(__name__ + f' Training model <{ID}>', 'green')
 
@@ -192,6 +193,10 @@ def main():
                     validate_loader = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
                     
                     # Train
+                    
+                    # Set current epoch (for special scheduling reasons)
+                    param[ID]['opt_param']['current_epoch'] = epoch
+
                     loss = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
                     # Validate
