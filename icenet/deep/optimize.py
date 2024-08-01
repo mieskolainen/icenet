@@ -198,7 +198,7 @@ def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None, epoc
     
     sigma2 = None
     if 'noise_reg' in opt_param and opt_param['noise_reg'] > 0.0:
-        noise_reg = param['opt_param']['noise_reg']
+        noise_reg = opt_param['noise_reg']
         sigma2 = noise_reg * deeptools.sigmoid_schedule(t=opt_param['current_epoch'], N_max=opt_param['epochs'])
     # -------------------------------------------------------------------
     
