@@ -1097,7 +1097,6 @@
         <span class="k">if</span> <span class="s1">&#39;noise_reg&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;noise_reg&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">X_trn_orig</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">X_trn</span><span class="p">)</span>
             <span class="n">noise_reg</span>  <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;noise_reg&#39;</span><span class="p">]</span>
-    
     <span class="c1"># -------------------------------------------</span>
     
     <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">):</span>
@@ -1110,7 +1109,6 @@
             <span class="n">X_trn</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">sigma2</span><span class="p">)</span> <span class="o">*</span> <span class="n">X_trn_orig</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">X_trn</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Noise regularization sigma2 = </span><span class="si">{</span><span class="n">sigma2</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        
         <span class="c1"># ---------------------------------------</span>
         
         <span class="c1"># Create input xgboost frames</span>
