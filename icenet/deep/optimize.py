@@ -160,7 +160,7 @@ def process_batch(batch, x, y, w, y_DA=None, w_DA=None, MI=None, DA_active=False
     return x, y, w, y_DA, w_DA
 
 
-def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None, epoch: int=0):
+def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None):
     """
     Pytorch based training routine.
     
@@ -171,7 +171,6 @@ def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None, epoc
         device    : 'cpu' or 'device'
         opt_param : optimization parameters
         MI        : MI parameters
-        epoch     : current epoch counter
     
     Returns
         trained model (return implicit via input arguments)
@@ -192,7 +191,7 @@ def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None, epoc
     if MI is not None:
         for k in range(len(MI['model'])):
             MI['model'][k].eval()
-
+    
     # -------------------------------------------------------------------
     # Scheduled noise regularization
     
@@ -200,6 +199,8 @@ def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None, epoc
     if 'noise_reg' in opt_param and opt_param['noise_reg'] > 0.0:
         noise_reg = opt_param['noise_reg']
         sigma2 = noise_reg * deeptools.sigmoid_schedule(t=opt_param['current_epoch'], N_max=opt_param['epochs'])
+        
+        print(f'Noise regularization sigma2 = {sigma2:0.4f}')
     # -------------------------------------------------------------------
     
     for _, batch in tqdm(enumerate(loader)):

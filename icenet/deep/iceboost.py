@@ -570,7 +570,6 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         if 'noise_reg' in param['opt_param'] and param['opt_param']['noise_reg'] > 0.0:
             X_trn_orig = copy.deepcopy(X_trn)
             noise_reg  = param['opt_param']['noise_reg']
-    
     # -------------------------------------------
     
     for epoch in range(0, num_epochs):
@@ -583,7 +582,6 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             X_trn  = np.sqrt(1-sigma2) * X_trn_orig + np.sqrt(sigma2) * np.random.normal(size=X_trn.shape)
             
             print(f'Noise regularization sigma2 = {sigma2:0.4f}')
-        
         # ---------------------------------------
         
         # Create input xgboost frames
