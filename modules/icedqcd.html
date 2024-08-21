@@ -144,15 +144,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-icedqcd.deploy">icedqcd.deploy</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#icedqcd.deploy.create_ID_label"><code class="docutils literal notranslate"><span class="pre">create_ID_label()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icedqcd.deploy.f2s"><code class="docutils literal notranslate"><span class="pre">f2s()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icedqcd.deploy.generate_cartesian_param"><code class="docutils literal notranslate"><span class="pre">generate_cartesian_param()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icedqcd.deploy.get_predictor"><code class="docutils literal notranslate"><span class="pre">get_predictor()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icedqcd.deploy.process_data"><code class="docutils literal notranslate"><span class="pre">process_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icedqcd.deploy.zscore_normalization"><code class="docutils literal notranslate"><span class="pre">zscore_normalization()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#icedqcd-deploy">icedqcd.deploy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icedqcd.graphio">icedqcd.graphio</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
 </ul>
@@ -435,7 +427,7 @@
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#icenet-tools-process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
@@ -569,44 +561,8 @@ info:  trigger, MC xs, pre-selection acceptance x efficiency information (dict)<
 </dd></dl>
 
 </section>
-<section id="module-icedqcd.deploy">
-<span id="icedqcd-deploy"></span><h2>icedqcd.deploy<a class="headerlink" href="#module-icedqcd.deploy" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="icedqcd.deploy.create_ID_label">
-<span class="sig-name descname"><span class="pre">create_ID_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icedqcd/deploy.html#create_ID_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icedqcd.deploy.create_ID_label" title="Link to this definition">¶</a></dt>
-<dd><p>Create parameter label for the conditional model parameters</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icedqcd.deploy.f2s">
-<span class="sig-name descname"><span class="pre">f2s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icedqcd/deploy.html#f2s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icedqcd.deploy.f2s" title="Link to this definition">¶</a></dt>
-<dd><p>Convert e.g. floating point “1.5” to “1p5”</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icedqcd.deploy.generate_cartesian_param">
-<span class="sig-name descname"><span class="pre">generate_cartesian_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icedqcd/deploy.html#generate_cartesian_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icedqcd.deploy.generate_cartesian_param" title="Link to this definition">¶</a></dt>
-<dd><p>Generate cartesian N-dim array for the theory model parameter conditional sampling</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icedqcd.deploy.get_predictor">
-<span class="sig-name descname"><span class="pre">get_predictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icedqcd/deploy.html#get_predictor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icedqcd.deploy.get_predictor" title="Link to this definition">¶</a></dt>
-<dd><p>Load model predictor function handle</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icedqcd.deploy.process_data">
-<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icedqcd/deploy.html#process_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icedqcd.deploy.process_data" title="Link to this definition">¶</a></dt>
-<dd><p>Main processing loop</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icedqcd.deploy.zscore_normalization">
-<span class="sig-name descname"><span class="pre">zscore_normalization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icedqcd/deploy.html#zscore_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icedqcd.deploy.zscore_normalization" title="Link to this definition">¶</a></dt>
-<dd><p>Z-score normalization</p>
-</dd></dl>
-
+<section id="icedqcd-deploy">
+<h2>icedqcd.deploy<a class="headerlink" href="#icedqcd-deploy" title="Link to this heading">¶</a></h2>
 </section>
 <section id="module-icedqcd.graphio">
 <span id="icedqcd-graphio"></span><h2>icedqcd.graphio<a class="headerlink" href="#module-icedqcd.graphio" title="Link to this heading">¶</a></h2>
