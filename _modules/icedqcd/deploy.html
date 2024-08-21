@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>icehgcal.preprocess &mdash; icenet alpha documentation</title>
+  <title>icedqcd.deploy &mdash; icenet alpha documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
@@ -507,7 +507,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">icehgcal.preprocess</li>
+      <li class="breadcrumb-item active">icedqcd.deploy</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -516,191 +516,386 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for icehgcal.preprocess</h1><div class="highlight"><pre>
-<span></span><span class="c1"># HGCAL hackathon trackster tree processor</span>
-<span class="c1"># </span>
-<span class="c1"># &quot;/eos/cms/store/group/dpg_hgcal/comm_hgcal/hackathon/samples/close_by_double_pion/production/new_new_ntuples/&quot;</span>
+  <h1>Source code for icedqcd.deploy</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Deploy MVA-model to data (or MC) files (work in progress, not all models supported ...)</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
+<span class="c1"># This code is compatible with grid (SGE, HTCondor) submission</span>
+<span class="c1">#</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">uproot</span> <span class="k">as</span> <span class="nn">uproot</span>
-<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">uproot</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">common</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">process</span>
+<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">predict</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
+<span class="c1"># ------------------------------------------</span>
+<span class="c1">#from icenet import print # (reservation)</span>
+<span class="c1"># ------------------------------------------</span>
 
-<div class="viewcode-block" id="compute_edges">
-<a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.preprocess.compute_edges">[docs]</a>
-<span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span>
-<span class="k">def</span> <span class="nf">compute_edges</span><span class="p">(</span><span class="n">trk_data</span><span class="p">,</span> <span class="n">ass_data</span><span class="p">,</span> <span class="n">gra_data</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_labels</span><span class="p">,</span> <span class="n">edge_qualities</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">):</span>
+<div class="viewcode-block" id="f2s">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.f2s">[docs]</a>
+<span class="k">def</span> <span class="nf">f2s</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Logic based on (but refined):</span>
-<span class="sd">    https://github.com/Abhirikshma/HackathonLinking/blob/master/firstModelAndTraining.ipynb</span>
-<span class="sd">    </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        node, edge, edge_labels</span>
+<span class="sd">    Convert e.g. floating point &quot;1.5&quot; to &quot;1p5&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">decimals</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">)</span></div>
 
-    <span class="c1"># From yaml file</span>
-    <span class="n">thresh</span>     <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;thresh&#39;</span><span class="p">]</span>
-    <span class="n">directed</span>   <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;directed&#39;</span><span class="p">]</span>
-    <span class="n">self_loops</span> <span class="o">=</span> <span class="n">graph_param</span><span class="p">[</span><span class="s1">&#39;self_loops&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="generate_cartesian_param">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.generate_cartesian_param">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_cartesian_param</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">mc_param</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate cartesian N-dim array for the theory model parameter conditional sampling</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mc_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mc_param</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span> <span class="n">decimals</span><span class="p">))</span>
+
+    <span class="n">CAX</span>    <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">cartesian_product</span><span class="p">(</span><span class="o">*</span><span class="n">arr</span><span class="p">)</span>
+    <span class="n">pindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mc_param</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     
-    <span class="c1"># Each trackster ~ node in the ML-graph</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trk_data</span><span class="o">.</span><span class="n">NTracksters</span><span class="p">):</span>
-
-        <span class="n">qualities_i</span> <span class="o">=</span> <span class="n">ass_data</span><span class="o">.</span><span class="n">tsCLUE3D_recoToSim_CP_score</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">best_sts_i</span>  <span class="o">=</span> <span class="n">ass_data</span><span class="o">.</span><span class="n">tsCLUE3D_recoToSim_CP</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">ak</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">qualities_i</span><span class="p">)]</span>
-        <span class="n">OK_i</span>        <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">qualities_i</span><span class="p">[</span><span class="n">best_sts_i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">thresh</span> <span class="k">else</span> <span class="kc">False</span>
-
-        <span class="c1"># Found within (eta,phi) window, presumably</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">gra_data</span><span class="o">.</span><span class="n">linked_inners</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-
-            <span class="n">qualities_j</span> <span class="o">=</span> <span class="n">ass_data</span><span class="o">.</span><span class="n">tsCLUE3D_recoToSim_CP_score</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-            <span class="n">best_sts_j</span>  <span class="o">=</span> <span class="n">ass_data</span><span class="o">.</span><span class="n">tsCLUE3D_recoToSim_CP</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">ak</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">qualities_j</span><span class="p">)]</span>
-            <span class="n">OK_j</span>        <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">qualities_j</span><span class="p">[</span><span class="n">best_sts_j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">thresh</span> <span class="k">else</span> <span class="kc">False</span>
-
-            <span class="c1"># -----------------------------</span>
-            <span class="c1">## Create ML-graph data</span>
-            
-             <span class="c1"># ** MC truth **</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">best_sts_i</span> <span class="o">==</span> <span class="n">best_sts_j</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">OK_i</span> <span class="ow">and</span> <span class="n">OK_j</span><span class="p">):</span>
-                <span class="n">edge_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">edge_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-            <span class="n">edge_index</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
-            <span class="n">edge_qualities</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">qualities_i</span><span class="p">[</span><span class="n">best_sts_i</span><span class="p">],</span> <span class="n">qualities_j</span><span class="p">[</span><span class="n">best_sts_j</span><span class="p">]])</span>
-            
-            <span class="c1"># If we want undirected graph</span>
-            <span class="k">if</span> <span class="n">directed</span><span class="p">:</span>
-                <span class="n">edge_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge_labels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">edge_index</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">edge_qualities</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">qualities_j</span><span class="p">[</span><span class="n">best_sts_j</span><span class="p">],</span> <span class="n">qualities_i</span><span class="p">[</span><span class="n">best_sts_i</span><span class="p">]])</span>
-            <span class="c1"># -----------------------------</span>
-
-        <span class="c1"># If we want self-loops</span>
-        <span class="k">if</span> <span class="n">self_loops</span><span class="p">:</span>
-            <span class="n">edge_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">edge_index</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">])</span>
-            <span class="n">edge_qualities</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">qualities_i</span><span class="p">[</span><span class="n">best_sts_i</span><span class="p">],</span> <span class="n">qualities_i</span><span class="p">[</span><span class="n">best_sts_i</span><span class="p">]])</span></div>
-
-
-
-<div class="viewcode-block" id="create_trackster_data">
-<a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.preprocess.create_trackster_data">[docs]</a>
-<span class="k">def</span> <span class="nf">create_trackster_data</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mc_param</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">pindex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MODEL_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="n">calos</span>        <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">tracksters</span>   <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">associations</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">graph</span>        <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">CAX</span><span class="p">,</span> <span class="n">pindex</span></div>
 
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+
+<div class="viewcode-block" id="create_ID_label">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.create_ID_label">[docs]</a>
+<span class="k">def</span> <span class="nf">create_ID_label</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">mc_param</span><span class="p">,</span> <span class="n">lattice_values</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create parameter label for the conditional model parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ID_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">_&#39;</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mc_param</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">ID_label</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">f2s</span><span class="p">(</span><span class="n">lattice_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">decimals</span><span class="o">=</span><span class="n">decimals</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+    
+    <span class="k">return</span> <span class="n">ID_label</span></div>
+
+
+<div class="viewcode-block" id="zscore_normalization">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.zscore_normalization">[docs]</a>
+<span class="k">def</span> <span class="nf">zscore_normalization</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Z-score normalization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span><span class="p">:</span>                            
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Z-score normalizing variables ...&#39;</span><span class="p">)</span>
+        <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/zscore.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;X.shape = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> | X_mu.shape = </span><span class="si">{</span><span class="n">X_mu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> | X_std.shape = </span><span class="si">{</span><span class="n">X_std</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">apply_zscore</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">X</span></div>
+
+
+<div class="viewcode-block" id="process_data">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.process_data">[docs]</a>
+<span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main processing loop</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rootname</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span>
+    <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">rootname</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Processing data&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    
+    <span class="c1">## ** Special YAML loader here **</span>
+    <span class="kn">from</span> <span class="nn">libs.ccorp.ruamel.yaml.include</span> <span class="kn">import</span> <span class="n">YAML</span>
+    <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
+    <span class="n">yaml</span><span class="o">.</span><span class="n">allow_duplicate_keys</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s1">/configs/</span><span class="si">{</span><span class="n">rootname</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputmap&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inputmap</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;includes&#39;</span> <span class="ow">in</span> <span class="n">inputmap</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">inputmap</span><span class="p">[</span><span class="s1">&#39;includes&#39;</span><span class="p">]</span> <span class="c1"># ! crucial</span>
+
+        <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;yaml.YAMLError: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+    <span class="n">root_path</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Remove [] list</span>
+    
+    <span class="c1"># ------------------</span>
+    <span class="c1"># Phase 0: Create output path</span>
+    
+    <span class="n">path_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s2">/output/</span><span class="si">{</span><span class="n">rootname</span><span class="si">}</span><span class="s2">/deploy/modeltag__</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeltag&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="c1"># Add conditional tag</span>
+    <span class="n">conditional_tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;--use_conditional__</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;use_conditional&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;use_conditional&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">path_str</span> <span class="o">+=</span> <span class="n">conditional_tag</span>
+    
+    <span class="n">basepath</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">path_str</span><span class="p">)</span>
+    
+    <span class="c1"># ------------------</span>
+    <span class="c1"># Phase 1: Read ROOT-file to awkward-format</span>
+    
+    <span class="n">nodestr</span>  <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inputmap__</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">safetxt</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputmap&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">--grid_id__</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;grid_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">--hostname__</span><span class="si">{</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span><span class="si">}</span><span class="s2">--time__</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">basepath</span><span class="si">}</span><span class="s1">/deploy--</span><span class="si">{</span><span class="n">nodestr</span><span class="si">}</span><span class="s1">.log&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> | </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%m/%Y %H:%M:%S&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Save to log-file</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data: </span><span class="si">{</span><span class="n">nodestr</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">inputmap</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Pick the model lattice definition</span>
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]:</span>    
+        <span class="n">mc_param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;mc_param&#39;</span><span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">inputmap</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_data: Processing &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Write to log-file</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;-------------------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Process: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Get all files</span>
+        <span class="n">datasets</span>  <span class="o">=</span> <span class="n">inputmap</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">inputmap</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;files&#39;</span><span class="p">]</span>
+        <span class="n">rootfiles</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
+
+        <span class="c1"># Loop over the files</span>
+        <span class="n">total_num_events</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># ----------------------------------</span>
+        <span class="c1"># GRID (batch) processing</span>
+        <span class="n">all_file_id</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_start_end</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rootfiles</span><span class="p">)),</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;grid_nodes&#39;</span><span class="p">])</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">file_id</span> <span class="o">=</span> <span class="n">all_file_id</span><span class="p">[</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;grid_id&#39;</span><span class="p">]]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_id = </span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2"> (grid_id = </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;grid_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             
-            <span class="n">f</span>    <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-            <span class="n">t</span>    <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ntuplizer/tracksters&quot;</span><span class="p">]</span>
-            <span class="n">calo</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ntuplizer/simtrackstersCP&quot;</span><span class="p">]</span>
-            <span class="n">ass</span>  <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ntuplizer/associations&quot;</span><span class="p">]</span>
-            <span class="n">gra</span>  <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ntuplizer/graph&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Subfolder already saturated -- no processing under this grid PC node -- continue&#39;</span><span class="p">)</span>
+            <span class="k">continue</span> <span class="c1"># This subfolder is already saturated on the grid processing, i.e. grid_id &gt; len(all_file_id)</span>
+        <span class="c1"># ----------------------------------</span>
+        
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">file_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">file_id</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
 
-            <span class="c1"># Tracksters</span>
-            <span class="n">tracksters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">arrays</span><span class="p">([</span><span class="s2">&quot;NTracksters&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;raw_energy&quot;</span><span class="p">,</span> 
-                                        <span class="s2">&quot;raw_em_energy&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;trackster_barycenter_eta&quot;</span><span class="p">,</span> 
-                                        <span class="s2">&quot;trackster_barycenter_phi&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;barycenter_x&quot;</span><span class="p">,</span> 
-                                        <span class="s2">&quot;barycenter_y&quot;</span><span class="p">,</span> 
-                                        <span class="s2">&quot;barycenter_z&quot;</span><span class="p">,</span> 
-                                        <span class="s2">&quot;id_probabilities&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;EV1&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;EV2&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;EV3&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;eVector0_x&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;eVector0_y&quot;</span><span class="p">,</span> 
-                                        <span class="s2">&quot;eVector0_z&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;sigmaPCA1&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;sigmaPCA2&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;sigmaPCA3&quot;</span><span class="p">]))</span>
-            <span class="c1"># Calorimetry</span>
-            <span class="n">calos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calo</span><span class="o">.</span><span class="n">arrays</span><span class="p">([</span><span class="s2">&quot;stsCP_trackster_barycenter_eta&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;stsCP_trackster_barycenter_phi&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;stsCP_barycenter_x&quot;</span><span class="p">,</span> 
-                          <span class="s2">&quot;stsCP_barycenter_y&quot;</span><span class="p">,</span> 
-                          <span class="s2">&quot;stsCP_barycenter_z&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;stsCP_raw_energy&quot;</span><span class="p">]))</span>
-
-            <span class="c1"># Associations</span>
-            <span class="n">associations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ass</span><span class="o">.</span><span class="n">arrays</span><span class="p">([</span><span class="s2">&quot;tsCLUE3D_recoToSim_CP&quot;</span><span class="p">,</span> <span class="s2">&quot;tsCLUE3D_recoToSim_CP_score&quot;</span><span class="p">]))</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">rootfiles</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;rootfile&#39;</span>    <span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
+                <span class="s1">&#39;tree&#39;</span>        <span class="p">:</span> <span class="s1">&#39;Events&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;entry_start&#39;</span> <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;entry_stop&#39;</span>  <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;maxevents&#39;</span>   <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;ids&#39;</span>         <span class="p">:</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">LOAD_VARS</span><span class="p">,</span>
+                <span class="s1">&#39;library&#39;</span>     <span class="p">:</span> <span class="s1">&#39;ak&#39;</span>
+            <span class="p">}</span>
             
-            <span class="c1"># Links</span>
-            <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gra</span><span class="o">.</span><span class="n">arrays</span><span class="p">([</span><span class="s2">&quot;linked_inners&quot;</span><span class="p">]))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">X_nocut</span><span class="p">,</span> <span class="n">ids_nocut</span> <span class="o">=</span> <span class="n">iceroot</span><span class="o">.</span><span class="n">load_tree</span><span class="p">(</span><span class="o">**</span><span class="n">param</span><span class="p">)</span>
 
-        <span class="k">except</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># Write to log-file</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> | Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X_nocut</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">total_num_events</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_nocut</span><span class="p">)</span>
 
-    <span class="n">df_calo</span>  <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">calos</span><span class="p">)</span>
-    <span class="n">df_track</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">tracksters</span><span class="p">)</span>
-    <span class="n">df_ass</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">associations</span><span class="p">)</span>
-    <span class="n">df_gra</span>   <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A fatal error in iceroot.load_tree with a file &quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&quot;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                
+                <span class="c1"># Write to log-file</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> | A fatal error in iceroot.load_tree: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># -------------------------------------------------</span>
+            <span class="c1"># Phase 1.5: Add conditional (theory MC param) variables</span>
 
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;df_calo&#39;</span><span class="p">:</span> <span class="n">df_calo</span><span class="p">,</span> <span class="s1">&#39;df_track&#39;</span><span class="p">:</span> <span class="n">df_track</span><span class="p">,</span> <span class="s1">&#39;df_ass&#39;</span><span class="p">:</span> <span class="n">df_ass</span><span class="p">,</span> <span class="s1">&#39;df_gra&#39;</span><span class="p">:</span> <span class="n">df_gra</span><span class="p">}</span></div>
+            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]:</span>
 
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initializing conditional theory (model) parameters&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">mc_param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="c1"># Create new &#39;record&#39; (column) to ak-array and init to zero</span>
+                    <span class="n">col_name</span>          <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;MODEL_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">X_nocut</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
+                <span class="n">ids_nocut</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">X_nocut</span><span class="p">)</span>
 
-<div class="viewcode-block" id="event_loop">
-<a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.preprocess.event_loop">[docs]</a>
-<span class="k">def</span> <span class="nf">event_loop</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1E9</span><span class="p">)):</span>
+            <span class="c1"># ------------------</span>
+            <span class="c1"># Phase 2: Apply pre-selections to get an event mask</span>
 
-    <span class="c1"># --------------------------------------------</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">process_root</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_nocut</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">X</span>        <span class="o">=</span> <span class="n">X_nocut</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No events left after pre-cuts -- scores will be -1 for all events&quot;</span><span class="p">)</span>
+                <span class="n">OK_event</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">X</span>        <span class="o">=</span> <span class="n">X_nocut</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+                <span class="n">OK_event</span> <span class="o">=</span> <span class="kc">True</span>
+            
+            <span class="c1"># ------------------</span>
+            <span class="c1"># Phase 3: Convert to icenet dataformat</span>
 
-    <span class="c1"># Create trackster data</span>
-    <span class="n">data</span>  <span class="o">=</span> <span class="n">create_trackster_data</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Dequantization always off in deployment</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_nocut</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                                          <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dequantize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                
+                <span class="c1"># Something went wrong at OS level (e.g. memory), write to log-file and exit with error</span>
+                <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> | A fatal error in common.splitfactor -- os._exit(os.EX_OSERR): &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">EX_OSERR</span><span class="p">)</span>
+            
+            <span class="c1"># ------------------</span>
+            <span class="c1"># ** Free memory **</span>
+            <span class="k">del</span> <span class="n">X</span>
+            <span class="k">del</span> <span class="n">X_nocut</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+            <span class="c1"># ------------------</span>
+            
+            <span class="c1"># ------------------</span>
+            <span class="c1"># Phase 4: Apply MVA-models</span>
+            
+            <span class="n">ALL_scores</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="n">x</span>              <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">edge_index</span>     <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">edge_labels</span>    <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">edge_qualities</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
+                
+                <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+            
+                <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
+                
+                <span class="c1"># xgb / iceboost</span>
+                <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="s1">&#39;xgb_logistic&#39;</span><span class="p">]:</span>
+                    
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Evaluating MVA-model &quot;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&quot; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">maxevents</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;df_track&#39;</span><span class="p">])])</span>
+                    <span class="c1">## 1. Impute data</span>
+                    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
+                        
+                        <span class="n">fmodel</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/imputer.pkl&#39;</span>
+                        <span class="n">imputer</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fmodel</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+                        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">impute_datasets</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;imputation_param&#39;</span><span class="p">],</span> <span class="n">imputer</span><span class="o">=</span><span class="n">imputer</span><span class="p">)</span>
+                    
+                    <span class="c1">## 2. Apply the input variable set reductor</span>
+                    <span class="n">X</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)):</span>
+                    <span class="c1">## 3. Get the MVA-model</span>
+                    <span class="n">func_predict</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">get_predictor</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+
+                    <span class="c1">## 4. ** Conditional model **</span>
+                    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;use_conditional&#39;</span><span class="p">]:</span>
+                        
+                        <span class="c1">## Get conditional parameters</span>
+                        <span class="n">CAX</span><span class="p">,</span> <span class="n">pindex</span> <span class="o">=</span> <span class="n">generate_cartesian_param</span><span class="p">(</span><span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">mc_param</span><span class="o">=</span><span class="n">mc_param</span><span class="p">)</span>
+
+                        <span class="c1">## Run the MVA-model on all the theory model points in CAX array</span>
+                        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CAX</span><span class="p">))):</span>
+
+                            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+                            <span class="c1"># Set the new conditional model parameters to X</span>
+                            <span class="n">lattice_values</span> <span class="o">=</span> <span class="n">CAX</span><span class="p">[</span><span class="n">z</span><span class="p">,:]</span>
+                            <span class="n">ID_label</span>       <span class="o">=</span> <span class="n">create_ID_label</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">,</span> <span class="n">mc_param</span><span class="o">=</span><span class="n">mc_param</span><span class="p">,</span> <span class="n">lattice_values</span><span class="o">=</span><span class="n">lattice_values</span><span class="p">)</span>
+
+                            <span class="k">if</span> <span class="n">OK_event</span><span class="p">:</span>
+                                <span class="n">XX</span>            <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                                <span class="n">XX</span><span class="p">[:,</span> <span class="n">pindex</span><span class="p">]</span> <span class="o">=</span> <span class="n">lattice_values</span>  <span class="c1"># Set new values</span>
+
+                                <span class="c1"># Variable normalization</span>
+                                <span class="n">XX</span> <span class="o">=</span> <span class="n">zscore_normalization</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">XX</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+                                
+                                <span class="c1"># Predict</span>
+                                <span class="n">pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">XX</span><span class="p">)</span>
+                                <span class="n">pred</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">unmask</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">pred</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span> <span class="c1"># all -1</span>
+
+                            <span class="c1"># Save</span>
+                            <span class="n">ALL_scores</span><span class="p">[</span><span class="n">io</span><span class="o">.</span><span class="n">rootsafe</span><span class="p">(</span><span class="n">ID_label</span><span class="p">)]</span> <span class="o">=</span> <span class="n">pred</span>
+
+                    <span class="c1"># 4. ** Unconditional model **</span>
+                    <span class="k">else</span><span class="p">:</span>
+
+                        <span class="k">if</span> <span class="n">OK_event</span><span class="p">:</span>
+
+                            <span class="c1"># Variable normalization</span>
+                            <span class="n">XX</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                            <span class="n">XX</span> <span class="o">=</span> <span class="n">zscore_normalization</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">XX</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+
+                            <span class="c1"># Predict</span>
+                            <span class="n">pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">XX</span><span class="p">)</span>
+                            <span class="n">pred</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">unmask</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                                               
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">pred</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span> <span class="c1"># all -1</span>
+
+                        <span class="c1"># Save</span>
+                        <span class="n">ALL_scores</span><span class="p">[</span><span class="n">io</span><span class="o">.</span><span class="n">rootsafe</span><span class="p">(</span><span class="n">ID</span><span class="p">)]</span> <span class="o">=</span> <span class="n">pred</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    
+                    <span class="c1"># if param[&#39;predict&#39;] == &#39;torch_graph&#39;: # Turned off for now</span>
+                    <span class="c1">#   scores = func_predict(data[&#39;graph&#39;])</span>
+
+                    <span class="c1"># Write to log-file</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Did not evaluate model (unsupported deployment): </span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+            
+            <span class="c1"># ------------------</span>
+            <span class="c1"># Phase 5: Write MVA-scores out</span>
+
+            <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">basepath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># Create dir</span>
+            <span class="n">outputfile</span> <span class="o">=</span> <span class="n">basepath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.root&#39;</span><span class="p">,</span> <span class="s1">&#39;-icenet.root&#39;</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving root output to &quot;</span><span class="si">{</span><span class="n">outputfile</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">uproot</span><span class="o">.</span><span class="n">recreate</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">uproot</span><span class="o">.</span><span class="n">ZLIB</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="k">as</span> <span class="n">rfile</span><span class="p">:</span>
+                <span class="n">rfile</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Events&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ALL_scores</span>
+            
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span> <span class="c1">#! Garbage collection</span>
         
-        <span class="n">trk_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df_track&#39;</span><span class="p">][</span><span class="n">ev</span><span class="p">]</span>
-        <span class="n">gra_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df_gra&#39;</span><span class="p">][</span><span class="n">ev</span><span class="p">]</span>
-        <span class="n">ass_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df_ass&#39;</span><span class="p">][</span><span class="n">ev</span><span class="p">]</span>
+        <span class="c1"># Write to log-file</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total number of events: </span><span class="si">{</span><span class="n">total_num_events</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
-        <span class="c1"># Compute node data</span>
-        <span class="n">x_</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s1">&#39;raw_energy&#39;</span><span class="p">:</span>    <span class="n">trk_data</span><span class="o">.</span><span class="n">raw_energy</span><span class="p">,</span> 
-                     <span class="s1">&#39;raw_em_energy&#39;</span><span class="p">:</span> <span class="n">trk_data</span><span class="o">.</span><span class="n">raw_em_energy</span><span class="p">,</span>
-                     <span class="s1">&#39;barycenter_x&#39;</span><span class="p">:</span>  <span class="n">trk_data</span><span class="o">.</span><span class="n">barycenter_x</span><span class="p">,</span>
-                     <span class="s1">&#39;barycenter_y&#39;</span><span class="p">:</span>  <span class="n">trk_data</span><span class="o">.</span><span class="n">barycenter_y</span><span class="p">,</span>
-                     <span class="s1">&#39;barycenter_z&#39;</span><span class="p">:</span>  <span class="n">trk_data</span><span class="o">.</span><span class="n">barycenter_z</span><span class="p">,</span>
-                     <span class="s1">&#39;EV1&#39;</span><span class="p">:</span>           <span class="n">trk_data</span><span class="o">.</span><span class="n">EV1</span><span class="p">,</span>
-                     <span class="s1">&#39;EV2&#39;</span><span class="p">:</span>           <span class="n">trk_data</span><span class="o">.</span><span class="n">EV2</span><span class="p">,</span>
-                     <span class="s1">&#39;EV3&#39;</span><span class="p">:</span>           <span class="n">trk_data</span><span class="o">.</span><span class="n">EV3</span>
-        <span class="p">})</span>
 
-        <span class="n">edge_index_</span>     <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">edge_labels_</span>    <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">edge_qualities_</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># Compute edge data and labels</span>
-        <span class="n">compute_edges</span><span class="p">(</span><span class="n">trk_data</span><span class="o">=</span><span class="n">trk_data</span><span class="p">,</span> <span class="n">ass_data</span><span class="o">=</span><span class="n">ass_data</span><span class="p">,</span> <span class="n">gra_data</span><span class="o">=</span><span class="n">gra_data</span><span class="p">,</span>
-            <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index_</span><span class="p">,</span> <span class="n">edge_labels</span><span class="o">=</span><span class="n">edge_labels_</span><span class="p">,</span> <span class="n">edge_qualities</span><span class="o">=</span><span class="n">edge_qualities_</span><span class="p">,</span> <span class="n">graph_param</span><span class="o">=</span><span class="n">graph_param</span><span class="p">)</span>
-        
-        <span class="c1"># Save event data</span>
-        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_</span><span class="p">)</span>
-        <span class="n">edge_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge_labels_</span><span class="p">)</span>
-        <span class="n">edge_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">edge_index_</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-        <span class="n">edge_qualities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">edge_qualities_</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<div class="viewcode-block" id="get_predictor">
+<a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.get_predictor">[docs]</a>
+<span class="k">def</span> <span class="nf">get_predictor</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load model predictor function handle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb&#39;</span><span class="p">:</span>
+        <span class="n">func_predict</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_xgb</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">,</span> <span class="n">return_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xgb_logistic&#39;</span><span class="p">:</span>
+        <span class="n">func_predict</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_xgb_logistic</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">,</span> <span class="n">return_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1">#elif param[&#39;predict&#39;] == &#39;torch_vector&#39;:</span>
+    <span class="c1">#    func_predict = predict.pred_torch_generic(args=args, param=param)</span>
+
+    <span class="c1">#elif param[&#39;predict&#39;] == &#39;torch_graph&#39;:</span>
+    <span class="c1">#    func_predict = predict.pred_torch_graph(args=args, param=param)</span>
     
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;edge_index&#39;</span><span class="p">:</span> <span class="n">edge_index</span><span class="p">,</span> <span class="s1">&#39;edge_labels&#39;</span><span class="p">:</span> <span class="n">edge_labels</span><span class="p">,</span> <span class="s1">&#39;edge_qualities&#39;</span><span class="p">:</span> <span class="n">edge_qualities</span><span class="p">}</span></div>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.get_predictor: Unknown param[&quot;predict&quot;] = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;predict&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">model</span></div>
 
 </pre></div>
 

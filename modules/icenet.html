@@ -145,7 +145,15 @@
 <li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="icedqcd.html#icedqcd-deploy">icedqcd.deploy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.deploy">icedqcd.deploy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.create_ID_label"><code class="docutils literal notranslate"><span class="pre">create_ID_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.f2s"><code class="docutils literal notranslate"><span class="pre">f2s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.generate_cartesian_param"><code class="docutils literal notranslate"><span class="pre">generate_cartesian_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.get_predictor"><code class="docutils literal notranslate"><span class="pre">get_predictor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.process_data"><code class="docutils literal notranslate"><span class="pre">process_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.deploy.zscore_normalization"><code class="docutils literal notranslate"><span class="pre">zscore_normalization()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="icedqcd.html#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
 </ul>
@@ -428,7 +436,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.io">icenet.tools.io</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.plots">icenet.tools.plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.prints">icenet.tools.prints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#icenet-tools-process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.process">icenet.tools.process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.tools.stx">icenet.tools.stx</a></li>
@@ -4725,8 +4733,137 @@ ax:  figure axis</p>
 </dd></dl>
 
 </section>
-<section id="icenet-tools-process">
-<h3>icenet.tools.process<a class="headerlink" href="#icenet-tools-process" title="Link to this heading">¶</a></h3>
+<section id="module-icenet.tools.process">
+<span id="icenet-tools-process"></span><h3>icenet.tools.process<a class="headerlink" href="#module-icenet.tools.process" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.concatenate_data">
+<span class="sig-name descname"><span class="pre">concatenate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#concatenate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.concatenate_data" title="Link to this definition">¶</a></dt>
+<dd><p>Helper function to concatenate arrays with a specified maximum batch size</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.evaluate_models">
+<span class="sig-name descname"><span class="pre">evaluate_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#evaluate_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.evaluate_models" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluate ML/AI models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>objects</strong> (<em>Different datatype</em>)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Saves evaluation plots to the disk</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.generic_flow">
+<span class="sig-name descname"><span class="pre">generic_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#generic_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.generic_flow" title="Link to this definition">¶</a></dt>
+<dd><p>Generic (read data – train models – evaluate models) workflow</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rootname</strong> – name of the workflow config folder</p></li>
+<li><p><strong>func_loader</strong> – data loader (function handle)</p></li>
+<li><p><strong>func_factor</strong> – data transformer (function handle)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.impute_datasets">
+<span class="sig-name descname"><span class="pre">impute_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#impute_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.impute_datasets" title="Link to this definition">¶</a></dt>
+<dd><p>Dataset imputation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – .x, .y, .w, .ids type object</p></li>
+<li><p><strong>args</strong> – imputer parameters</p></li>
+<li><p><strong>features</strong> – variables to impute (list), if None, then all are considered</p></li>
+<li><p><strong>imputer</strong> – imputer object (scikit-type)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>imputed data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.load_file_wrapper">
+<span class="sig-name descname"><span class="pre">load_file_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#load_file_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.load_file_wrapper" title="Link to this definition">¶</a></dt>
+<dd><p>Helper function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.make_plots">
+<span class="sig-name descname"><span class="pre">make_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#make_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.make_plots" title="Link to this definition">¶</a></dt>
+<dd><p>Basic Q/A-plots</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.plot_XYZ_multiple_models">
+<span class="sig-name descname"><span class="pre">plot_XYZ_multiple_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targetdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#plot_XYZ_multiple_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.plot_XYZ_multiple_models" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.plot_XYZ_wrap">
+<span class="sig-name descname"><span class="pre">plot_XYZ_wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_predict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_kin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_RAW</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids_RAW</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#plot_XYZ_wrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.plot_XYZ_wrap" title="Link to this definition">¶</a></dt>
+<dd><p>Arbitrary plot steering function.
+Add new plot types here, steered from plots.yml</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.process_data">
+<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#process_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.process_data" title="Link to this definition">¶</a></dt>
+<dd><p>Process data further</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.read_cli">
+<span class="sig-name descname"><span class="pre">read_cli</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_cli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_cli" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.read_config">
+<span class="sig-name descname"><span class="pre">read_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'configs/xyz/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_config" title="Link to this definition">¶</a></dt>
+<dd><p>Commandline and YAML configuration reader</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.read_data">
+<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data" title="Link to this definition">¶</a></dt>
+<dd><p>Load input data and return full dataset arrays</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – main argument dictionary</p></li>
+<li><p><strong>func_loader</strong> – application specific root file loader function</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.read_data_processed">
+<span class="sig-name descname"><span class="pre">read_data_processed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data_processed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data_processed" title="Link to this definition">¶</a></dt>
+<dd><p>Read/write (MVA) data and return full processed dataset</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.train_models">
+<span class="sig-name descname"><span class="pre">train_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_trn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#train_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.train_models" title="Link to this definition">¶</a></dt>
+<dd><p>Train ML/AI models wrapper with pre-processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>objects</strong> (<em>Different datatype</em>)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Saves trained models to disk</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-icenet.tools.raytools">
 <span id="icenet-tools-raytools"></span><h3>icenet.tools.raytools<a class="headerlink" href="#module-icenet.tools.raytools" title="Link to this heading">¶</a></h3>
