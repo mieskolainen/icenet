@@ -12,14 +12,14 @@ if [ "${maxevents+x}" ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 CONFIG="tune0_EEp"
 
 # Step 1. Produce output (cache) files with all sign events
-python analysis/zee.py --runmode "genesis" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}"                                           --run_id "S1-run-${CONFIG}" --supertune "drop_negative=False"
-python analysis/zee.py --runmode "train"   $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}" --hash_post_genesis "S1-${CONFIG}__train" --run_id "S1-run-${CONFIG}" --compute 0
-python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}" --hash_post_genesis "S1-${CONFIG}__eval"  --run_id "S1-run-${CONFIG}" --compute 0
+python analysis/zee.py --runmode "genesis" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}"                                           --run_id "S1-run" --supertune "drop_negative=False"
+python analysis/zee.py --runmode "train"   $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}" --hash_post_genesis "S1-${CONFIG}__train" --run_id "S1-run" --compute 0
+python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}" --hash_post_genesis "S1-${CONFIG}__eval"  --run_id "S1-run" --compute 0
 
 # Step 2. Default training with only positive sign events
-python analysis/zee.py --runmode "genesis" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --run_id "S2-run-${CONFIG}"
-python analysis/zee.py --runmode "train"   $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --run_id "S2-run-${CONFIG}"
-python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --run_id "S2-run-${CONFIG}"
+python analysis/zee.py --runmode "genesis" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --run_id "S2-run"
+python analysis/zee.py --runmode "train"   $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --run_id "S2-run"
+python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --run_id "S2-run"
 
 # ** Change these manually by carefully inspecting outputs under /output and /checkpoint **
 # However, we use the forced setup above.
@@ -32,4 +32,4 @@ python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datap
 #RUN_ID="2024-08-08_20-27-57_lxcgpu00"
 
 # Step 3. Evaluation with all sign events
-python analysis/zee.py --runmode "eval" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}" --hash_post_genesis "S1-${CONFIG}__eval" --run_id "S2-run-${CONFIG}" --evaltag "S3__mixed-eval"
+python analysis/zee.py --runmode "eval" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}" --hash_post_genesis "S1-${CONFIG}__eval" --run_id "S2-run" --evaltag "S3__mixed-eval"

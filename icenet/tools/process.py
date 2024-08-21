@@ -305,7 +305,12 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         run_id     = f'{aux.get_datetime()}_{socket.gethostname().split(".")[0]}'
         run_id_now = copy.deepcopy(run_id)
         
-        if runmode == 'eval' or runmode == 'deploy':
+        if runmode == 'train':
+            
+            if cli_dict['run_id'] != 'latest':
+                run_id = cli_dict['run_id']
+        
+        elif runmode == 'eval' or runmode == 'deploy':
             
             if cli_dict['run_id'] == 'latest':
                 
