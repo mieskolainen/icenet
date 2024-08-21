@@ -10,9 +10,10 @@ import xgboost
 import copy
 from tqdm import tqdm
 import pickle
+import gc
 
 # icenet
-from icenet.tools import aux, stx, plots, reweight
+from icenet.tools import aux, stx, plots, io
 from icenet.deep import autogradxgb, optimize, losstools, tempscale, deeptools
 from icefit import mine, cortools
 
@@ -560,6 +561,10 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     X_trn, ids_trn = aux.red(X=data_trn.x, ids=data_trn.ids, param=param, verbose=True)  # variable reduction
     X_val, ids_val = aux.red(X=data_val.x, ids=data_val.ids, param=param, verbose=False) # variable reduction
     
+    # Create input xgboost frames
+    dtrain = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)    
+    deval  = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val if not out_weights_on else None, feature_names=ids_val)
+    
     # -------------------------------------------
     # Special optimization parameters
     
@@ -581,12 +586,10 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             sigma2 = noise_reg * deeptools.sigmoid_schedule(t=epoch, N_max=num_epochs)
             X_trn  = np.sqrt(1-sigma2) * X_trn_orig + np.sqrt(sigma2) * np.random.normal(size=X_trn.shape)
             
+            dtrain = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)    
+
             print(f'Noise regularization sigma2 = {sigma2:0.4f}')
         # ---------------------------------------
-        
-        # Create input xgboost frames
-        dtrain = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)    
-        deval  = xgboost.DMatrix(data=X_val, label = data_val.y,  weight = w_val if not out_weights_on else None, feature_names=ids_val)
         
         ## What to evaluate
         if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:
@@ -624,7 +627,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     skip_hessian = False
                 else:
                     skip_hessian = True
-
+                
                 a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, skip_hessian=skip_hessian, device=device)
                 a['params']['disable_default_eval_metric'] = 1
             
@@ -635,7 +638,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     skip_hessian = False
                 else:
                     skip_hessian = True
-
+                
                 a['obj'] = autogradxgb.XgboostObjective(loss_func=_sliced_wasserstein, skip_hessian=skip_hessian, device=device)
                 a['params']['disable_default_eval_metric'] = 1
             
@@ -690,6 +693,11 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             
             else:
                 eval_loss = results['eval'][model_param['eval_metric'][0]][0] # Collect the value
+            
+            if torch.cuda.is_available():        
+                io.showmem_cuda()
+            else:
+                io.showmem()
         
         # ==============================================
         # Collect values
@@ -738,6 +746,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             with open(filename + '.pkl', 'wb') as file:
                 data = {'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': epoch, 'param': param}
                 pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+        
+        
+        gc.collect() #!
     
     
     # Report only once after all boost iterations

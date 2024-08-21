@@ -365,8 +365,19 @@ def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, norm_wei
                                                     norm_weights=norm_weights,
                                                     mode=mode)
 
-    return loss_uv
+    print(f'before: {loss_uv}')
     
+    # Overall statistics scale normalization (based on class = 1) done afterwards
+    if (norm_weights == False):
+        if v_weights is not None:
+            loss_uv = loss_uv / torch.sum(v_weights)
+        else:
+            loss_uv = loss_uv / torch.sum(v_idx)
+    
+    print(f'after: {loss_uv}')
+    
+    return loss_uv
+
 def Lq_binary_loss(logits, y, q, weights=None):
     """
     L_q Bernoulli loss

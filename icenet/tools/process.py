@@ -1677,6 +1677,8 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                                          targetdir=targetdir + '/OBS_reweight', num_cpus=args['num_cpus'])
             
             plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
+
+            gc.collect() #!
         
         # ** Set filtered **
         if 'set_filter' in args['plot_param']['OBS_reweight']:

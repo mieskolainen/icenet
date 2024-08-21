@@ -13,6 +13,7 @@ from prettytable import PrettyTable
 import multiprocessing
 import time
 from tqdm import tqdm
+import pandas as pd
 
 from iceplot import iceplot
 from icefit import statstools
@@ -1465,6 +1466,29 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         # Print stats
         prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
             header=f'Step 5. Total weights sum renormalized [wrt. class ID = {RN_ID}] | {ratio}', write_mode='a')
+    
+    
+    # ===================================================
+    # Save data to a parquet file
+    
+    if param['save_parquet']:
+        
+        # Create DataFrame
+        df_X       = pd.DataFrame(X,       columns=ids)
+        df_y       = pd.DataFrame(y,       columns=['y'])
+        df_y_pred  = pd.DataFrame(y_pred,  columns=['y_pred'])
+        df_weights = pd.DataFrame(weights, columns=['weights'])
+        df_AIw0    = pd.DataFrame(AIw0,    columns=['AIw0'])
+
+        # Concatenate all into one DataFrame
+        df = pd.concat([df_X, df_y, df_y_pred, df_weights, df_AIw0], axis=1)
+        
+        # Save to a parquet file
+        parquet_file = f'{local_dir}/dataframe.parquet'
+        df.to_parquet(parquet_file, index=False, compression='gzip')
+        
+        print(f'Saved dataframe to a parquet file with gzip compression: {parquet_file}')
+    
     
     # ===================================================
     # Visualization

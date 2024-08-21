@@ -49,6 +49,8 @@ OBS_reweight:
   
   active: true
   
+  save_parquet: true      # Save data and results to a parquet file
+  
   # Operation mode
   transform_mode: 'LR'    # 'LR' [f / (1 - f)],
                           # 'inverse-LR' [(1 - f) / f],

@@ -47,14 +47,14 @@ iceboost3D:
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
-  SWD_param:
-    beta: 1.0e-3
-    p: 1                  # p-norm (1,2, ...)
-    num_slices: 500       # Number of MC projections (Higher the better) 
-    mode: 'SWD'           # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
-    max_N: 400000         # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
-    var: ['.*']           # Use all variables in SWD
-    norm_weights: False   # Normalization enforced (if False, model should learn to keep the normalization)
+  #SWD_param:
+  #  beta: 1.0e-3
+  #  p: 1                  # p-norm (1,2, ...)
+  #  num_slices: 500       # Number of MC projections (Higher the better) 
+  #  mode: 'SWD'           # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
+  #  max_N: 400000         # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
+  #  var: ['.*']           # Use all variables in SWD
+  #  norm_weights: False   # Normalization enforced (if False, model should learn to keep the normalization)
   
   tensorboard: true
   plot_trees: false
@@ -104,6 +104,10 @@ xgb0:
     # learning task parameters
     objective: 'binary:logistic'  # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']      # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  # Special optimization
+  opt_param:
+    noise_reg: 0.1                # Scheduled noise regularization
   
   tensorboard: true
   plot_trees: false
