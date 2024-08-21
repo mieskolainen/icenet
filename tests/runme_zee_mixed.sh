@@ -13,8 +13,8 @@ CONFIG="tune0_EEp.yml"
 
 # Step 1. Produce output (cache) files with all sign events
 python analysis/zee.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH --supertune "drop_negative=False"
-python analysis/zee.py --runmode "train"   $MAX --config $CONFIG --datapath $DATAPATH --supertune "drop_negative=False" --compute 0
-python analysis/zee.py --runmode "eval"    $MAX --config $CONFIG --datapath $DATAPATH --supertune "drop_negative=False" --compute 0
+python analysis/zee.py --runmode "train"   $MAX --config $CONFIG --datapath $DATAPATH --compute 0
+python analysis/zee.py --runmode "eval"    $MAX --config $CONFIG --datapath $DATAPATH --compute 0
 
 # Step 2. Default training with only positive sign events
 python analysis/zee.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH
