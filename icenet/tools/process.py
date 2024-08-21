@@ -53,25 +53,30 @@ def read_cli():
     parser = argparse.ArgumentParser()
     
     ## argparse.SUPPRESS removes argument from the namespace if not passed
-    parser.add_argument("--runmode",         type=str,  default='all')
-    parser.add_argument("--config",          type=str,  default='tune0.yml')
-    parser.add_argument("--datapath",        type=str,  default='')
-    parser.add_argument("--datasets",        type=str,  default='')
+    parser.add_argument("--runmode",           type=str,  default='all')
+    parser.add_argument("--config",            type=str,  default='tune0.yml')
+    parser.add_argument("--datapath",          type=str,  default='')
+    parser.add_argument("--datasets",          type=str,  default='')
     
-    parser.add_argument("--maxevents",       type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
-    parser.add_argument("--use_conditional", type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
-    parser.add_argument("--use_cache",       type=int,  default=1)
-    parser.add_argument("--fastplot",        type=int,  default=0)
+    parser.add_argument("--maxevents",         type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
+    parser.add_argument("--use_conditional",   type=int,  default=argparse.SUPPRESS) # GLOBAL POWER CONTROL
     
-    parser.add_argument("--grid_id",         type=int,  default=0)    # Condor/Oracle execution variables
-    parser.add_argument("--grid_nodes",      type=int,  default=1)    # Condor/Oracle
+    parser.add_argument("--compute",           type=int,  default=1)    # allow to skip train/eval computations
+    parser.add_argument("--use_cache",         type=int,  default=1)
+    parser.add_argument("--fastplot",          type=int,  default=0)
     
-    parser.add_argument("--inputmap",        type=str,  default=None)
-    parser.add_argument("--modeltag",        type=str,  default=None) # Use this for multiple parallel runs
-    parser.add_argument("--run_id",          type=str,  default='latest')
+    parser.add_argument("--hash_genesis",      type=str,  default=None) # override control
+    parser.add_argument("--hash_post_genesis", type=str,  default=None)
     
-    parser.add_argument("--num_cpus",        type=int,  default=0)    # Fixed number of CPUs
-    parser.add_argument("--supertune",       type=str,  default=None) # Generic cli override
+    parser.add_argument("--grid_id",           type=int,  default=0)    # Condor/Oracle execution variables
+    parser.add_argument("--grid_nodes",        type=int,  default=1)    # Condor/Oracle
+    
+    parser.add_argument("--inputmap",          type=str,  default=None)
+    parser.add_argument("--modeltag",          type=str,  default=None) # Use this for multiple parallel runs
+    parser.add_argument("--run_id",            type=str,  default='latest')
+    
+    parser.add_argument("--num_cpus",          type=int,  default=0)    # Fixed number of CPUs
+    parser.add_argument("--supertune",         type=str,  default=None) # Generic cli override
     
     cli      = parser.parse_args()
     cli_dict = vars(cli)
@@ -347,13 +352,26 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # "Simplified" data reader
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
     
+    
+    # -------------------------------------------------------------------
     # Technical
     args['__use_cache__']       = bool(cli_dict['use_cache'])
+    args['__compute__']         = bool(cli_dict['compute'])
     args['__raytune_running__'] = False
 
+    # Override hashes
+    if cli_dict['hash_genesis'] is not None:
+        print(f"Override 'hash_genesis' with: {cli_dict['hash_genesis']}", 'red')
+        args['__hash_genesis__'] = cli_dict['hash_genesis']
+    
+    if cli_dict['hash_post_genesis'] is not None:
+        print(f"Override 'hash_post_genesis' with: {cli_dict['hash_post_genesis']}", 'red')
+        args['__hash_post_genesis__'] = cli_dict['hash_post_genesis']
+    
     # Distributed computing
     for key in ['grid_id', 'grid_nodes']:
         args[key] = cli_dict[key]
+    
     
     # -------------------------------------------------------------------
     ## Create aux dirs
@@ -402,25 +420,27 @@ def generic_flow(rootname, func_loader, func_factor):
         
         data = read_data_processed(args=args, func_loader=func_loader,
                 func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
-        
-    if runmode == 'train':
-        
-        output_file = f'{args["plotdir"]}/train/stats_train.log'
-        prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
-        
-        make_plots(data=data['trn'], args=args, runmode=runmode)
-        
-        train_models(data_trn=data['trn'], data_val=data['val'], args=args)
-
-    if runmode == 'eval':
-        
-        output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
-        prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)
-        
-        make_plots(data=data['tst'], args=args, runmode=runmode)
-        
-        evaluate_models(data=data['tst'], info=data['info'], args=args)
     
+    if args['__compute__']:
+        
+        if runmode == 'train':
+            
+            output_file = f'{args["plotdir"]}/train/stats_train.log'
+            prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
+            
+            make_plots(data=data['trn'], args=args, runmode=runmode)
+            
+            train_models(data_trn=data['trn'], data_val=data['val'], args=args)
+
+        if runmode == 'eval':
+            
+            output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
+            prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)
+            
+            make_plots(data=data['tst'], args=args, runmode=runmode)
+            
+            evaluate_models(data=data['tst'], info=data['info'], args=args)
+        
     return args, runmode
 
 # -------------------------------------------------------------------
