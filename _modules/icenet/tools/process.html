@@ -829,7 +829,12 @@
         <span class="n">run_id</span>     <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">aux</span><span class="o">.</span><span class="n">get_datetime</span><span class="p">()</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="n">run_id_now</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
         
-        <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span> <span class="ow">or</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;deploy&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;latest&#39;</span><span class="p">:</span>
+                <span class="n">run_id</span> <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span>
+        
+        <span class="k">elif</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span> <span class="ow">or</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;deploy&#39;</span><span class="p">:</span>
             
             <span class="k">if</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;latest&#39;</span><span class="p">:</span>
                 
