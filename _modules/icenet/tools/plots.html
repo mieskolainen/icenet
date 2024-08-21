@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.2.1
+                0.1.2.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -532,6 +532,7 @@
 <span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">iceplot</span> <span class="kn">import</span> <span class="n">iceplot</span>
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">statstools</span>
@@ -2055,6 +2056,29 @@
         <span class="c1"># Print stats</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">print_weights</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">AIw0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">AIw0</span><span class="p">)),</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
             <span class="n">header</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Step 5. Total weights sum renormalized [wrt. class ID = </span><span class="si">{</span><span class="n">RN_ID</span><span class="si">}</span><span class="s1">] | </span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">write_mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    
+    
+    <span class="c1"># ===================================================</span>
+    <span class="c1"># Save data to a parquet file</span>
+    
+    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;save_parquet&#39;</span><span class="p">]:</span>
+        
+        <span class="c1"># Create DataFrame</span>
+        <span class="n">df_X</span>       <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span>       <span class="n">columns</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+        <span class="n">df_y</span>       <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">y</span><span class="p">,</span>       <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+        <span class="n">df_y_pred</span>  <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span>  <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;y_pred&#39;</span><span class="p">])</span>
+        <span class="n">df_weights</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weights&#39;</span><span class="p">])</span>
+        <span class="n">df_AIw0</span>    <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">AIw0</span><span class="p">,</span>    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AIw0&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Concatenate all into one DataFrame</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_X</span><span class="p">,</span> <span class="n">df_y</span><span class="p">,</span> <span class="n">df_y_pred</span><span class="p">,</span> <span class="n">df_weights</span><span class="p">,</span> <span class="n">df_AIw0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Save to a parquet file</span>
+        <span class="n">parquet_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">local_dir</span><span class="si">}</span><span class="s1">/dataframe.parquet&#39;</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">parquet_file</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saved dataframe to a parquet file with gzip compression: </span><span class="si">{</span><span class="n">parquet_file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
     
     <span class="c1"># ===================================================</span>
     <span class="c1"># Visualization</span>

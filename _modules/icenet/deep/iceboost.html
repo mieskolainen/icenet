@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.2.1
+                0.1.2.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -529,9 +529,10 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">gc</span>
 
 <span class="c1"># icenet</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">stx</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">reweight</span>
+<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">stx</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">autogradxgb</span><span class="p">,</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">tempscale</span><span class="p">,</span> <span class="n">deeptools</span>
 <span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span><span class="p">,</span> <span class="n">cortools</span>
 
@@ -1087,6 +1088,10 @@
     <span class="n">X_trn</span><span class="p">,</span> <span class="n">ids_trn</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># variable reduction</span>
     <span class="n">X_val</span><span class="p">,</span> <span class="n">ids_val</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data_val</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data_val</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># variable reduction</span>
     
+    <span class="c1"># Create input xgboost frames</span>
+    <span class="n">dtrain</span> <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X_trn</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">y</span> <span class="k">if</span> <span class="n">y_soft</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">w_trn</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">out_weights_on</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">ids_trn</span><span class="p">)</span>    
+    <span class="n">deval</span>  <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X_val</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data_val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>  <span class="n">weight</span> <span class="o">=</span> <span class="n">w_val</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">out_weights_on</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">ids_val</span><span class="p">)</span>
+    
     <span class="c1"># -------------------------------------------</span>
     <span class="c1"># Special optimization parameters</span>
     
@@ -1108,12 +1113,10 @@
             <span class="n">sigma2</span> <span class="o">=</span> <span class="n">noise_reg</span> <span class="o">*</span> <span class="n">deeptools</span><span class="o">.</span><span class="n">sigmoid_schedule</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">N_max</span><span class="o">=</span><span class="n">num_epochs</span><span class="p">)</span>
             <span class="n">X_trn</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">sigma2</span><span class="p">)</span> <span class="o">*</span> <span class="n">X_trn_orig</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">X_trn</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             
+            <span class="n">dtrain</span> <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X_trn</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">y</span> <span class="k">if</span> <span class="n">y_soft</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">w_trn</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">out_weights_on</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">ids_trn</span><span class="p">)</span>    
+
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Noise regularization sigma2 = </span><span class="si">{</span><span class="n">sigma2</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="c1"># ---------------------------------------</span>
-        
-        <span class="c1"># Create input xgboost frames</span>
-        <span class="n">dtrain</span> <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X_trn</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data_trn</span><span class="o">.</span><span class="n">y</span> <span class="k">if</span> <span class="n">y_soft</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">y_soft</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">w_trn</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">out_weights_on</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">ids_trn</span><span class="p">)</span>    
-        <span class="n">deval</span>  <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X_val</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">data_val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>  <span class="n">weight</span> <span class="o">=</span> <span class="n">w_val</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">out_weights_on</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">ids_val</span><span class="p">)</span>
         
         <span class="c1">## What to evaluate</span>
         <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">((</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;evalmode&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
@@ -1151,7 +1154,7 @@
                     <span class="n">skip_hessian</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">skip_hessian</span> <span class="o">=</span> <span class="kc">True</span>
-
+                
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">autogradxgb</span><span class="o">.</span><span class="n">XgboostObjective</span><span class="p">(</span><span class="n">loss_func</span><span class="o">=</span><span class="n">_binary_cross_entropy</span><span class="p">,</span> <span class="n">skip_hessian</span><span class="o">=</span><span class="n">skip_hessian</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="s1">&#39;disable_default_eval_metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             
@@ -1162,7 +1165,7 @@
                     <span class="n">skip_hessian</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">skip_hessian</span> <span class="o">=</span> <span class="kc">True</span>
-
+                
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">autogradxgb</span><span class="o">.</span><span class="n">XgboostObjective</span><span class="p">(</span><span class="n">loss_func</span><span class="o">=</span><span class="n">_sliced_wasserstein</span><span class="p">,</span> <span class="n">skip_hessian</span><span class="o">=</span><span class="n">skip_hessian</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="s1">&#39;disable_default_eval_metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             
@@ -1217,6 +1220,11 @@
             
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">eval_loss</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;eval&#39;</span><span class="p">][</span><span class="n">model_param</span><span class="p">[</span><span class="s1">&#39;eval_metric&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Collect the value</span>
+            
+            <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>        
+                <span class="n">io</span><span class="o">.</span><span class="n">showmem_cuda</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
         
         <span class="c1"># ==============================================</span>
         <span class="c1"># Collect values</span>
@@ -1265,6 +1273,9 @@
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="n">ids_trn</span><span class="p">,</span> <span class="s1">&#39;losses&#39;</span><span class="p">:</span> <span class="n">losses</span><span class="p">,</span> <span class="s1">&#39;epoch&#39;</span><span class="p">:</span> <span class="n">epoch</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
                 <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+        
+        
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span> <span class="c1">#!</span>
     
     
     <span class="c1"># Report only once after all boost iterations</span>

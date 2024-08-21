@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.2.1
+                0.1.2.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -2234,6 +2234,8 @@
                                          <span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/OBS_reweight&#39;</span><span class="p">,</span> <span class="n">num_cpus</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">])</span>
             
             <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">chi2_table</span><span class="o">=</span><span class="n">chi2_table</span><span class="p">)</span>
+
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span> <span class="c1">#!</span>
         
         <span class="c1"># ** Set filtered **</span>
         <span class="k">if</span> <span class="s1">&#39;set_filter&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">]:</span>
