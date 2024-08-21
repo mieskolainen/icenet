@@ -31,11 +31,12 @@ ADDITIONAL_VARS = [
 # Use these to test that the (re-weight trained) classifier
 # is independent of these
 UNIT_TEST_ID = [
-    'gsf_pt',
-    'gsf_eta',
-    'rho',
+    'gsf_pt','gsf_eta',
+#    'gsf_pt','rho',
+#    'gsf_pt','gsf_eta','rho',
 ]
 
+# ID BDT variables (obsolete?)
 CMSSW_MVA_SCALAR_VARS_ORIG = [
     'gsf_bdtout1',
     'eid_rho',
@@ -62,6 +63,36 @@ CMSSW_MVA_SCALAR_VARS_ORIG = [
     'eid_trk_p',
 ]
 
+# Seeding BDT variables
+CMSSW_MVA_SCALAR_VARS_RunIIAutumn18 = [
+    "RunIIAutumn18_trk_pt",
+    "RunIIAutumn18_trk_eta",
+    "RunIIAutumn18_trk_phi",
+    "RunIIAutumn18_trk_p",
+    "RunIIAutumn18_trk_nhits",
+    "RunIIAutumn18_trk_high_quality",
+    "RunIIAutumn18_trk_chi2red",
+    "RunIIAutumn18_rho",
+    "RunIIAutumn18_ktf_ecal_cluster_e",
+    "RunIIAutumn18_ktf_ecal_cluster_deta",
+    "RunIIAutumn18_ktf_ecal_cluster_dphi",
+    "RunIIAutumn18_ktf_ecal_cluster_e3x3",
+    "RunIIAutumn18_ktf_ecal_cluster_e5x5",
+    "RunIIAutumn18_ktf_ecal_cluster_covEtaEta",
+    "RunIIAutumn18_ktf_ecal_cluster_covEtaPhi",
+    "RunIIAutumn18_ktf_ecal_cluster_covPhiPhi",
+    "RunIIAutumn18_ktf_ecal_cluster_r9",
+    "RunIIAutumn18_ktf_ecal_cluster_circularity",
+    "RunIIAutumn18_ktf_hcal_cluster_e",
+    "RunIIAutumn18_ktf_hcal_cluster_deta",
+    "RunIIAutumn18_ktf_hcal_cluster_dphi",
+    "RunIIAutumn18_gsf_dpt",
+    "RunIIAutumn18_trk_gsf_chiratio",
+    "RunIIAutumn18_gsf_chi2red",
+    "RunIIAutumn18_trk_dxy_sig",
+]
+    
+# ID BDT variables
 CMSSW_MVA_SCALAR_VARS_2019Aug07 = [
     # KF track
     '2019Aug07_trk_p',
@@ -95,6 +126,7 @@ CMSSW_MVA_SCALAR_VARS_2019Aug07 = [
     '2019Aug07_gsf_bdtout1',
 ]
 
+# ID BDT variables
 CMSSW_MVA_SCALAR_VARS_2020Sept15 = [
     # KF track
     '2020Sept15_trk_p',
@@ -197,6 +229,7 @@ KINEMATIC_VARS += ADDITIONAL_VARS
 # CMSSW_MVA_SCALAR_VARS are features used by BDT models
 CMSSW_MVA_SCALAR_VARS = []
 #CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_ORIG
+#CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_RunIIAutumn18
 CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_2019Aug07
 CMSSW_MVA_SCALAR_VARS += CMSSW_MVA_SCALAR_VARS_2020Sept15
 CMSSW_MVA_SCALAR_VARS = list(set(CMSSW_MVA_SCALAR_VARS))

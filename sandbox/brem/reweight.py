@@ -14,7 +14,7 @@ parser = ArgumentParser()
 parser.add_argument('--verbose',action='store_true')
 parser.add_argument('--nevents',default=-1,type=int)
 parser.add_argument('--reweight',action='store_true')
-parser.add_argument('--nbins',default=0,type=int)
+parser.add_argument('--nbins',default=None,type=int)
 args = parser.parse_args()
 print("Command line args:",vars(args))
 
@@ -81,13 +81,11 @@ reweight_features = [
     ['log_trk_pt','rho'],
      ][0]
 
-nbins = args.nbins if args.nbins > 0 else None
-
 # Determine weights and write to file
 df,clusterizer,dct = extract_weights(
     df=df,
     reweight_features=reweight_features,
-    nbins=nbins,
+    nbins=args.nbins,
     base=f'{inputs}',
     filename='weights',
     write=True,
@@ -96,7 +94,7 @@ df,clusterizer,dct = extract_weights(
 df,clusterizer,weights_dct = extract_weights(
     df=df,
     reweight_features=reweight_features,
-    nbins=nbins,
+    nbins=args.nbins,
     base=f'{inputs}',
     filename='weights',
     write=False,

@@ -4,11 +4,19 @@
 # 
 # Run with: maxevents=10000; source runme.sh
 
-CONFIG="tune0_reweight.yml"
-DATAPATH="."
-MCMAP="map_mc_test.yml" # uses travis-stash/input/icebrem
+ICEPATH=/home/hep/rjb3/work/icenet
+cd $ICEPATH
+echo "$(pwd)"
+#echo "superclean ..."; rm -f -r $ICEPATH/output/*; rm -f -r $ICEPATH/figs/*; rm -f -r $ICEPATH/checkpoint/*; rm -f -r $ICEPATH/tmp/*
+source $ICEPATH/setconda.sh
+conda activate icenet
+source $ICEPATH/setenv.sh
+
+CONFIG="tune0.yml"
+DATAPATH="/vols/cms/bainbrid/ntuples/icenet/"
+#MCMAP="map_mc_test.yml" # uses travis-stash/input/icebrem
 #MCMAP="map_mc.yml" # local-stash
-#MCMAP="map_mc_large.yml" # large-stash
+MCMAP="map_mc_large.yml" # large-stash
 #DATASETS="output_*.root"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi

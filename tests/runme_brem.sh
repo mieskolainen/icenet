@@ -5,8 +5,10 @@
 # Run with: maxevents=10000; source runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="./travis-stash/input/icebrem"
-MCMAP="mc_map.yml"
+DATAPATH="/vols/cms/bainbrid/ntuples/icenet/"
+MCMAP="map_mc_test.yml" # uses travis-stash/input/icebrem
+#MCMAP="map_mc.yml" # local-stash
+#MCMAP="map_mc_large.yml" # large-stash
 #DATASETS="output_*.root"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi

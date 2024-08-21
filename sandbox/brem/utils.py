@@ -214,9 +214,7 @@ def extract_weights(
             dct['counts'][int(cluster)] = float(min(n_sig,n_bkg))
             n_sig_tot += n_sig
             n_bkg_tot += n_bkg
-            print(cluster,n_sig,n_bkg,n_sig+n_bkg,len(group))
         dct['features'] = reweight_features
-        print(n_sig_tot,n_bkg_tot,n_sig_tot+n_bkg_tot,len(df.index))
         with open(f'{base}/{filename}.json','w') as f : json.dump(dct,f)
         print(f'Written weights to file "{base}/{filename}.json"')
     else:

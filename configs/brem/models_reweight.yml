@@ -5,10 +5,12 @@ xgb0:
   predict: 'xgb'
   label:   'Reweight'
   raytune:  'xgb_setup'
-  # exclude_MVA_vars: ['.*']
-  # include_MVA_vars: ['trk_pt', 'trk_eta', 'rho']
-  
+  exclude_MVA_vars: ['.*']
+  include_MVA_vars: ['gsf_pt','gsf_eta']
+#  include_MVA_vars: ['gsf_pt','rho']
+
   # general parameters
+  # defaults: https://xgboost.readthedocs.io/en/latest/python/python_api.html#xgboost.XGBClassifier
   model_param:
     num_boost_round: 100    # number of epochs (equal to the number of trees!)
     
@@ -21,14 +23,14 @@ xgb0:
     gamma: 0.0
     max_depth: 10
     min_child_weight: 1.0
-    max_delta_step: 1
+    max_delta_step: 0
     subsample: 1
 
     colsample_bytree:  1
     colsample_bylevel: 1
     colsample_bynode:  1
     
-    reg_lambda: 2.0       # L2 regularization
+    reg_lambda: 1.0       # L2 regularization
     reg_alpha: 0.0        # L1 regularization
     
     # learning task parameters
@@ -41,3 +43,77 @@ xgb0:
   # Read/Write of epochs
   evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+xgb3Drw:
+  train:   'xgb'
+  predict: 'xgb_logistic'
+  label:   'XGB3DRW'
+  raytune:  xgb_trial_0
+  
+  # ** Custom set of variables **
+  exclude_MVA_vars: ['.*']
+  include_MVA_vars: ['gsf_pt','gsf_eta']
+#  include_MVA_vars: ['gsf_pt','rho']
+  
+  # booster parameters
+  model_param:
+    num_boost_round: 100      # number of epochs (equal to the number of trees!)
+    
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'       # 'auto', 'cpu', 'cuda'
+    
+    learning_rate: 0.1
+    gamma: 1.5
+    max_depth: 15
+    min_child_weight: 1.0
+    max_delta_step: 1.0
+    subsample: 1
+    
+    colsample_bytree:  1.0
+    colsample_bylevel: 1.0
+    colsample_bynode:  1.0
+    
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
+    
+    # learning task parameters
+    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0,1]
+      beta: 1.0
+      #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  plot_trees: False
+  
+  # Read/Write of epochs
+  evalmode: 1                   # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                  # -1 is the last saved epoch
+
+cut0:
+  train:    'cut'
+  predict:  'cut'
+  label:    'gsf_pt'
+  variable: 'gsf_pt'
+  sign: 1
+  transform: null
+
+cut1:
+  train:    'cut'
+  predict:  'cut'
+  label:    'gsf_eta'
+  variable: 'gsf_eta'
+  sign: -1
+  transform: np.abs
+
+cut2:
+  train:    'cut'
+  predict:  'cut'
+  label:    'rho'
+  variable: 'rho'
+  sign: -1
+  transform: null
