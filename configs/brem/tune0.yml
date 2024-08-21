@@ -112,7 +112,7 @@ train_runmode:
   models:  !include configs/brem/models.yml
   active_models: &ACTIVE_MODELS
 
-    - xgb0
+#    - xgb0
     - xgb1
     - cut0
     - cut1

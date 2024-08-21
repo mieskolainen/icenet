@@ -13,10 +13,10 @@ conda activate icenet
 source $ICEPATH/setenv.sh
 
 CONFIG="tune0.yml"
-DATAPATH="/home/hep/rjb3/vols/ntuples/icenet/"
-MCMAP="map_mc_test.yml" # uses travis-stash/input/icebrem
+DATAPATH="/vols/cms/bainbrid/ntuples/icenet/"
+#MCMAP="map_mc_test.yml" # uses travis-stash/input/icebrem
 #MCMAP="map_mc.yml" # local-stash
-#MCMAP="map_mc_large.yml" # large-stash
+MCMAP="map_mc_large.yml" # large-stash
 #DATASETS="output_*.root"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
@@ -24,4 +24,3 @@ if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 python analysis/brem.py --runmode genesis --config $CONFIG --datapath $DATAPATH --inputmap $MCMAP $MAX
 python analysis/brem.py --runmode train   --config $CONFIG --datapath $DATAPATH --inputmap $MCMAP $MAX
 python analysis/brem.py --runmode eval    --config $CONFIG --datapath $DATAPATH --inputmap $MCMAP $MAX
-date # print date/time
