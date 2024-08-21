@@ -1474,14 +1474,18 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     if param['save_parquet']:
         
         # Create DataFrame
-        df_X       = pd.DataFrame(X,       columns=ids)
-        df_y       = pd.DataFrame(y,       columns=['y'])
-        df_y_pred  = pd.DataFrame(y_pred,  columns=['y_pred'])
-        df_weights = pd.DataFrame(weights, columns=['weights'])
-        df_AIw0    = pd.DataFrame(AIw0,    columns=['AIw0'])
-
+        df_X         = pd.DataFrame(X,         columns=ids)
+        df_y         = pd.DataFrame(y,         columns=['y'])
+        df_y_pred    = pd.DataFrame(y_pred,    columns=['y_pred'])
+        df_w_post_S1 = pd.DataFrame(weights,   columns=['w_post_S1'])
+        
+        w_post_S2    = copy.deepcopy(weights)
+        w_post_S2[y == C0] = AIw0 # only C0
+        
+        df_w_post_S2 = pd.DataFrame(w_post_S2, columns=['w_post_S2'])
+        
         # Concatenate all into one DataFrame
-        df = pd.concat([df_X, df_y, df_y_pred, df_weights, df_AIw0], axis=1)
+        df = pd.concat([df_X, df_y, df_y_pred, df_w_post_S1, df_w_post_S2], axis=1)
         
         # Save to a parquet file
         parquet_file = f'{local_dir}/dataframe.parquet'
