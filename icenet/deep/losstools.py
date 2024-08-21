@@ -364,10 +364,11 @@ def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, norm_wei
                                                     p=p, num_slices=num_slices,
                                                     norm_weights=norm_weights,
                                                     mode=mode)
-
-    print(f'before: {loss_uv}')
+    """
+    # Overall statistics scale normalization (based on class = 1) done afterwards [experimental]
     
-    # Overall statistics scale normalization (based on class = 1) done afterwards
+    print(f'before: {loss_uv}')
+
     if (norm_weights == False):
         if v_weights is not None:
             loss_uv = loss_uv / torch.sum(v_weights)
@@ -375,6 +376,7 @@ def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, norm_wei
             loss_uv = loss_uv / torch.sum(v_idx)
     
     print(f'after: {loss_uv}')
+    """
     
     return loss_uv
 
