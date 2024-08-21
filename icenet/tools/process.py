@@ -73,6 +73,8 @@ def read_cli():
     
     parser.add_argument("--inputmap",          type=str,  default=None)
     parser.add_argument("--modeltag",          type=str,  default=None) # Use this for multiple parallel runs
+    parser.add_argument("--evaltag",           type=str,  default=None) # Use this for custom output plot directory for evaluation
+    
     parser.add_argument("--run_id",            type=str,  default='latest')
     
     parser.add_argument("--num_cpus",          type=int,  default=0)    # Fixed number of CPUs
@@ -343,6 +345,10 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         args['modeldir'] = aux.makedir(f"{args['modeldir']}/{run_id}")
         args['plotdir']  = aux.makedir(f"{args['plotdir']}/{run_id}")
         
+        if runmode == 'eval' and cli_dict['evaltag'] is not None:
+            args['plotdir'] = aux.makedir(f"{args['plotdir']}/{run_id}/evaltag__{cli_dict['evaltag']}")
+            print(f'Changing eval directory to {args['plotdir']}', 'red')
+        
         # ----------------------------------------------------------------
         ## Save args to yaml as a checkpoint of the run configuration
         dir = aux.makedir(f'{args["plotdir"]}/{runmode}')
@@ -355,6 +361,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     # -------------------------------------------------------------------
     # Technical
+    
     args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__compute__']         = bool(cli_dict['compute'])
     args['__raytune_running__'] = False
@@ -554,6 +561,9 @@ def read_data(args, func_loader, runmode):
 
         toc = time.time() - tic
         print(f'Saving took {toc:0.2f} sec')
+        
+        # Save args
+        aux.yaml_dump(data=args, filename=f'{args["datadir"]}/data_{args["__hash_genesis__"]}.yml')
         
         """
         # OLD code
