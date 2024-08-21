@@ -906,19 +906,17 @@
                                                     <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span>
                                                     <span class="n">norm_weights</span><span class="o">=</span><span class="n">norm_weights</span><span class="p">,</span>
                                                     <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    # Overall statistics scale normalization (based on class = 1) done afterwards [experimental]</span>
-<span class="sd">    </span>
-<span class="sd">    print(f&#39;before: {loss_uv}&#39;)</span>
 
-<span class="sd">    if (norm_weights == False):</span>
-<span class="sd">        if v_weights is not None:</span>
-<span class="sd">            loss_uv = loss_uv / torch.sum(v_weights)</span>
-<span class="sd">        else:</span>
-<span class="sd">            loss_uv = loss_uv / torch.sum(v_idx)</span>
-<span class="sd">    </span>
-<span class="sd">    print(f&#39;after: {loss_uv}&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;before: </span><span class="si">{</span><span class="n">loss_uv</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Overall statistics scale normalization (based on class = 1) done afterwards</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">norm_weights</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss_uv</span> <span class="o">=</span> <span class="n">loss_uv</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v_weights</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">loss_uv</span> <span class="o">=</span> <span class="n">loss_uv</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v_idx</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;after: </span><span class="si">{</span><span class="n">loss_uv</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">loss_uv</span></div>
 
