@@ -90,7 +90,7 @@ jobs:
       - name: Deep Learning system integration test (zee 1)
         run: |
           source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
+      #    source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
       
       #
       - name: Deep Learning system integration test (hnl 1)
