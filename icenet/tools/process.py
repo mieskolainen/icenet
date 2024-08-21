@@ -347,7 +347,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         
         if runmode == 'eval' and cli_dict['evaltag'] is not None:
             args['plotdir'] = aux.makedir(f"{args['plotdir']}/{run_id}/evaltag__{cli_dict['evaltag']}")
-            print(f'Changing eval directory to {args['plotdir']}', 'red')
+            print(f'Changing eval plotdir to: {args["plotdir"]}', 'red')
         
         # ----------------------------------------------------------------
         ## Save args to yaml as a checkpoint of the run configuration
