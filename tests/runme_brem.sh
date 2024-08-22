@@ -5,7 +5,8 @@
 # Run with: maxevents=10000; source runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="/vols/cms/bainbrid/ntuples/icenet/"
+#DATAPATH="/vols/cms/bainbrid/ntuples/icenet/"
+DATAPATH="./"
 MCMAP="map_mc_test.yml" # uses travis-stash/input/icebrem
 #MCMAP="map_mc.yml" # local-stash
 #MCMAP="map_mc_large.yml" # large-stash
