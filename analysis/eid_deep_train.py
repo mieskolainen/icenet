@@ -1,6 +1,6 @@
 # Electron ID [DEEP BATCHED TRAINING] steering code
 #
-# m.mieskolainen@imperial.ac.uk, 2022
+# m.mieskolainen@imperial.ac.uk, 2024
 
 # icenet system paths
 import sys
@@ -10,23 +10,12 @@ sys.path.append(".")
 import matplotlib
 matplotlib.use('Agg')
 
-import uproot
-import math
 import numpy as np
 import torch
 import torch_geometric
 from matplotlib import pyplot as plt
 
-import argparse
-import pprint
-import os
-import datetime
-import json
-import yaml
-
-import pickle
 import sys
-import copy
 from termcolor import cprint
 
 # icenet
@@ -44,10 +33,11 @@ from icenet.deep  import train
 from icenet.tools import process
 import icenet.deep as deep
 
+
 # iceid
 from iceid import common
 from iceid import graphio
-from configs.eid.mvavars import *
+from configs.eid.mvavars import * # global import
 
 
 def get_model(gdata, args, param):
@@ -77,14 +67,14 @@ def compute_reweight(root_files, num_events, args):
     index        = 0 # Use the first file by default
     cprint(__name__ + f': Loading from {root_files[index]} for differential re-weight PDFs', 'yellow')
 
-    entry_stop = np.min([args['reweight_param']['maxevents'], num_events[index]])
+    entry_stop = np.min([args['reweight_param']['diff_param']['maxevents'], num_events[index]])
     predata    = common.load_root_file(root_path=[root_files[index]], ids=None, entry_stop=entry_stop, args=args, library='np')
     
 
     X,Y,W,ids  = predata['X'],predata['Y'],predata['W'],predata['ids']
 
     # Compute re-weights
-    _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args['reweight_param'])
+    _, pdf = reweight.compute_ND_reweights(x=X, y=Y, w=W, ids=ids, args=args)
 
     return pdf, X, Y, W, ids
 
@@ -137,8 +127,7 @@ def main():
 
     visited    = False
     N_epochs   = args['batch_train_param']['epochs']
-    block_size = args['batch_train_param']['blocksize']
-
+    
     ### Over each global epoch
     for epoch in range(N_epochs):
 
@@ -179,9 +168,9 @@ def main():
                     # =========================================================================
                     # COMPUTE RE-WEIGHTS
                     
-                    trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=ids, args=args['reweight_param'])
-                    val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=ids, args=args['reweight_param'])
-
+                    trn_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=trn.x, y=trn.y, w=trn.w, ids=ids, args=args)
+                    val_weights,_ = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=ids, args=args)
+                    
                     # =========================================================================
                     ### Parse data into graphs
                     
@@ -196,29 +185,36 @@ def main():
 
                 # =========================================================================
                 ### Train all model over this block of data
+                
                 for ID in model.keys():
                     cprint(__name__ + f' Training model <{ID}>', 'green')
 
-                    train_loader     = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
-                    test_loader      = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
+                    train_loader    = torch_geometric.loader.DataLoader(gdata['trn'], batch_size=param[ID]['opt_param']['batch_size'], shuffle=True)
+                    validate_loader = torch_geometric.loader.DataLoader(gdata['val'], batch_size=512, shuffle=False)
                     
                     # Train
-                    loss             = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
                     
-                    # Evaluate
-                    trn_acc, trn_AUC = deep.optimize.test( model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID])
-                    val_acc, val_AUC = deep.optimize.test( model=model[ID], loader=test_loader,  optimizer=optimizer[ID], device=device[ID])
+                    # Set current epoch (for special scheduling reasons)
+                    param[ID]['opt_param']['current_epoch'] = epoch
+
+                    loss = deep.optimize.train(model=model[ID], loader=train_loader, optimizer=optimizer[ID], device=device[ID], opt_param=param[ID]['opt_param'])
+                    
+                    # Validate
+                    _, trn_acc, trn_AUC        = deep.optimize.test(model=model[ID], loader=train_loader,    device=device[ID], opt_param=param[ID]['opt_param'])
+                    val_loss, val_acc, val_AUC = deep.optimize.test(model=model[ID], loader=validate_loader, device=device[ID], opt_param=param[ID]['opt_param'], compute_loss=True)
                     
                     scheduler[ID].step()
                     
-                    print(f"[epoch: {epoch+1:03d}/{N_epochs:03d} | file: {f+1}/{len(root_files)} | block: {block+1}/{N_blocks} | "
-                        f"train loss: {deep.optimize.printloss(loss)} | train: {trn_acc:.4f} (acc), {trn_AUC:.4f} (AUC) | validate: {val_acc:.4f} (acc), {val_AUC:.4f} (AUC) | lr = {scheduler[ID].get_last_lr()}")
-                    
+                    print(f"Epoch: {epoch+1:03d} / {N_epochs:03d} | file: {f+1} / {len(root_files)} | block: {block+1} / {N_blocks}")
+                    print(f"[train] loss: {deep.optimize.printloss(loss)} | acc: {trn_acc:.4f} | AUC: {trn_AUC:.4f}")
+                    print(f"[eval]  loss: {deep.optimize.printloss(val_loss)} | acc: {val_acc:.4f} | AUC: {val_AUC:.4f}")
+                    print(f"lr = {scheduler[ID].get_last_lr()}")
+                
         ## Save each model per global epoch
         for ID in model.keys():
-            checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict()}
-            torch.save(checkpoint, args['modeldir'] + f'/{param[ID]["label"]}_{epoch}' + '.pth')
-
+            checkpoint = {'model': model[ID], 'state_dict': model[ID].state_dict(), 'epoch': epoch}
+            torch.save(checkpoint, aux.makedir(f'{args["modeldir"]}/{param[ID]["label"]}') + f'/{param[ID]["label"]}_{epoch}.pth')
+        
     print(__name__ + f' [Done!]')
 
 if __name__ == '__main__' :

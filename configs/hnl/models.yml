@@ -35,16 +35,16 @@ MI_REG_PARAM: &MI_REG_PARAM
   
   losstype: 'MINE_EMA'     # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for DEBUG)
   min_count: 32            #  Minimum number of events (per category)
-  max_N: null              #  Maximum number of events per function call (use to limit sample size)
-  min_score: null          #  Consider only events with MVA output larger than this value (null for None)
+  max_N: null              #  Maximum number of events per function call (use to limit sample size for DCORR)
+  min_score: null          #  Consider only events with MVA output [0,1] larger than this value (null for None)
   poisson_weight: True     #  per category Poisson sqrt(N) weighted loss
   
   # ------------------
   # Neural MI param
-
+  
   eval_batch_size: 4096    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  [null]           #  EMA tracking values
+  ma_eT:  [null]           #  EMA tracking values (for each class)
   
   y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
@@ -141,10 +141,11 @@ xgb0:
     objective: 'binary:logistic'    # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']        # for custom losses, otherwise 'logloss', 'mlogloss' ...
 
-  plot_trees: False
+  plot_trees: false
+  tensorboard: true
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -186,10 +187,11 @@ xgb0-red:
     objective: 'binary:logistic'          # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']              # for evaluation, 'logloss', 'mlogloss'
   
-  plot_trees: False
-  
+  plot_trees: false
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -240,13 +242,14 @@ xgb-MI-min:
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
   MI_param:
-    beta: [2.0]                # Positive for minimizing
+    beta: [2.0]                # Positive for minimizing  (for each class in use)
     <<: *MI_REG_PARAM
   
-  plot_trees: False
-  
+  plot_trees: false
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -297,15 +300,20 @@ xgb-MI-max:
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   
   MI_param:
-    beta: [-2.0]       # Negative for maximizing MI
+    beta: [-2.0]       # Negative for maximizing MI  (for each class in use)
     <<: *MI_REG_PARAM
 
-  plot_trees: False
-  
+  plot_trees: false
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
+# -----------------------------------------------------------------------------
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
 
 # Deep MLP
 dmlp0:
@@ -331,7 +339,7 @@ dmlp0:
     gamma: 2                   # focal_entropy exponent
     temperature: 1             # logit norm temperature
     
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -341,17 +349,21 @@ dmlp0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
+  eval_batch_size: 4096
 
+  
 # Deep MLP
 dmlp0-red:
   train:   'torch_generic'
@@ -377,7 +389,7 @@ dmlp0-red:
     gamma: 2                   # focal_entropy exponent
     temperature: 1             # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -387,15 +399,20 @@ dmlp0-red:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
+
 
 # Deep MLP
 dmlp-MI-min:
@@ -421,7 +438,7 @@ dmlp-MI-min:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -431,6 +448,7 @@ dmlp-MI-min:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
   
@@ -442,11 +460,13 @@ dmlp-MI-min:
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
+  eval_batch_size: 4096
 
 # Deep MLP
 dmlp-MI-max:
@@ -472,7 +492,7 @@ dmlp-MI-max:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -482,6 +502,7 @@ dmlp-MI-max:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
   
@@ -493,7 +514,10 @@ dmlp-MI-max:
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096

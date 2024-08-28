@@ -6,8 +6,6 @@
 import numpy as np
 from   tqdm import tqdm
 
-from termcolor import colored, cprint
-
 import torch
 from   torch_geometric.data import Data
 import torch_geometric.transforms as T
@@ -16,6 +14,9 @@ import icenet.algo.analytic as analytic
 from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e9), null_value=-999.0):
     """
@@ -65,8 +66,7 @@ def parse_graph_data_trackster(data, graph_param, weights=None, maxevents=int(1e
         x[~np.isfinite(x)] = null_value # Input protection
         x = torch.tensor(x, dtype=torch.float)
         # --------------------------------------------
-
-
+        
         # --------------------------------------------
         ## ** Construct edge indices **
 

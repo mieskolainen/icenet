@@ -13,15 +13,14 @@ import time
 import multiprocessing
 from importlib import import_module
 
-from termcolor import colored, cprint
-
-from icenet.tools import io
-from icenet.tools import aux
-from icenet.tools import prints
-from icenet.tools import iceroot
+from icenet.tools import io, aux, prints, iceroot
 from icenet.algo import analytic
 from icefit import dequantize
 from icedqcd import graphio
+
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 # GLOBALS
 from configs.dqcd.cuts   import *
@@ -71,7 +70,8 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         proc     = args["input"][key] 
         
         X[key], Y[key], W[key], _, INFO[key] = iceroot.read_multiple(class_id=class_id,
-            process_func=process_root, processes=proc, root_path=root_path, param=param)
+            process_func=process_root, processes=proc, root_path=root_path, param=param,
+            num_cpus=args['num_cpus'])
 
     # =================================================================
     # Sample conditional theory parameters as they are distributed in signal sample
@@ -103,7 +103,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
             rng = np.random.default_rng()
             new = rng.choice(A, axis=0, size=len(X[key]), p=p, replace=True)
             
-            print(__name__ + f'.load_root_file: Sampling theory conditional parameter "{var}" for "{key}"')
+            print(f'Sampling theory conditional parameter "{var}" for "{key}"')
             
             # Set conditional variables 'MODEL_'
             for i in range(len(var)):
@@ -129,7 +129,7 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     Y    = Y[rand]
     W    = W[rand]
 
-    print(__name__ + f'.common.load_root_file: Event counts per class')
+    print(f'Event counts per class')
     unique, counts = np.unique(Y, return_counts=True)
     print(np.asarray((unique, counts)).T)
     
@@ -151,7 +151,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None,
     stats['filterfunc'] = {'before': len(X), 'after': sum(fmask)}
     
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<filterfunc>_{isMC}', varlist=CUT_VARS, library='ak')
-    cprint(__name__ + f'.process_root: isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(fmask)} events ({sum(fmask)/(len(X)+1E-12):0.6f})', 'green')
+    print(f'isMC = {isMC} | <filterfunc>  before: {len(X)}, after: {sum(fmask)} events ({sum(fmask)/(len(X)+1E-12):0.6f})', 'green')
     prints.printbar()
     
     X_new = X[fmask]
@@ -161,7 +161,7 @@ def process_root(X, args, ids=None, isMC=None, return_mask=False, class_id=None,
     stats['cutfunc'] = {'before': len(X_new), 'after': sum(cmask)}
     
     #plots.plot_selection(X=X, mask=mask, ids=ids, plotdir=args['plotdir'], label=f'<cutfunc>_{isMC}', varlist=CUT_VARS, library='ak')
-    cprint(__name__ + f".process_root: isMC = {isMC} | <cutfunc>     before: {len(X_new)}, after: {sum(cmask)} events ({sum(cmask)/(len(X_new)+1E-12):0.6f}) \n", 'green')
+    print(f"isMC = {isMC} | <cutfunc>     before: {len(X_new)}, after: {sum(cmask)} events ({sum(cmask)/(len(X_new)+1E-12):0.6f}) \n", 'green')
     prints.printbar()
     io.showmem()
     
@@ -221,9 +221,9 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
         for var in inputvars.MODEL_VARS:
             try:
                 scalar_vars.remove(var)
-                cprint(__name__ + f'.splitfactor: Removing model conditional var "{var}" from scalar_vars', 'red')
+                print(f'Removing model conditional var "{var}" from scalar_vars', 'red')
             except:
-                cprint(__name__ + f'.splitfactor: Model conditional var "{var}" did not exist in scalar_vars', 'red')
+                print(f'Model conditional var "{var}" did not exist in scalar_vars', 'red')
                 continue
     else:
         
@@ -235,7 +235,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
             
             for var in inputvars.MODEL_VARS:
                 
-                cprint(__name__ + f'.split_factor: Dequantizing conditional "{var}" with iDQF', 'yellow')
+                print(f'Dequantizing conditional "{var}" with iDQF', 'yellow')
                 data.x[var] = dequantize.iDQF(x=ak.to_numpy(ak.ravel(data.x[var])), n_interp=n_interp, kind=kind)
     
     # -------------------------------------------------------------------------
@@ -244,7 +244,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     for d in args['jagged_filter']:
         
         expr = 'data.x.' + d['condition'].strip() # strip to remove leading/trailing spaces
-        cprint(__name__ + f'.splitfactor: Filtering collection {d} with {expr}', 'yellow')
+        print(f'Filtering collection {d} with {expr}', 'yellow')
         
         filter_ind = eval(expr)
         data.x[d['name']] = data.x[d['name']][filter_ind]
@@ -254,7 +254,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     
     for d in args['jagged_order']:
 
-        cprint(__name__ + f'.splitfactor: Collection re-ordering {d}', 'yellow')
+        print(f'Collection re-ordering {d}', 'yellow')
         
         sort_ind = ak.argsort(data.x[d['name']][d['var']], ascending=d['ascending'])
         data.x[d['name']] = data.x[d['name']][sort_ind]
@@ -262,7 +262,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     # -------------------------------------------------------------------------
     ## ** Custom variables added to collections **
     
-    cprint(__name__ + f".splitfactor: Adding custom muonSV variables ...")
+    print(f"Adding custom muonSV variables ...")
     
     ## \DeltaR
     data.x['muonSV', 'deltaR'] = \
@@ -279,7 +279,7 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     jagged_vars.append('muonSV_mass')
     muonsv_vars.append('muonSV_mass')
     
-    cprint(__name__ + f".splitfactor: muonSV.fields = {data.x['muonSV'].fields}", 'yellow')
+    print(f"muonSV.fields = {data.x['muonSV'].fields}", 'yellow')
     
     # -------------------------------------------------------------------------
     ### Pick kinematic variables out
@@ -319,10 +319,15 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
         start_time  = time.time()
         
         big_chunk_size = 10000
-        num_workers    = multiprocessing.cpu_count() // 2
-        big_chunks     = int(np.ceil(len(data.x) / big_chunk_size))
         
-        chunk_ind   = aux.split_start_end(range(len(data.x)), num_workers * big_chunks)
+        if int(args['num_cpus']) == 0:
+            num_workers = multiprocessing.cpu_count() // 2
+        else:
+            num_workers = int(args['num_cpus'])
+        
+        big_chunks = int(np.ceil(len(data.x) / big_chunk_size))
+        chunk_ind  = aux.split_start_end(range(len(data.x)), num_workers * big_chunks)
+        
         print(chunk_ind)
 
         data_graph = []

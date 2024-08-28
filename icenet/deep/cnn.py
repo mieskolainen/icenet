@@ -14,7 +14,7 @@ class CNN_MAXO(nn.Module):
     
     # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
 
-    def __init__(self, D, C, nchannels=1, nrows=32, ncols=32,
+    def __init__(self, D, C, out_dim=None, nchannels=1, nrows=32, ncols=32,
                     dropout_cnn=0.0, mlp_dim=50, num_units=6, dropout_mlp=0.1):
         super(CNN_MAXO, self).__init__()
         
@@ -24,6 +24,11 @@ class CNN_MAXO(nn.Module):
         self.C           = C
         self.dropout_cnn = dropout_cnn
 
+        if out_dim is None:
+            self.out_dim = C
+        else:
+            self.out_dim = out_dim
+            
         # Convolution (feature block) pipeline
         self.block1 = nn.Sequential(
 
@@ -73,7 +78,7 @@ class CNN_MAXO(nn.Module):
             self.fc1_list.append(nn.Linear(self.D + self.Z, mlp_dim))
             nn.init.xavier_normal_(self.fc1_list[-1].weight) # xavier init
             
-            self.fc2_list.append(nn.Linear(mlp_dim, self.C))
+            self.fc2_list.append(nn.Linear(mlp_dim, self.out_dim))
             nn.init.xavier_normal_(self.fc2_list[-1].weight) # xavier init
 
         # -------------------------------------------
@@ -132,7 +137,7 @@ class CNN_MAXO(nn.Module):
 class CNN(nn.Module):
     # Note: MaxPool(Relu(x)) = Relu(MaxPool(x))
 
-    def __init__(self, C, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.0, dropout_mlp=0.5, mlp_dim=128):
+    def __init__(self, C, out_dim=None, nchannels=1, nrows=32, ncols=32, dropout_cnn=0.0, dropout_mlp=0.5, mlp_dim=128):
         super(CNN, self).__init__()
 
         self.C           = C
@@ -140,6 +145,11 @@ class CNN(nn.Module):
         self.dropout_mlp = dropout_mlp
         self.mlp_dim     = mlp_dim
 
+        if out_dim is None:
+            self.out_dim = C
+        else:
+            self.out_dim = out_dim
+            
         # Convolution (feature block) pipeline
         self.block1 = nn.Sequential(
 
@@ -177,7 +187,7 @@ class CNN(nn.Module):
             nn.Linear(self.Z, self.mlp_dim),
             nn.ReLU(),
             nn.Dropout(p = self.dropout_mlp),
-            nn.Linear(self.mlp_dim, self.C),
+            nn.Linear(self.mlp_dim, self.out_dim),
         )
 
     def forward(self, x):
@@ -192,10 +202,21 @@ class CNN(nn.Module):
         x = self.block2(x)
         #print(f'\nAFTER BLOCK 2: {x.shape}')
         return x
-
-    # Returns softmax probability
-    def softpredict(self, x) :
-        #if self.training:
-        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        #else:
-        return F.softmax(self.forward(x), dim=-1)
+    
+    def softpredict(self,x) :
+        """ Softmax probability
+        """
+        
+        if self.out_dim > 1:
+            return F.softmax(self.forward(x), dim=-1)
+        else:
+            return torch.sigmoid(self.forward(x))
+    
+    def binarypredict(self,x) :
+        """ Return maximum probability class
+        """
+        if self.out_dim > 1:
+            prob = list(self.softpredict(x).detach().numpy())
+            return np.argmax(prob, axis=1)
+        else:
+            return np.round(self.softpredict(x).detach().numpy()).astype(int)

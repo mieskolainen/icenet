@@ -12,7 +12,7 @@ A deep learning driven library for high energy physics and beyond. See the docum
 
 https://mieskolainen.github.io/icenet
 
-Also an introduction talk: [docs/pdf/ICENET_ML_Forum_Mieskolainen_080223.pdf](docs/pdf/ICENET_ML_Forum_Mieskolainen_080223.pdf)
+An introduction talk: [docs/pdf/ICENET_ML_Forum_Mieskolainen_080223.pdf](docs/pdf/ICENET_ML_Forum_Mieskolainen_080223.pdf)
 
 ## First steps
 
@@ -29,14 +29,15 @@ For end-to-end deep learning examples, see e.g. github actions (CI) workflows un
 
 ## Reference
 
-If you use this work in your research (especially if you find algorithms or ideas novel), please cite:
+If you use this work in your research -- especially if you find algorithms, their application or ideas novel,
+please include a citation:
 ```
-@misc{icenet,
-  author = "{Mikael Mieskolainen}",
-  title  = "ICENET: a deep learning library for HEP",
-  year   = "2024",
-  url    = "https://github.com/mieskolainen/icenet",
-  note   = "[Online code; accessed XX-YY-2024]"
+@software{icenet,
+  author  = "{Mikael Mieskolainen}",
+  title   = "ICENET: a deep learning library for HEP",
+  url     = "https://github.com/mieskolainen/icenet",
+  version = {X.Y.Z},
+  date    = {2024-05-28},
 }
 ```
 

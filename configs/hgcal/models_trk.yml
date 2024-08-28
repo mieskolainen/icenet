@@ -9,9 +9,9 @@ gnet0:
   
   # Model
   model_param:
-    task: 'edge_symmetric'     # 'graph', 'node', 'edge_symmetric', 'edge_asymmetric' (level of inference)
+    task: 'edge_symmetric'      # 'graph', 'node', 'edge_symmetric', 'edge_asymmetric' (level of inference)
     global_pool: 'mean'
-    z_dim: 32                  # Convolution output dimension
+    z_dim: 32                   # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -40,7 +40,7 @@ gnet0:
     gamma: 2                           # focal_entropy exponent
     temperature: 1                     # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 80
@@ -50,15 +50,20 @@ gnet0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-
+  tensorboard: true
+  
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
+
 
 # Graph net
 gnet1:
@@ -112,15 +117,19 @@ gnet1:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -165,9 +174,9 @@ gnet2:
     gamma: 2                           # focal_entropy exponent
     temperature: 1                     # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
-
+    
     epochs: 80
     batch_size: 128
     lr: 3.0e-4
@@ -175,12 +184,16 @@ gnet2:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512

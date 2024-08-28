@@ -5,6 +5,7 @@
 
 rootname: 'brk'
 rngseed: 123456                 # Fixed seed for training data mixing
+num_cpus: 0                     # 0 for automatic
 inputvars: 'mvavars'            # Main file input description python file
 
 
@@ -83,6 +84,9 @@ train_runmode:
     algo: 'truncate' # algorithm: 'truncate', 'none'
     qmin:  0.001     # in [0,100] 
     qmax: 99.99      # in [0,100]
+
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
 
 
 # ----------------------------------------------------

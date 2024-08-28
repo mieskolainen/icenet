@@ -13,13 +13,12 @@ import psutil
 import subprocess
 import re
 
-from termcolor import colored, cprint
 
 # MVA imputation
 from sklearn.impute import KNNImputer
 from sklearn.impute import SimpleImputer
 
-from sklearn.experimental import enable_iterative_imputer
+from sklearn.experimental import enable_iterative_imputer # Needs this
 from sklearn.impute import IterativeImputer
 
 # Command line arguments
@@ -29,9 +28,13 @@ import copy
 
 import hashlib
 import base64
-import yaml
 
+from icenet.tools import aux
 from icenet.tools import stx
+
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 def rootsafe(txt):
     """
@@ -109,23 +112,32 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
     Do global / brace expansion of files
 
     Args:
-        datasets: dataset filename with glob syntax
+        datasets: dataset filename with glob syntax (can be a list of files)
         datapath: root path to files
     
     Returns:
         files: full filenames including the path
     """
     print("")
-    print(__name__ + f".glob_expand_files: Supported syntax: <filename_*>, <filename_0>, <filename_[0-99]>, <filename_{{0,3,4}}>")
+    print(f"Supported syntax: <filename_*>, <filename_0>, <filename_[0-99]>, <filename_{{0,3,4}}>")
     print("See https://docs.python.org/3/library/glob.html and brace expansion (be careful, do not use [,] brackets in your filenames)")
     print("")
     
-    datasets = list(braceexpand(datasets))
+    # Remove unnecessary []
+    if type(datasets) is list and len(datasets) == 1:
+        datasets = datasets[0]
+    
+    # Try first to brace expand
+    try:
+        datasets = list(braceexpand(datasets))
+    except:
+        True
+    
     #print(__name__ + f'.glob_expand_files: After braceexpand: {datasets}')
 
     if (len(datasets) == 1) and ('[' in datasets[0]) and (']' in datasets[0]):
 
-        print(__name__ + f'.glob_expand_files: Parsing of range [first-last] ...')
+        print(f'Parsing of range [first-last] ...')
 
         res   = re.findall(r'\[.*?\]', datasets[0])[0]
         temp  = res[1:-1]
@@ -134,7 +146,7 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
         first   = int(numbers[0])
         last    = int(numbers[1])
 
-        print(__name__ + f'.glob_expand_files: Obtained range of files: [{first}, {last}]')
+        print(f'Obtained range of files: [{first}, {last}]')
 
         # Split and add
         parts = datasets[0].split(res)
@@ -151,7 +163,7 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
     # Parse input files into a list
     files = list()
     for data in datasets:
-
+        
         x = datapath + '/' + data
         expanded_files = glob(x, recursive=recursive_glob) # This does e.g. _*.root expansion (finds the files)
 
@@ -159,7 +171,7 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
         if expanded_files != []:
             for i in range(len(expanded_files)):
                 files.append(expanded_files[i])
-
+    
     if files == []:
        files = [datapath]
     
@@ -167,16 +179,20 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
     for i in range(len(files)):
         files[i] = files[i].replace('////','/').replace('///', '/').replace('//', '/')
 
+    # Make them unique
+    files = list(set(files))
+    files.sort()
+    
     #print(__name__ + f'.glob_expand_files: Final files: {files}')
-        
+    
     return files
 
 
 def showmem(color='red'):
-    cprint(__name__ + f""".showmem: Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
+    print(f"""Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %]""", color)
 
 def showmem_cuda(device, color='red'):
-    cprint(__name__ + f".showmem_cuda: Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %] | VRAM usage: {get_gpu_memory_map()} GB [total VRAM {torch_cuda_total_memory(device):0.2f} GB]", color)
+    print(f"Process RAM: {process_memory_use():0.2f} GB [total RAM in use {psutil.virtual_memory()[2]} %] | VRAM usage: {get_gpu_memory_map()} GB [total VRAM {torch_cuda_total_memory(device):0.2f} GB]", color)
 
 
 def get_gpu_memory_map():
@@ -224,9 +240,9 @@ def checkinfnan(x, value = 0):
     x[nan_ind] = value
 
     if np.sum(inf_ind) > 0:
-        print(colored(__name__ + f'.checkinfnan: Inf found, replacing with {value}', 'red'))
+        print(f'Inf found, replacing with {value}', 'red')
     if np.sum(nan_ind) > 0:
-        print(colored(__name__ + f'.checkinfnan: NaN found, replacing with {value}', 'red'))    
+        print(f'NaN found, replacing with {value}', 'red')    
     return x
 
 
@@ -248,7 +264,7 @@ class fastarray1:
     #
     def add(self, x):
         if self.size == self.capacity:
-            print(f'fastarray1.add: increasing current capacity = {self.capacity} to 2x')
+            print(f'increasing current capacity = {self.capacity} to 2x')
             self.capacity *= 2
             newdata = np.zeros((self.capacity))
             newdata[:self.size] = self.data
@@ -265,6 +281,17 @@ class fastarray1:
     # Reset index, keep the buffersize
     def reset(self):
         self.size = 0
+
+def index_list(target_list, keys):
+    """
+    Use e.g. x_subset = x[:, io.index_list(ids, variables)]
+    
+    """
+    index = []
+    for key in keys:
+        index.append(target_list.index(key))
+    return index
+    
 
 def pick_vars(data, set_of_vars):
     """ Choose the active set of input variables.
@@ -307,6 +334,12 @@ class IceXYW:
             self.concat = ak.concatenate
         else:
             raise Exception(__name__ + f'.IceXYW.__init__: Unknown input array type')
+    
+    def find_ind(self, key):
+        """
+        Return column index corresponding to key
+        """
+        return int(np.where(np.array(self.ids, dtype=np.object_) == key)[0])
     
     def __getitem__(self, key):
         """ Advanced indexing with a variable or a list of variables """
@@ -419,7 +452,7 @@ def split_data_simple(X, frac, permute=True):
     X_val = X[N_trn:N_trn + N_val]
     X_tst = X[N - N_tst:]
     
-    print(__name__ + f".split_data: fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
+    print(f"fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
     
     return X_trn, X_val, X_tst
 
@@ -486,7 +519,7 @@ def split_data(X, Y, W, ids, frac=[0.5, 0.1, 0.4], permute=True):
     tst = IceXYW(x = X_tst, y = Y_tst, w=W_tst, ids=ids)
     # --------------------------------------------------------
     
-    print(__name__ + f".split_data: fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
+    print(f"fractions [train: {len(X_trn)/N:0.3f}, validate: {len(X_val)/N:0.3f}, test: {len(X_tst)/N:0.3f}]")
     
     return trn, val, tst
 
@@ -511,17 +544,18 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
     
     if dim is None:
         dim = np.arange(X.shape[1])
-
+    
     if labels is None:
         labels = np.zeros(X.shape[1])
 
     N = X.shape[0]
-
+    
     # Count NaN
     for j in dim:
-        nan_ind = np.isnan(np.array(X[:,j], dtype=np.float))
-        if np.sum(nan_ind) > 0:
-            cprint(__name__ + f'.impute_data: Column {j} Number of {nan_ind} NaN found [{labels[j]}]', 'red')
+        nan_ind = np.isnan(np.array(X[:,j], dtype=np.float32))
+        found   = np.sum(nan_ind)
+        if found > 0:
+            print(f'Column {j} Number of {nan_ind} NaN found ({found/len(X):0.3E}) [{labels[j]}]', 'red')
     
     # Loop over dimensions
     for j in dim:
@@ -530,14 +564,14 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
         M_tot = 0
         for z in values:
             
-            ind = np.isclose(np.array(X[:,j], dtype=np.float), z)
+            ind = np.isclose(np.array(X[:,j], dtype=np.float32), z)
             X[ind, j] = np.nan
             
             M = np.sum(ind)
             M_tot += M
 
             if (M/N > 0):
-                print(__name__ + f'.impute_data: Column {j} fraction [{M/N:0.3E}] with value {z} [{labels[j]}]')
+                print(f'Column {j} fraction [{M/N:0.3E}] with value {z} [{labels[j]}]')
 
         if (M_tot == N): # Protection, if all are now NaN
             # Set to zero so Imputer Function below does not remove the full column!!
@@ -546,10 +580,12 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
     # Treat infinities (inf)
     for j in dim:
 
-        inf_ind = np.isinf(np.array(X[:,j], dtype=np.float))
+        inf_ind = np.isinf(np.array(X[:,j], dtype=np.float32))
         X[inf_ind, j] = np.nan
-        if np.sum(inf_ind) > 0:
-            cprint(__name__ + f'.impute_data: Column {j} Number of {np.sum(inf_ind)} Inf found [{labels[j]}]', 'red')
+        
+        found = np.sum(inf_ind)
+        if found > 0:
+            print(f'Column {j} Number of {found} Inf found ({found/len(X):0.3E}) [{labels[j]}]', 'red')
     
     if imputer == None:
 
@@ -571,7 +607,8 @@ def impute_data(X, imputer=None, dim=None, values=[-999], labels=None, algorithm
     imputer.fit(X[:,dim])
     X[:,dim] = imputer.transform(X[:,dim])
     
-    print(__name__ + '.impute_data: [done] \n')
+    print('[done] \n')
+    
     return X, imputer
 
 
@@ -625,14 +662,15 @@ def apply_zscore_tensor(T, mu, std, EPS=1E-12):
 
     # Over all events
     for i in range(T.shape[0]):
-        Y[i,...] = (Y[i,...] - mu) / (std + EPS)
+        Y[i,...] = (Y[i,...] - mu) / max(std, EPS)
     return Y
 
-def calc_zscore(X : np.array):
+def calc_zscore(X: np.array, weights: np.array = None):
     """ Calculate 0-mean & unit-variance normalization.
 
     Args:
-        X : Input with [# vectors x # dimensions]
+        X       : Input with [N x dim]
+        weights : Event weights
     
     Returns:
         X_mu  : Mean vector
@@ -643,10 +681,15 @@ def calc_zscore(X : np.array):
     X_std = np.zeros((X.shape[1]))
 
     # Calculate mean and std based on the training data
-    for i in range(X.shape[1]) :
-        X_mu[i]  = np.mean(X[:,i])
-        X_std[i] = np.std(X[:,i])
-
+    for i in range(X.shape[1]):
+        
+        xval = X[:,i]
+        
+        if weights is not None:
+            X_mu[i], X_std[i] = aux.weighted_avg_and_std(xval, weights)
+        else:
+            X_mu[i], X_std[i] = np.mean(xval), np.std(xval)
+        
         if (np.isnan(X_std[i])):
             raise Exception(__name__ + f': Fatal error with std[index = {i}] is NaN')
 
@@ -663,7 +706,7 @@ def apply_zscore(X : np.array, X_mu, X_std, EPS=1E-12):
 
     Y = np.zeros(X.shape)
     for i in range(len(X_mu)):
-        Y[:,i] = (X[:,i] - X_mu[i]) / (X_std[i] + EPS)
+        Y[:,i] = (X[:,i] - X_mu[i]) / max(X_std[i], EPS)
     return Y
 
 
@@ -675,5 +718,5 @@ def apply_madscore(X : np.array, X_m, X_mad, EPS=1E-12):
     Y = np.zeros(X.shape)
     scale = 0.6745 # 0.75th of z-normal
     for i in range(len(X_m)):
-        Y[:,i] = scale * (X[:,i] - X_m[i]) / (X_mad[i] + EPS)
+        Y[:,i] = scale * (X[:,i] - X_m[i]) / max(X_mad[i], EPS)
     return Y

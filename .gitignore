@@ -1,3 +1,5 @@
+# Files ignored in GIT
+
 *.pdf
 *.pth
 *.dat
@@ -8,6 +10,7 @@
 *.pt
 *.zip
 *.text
+*.log
 #*.json
 #*.txt
 

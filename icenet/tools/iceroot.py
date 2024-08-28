@@ -5,24 +5,28 @@
 import numpy as np
 import uproot
 import awkward as ak
-import re
 import ray
 import multiprocessing
 import os
 import copy
 import gc
-
+import time
 from tqdm import tqdm
-from termcolor import colored, cprint
 
 from icenet.tools import io
 from icenet.tools import aux
 from icenet.tools import iceroot
 
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
-def read_single(process_func, process, root_path, param, class_id, dtype=None):
+
+def read_single(process_func, process, root_path, param, class_id, dtype=None, num_cpus=0, verbose=False):
     """
     Loop over different MC / data processes as defined in the yaml files
+    
+    [awkward compatible only]
     
     Args:
         process_func:  data processing function
@@ -30,12 +34,14 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
         root_path:     main path of files
         param:         parameters of 'process_func'
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
+        num_cpus:      number of CPUs used (set 0 for automatic)
+        verbose:       verbose output print
     
     Returns:
         X, Y, W, ids, info (awkward array format)
     """
 
-    print(__name__ + f'.read_single: {process}')
+    print(f'{process}')
 
     # --------------------
     
@@ -62,7 +68,8 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     # Load file
     X_uncut, ids = iceroot.load_tree(rootfile=rootfile, tree=param['tree'],
                     entry_start=param['entry_start'], entry_stop=param['entry_stop'],
-                    maxevents=maxevents, ids=param['load_ids'], library='ak', dtype=dtype)
+                    maxevents=maxevents, ids=param['load_ids'], library='ak', dtype=dtype,
+                    num_cpus=num_cpus, verbose=verbose)
     
     N_before = len(X_uncut)
 
@@ -74,7 +81,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     
     eff_acc = N_after / N_before
     
-    print(__name__ + f'.read_single: efficiency x acceptance = {eff_acc:0.6f}')
+    print(f'efficiency x acceptance = {eff_acc:0.6f}')
 
     Y = class_id * ak.Array(np.ones(N_after, dtype=np.int32))
 
@@ -104,7 +111,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     
     if model_param is not None:
         
-        print(__name__ + f'.read_single: Adding conditional theory (model) parameters')
+        print(f'Adding conditional theory (model) parameters')
         print(model_param)
         
         for var in model_param.keys():
@@ -125,7 +132,7 @@ def read_single(process_func, process, root_path, param, class_id, dtype=None):
     return {'X': X, 'Y': Y, 'W': W, 'ids': ids, 'info': info}
 
 
-def read_multiple(process_func, processes, root_path, param, class_id, dtype=None):
+def read_multiple(process_func, processes, root_path, param, class_id, dtype=None, num_cpus=0, verbose=False):
     """
     Loop over different MC / data processes as defined in the yaml files
     
@@ -135,35 +142,49 @@ def read_multiple(process_func, processes, root_path, param, class_id, dtype=Non
         root_path:     main path of files
         param:         parameters of 'process_func'
         class_id:      class identifier (integer), e.g. 0, 1, 2 ...
+        num_cpus:      number of CPUs used (set 0 for automatic)
+        verbose:       verbose output print
     
     Returns:
         X, Y, W, ids, info (awkward array format)
     """
 
     # Combine results
-    X,Y,W,ids,info = None,None,None,None,{}
+    X_list, Y_list, W_list, ids, info = [], [], [], None, {}
 
-    for i,key in enumerate(processes):
-        
-        data = read_single(process_func, processes[key], root_path, param, class_id, dtype)
-        
-        # Concatenate processes
+    for i, key in enumerate(processes):
+        data = read_single(
+            process_func=process_func, process=processes[key],
+            root_path=root_path, param=param, class_id=class_id,
+            dtype=dtype, num_cpus=num_cpus, verbose=verbose
+        )
+
+        # Append data to the lists
+        X_list.append(data['X'])
+        Y_list.append(data['Y'])
+        W_list.append(data['W'])
+
+        # Assuming ids are the same for all processes
         if i == 0:
-            X = copy.deepcopy(data['X'])
-            Y = copy.deepcopy(data['Y'])
-            W = copy.deepcopy(data['W'])
-        else:
-            X = ak.concatenate((X, data['X']), axis=0)
-            Y = ak.concatenate((Y, data['Y']), axis=0)
-            W = ak.concatenate((W, data['W']), axis=0)
-
-        ids       = copy.deepcopy(data['ids']) # Same for all processes
-        info[key] = copy.deepcopy(data['info'])
+            ids = copy.deepcopy(data['ids'])
         
-        del data # free memory
-        gc.collect()
-        io.showmem()
+        info[key] = copy.deepcopy(data['info'])
 
+        io.showmem()
+        gc.collect() #!
+
+    # Concatenate all lists into final arrays
+    tic = time.time()
+    
+    X = aux.concatenate_and_clean(X_list, axis=0)
+    Y = aux.concatenate_and_clean(Y_list, axis=0)
+    W = aux.concatenate_and_clean(W_list, axis=0)
+    
+    toc = time.time() - tic
+    print(f'Final concatenation took: {toc:0.2f} sec')
+    
+    io.showmem()
+    
     return X,Y,W,ids,info
 
 
@@ -195,9 +216,9 @@ def load_tree_stats(rootfile, tree, key=None, verbose=False):
             num_events[i] = len(events.arrays(key_name))
             
             if verbose:
-                print(__name__ + f'.load_tree_stats: {rootfile[i]}')
-                print(__name__ + f'.load_tree_stats: keys(): {events.keys()}')
-                print(__name__ + f'.load_tree_stats: values(): {events.values()}')
+                print(f'{rootfile[i]}')
+                print(f'keys(): {events.keys()}')
+                print(f'values(): {events.values()}')
             
             file.close()
 
@@ -219,7 +240,7 @@ def events_to_jagged_numpy(events, ids, entry_start=0,
         X
     """
     if label is not None:
-        cprint( __name__ + f'.events_to_jagged_numpy: Loading: {label}', 'yellow')
+        print(f'Loading: {label}', 'yellow')
 
     # -------------------------------
     if entry_start is None:
@@ -240,13 +261,13 @@ def events_to_jagged_numpy(events, ids, entry_start=0,
         X[:,j] = np.asarray(events.arrays(ids[j],
                     entry_start=entry_start, entry_stop=entry_stop_final, library="np", how=list))
     
-    cprint( __name__ + f'.events_to_jagged_numpy: Entry_start = {entry_start}, entry_stop = {entry_stop}, maxevents = {maxevents} | realized = {len(X)} ({100*len(X)/N_all:0.3f} % | available = {N_all})', 'green')
+    print(f'Entry_start = {entry_start}, entry_stop = {entry_stop}, maxevents = {maxevents} | realized = {len(X)} ({100*len(X)/N_all:0.3f} % | available = {N_all})', 'green')
     
     return X, ids
 
 
 def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
-              ids=None, library='np', dtype=None):
+              ids=None, library='np', dtype=None, num_cpus=0, verbose=False):
     """
     Load ROOT files
 
@@ -258,6 +279,8 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
         maxevents:     Maximum number of events in total (over all files)
         ids:           Names of the variables to read out from the root tree
         library:       Return type 'np' (jagged numpy) or 'ak' (awkward) of the array
+        num_cpus:      Number of processes used (set 0 for automatic)
+        verbose:       Verbose output
     
     Returns:
         array of type 'library'
@@ -266,7 +289,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
     if type(rootfile) is not list:
         rootfile = [rootfile]
 
-    cprint(__name__ + f'.load_tree: Opening rootfile {rootfile} with a tree key <{tree}>', 'yellow')
+    print(f'Opening rootfile {rootfile} with a tree key <{tree}>', 'yellow')
 
     # Add Tree handles here using the string-syntax of uproot {file:tree}
     files = [rootfile[i] + f':{tree}' for i in range(len(rootfile))]
@@ -278,17 +301,28 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
     
     load_ids = aux.process_regexp_ids(ids=ids, all_ids=all_ids)
 
-    cprint(__name__ + f'.load_tree: All variables ({len(all_ids)}): \n{all_ids} \n', 'green')
+    if verbose:
+        print(f'All variables ({len(all_ids)}): \n{all_ids} \n', 'green')
+        print('')
+        print(f'Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
+        print('')
+    else:
+        print(f'All variables ({len(all_ids)}) | Loading variables ({len(load_ids)})', 'green')
+        print('')
+    
+    print(f'Reading {len(files)} root files | Conversion to object library "{library}" ')
     print('')
-    cprint(__name__ + f'.load_tree: Loading variables ({len(load_ids)}): \n{load_ids} \n', 'green')
-    print('')
-    print(__name__ + f'.load_tree: Reading {len(files)} root files ...')
+    
+    if int(num_cpus) == 0:
+        num_workers = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
+    else:
+        num_workers = int(num_cpus)
     
     if   library == 'np':
         
         if maxevents is None:
             maxevents = int(1e10)
-            cprint(__name__ + f'.load_tree: maxevents is None, setting maxevents = {maxevents}', 'red')
+            print(f'maxevents is None, setting maxevents = {maxevents}', 'red')
         
         # Non-multiprocessed version for single files
         if len(files) == 1:
@@ -305,9 +339,9 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
 
                 if (maxevents is not None) and (len(X) >= maxevents):
                     X = X[0:maxevents]
-                    cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
+                    print(f'Maximum event count {maxevents} reached', 'red')
             
-            print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+            print(f'Total number of entries = {len(X)}')        
             
             return X, load_ids
 
@@ -316,35 +350,37 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
             # ======================================================
             # Multiprocessing version for multiple files
             
-            num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
             ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
             chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
             submaxevents = aux.split_size(range(maxevents), num_workers)
             futures      = []
             
-            print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
+            print(f'submaxevents per ray process: {submaxevents}')
 
             for k in range(num_workers):    
                 futures.append(read_file_np.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]],
                                                    load_ids, entry_start, entry_stop, submaxevents[k], dtype))
 
-            print(__name__ + f'.load_tree: Get futures')
+            print(f'Get futures')
             results = ray.get(futures) # synchronous read-out
             ray.shutdown()
             
             # Combine future returned sub-arrays
-            print(__name__ + f'.load_tree: Concatenating results from futures')
+            print(f'Concatenating results from futures')
             
-            # We concatenate one-by-one, to save memory
-            for k in tqdm(range(len(results))):
-                X = copy.deepcopy(results[k]) if (k == 0) else np.concatenate((X, results[k]), axis=0)
-
-                results[k] = None # free memory
-                gc.collect()
-                io.showmem()
+            X = aux.concatenate_and_clean(results, axis=0)
+            io.showmem()
+            
+            # Concatenate one-by-one
+            #for k in tqdm(range(len(results))):
+            #    X = copy.deepcopy(results[k]) if (k == 0) else np.concatenate((X, results[k]), axis=0)
+            #
+            #    results[k] = None # free memory
+            #    gc.collect()
+            #    io.showmem()
         
-        print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+        print(f'Total number of entries = {len(X)}')        
         
         return X, load_ids
 
@@ -352,7 +388,7 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
 
         if maxevents is None:
             maxevents = int(1e10)
-            cprint(__name__ + f'.load_tree: maxevents is None, setting maxevents = {maxevents}', 'red')
+            print(f'maxevents is None, setting maxevents = {maxevents}', 'red')
         
         # Non-multiprocessed version for single files
         
@@ -371,42 +407,44 @@ def load_tree(rootfile, tree, entry_start=0, entry_stop=None, maxevents=None,
                 
                 if (maxevents is not None) and (len(X) > maxevents):
                     X = X[0:maxevents]
-                    cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached (had {num_events})', 'red')
+                    print(f'Maximum event count {maxevents} reached (had {num_events})', 'red')
         
         else:
             
             # ======================================================
             # Multiprocessing version for multiple files
             
-            num_workers  = min(len(files), multiprocessing.cpu_count() // 2) # min handles the case #files < #cpu
             ray.init(num_cpus=num_workers, _temp_dir=f'{os.getcwd()}/tmp/')
 
             chunk_ind    = aux.split_start_end(range(len(files)), num_workers)
             submaxevents = aux.split_size(range(maxevents), num_workers)
             futures      = []
             
-            print(__name__ + f'.load_tree: submaxevents per ray process: {submaxevents}')
+            print(f'submaxevents per ray process: {submaxevents}')
 
             for k in range(num_workers):    
                 futures.append(read_file_ak.remote(files[chunk_ind[k][0]:chunk_ind[k][-1]],
                                                    load_ids, entry_start, entry_stop, submaxevents[k], dtype))
 
-            print(__name__ + f'.load_tree: Get futures')
+            print(f'Get futures')
             results = ray.get(futures) # synchronous read-out
             ray.shutdown()
             
             # Combine future returned sub-arrays
-            print(__name__ + f'.load_tree: Concatenating results from futures')
+            print(f'Concatenating results from futures')
 
-            # We concatenate one-by-one, to save memory
-            for k in tqdm(range(len(results))):
-                X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
-
-                results[k] = None # free memory
-                gc.collect()
-                io.showmem()
+            X = aux.concatenate_and_clean(results, axis=0)
+            io.showmem()
+            
+            # Concatenate one-by-one
+            #for k in tqdm(range(len(results))):
+            #    X = copy.deepcopy(results[k]) if (k == 0) else ak.concatenate((X, results[k]), axis=0)
+            #
+            #    results[k] = None # free memory
+            #    gc.collect()
+            #    io.showmem()
         
-        print(__name__ + f'.load_tree: Total number of entries = {len(X)}')        
+        print(f'Total number of entries = {len(X)}')        
             
         return X, ak.fields(X)
         
@@ -453,7 +491,7 @@ def read_file_np(files, ids, entry_start, entry_stop, maxevents, dtype=None):
             
             if (maxevents is not None) and (len(X) >= maxevents):
                 X = X[0:maxevents]
-                cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
+                print(f'Maximum event count {maxevents} reached', 'red')
                 break
     
     return X
@@ -499,7 +537,7 @@ def read_file_ak(files, ids, entry_start, entry_stop, maxevents, dtype=None):
             
             if (maxevents is not None) and (len(X) >= maxevents):
                 X = X[0:maxevents]
-                cprint(__name__ + f'.load_tree: Maximum event count {maxevents} reached', 'red')
+                print(__name__ + f'Maximum event count {maxevents} reached', 'red')
                 break
     return X
 

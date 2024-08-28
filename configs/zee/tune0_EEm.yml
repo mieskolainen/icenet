@@ -1,0 +1,173 @@
+# ZEE tune0.yml (EEm)
+#
+# -------------------------------------------------------------------
+
+rootname: 'zee'
+rngseed: 123456                       # Fixed seed for training data mixing
+num_cpus: 0                           # 0 for automatic
+inputvars: 'mvavars'                  # Main file input description python file
+
+
+# ----------------------------------------------------
+mva_param: &MVA_INPUT_PARAM
+  use_conditional: false              # Conditional (theory parametric) input
+  primary_classes: [0,1]              # Primary class IDs in MVA (train, ROC etc.)
+  signal_class: 1                     # Signal class ID
+  #DA_class:    -2                    # Domain Adaptation class
+  
+  inputvar_scalar: 'MVA_SCALAR_VARS'  # Input variables, implemented under mvavars.py
+  
+  varnorm: 'zscore-weighted'          # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
+  
+  #frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
+  frac: None                          # Train vs validate/test split fraction (we use file structure)
+  
+  # Imputation
+  imputation_param:
+    active: true                      # True / False
+    var: null                         # Array of variables to be imputated, null for all
+    algorithm: 'constant'             # Algorithm type: 'constant', iterative' (vector), knn' (vector), 'mean' (scalar), 'median' (scalar)
+    fill_value: 0                     # For constant imputation
+    knn_k: 8                          # Number of nearest neighbours considered
+    values: null                      # Special values which indicate the need for imputation, if null, then only Inf/Nan
+
+# ----------------------------------------------------
+genesis_runmode:
+  
+  maxevents:  null
+  inputmap:   null
+  
+  mcfile:     {'trn': ['MC_train_EEm.parquet'],
+               'val': ['MC_val_EEm.parquet'],   
+               'tst': ['MC_test_EEm.parquet']}
+  
+  datafile:   {'trn': ['Data_train_EEm.parquet'],
+               'val': ['Data_val_EEm.parquet'],   
+               'tst': ['Data_test_EEm.parquet']}
+
+  drop_negative: true                 # Drop negative weight (MC) events
+  
+  tree_name:  null                    # 'ntuplizer/tree'
+  targetfunc: null                    # Training target,    implemented under mctargets.py
+  filterfunc: 'filter_nofilter'       # Training filtering, implemented under mcfilter.py
+  cutfunc:    'cut_nocut'             # Basic cuts,         implemented under cuts.py
+
+  xcorr_flow: True                    # Full N-point correlations computed between cuts
+  pickle_size: 10000000               # Number of entries (events) per pickle file
+
+
+# ----------------------------------------------------
+train_runmode:
+
+  <<: *MVA_INPUT_PARAM
+
+  maxevents: null
+  modeltag:  null
+
+  tech: &TECH
+    concat_max_pickle: 32           # (technical) [Recursive] concatenation max size, adjust this if encounter problems e.g. with awkward ("127 limit")
+  
+  pre_transform: &PRE_TRANSFORM       # Done inside common.py
+
+    active: False
+            
+    var: ['probe_esEffSigmaRR',
+          'probe_pfChargedIso',
+          'probe_ecalPFClusterIso',
+          'probe_trkSumPtHollowConeDR03',
+          'probe_trkSumPtSolidConeDR04']
+    func:
+          ['np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)',
+           'np.arcsinh(x)']
+
+  ## Reweighting setup
+  reweight: true
+  
+  # 'write' (train PDF model and apply), 'load' (load PDF model and apply),
+  # 'write-skip' (train PDF model but do not apply), 'load-skip' (load PDF model but do not apply)
+  reweight_mode: 'write'
+  reweight_file: null           # null for automatic, or string for specific
+  
+  reweight_param: !include configs/zee/stage1rw.yml
+  
+  ## Outlier protection in the training
+  outlier_param:
+    algo: 'truncate'   # algorithm: 'truncate', null
+    qmin: 0.01         # in [0,100] 
+    qmax: 99.9         # in [0,100]
+
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
+  
+
+  # ** Activate models here **
+  # Give all models some unique identifier and label
+  models:  !include configs/zee/models.yml
+  
+  active_models: &ACTIVE_MODELS !include configs/zee/active_models.yml
+  
+  raytune: !include configs/zee/raytune.yml
+
+  # Distillation training
+  # -- the order must be compatible with the causal order in 'active_models'
+  #distillation:
+  #
+  #  # Big, sophisticated model
+  #  source:
+  #    #xgb0
+  #  
+  #  # Simple, compressed models
+  #  drains:
+  #    #- xgb1
+  #    # - add more here
+
+  # Batched "deep" training
+  #batch_train_param:
+  #  blocksize: 150000   # Maximum number of events simultaneously in RAM
+  #  epochs: 50          # Number of global epochs (1 epoch = one iteration over the full input dataset), same for all models
+  #  #num_cpu: null      # Set null for auto, or an integer for manual.
+
+# ----------------------------------------------------
+eval_runmode:
+
+  <<: *MVA_INPUT_PARAM
+  
+  pre_transform: 
+    <<: *PRE_TRANSFORM
+
+  maxevents: null
+  modeltag:  null
+  
+  tech: *TECH
+
+  reweight: true
+  reweight_mode: 'load'          # 'write', 'load', 'write-skip', 'load-skip'
+  reweight_file: null            # null for automatic, or string for specific
+
+  reweight_param: !include configs/zee/stage1rw.yml
+
+  models:  !include configs/zee/models.yml
+  active_models: *ACTIVE_MODELS
+
+# ----------------------------------------------------
+deploy_runmode:
+  
+  <<: *MVA_INPUT_PARAM
+  
+  pre_transform: 
+    <<: *PRE_TRANSFORM
+  
+  maxevents: null
+  modeltag:  null
+  
+  #mc_param: !include configs/dqcd/mc_param.yml
+  
+  models:  !include configs/zee/models.yml
+  active_models: *ACTIVE_MODELS
+
+
+# ----------------------------------------------------
+plot_param: !include configs/zee/plots.yml

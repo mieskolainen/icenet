@@ -1,0 +1,24 @@
+# Active ML models for 'EB', 'EEm', 'EEp'
+#
+
+#- dbnf0
+
+#- lzmlp0_nozero
+#- dmlp0_nozero
+#- fastkan0_nozero
+
+#- lzmlp0
+#- lzmlp1
+#- lzmlp2
+#- lzmlp3
+#- lzmlp4
+
+# BDT based
+- iceboost_swd
+- iceboost0
+- xgb0
+
+# Neural Nets
+- fastkan0
+- lzmlp0
+- dmlp0

@@ -14,19 +14,20 @@ from tqdm import tqdm
 import xgboost
 
 # icenet
-from icenet.tools import stx
-from icenet.tools import aux
-from icenet.tools import aux_torch
+from icenet.tools import stx, aux, aux_torch
 
 from icenet.algo  import flr
-from icenet.deep  import bnaf
 from icenet.deep  import optimize
 from icenet.deep  import dbnf
+
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 
 def pred_cut(ids, param):
 
-    print(__name__ + f'.pred_cut: Evaluate <{param["label"]}> cut model ...')
+    print(f'Evaluate [{param["label"]}] cut model ...')
 
     # Get feature name variables
     index = ids.index(param['variable'])
@@ -37,7 +38,7 @@ def pred_cut(ids, param):
             return param['sign'] * x[...,index]
         # Transform via sigmoid from R -> [0,1]
         elif param['transform'] == 'sigmoid':
-            return 1 / (1 + np.exp(param['sign'] * x[...,index]))
+            return aux.sigmoid(param['sign'] * x[...,index])
         # Numpy function, e.g. np.abs, np.tanh ...
         elif 'np.' in param['transform']:
             cmd = "param['sign'] * " + param['transform'] + f"(x[...,index])"
@@ -49,7 +50,7 @@ def pred_cut(ids, param):
 
 def pred_cutset(ids, param):
 
-    print(__name__ + f'.pred_cutset: Evaluate <{param["label"]}> fixed cutset model ...')
+    print(f'Evaluate [{param["label"]}] fixed cutset model ...')
     cutstring = param['cutstring']
     print(f'cutstring: "{cutstring}"')
 
@@ -69,18 +70,24 @@ def pred_cutset(ids, param):
     
     return func_predict
 
-def pred_graph_xgb(args, param, device='cpu'):
+def pred_graph_xgb(args, param):
     
-    print(__name__ + f'.pred_graph_xgb: Evaluate <{param["label"]}> model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
-    graph_model = aux_torch.load_torch_checkpoint(path=args['modeldir'], \
-        label=param['graph']['label'], epoch=param['graph']['readmode']).to(device)
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
+    
+    graph_model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['graph']['label']}", \
+        label=param['graph']['label'], epoch=param['graph']['readmode'])
+    
+    graph_model, device = optimize.model_to_cuda(graph_model, device_type=device)
     
     graph_model.eval() # Turn on eval!
     
-    xgb_model   = pickle.load(open(aux.create_model_filename(path=args['modeldir'], \
-        label=param['xgb']['label'], epoch=param['xgb']['readmode'], filetype='.dat'), 'rb'))
-
+    with open(aux.create_model_filename(path=f"{args['modeldir']}/{param['xgb']['label']}", label=param['xgb']['label'], \
+                epoch=param['xgb']['readmode'], filetype='.pkl'), 'rb') as file:
+        
+        xgb_model = pickle.load(file)['model']
+    
     def func_predict(x):
 
         if isinstance(x, list):
@@ -111,9 +118,13 @@ def pred_graph_xgb(args, param, device='cpu'):
 
 def pred_torch_graph(args, param, batch_size=5000, return_model=False):
     
-    print(__name__ + f'.pred_torch_graph: Evaluate <{param["label"]}> model ...')
-    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    print(f'Evaluate [{param["label"]}] model ...')
+    
+    model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
+                                            label=param['label'], epoch=param['readmode'])
+    
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
+    model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
     
@@ -129,7 +140,12 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
 
         # Predict in smaller batches not to overflow GPU memory
         for i, batch in tqdm(enumerate(loader)):
-            y = model.softpredict(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
+            
+            if 'raw_logit' in param:
+                y = model.forward(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
+            else:
+                y = model.softpredict(batch.to(device))[:, args['signal_class']].detach().cpu().numpy()
+            
             y_tot = copy.deepcopy(y) if (i == 0) else np.concatenate((y_tot, y), axis=0)
         
         return y_tot
@@ -142,9 +158,13 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
 
 def pred_torch_generic(args, param, return_model=False):
     
-    print(__name__ + f'.pred_torch_generic: Evaluate <{param["label"]}> model ...')
-    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    print(f'Evaluate [{param["label"]}] model ...')
+    
+    model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
+                                            label=param['label'], epoch=param['readmode'])
+    
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
+    model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
     
@@ -157,7 +177,10 @@ def pred_torch_generic(args, param, return_model=False):
             for key in x_in.keys():
                 x_in[key] = x_in[key].to(device)
         
-        return model.softpredict(x_in)[:, args['signal_class']].detach().cpu().numpy()
+        if 'raw_logit' in param:
+            return model.forward(x_in)[:, args['signal_class']].detach().cpu().numpy()
+        else:
+            return model.softpredict(x_in)[:, args['signal_class']].detach().cpu().numpy()
     
     if return_model == False:
         return func_predict
@@ -167,9 +190,13 @@ def pred_torch_generic(args, param, return_model=False):
 
 def pred_torch_scalar(args, param, return_model=False):
     
-    print(__name__ + f'.pred_torch_scalar: Evaluate <{param["label"]}> model ...')
-    model         = aux_torch.load_torch_checkpoint(path=args['modeldir'], label=param['label'], epoch=param['readmode'])
-    model, device = optimize.model_to_cuda(model, device_type=param['device'])
+    print(f'Evaluate [{param["label"]}] model ...')
+    
+    model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
+                                            label=param['label'], epoch=param['readmode'])
+    
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
+    model, device = optimize.model_to_cuda(model, device_type=device)
     
     model.eval() # ! Turn on eval mode!
     
@@ -182,7 +209,10 @@ def pred_torch_scalar(args, param, return_model=False):
             for key in x_in.keys():
                 x_in[key] = x_in[key].to(device)
         
-        return model.softpredict(x_in).detach().cpu().numpy()
+        if 'raw_logit' in param:
+            return model.forward(x_in).squeeze().detach().cpu().numpy()
+        else:
+            return model.softpredict(x_in).squeeze().detach().cpu().numpy()
     
     if return_model == False:
         return func_predict
@@ -190,11 +220,43 @@ def pred_torch_scalar(args, param, return_model=False):
         return func_predict, model
 
 
+def pred_flow(args, param, n_dims, return_model=False):
+
+    print(f'Evaluate [{param["label"]}] model ...')
+    
+    # Load models
+    param['model_param']['n_dims'] = n_dims # Set input dimension
+    
+    modelnames = []
+    for i in args['primary_classes']:
+        modelnames.append(f'{param["label"]}_class_{i}')
+    
+    device = param['deploy_device'] if 'deploy_device' in param else param['device']
+    models, device = dbnf.load_models(param=param, modelnames=modelnames,
+                                      modeldir=f"{args['modeldir']}/{param['label']}", device=device)
+    
+    # Turn on eval!
+    for i in range(len(models)):
+        models[i].eval()
+    
+    def func_predict(x):
+        return dbnf.predict(x.to(device), models)
+
+    if return_model == False:
+        return func_predict
+    else:
+        return func_predict, models
+
+
 def pred_xgb(args, param, feature_names=None, return_model=False):
     
-    print(__name__ + f'.pred_xgb: Evaluate <{param["label"]}> model ...')
-    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model = pickle.load(open(filename, 'rb'))
+    print(f'Evaluate [{param["label"]}] model ...')
+    
+    filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
+                                         label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    
+    with open(filename, 'rb') as file:
+        model = pickle.load(file)['model']
     
     def func_predict(x):
         pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
@@ -209,9 +271,13 @@ def pred_xgb(args, param, feature_names=None, return_model=False):
 
 def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
     
-    print(__name__ + f'.pred_xgb_scalar: Evaluate <{param["label"]}> model ...')
-    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model = pickle.load(open(filename, 'rb'))
+    print(f'Evaluate [{param["label"]}] model ...')
+    
+    filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
+                                         label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    
+    with open(filename, 'rb') as file:
+        model = pickle.load(file)['model']
     
     def func_predict(x):
         pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
@@ -224,14 +290,20 @@ def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
 
 
 def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
+    """
+    Same as pred_xgb_scalar but a sigmoid function applied
+    """
     
-    print(__name__ + f'.pred_xgb_logistic: Evaluate <{param["label"]}> model ...')
-    filename  = aux.create_model_filename(path=args['modeldir'], label=param['label'], epoch=param['readmode'], filetype='.dat')
-    model = pickle.load(open(filename, 'rb'))
+    print(f'Evaluate [{param["label"]}] model ...')
+    
+    filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
+                                         label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    model    = pickle.load(open(filename, 'rb'))['model']
     
     def func_predict(x):
-        # Apply sigmoid function    
-        return 1 / (1 + np.exp(- model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))))
+        
+        logits = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))   
+        return aux.sigmoid(logits)
     
     if return_model == False:
         return func_predict
@@ -239,37 +311,17 @@ def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
         return func_predict, model
 
 
-def pred_flow(args, param, n_dims, return_model=False):
-
-    print(__name__ + f'.pred_flow: Evaluate <{param["label"]}> model ...')
-
-    # Load models
-    param['model_param']['n_dims'] = n_dims # Set input dimension
-    
-    modelnames = []
-    for i in range(args['num_classes']):
-        modelnames.append(f'{param["label"]}_class_{i}')
-    
-    models = dbnf.load_models(param=param, modelnames=modelnames, modeldir=args['modeldir'])
-    
-    # Turn on eval!
-    for i in range(len(models)):
-        models[i].eval()
-    
-    def func_predict(x):
-        return dbnf.predict(x, models)
-
-    if return_model == False:
-        return func_predict
-    else:
-        return func_predict, models
-
-
 def pred_flr(args, param):
 
-    print(__name__ + f'.pred_flr: Evaluate <{param["label"]}> model ...')
+    print(f'Evaluate [{param["label"]}] model ...')
     
-    b_pdfs, s_pdfs, bin_edges = pickle.load(open(args['modeldir'] + f'/{param["label"]}_0_.dat', 'rb'))
+    with open(f"{args['modeldir']}/{param['label']}/{param['label']}_0.pkl", 'rb') as file:
+        model = pickle.load(file)
+    
+    b_pdfs    = model['b_pdfs']
+    s_pdfs    = model['s_pdfs']
+    bin_edges = model['bin_edges']
+    
     def func_predict(x):
         return flr.predict(x, b_pdfs, s_pdfs, bin_edges)
     

@@ -229,7 +229,7 @@ class GNNGeneric(torch.nn.Module):
 
         return x
 
-    def __init__(self, d_dim, c_dim, u_dim=0, e_dim=None, z_dim=96,
+    def __init__(self, d_dim, out_dim, u_dim=0, e_dim=None, z_dim=96, C=None,
         conv_type        = 'EdgeConv',
         task             = 'node',
         global_pool      = 'mean',
@@ -264,9 +264,13 @@ class GNNGeneric(torch.nn.Module):
         self.u_dim = u_dim  # graph global feature dimension
         self.e_dim = e_dim  # edge feature dimension
 
-        self.c_dim = c_dim  # number of output classes
-        self.C     = c_dim  # (used elsewhere in icenet)
-
+        self.C = C
+        
+        if out_dim is None:
+            self.out_dim = C
+        else:
+            self.out_dim = out_dim
+        
         self.z_dim = z_dim  # latent dimension
 
         self.task           = task           # 'node', 'edge', 'graph'
@@ -441,19 +445,19 @@ class GNNGeneric(torch.nn.Module):
 
         # ----------------------------------------------------
         ## Final MLP
-
+        
         # Node level or graph level inference
         if self.task == 'node' or self.task == 'graph':
-            self.mlp_final = MLP([self.z_dim, self.z_dim // 2, self.z_dim // 2, self.c_dim],
+            self.mlp_final = MLP([self.z_dim, self.z_dim // 2, self.z_dim // 2, self.out_dim],
                 activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout)
 
         # 2-point (node) probability computation function (edge level inference)
         elif self.task == 'edge_asymmetric':
-            self.mlp_final = MLP([2 * self.z_dim, self.z_dim // 2, self.z_dim//2, self.c_dim],
+            self.mlp_final = MLP([2 * self.z_dim, self.z_dim // 2, self.z_dim//2, self.out_dim],
                         activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout)
         
         elif self.task == 'edge_symmetric':
-            self.mlp_final =  MLP([self.z_dim, self.z_dim // 2, self.z_dim//2, self.c_dim],
+            self.mlp_final =  MLP([self.z_dim, self.z_dim // 2, self.z_dim//2, self.out_dim],
                         activation=final_MLP_act, batch_norm=final_MLP_bn, dropout=final_MLP_dropout)
         else:
             raise Exception(__name__ + f'.GraphNetGeneric: Unknown task = {task} parameter')
@@ -462,7 +466,7 @@ class GNNGeneric(torch.nn.Module):
         ### Domain adaptation via gradient reversal
         if self.DA_active:
             self.DA_grad_reverse  = GradientReversal(self.DA_alpha)
-            self.DA_MLP_net       = MLP([self.c_dim] + self.MLP_dim + [2],
+            self.DA_MLP_net       = MLP([self.out_dim] + self.MLP_dim + [2],
                 activation=self.DA_MLP_act, batch_norm=self.DA_MLP_bn, dropout=self.DA_MLP_dropout)
 
         # ----------------------------------------------------
@@ -572,9 +576,20 @@ class GNNGeneric(torch.nn.Module):
 
         return x
 
-    # Returns softmax probability
-    def softpredict(self,x):
-        #if self.training:
-        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        #else:
-        return F.softmax(self.forward(x), dim=-1)
+    def softpredict(self,x) :
+        """ Softmax probability
+        """
+        
+        if self.out_dim > 1:
+            return F.softmax(self.forward(x), dim=-1)
+        else:
+            return torch.sigmoid(self.forward(x))
+    
+    def binarypredict(self,x) :
+        """ Return maximum probability class
+        """
+        if self.out_dim > 1:
+            prob = list(self.softpredict(x).detach().numpy())
+            return np.argmax(prob, axis=1)
+        else:
+            return np.round(self.softpredict(x).detach().numpy()).astype(int)

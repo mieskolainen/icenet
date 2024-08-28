@@ -30,7 +30,6 @@ def filter_standard(X, isMC=None, class_id=None, xcorr_flow=False):
 
     names = []
 
-
     # __technical__ recast due to eval() scope
     global O; O = X
 
@@ -70,6 +69,6 @@ def filter_standard(X, isMC=None, class_id=None, xcorr_flow=False):
     print(names)
             
     # Construct and apply
-    cuts  = [eval(names[i], globals()) for i in range(len(names))]
-    mask        = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
+    cuts = [eval(names[i], globals()) for i in range(len(names))]
+    mask = stx.apply_cutflow(cut=cuts, names=names, xcorr_flow=xcorr_flow)
     return mask

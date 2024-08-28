@@ -5,8 +5,6 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2024
 
-import numpy as np
-
 import torch
 from torch import nn
 from torch.autograd import Variable
@@ -24,24 +22,25 @@ input x | decoder | latent space (z) ~ N(mu,sigma) | encoder | output xhat
 """
 
 class Encoder(nn.Module):
-    def __init__(self, D, hidden_dim=128, latent_dim=32, activation='tanh', batch_norm=False, dropout=0.0):
+    """ Non-variational encoder """
+     
+    def __init__(self, D, hidden_dim=[128, 128], latent_dim=32, activation='tanh', batch_norm=False, dropout=0.0):
         super(Encoder, self).__init__()
 
-        self.mlp = MLP_ALL_ACT([D, hidden_dim, latent_dim], activation=activation, batch_norm=batch_norm, dropout=dropout)
-        
-        # modules  = [self.linear2, torch.sigmoid()]
-        #self.linear2 = nn.Sequential(*modules)
-
+        self.mlp = MLP_ALL_ACT([D] + hidden_dim + [latent_dim], activation=activation, batch_norm=batch_norm, dropout=dropout)
+    
     def forward(self, x):
         return self.mlp(x)
 
 class VariationalEncoder(nn.Module):
-    def __init__(self, D, hidden_dim, latent_dim, activation='relu', batch_norm=False, dropout=0.0):
+    """ Variational encoder """
+    
+    def __init__(self, D, hidden_dim = [128, 128], var_hidden_dim = [128, 64], latent_dim = 32, activation='relu', batch_norm=False, dropout=0.0):
         super(VariationalEncoder, self).__init__()
         
-        self.mlp        = MLP_ALL_ACT([D, hidden_dim, hidden_dim], activation=activation, batch_norm=batch_norm, dropout=dropout)
-        self.mlp_mu     = MLP_ALL_ACT([hidden_dim, latent_dim],    activation='tanh', batch_norm=batch_norm, dropout=dropout)
-        self.mlp_logvar = MLP_ALL_ACT([hidden_dim, latent_dim],    activation='tanh', batch_norm=batch_norm, dropout=dropout)
+        self.mlp        = MLP_ALL_ACT([D] + hidden_dim, activation=activation, batch_norm=batch_norm, dropout=dropout)
+        self.mlp_mu     = MLP_ALL_ACT(var_hidden_dim + [latent_dim], activation='tanh', batch_norm=batch_norm, dropout=dropout)
+        self.mlp_logvar = MLP_ALL_ACT(var_hidden_dim + [latent_dim], activation='tanh', batch_norm=batch_norm, dropout=dropout)
         
         self.N          = torch.distributions.Normal(0,1)
 
@@ -67,20 +66,22 @@ class VariationalEncoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, latent_dim, hidden_dim, D, activation='tanh', batch_norm=False, dropout=0.0):
+    """ Decoder """
+    
+    def __init__(self, D, latent_dim = 32, hidden_dim = [128, 128], activation='tanh', batch_norm=False, dropout=0.0):
         super(Decoder, self).__init__()
 
-        self.mlp = MLP([latent_dim, hidden_dim, hidden_dim, D], activation=activation, batch_norm=batch_norm, dropout=dropout)
+        self.mlp = MLP([latent_dim] + hidden_dim + [D], activation=activation, batch_norm=batch_norm, dropout=dropout)
 
     def forward(self, z):
         return self.mlp(z)
 
 
 class VAE(nn.Module):
-    def __init__(self, D, latent_dim, hidden_dim,
+    def __init__(self, D, latent_dim, encoder_hidden_dim = [128, 128], var_hidden_dim = [128], decoder_hidden_dim = [128, 128],
             encoder_bn=True, encoder_act='relu', encoder_dropout=0.0, decoder_bn=False, decoder_act='relu', decoder_dropout=0.0,
-            reco_prob='Gaussian', kl_prob='Gaussian', anomaly_score='KL_RECO', C=None):
-
+            reco_prob='Gaussian', kl_prob='Gaussian', anomaly_score='KL_RECO', C=None, **kwargs):
+        
         super(VAE, self).__init__()
         
         self.D             = D
@@ -88,11 +89,12 @@ class VAE(nn.Module):
         self.reco_prob     = reco_prob
         self.kl_prob       = kl_prob
         self.anomaly_score = anomaly_score
-
-        self.encoder = VariationalEncoder(D=D, hidden_dim=hidden_dim, latent_dim=latent_dim,
-            activation=encoder_act, batch_norm=encoder_bn, dropout=encoder_dropout)
-        self.decoder = Decoder(latent_dim=latent_dim, hidden_dim=hidden_dim,
-            activation=decoder_act, batch_norm=decoder_bn, dropout=encoder_dropout, D=D)
+        
+        self.encoder = VariationalEncoder(D=D, hidden_dim=encoder_hidden_dim, var_hidden_dim=var_hidden_dim,
+            latent_dim=latent_dim, activation=encoder_act, batch_norm=encoder_bn, dropout=encoder_dropout)
+        
+        self.decoder = Decoder(D=D, latent_dim=latent_dim, hidden_dim=decoder_hidden_dim,
+            activation=decoder_act, batch_norm=decoder_bn, dropout=decoder_dropout)
 
     def to_device(self, device):
         self.encoder = self.encoder.to(device)
@@ -106,18 +108,20 @@ class VAE(nn.Module):
         return xhat,z,mu,std
 
     def softpredict(self, x):
+        
         xhat,z,mu,std = self.forward(x)
         
-        # "Test statistic"
+        # 'Test statistic'
+        
         if   self.anomaly_score == 'RECO':
 
             score = self.log_pxz(x=x, xhat=xhat)
-            return 1/(1 + torch.exp(-1/score))
-            
+            return torch.sigmoid(1 / score)
+        
         elif self.anomaly_score == 'KL_RECO':
 
             score = self.loss_kl_reco(x=x, xhat=xhat, z=z, mu=mu, std=std)
-            return 1/(1 + torch.exp(1/score))
+            return torch.sigmoid(-1 / score)
         
         else:
             raise Exception(__name__ + f'.softpredict: Unknown <anomaly_score> = {self.anomaly_score} selected.')

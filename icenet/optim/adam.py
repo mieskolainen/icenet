@@ -29,7 +29,7 @@ class Adam(torch.optim.Optimizer):
         super(Adam, self).__setstate__(state)
         for group in self.param_groups:
             group.setdefault('amsgrad', False)
-
+    
     def step(self, closure=None):
         """Performs a single optimization step.
 
@@ -76,9 +76,9 @@ class Adam(torch.optim.Optimizer):
                     grad.add_(group['weight_decay'], p.data)
 
                 # Decay the first and second moment running average coefficient
-                exp_avg.mul_(beta1).add_(1 - beta1, grad)
+                exp_avg    = exp_avg * beta1 + (1 - beta1) * grad
+                exp_avg_sq = exp_avg_sq * beta2 + (1 - beta2) * (grad**2)
                 
-                exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
                 if amsgrad:
                     # Maintains the maximum of all 2nd moment running avg. till now
                     torch.max(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)
@@ -91,8 +91,9 @@ class Adam(torch.optim.Optimizer):
                 bias_correction2 = 1 - beta2 ** state['step']
                 step_size = group['lr'] * math.sqrt(bias_correction2) / bias_correction1
 
-                p.data.addcdiv_(-step_size, exp_avg, denom)
-                
+                # Update param
+                p.data = p.data - step_size * exp_avg / denom
+
                 polyak = self.defaults['polyak']
                 state['exp_avg_param'] = polyak * state['exp_avg_param'] + (1 - polyak) * p.data
 

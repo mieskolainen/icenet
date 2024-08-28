@@ -5,6 +5,35 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import math
+
+
+def sigmoid_schedule(t, N_max=1, start=0, end=3, tau=0.7, clip_min=1e-9):
+    """
+    https://arxiv.org/abs/2305.18900
+    """
+    def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
+    
+    t = t / N_max
+    v_start = sigmoid(start / tau)
+    v_end   = sigmoid(end / tau)
+    output  = sigmoid((t * (end - start) + start) / tau)
+    output  = (v_end - output) / (v_end - v_start)
+    return np.clip(output, clip_min, 1.0)
+
+
+class Multiply(nn.Module):
+    """
+    Multiplication with a non-learnable constant alpha
+    """
+    def __init__(self, alpha):
+        super().__init__()
+        self.alpha =  alpha
+    
+    def forward(self, x):
+        x = torch.mul(x, self.alpha)
+        return x
 
 
 def grad_norm(module: nn.Module):
@@ -101,3 +130,60 @@ def weights_init_normal(m):
         y = m.in_features
         m.weight.data.normal_(0.0, 1/np.sqrt(y))
         m.bias.data.fill_(0)
+
+
+def set_scheduler(optimizer: dict, param: dict):
+    """
+    Args:
+        optimizer: optimizers for different models
+        param:     setup parameters
+    
+    Returns:
+        torch scheduler
+    """
+    
+    print(__name__ + f'.set_scheduler: ')
+    print(param)
+    print('')
+    
+    if param['type']== 'cos':
+        
+        period = param['period']
+        
+        # "Cosine cycle scheme"
+        lf = lambda x: (((1 + math.cos(x * math.pi / period)) / 2) ** 1.0) * 0.9 + 0.1
+        
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
+        
+    elif param['type'] == 'warm-cos':
+        
+        T0      = param['period']
+        eta_min = param['eta_min'] # ~ lr / 10
+        
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=T0, eta_min=eta_min)
+    
+    elif param['type'] == 'exp':
+        
+        gamma      = param['gamma']      # ~ (1 - 1e-5)
+        last_epoch = param['last_epoch'] # -1
+        
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma, last_epoch=last_epoch)
+    
+    elif param['type'] == 'step':
+        
+        step_size = param['step_size']  # ~ 150
+        gamma     = param['gamma']      # ~ 0.1
+        
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma)
+    
+    elif param['type'] == 'constant':
+        
+        factor      = param['factor']      # ~ 1
+        total_iters = param['total_iters'] # ~ 10000
+        
+        scheduler = torch.optim.lr_scheduler.ConstantLR(optimizer, factor, total_iters)
+    
+    else:
+        raise Exception(__name__ + f'.set_scheduler: Unknown scheduler_type: {param["type"]}')
+    
+    return scheduler

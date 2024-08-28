@@ -7,24 +7,175 @@ import numpy as np
 import awkward as ak
 import re
 import time
-import datetime
-
-import numba
-import copy
-from tqdm import tqdm
+import pickle
 import os
 import glob
-from termcolor import cprint
+import torch
+from datetime import datetime
+import torch
+import random
+import yaml
+import gc
+
+import numba
+from tqdm import tqdm
 
 import sklearn
 from sklearn import metrics
 import scipy
-from scipy import stats
-import scipy.special as special
 from scipy import interpolate
 
-from icefit import statstools
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
+
+def yaml_dump(data: dict, filename: str):
+    """
+    Dump dictionary to YAML with custom style
+    
+    Args:
+        data: dictionary
+        filename: full path
+    """
+    # Custom representer to force flow style for lists
+    def flow_style_list_representer(dumper, data):
+        return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
+
+    # Custom representer to force block style for dictionaries
+    def block_style_dict_representer(dumper, data):
+        return dumper.represent_mapping('tag:yaml.org,2002:map', data, flow_style=False)
+
+    class NoSortDumper(yaml.Dumper):
+        def represent_dict(self, data):
+            return self.represent_mapping('tag:yaml.org,2002:map', data.items(), flow_style=False)
+
+    # Register the custom representers with NoSortDumper
+    NoSortDumper.add_representer(list, flow_style_list_representer)
+    NoSortDumper.add_representer(dict, block_style_dict_representer)
+    
+    # Save the YAML string with mixed styles to a file
+    with open(filename, 'w') as yaml_file:
+        yaml.dump(data, yaml_file, Dumper=NoSortDumper)
+
+
+def recursive_concatenate(array_list, max_batch_size: int=32, axis: int=0):
+    """
+    Concatenate a list of arrays in a recursive way
+    (to avoid possible problems with one big concatenation e.g. with Awkward)
+    
+    Args:
+        array_list:      a list of Awkward or Numpy arrays
+        max_batch_size:  maximum number of list elements per concatenation
+        axis:            axis to concatenate over
+    
+    Returns:
+        concatenated array
+    """
+    
+    n = len(array_list)
+    
+    # Base case
+    if n == 1:
+        return array_list[0]
+    
+    # Concatenate directly
+    elif n <= max_batch_size:
+        if isinstance(array_list[0], ak.Array):
+            return ak.concatenate(array_list, axis=axis)
+        else:
+            return np.concatenate(array_list, axis=axis)
+    
+    # Split the list into two halves and recursively concatenate each half
+    else:
+        mid   = (n + 1) // 2  # handle odd length
+        left  = recursive_concatenate(array_list[:mid], max_batch_size=max_batch_size, axis=axis)
+        right = recursive_concatenate(array_list[mid:], max_batch_size=max_batch_size, axis=axis)
+        if isinstance(left, ak.Array) or isinstance(right, ak.Array):
+            return ak.concatenate([left, right], axis=axis)
+        else:
+            return np.concatenate([left, right], axis=axis)
+
+
+def concatenate_and_clean(array_list: list, axis: int=0):
+    """
+    Concatenate a list of arrays and clean memory
+    
+    Args:
+        array_list: a list of Awkward or numpy arrays
+    Returns:
+        concatenated array
+    """
+    if isinstance(array_list[0], ak.Array):
+        result = ak.concatenate(array_list, axis=axis)
+    else:
+        result = np.concatenate(array_list, axis=axis)
+    
+    del array_list
+    gc.collect()
+    
+    return result
+
+def set_random_seed(seed):
+    """
+    Set random seeds
+    """
+    print(f'{seed} (random, numpy, torch)')
+    
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+def get_datetime():
+    """
+    Return datetime string of style '2024-06-04--14-45-07'
+    """
+    return str(datetime.now()).replace(' ', '_').replace(':','-').split('.')[0]
+
+def q_exp(x, q: float=1.0):
+    """
+    q-exponent
+    """    
+    exp_ = torch.exp if type(x) is torch.Tensor else np.exp
+    return exp_(x) if np.abs(q - 1.0) < 1E-4 else (1 + (1-q)*x)**(1.0 / (1-q))
+
+def q_log(x, q: float=1.0):
+    """
+    q-logarithm
+    """    
+    log_ = torch.log if type(x) is torch.Tensor else np.log    
+    return log_(x) if np.abs(q - 1.0) < 1E-4 else (x**(1-q) - 1) / (1-q)
+
+def inverse_sigmoid(p: np.ndarray, EPS=1E-9):
+    """
+    Stable inverse sigmoid function
+    """
+    # log(p) - log(1-p)
+    return np.log(np.clip(p, EPS, 1.0-EPS)) - np.log(np.clip(1-p, EPS, 1.0-EPS))
+
+def _positive_sigmoid(x: np.ndarray):
+    return 1 / (1 + np.exp(-x))
+
+def _negative_sigmoid(x: np.ndarray):
+    exp = np.exp(x) # Cache exp for speed
+    return exp / (exp + 1)
+
+def sigmoid(x: np.ndarray):
+    """
+    Stable sigmoid function
+    """
+    positive = (x >= 0)
+    negative = ~positive
+    
+    result = np.empty_like(x)
+    result[positive] = _positive_sigmoid(x[positive])
+    result[negative] = _negative_sigmoid(x[negative])
+
+    return result
 
 def weighted_avg_and_std(values, weights):
     """
@@ -139,10 +290,10 @@ def red(X, ids, param, mode=None, exclude_tag='exclude_MVA_vars', include_tag='i
         reduced.sort() # Make it deterministic order
         
         if verbose:
-            cprint(__name__ + f'.red: Included input variables: {np.array(ids)[mask]}', 'yellow')
-            cprint(__name__ + f'.red: Excluded input variables: {reduced}', 'red')
+            print(f'Included input variables: {np.array(ids)[mask]}', 'yellow')
+            print(f'Excluded input variables: {reduced}', 'red')
     else:
-        cprint(__name__ + f'.red: Using a full set of input variables', 'red')
+        print(f'Using a full set of input variables', 'red')
     
     if   mode == 'X':
         return X[:, mask]
@@ -215,38 +366,68 @@ def process_regexp_ids(all_ids, ids=None):
 
     return load_ids
 
-
-def parse_vars(items):
+def pick_index(all_ids: list, vars: list):
     """
-    Parse a series of key-value pairs and return a dictionary
+    Return indices in all_ids corresponding to vars
+    
+    (vars can contain regexp)
+    
+    Args:
+        all_ids: list of strings, e.g. ['a','b','c']
+        vars:    list of string to pick, e.g. ['a', 'c'] or ['.*']
+    
+    Returns:
+        index array, variable names list
     """
-    d = {}
+    
+    var_names = process_regexp_ids(all_ids=all_ids, ids=vars)
+    pick_ind  = np.array(np.where(np.isin(all_ids, var_names))[0], dtype=int)
 
-    if items:
-        for item in items:
-            key, value = parse_var(item)
-            d[key] = value
-    return d
+    return pick_ind, var_names
 
 
-def ak2numpy(x, fields, null_value=float(-999.0), dtype='float32'):
+#def parse_vars(items):
+#    """
+#    Parse a series of key-value pairs and return a dictionary
+#    """
+#    d = {}
+#
+#    if items:
+#        for item in items:
+#            key, value = parse_var(item)
+#            d[key] = value
+#    return d
+
+
+def ak2numpy(x: ak.Array, fields: list, null_value: float=-999.0, dtype='float32'):
     """
     Unzip awkward array to numpy array per column (awkward Record)
     
     Args:
-        x:      awkward array
-        fields: record field names to extract
+        x:            awkward array
+        fields:       record field names to extract
+        null_value:   missing element value
+        dtype:        final numpy array dtype
+    
     Returns:
         numpy array with columns ordered as 'fields' parameter
     """
-    out = null_value * np.ones((len(x), len(fields)), dtype=dtype)
+    out = np.full((len(x), len(fields)), null_value, dtype=dtype)
+    
     for i in range(len(fields)):
-        out[:,i] = ak.flatten(ak.unzip(x[fields[i]]))
+        
+        y = ak.to_numpy(x[fields[i]], allow_missing=True)
+        
+        if np.ma.isMaskedArray(y): # Process missing elements
+            y = np.ma.filled(y, fill_value=null_value)
+        
+        out[:,i] = y
+    
     return out
 
 
 def jagged_ak_to_numpy(arr, scalar_vars, jagged_vars, jagged_maxdim,
-                       entry_start=None, entry_stop=None, null_value=float(-999.0), dtype='float32'):
+                       entry_start=None, entry_stop=None, null_value: float=-999.0, dtype='float32'):
     """
     Transform jagged awkward array to fixed dimensional numpy data
     
@@ -292,7 +473,7 @@ def jagged_ak_to_numpy(arr, scalar_vars, jagged_vars, jagged_maxdim,
 
 
 def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
-    entry_start=None, entry_stop=None, null_value=float(-999.0), mode='columnar', dtype='float32'):
+    entry_start=None, entry_stop=None, null_value: float=-999.0, mode: str='columnar', dtype='float32'):
     """
     Transform a "jagged" event container to a matrix (rows ~ event, columns ~ variables)
     
@@ -317,7 +498,7 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
     mem_size = N*D*32/8/1024**3 # 32 bit
     if dtype == 'float64': mem_size *= 2
     
-    print(__name__ + f'.jagged2matrix: Creating a matrix with dimensions [{N} x {D}] ({mem_size:0.3f} GB)')
+    print(f'Creating a matrix with dimensions [{N} x {D}] ({mem_size:0.3f} GB)')
 
     # Pre-processing of jagged variable names
     jvname = []
@@ -377,7 +558,7 @@ def jagged2matrix(arr, scalar_vars, jagged_vars, jagged_dim,
                 k += jagged_dim[j]
 
     elapsed = time.time() - t
-    print(__name__ + f'.jagged2matrix: Processing took {elapsed:0.1f} sec')
+    print(f'Processing took {elapsed:0.1f} sec')
 
     return shared_array
 
@@ -407,7 +588,7 @@ def jagged2tensor(X, ids, xyz, x_binedges, y_binedges, dtype='float32'):
             T[i,c,:,:] = arrays2matrix(x_arr=X[i,ind[0]], y_arr=X[i,ind[1]], z_arr=X[i,ind[2]], 
                 x_binedges=x_binedges, y_binedges=y_binedges)
 
-    print(__name__ + f'.jagged2tensor: Returning tensor with shape {T.shape}')
+    print(f'Returning tensor with shape {T.shape}')
 
     return T
 
@@ -436,7 +617,7 @@ def arrays2matrix(x_arr, y_arr, z_arr, x_binedges, y_binedges, dtype='float32'):
         for i in range(len(x_ind)):
             A[x_ind[i], y_ind[i]] += z_arr[i]
     except:
-        print(__name__ + f'.arrays2matrix: not valid input (returning 0-matrix)')
+        print(f'Not valid input (returning 0-matrix)')
 
     return A
 
@@ -547,11 +728,11 @@ def count_targets(events, ids, entry_start=0, entry_stop=None, new=False, librar
         vec = np.array([events.array(name, entry_start=entry_start, entrystop=entry_stop) for name in ids])
     vec = vec.T
     
-    print(__name__ + f'.count_targets: vec.shape = {vec.shape}')
+    print(f'vec.shape = {vec.shape}')
 
     intmat = binaryvec2int(vec)
     BMAT   = generatebinary(K)
-    print(__name__ + f'.count_targets: {ids}')
+    print(f'{ids}')
     for i in range(BMAT.shape[0]):
         print(f'{BMAT[i,:]} : {np.sum(intmat == i):>10} ({np.sum(intmat == i) / len(intmat):.4f})')
     
@@ -755,7 +936,7 @@ def generatebinary(N, M=None, verbose=False):
         K += binomial(N,k)
 
     if verbose:
-        print(__name__ + f'.generatebinary: Binary matrix dimension {K} x {N}')
+        print(f'Binary matrix dimension {K} x {N}')
 
     X = np.zeros((K, N), dtype=np.uint8)
     ivals = np.zeros(K, dtype = np.double)
@@ -804,8 +985,8 @@ def binaryvec2int(X):
         # double because we may have over 63 bits
         Y = np.zeros(X.shape[0], dtype=np.double)
     else:
-        Y = np.zeros(X.shape[0], dtype=np.int)
-
+        Y = np.zeros(X.shape[0], dtype=np.int64)
+    
     for i in range(len(Y)):
         Y[i] = bin2int(X[i,:])
     return Y
@@ -848,22 +1029,62 @@ def getmtime(filename):
 def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None):
     """
     Create model filename
+    
+    This function automatically takes the minimum validation loss epoch / iteration,
+    if epoch == - 1, by first reading the last epoch / iteration file.
     """
     def createfilename(i):
         return f'{path}/{label}_{i}{filetype}'
     
     if epoch is None or epoch == -1:
-        cprint(__name__ + f'.create_model_filename: Loading the latest model by timestamp', 'yellow')
-        
+        print(f'Loading the latest model by timestamp', 'yellow')
+
         list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
-        filename      = max(list_of_files, key=os.path.getctime)
-    else:
-        cprint(__name__ + f'.create_model_filename: Loading the model with the provided epoch = {epoch}', 'yellow')
         
+        if len(list_of_files) == 0:
+            txt  = f'Could not find any files for model "{label}"'
+            txt += f" under path {path}"
+            raise Exception(txt)
+        
+        # Latest model
+        filename = max(list_of_files, key=os.path.getctime)
+        
+        # ----------------------------------------------------
+        # Try to find the best model
+        succeeded = False
+        try:
+            # Try with pickle load
+            with open(filename, 'rb') as file:
+                data  = pickle.load(file)
+            succeeded = True
+            
+        except:
+            # Try with torch load
+            try:
+                data = torch.load(filename, map_location = 'cpu')
+                succeeded = True
+            
+            except Exception as e:
+                print(e)
+                print(f'Problem in finding the model [{label}] with the minimum validation loss', 'red')
+        
+        if succeeded:
+            # Take the minimum validation loss epoch index
+            losses = np.array(data['losses']['val_losses'])
+            idx    = np.argmin(losses)
+            
+            str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+            print(f'{str}', 'magenta')
+            
+            filename = createfilename(idx)
+        # ----------------------------------------------------
+        
+    else:
+        print(f'Loading the model with the provided epoch = {epoch}', 'yellow')
         filename = createfilename(epoch)
     
-    dt = datetime.datetime.fromtimestamp(getmtime(filename))
-    cprint(__name__ + f'.create_model_filename: Found a model file: {filename} (modified {dt})', 'green')
+    dt = datetime.fromtimestamp(getmtime(filename))
+    print(f'Found a model file: {filename} (modified {dt})', 'green')
     
     return filename
 
@@ -960,7 +1181,7 @@ class Metric:
         # Invalid input
         if self.num_classes <= 1:
             if verbose:
-                print(__name__ + f'.Metric: only one class present cannot evaluate metrics (return -1)')
+                print(f'only one class present cannot evaluate metrics (return -1)')
 
             return # Return None
         
@@ -1041,7 +1262,7 @@ class Metric:
                     else:
                         trials += 1
                 if trials > max_trials:
-                    print(__name__ + f'.Metric: bootstrap failed (check the input per class statistics)')
+                    print(f'bootstrap failed (check the input per class statistics)')
                     continue
                 # ------------------
                 
@@ -1049,16 +1270,48 @@ class Metric:
                 out = compute_metrics(class_ids=self.class_ids, y_true=y_true[ind], y_pred=y_pred[ind], weights=ww)
                 
                 if out['auc'] > 0:
-
+                    
                     self.auc_bootstrap[i] = out['auc']
                     self.acc_bootstrap[i] = out['acc']
 
                     # Interpolate ROC-curve (re-sample to match the non-bootstrapped x-axis)
                     func = interpolate.interp1d(out['fpr'], out['tpr'], 'linear')
                     self.tpr_bootstrap[i,:] = func(self.fpr)
-
+                    
                     func = interpolate.interp1d(out['tpr'], out['fpr'], 'linear')
                     self.fpr_bootstrap[i,:] = func(self.tpr)
+
+
+def sort_fpr_tpr(fpr, tpr):
+    """
+    For numerical stability with negative weighted events
+    """
+    fpr = np.clip(fpr, 0.0, 1.0)
+    tpr = np.clip(tpr, 0.0, 1.0)
+    
+    sorted_index = np.argsort(fpr) # x-axis needs to be monotonic
+    fpr_sorted   = np.array(fpr)[sorted_index]
+    tpr_sorted   = np.array(tpr)[sorted_index]
+    
+    return fpr_sorted, tpr_sorted
+
+
+def auc_score(fpr, tpr):
+    """
+    AUC-ROC via numerical intergration
+    
+    Args:
+        fpr:  false positive rate array
+        tpr:  true positive rate array
+    
+    Call sort_fpr_tpr before this function for numerical stability.
+    
+    Returns:
+        AUC score
+    """
+    auc = scipy.integrate.trapz(y=tpr, x=fpr)
+
+    return np.clip(auc, 0.0, 1.0)
 
 
 def compute_metrics(class_ids, y_true, y_pred, weights):
@@ -1072,18 +1325,18 @@ def compute_metrics(class_ids, y_true, y_pred, weights):
     # Fix NaN
     num_nan = np.sum(~np.isfinite(y_pred))
     if num_nan > 0:
-        print(__name__ + f'.compute_metrics: Found {num_nan} NaN/Inf (set to zero)')
+        print(f'Found {num_nan} NaN/Inf (set to zero)')
         y_pred[~np.isfinite(y_pred)] = 0 # Set to zero
     
     try:
         if  len(class_ids) == 2:
             fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred, sample_weight=weights)
             
-            # AUC via numerical integration (stable with negative weight events)
-            sorted_index = np.argsort(fpr)
-            fpr_sorted   = np.array(fpr)[sorted_index]
-            tpr_sorted   = np.array(tpr)[sorted_index]
-            auc = scipy.integrate.trapz(y=tpr_sorted, x=fpr_sorted)
+            if np.min(weights < 0): # Protect
+                fpr, tpr = sort_fpr_tpr(fpr=fpr, tpr=tpr)
+            
+            # By integration
+            auc = auc_score(fpr=fpr, tpr=tpr)
             
             #auc = metrics.roc_auc_score(y_true=y_true,  y_score=y_pred, sample_weight=weights)
             acc = metrics.accuracy_score(y_true=y_true, y_pred=np.round(y_pred), sample_weight=weights)
@@ -1094,7 +1347,7 @@ def compute_metrics(class_ids, y_true, y_pred, weights):
             acc = metrics.accuracy_score(y_true=y_true, y_pred=y_pred.argmax(axis=1), sample_weight=weights)
     
     except Exception as e:
-        print(__name__ + f'.compute_metrics: Unable to compute ROC-metrics: {e}')
+        print(f'Unable to compute ROC-metrics: {e}')
         for c in class_ids:
             print(f'num of class[{c}] = {np.sum(y_true == c)}')
 

@@ -1,7 +1,7 @@
 # [0]
 DATA: &DATA
-  path: ''
-  files: 'output_data_10k.root'
+  path: 'travis-stash/input/icebrem/output_data_1M'
+  files: 'output_data_[0-4].root'
   xs: 1.
   model_param: null
   force_xs: false

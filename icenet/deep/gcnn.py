@@ -5,7 +5,7 @@
 # 
 # m.mieskolainen@imperial.ac.uk, 2024
 
-
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -57,7 +57,7 @@ class GCN(nn.Module):
     """ Graph Convolution Network
     """
 
-    def __init__(self, D, Z, C, dropout=0.5):
+    def __init__(self, D, Z, C, out_dim=None, dropout=0.5):
         """ 
         Args:
             D       : Input dimension
@@ -71,8 +71,13 @@ class GCN(nn.Module):
         self.Z = Z
         self.C = C
         
+        if out_dim is None:
+            self.out_dim = C
+        else:
+            self.out_dim = out_dim
+        
         self.gc1 = GCN_layer(self.D, self.Z)
-        self.gc2 = GCN_layer(self.Z, self.C)
+        self.gc2 = GCN_layer(self.Z, self.out_dim)
         self.dropout = dropout
 
     def forward(self, x, adj_matrix):
@@ -81,7 +86,22 @@ class GCN(nn.Module):
         y = F.dropout(y, self.dropout, training=self.training)
         y = self.gc2(y, adj_matrix)
         
-        #if self.training:
-        #    return F.log_softmax(y, dim=-1) # Numerically more stable
-        #else:
-        return F.softmax(y, dim=-1)
+        return y
+    
+    def softpredict(self,x) :
+        """ Softmax probability
+        """
+        
+        if self.out_dim > 1:
+            return F.softmax(self.forward(x), dim=-1)
+        else:
+            return torch.sigmoid(self.forward(x))
+    
+    def binarypredict(self,x) :
+        """ Return maximum probability class
+        """
+        if self.out_dim > 1:
+            prob = list(self.softpredict(x).detach().numpy())
+            return np.argmax(prob, axis=1)
+        else:
+            return np.round(self.softpredict(x).detach().numpy()).astype(int)

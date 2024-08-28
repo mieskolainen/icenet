@@ -5,13 +5,15 @@
 
 import numpy as np
 import copy
-import pickle
+import pandas as pd
 from importlib import import_module
-
-from termcolor import colored, cprint
 
 from icenet.tools import io
 from icenet.tools import aux
+
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 # GLOBALS
 #from configs.hnl.cuts import *
@@ -31,27 +33,32 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
         ids:   columnar variable string (list)
         info:  trigger and pre-selection acceptance x efficiency information (dict)
     """
-    inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
+    #inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
     
     if type(root_path) is list:
         root_path = root_path[0] # Remove [] list, we expect only the path here
     
     # -----------------------------------------------
-    param = {
-        'entry_start': entry_start,
-        "entry_stop":  entry_stop,
-        "maxevents":   maxevents,
-        "args": args
-    }
+    #param = {
+    #    'entry_start': entry_start,
+    #    "entry_stop":  entry_stop,
+    #    "maxevents":   maxevents,
+    #    "args": args
+    #}
 
     # =================================================================
     # *** MC (signal and background) ***
     
-    rootfile = f'{root_path}/{args["mcfile"]}'
+    frames  = []
+    mcfiles = io.glob_expand_files(datasets=args["mcfile"], datapath=root_path)
     
-    with open(rootfile, 'rb') as f:
-        frame = pickle.load(f)
-
+    for f in mcfiles:
+        new_frame = copy.deepcopy(pd.read_parquet(f))
+        frames.append(new_frame)
+        print(f'{f} | N = {len(new_frame)}')
+    
+    frame = pd.concat(frames)
+    
     ids = frame.keys()
     print(ids)
     
@@ -62,11 +69,11 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     ## Print some diagnostics
     label_type = frame['label_type'].to_numpy().astype(int)
     
-    print(__name__ + f'.load_root_file: Number of events: {len(X)}')
+    print(f'Number of events: {len(X)}')
     
     for c in np.unique(Y):
-        print(__name__ + f'.load_root_file: class[{c}] has unique "label_type" = {np.unique(label_type[Y==c])}')        
-        print(__name__ + f'.load_root_file: class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3f}, std(event_weight) = {np.std(W[Y==c]):0.3f}')
+        print(f'class[{c}] has unique "label_type" = {np.unique(label_type[Y==c])}')        
+        print(f'class[{c}] mean(event_weight) = {np.mean(W[Y==c]):0.3f}, std(event_weight) = {np.std(W[Y==c]):0.3f}')
     
     ## ** Set all weights to one **
     W   = np.ones(len(W))
@@ -84,9 +91,9 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     W    = W[rand].squeeze()
 
     # Apply maxevents cutoff
-    maxevents = np.min([args['maxevents'], len(X)])
+    maxevents = np.min([maxevents, len(X)])
     X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
-        
+    
     # TBD add cut statistics etc. here
     info = {}
     

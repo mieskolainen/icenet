@@ -5,13 +5,11 @@
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
-import uproot
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
-from termcolor import colored, cprint
 from matplotlib.ticker import FuncFormatter
-                    
+
 from scipy.interpolate import RectBivariateSpline
 from matplotlib import ticker, cm
 import matplotlib as mpl
@@ -21,7 +19,7 @@ import sys
 sys.path.append(".")
 
 from icenet.tools import aux,io
-from icefit.peakfit import TH1_to_numpy
+from icefit.icepeak import TH1_to_numpy
 from icefit.icelimit import *
 
 brazil_green  = np.array([0, 245, 34]) / 255
@@ -487,7 +485,7 @@ def run_limits_vector(data={}, param={}, savepath = '.'):
     if param['cosmetics']['portal'] == 'vector':
         create_limit_plots_vector(data=data, param=param, savepath=savepath)
     else:
-        cprint(f"Plots not implemented for portal {param['cosmetics']['portal']}", 'red')
+        print(f"Plots not implemented for portal {param['cosmetics']['portal']}", 'red')
     
     ## Produce tables
     create_limit_tables(data=data, param=param, savepath=savepath)

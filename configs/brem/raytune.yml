@@ -1,7 +1,7 @@
 param:
   active:         [null]
-  #active:         ['xgb1'] # Add model identifiers here
-  num_samples:    5   # Trial count parameter
+#  active:         ['xgb1'] # Add model identifiers here
+  num_samples:    20   # Trial count parameter
 
 setup:
   
@@ -15,37 +15,40 @@ setup:
     param:
       
       num_boost_round:
-        type: "tune.randint(20, 120)"
+        type: "tune.randint(20, 1000)"
 
       ## Tree parameters
-      max_depth:
-        type: "tune.choice([4,5,6,7,8,9,10,11,12,13,14,15,16,17])"
 
-      ## Regularization
-      reg_lambda: # Smoothness
-        type: "tune.uniform(0.0, 5.0)"
-
-      reg_alpha: # Sparsity
-        type: "tune.uniform(0.0, 0.5)"
-
-      ## Tree splitting
-      #min_child_weight:
-      #  type: "tune.uniform(0.1, 2.0)"  # Between [0, inf] Default 1.0
-      
-      gamma:
-        type: "tune.uniform(0.0, 2.0)"   # Between [0,inf] Default 1.0
-      
-      #max_delta_step:
-      #  type: "tune.uniform(0.0, 1.5)"  # Between [0, inf] Default 0
-
-      #subsample:
-      #  type: "tune.uniform(0.5, 1)"    # Between [0, 1] # Default 1
-
-      colsample_bytree:
-        type: "tune.uniform(0.3, 1.0)" # Between [0,1], default 1
-
-      colsample_bylevel:
-        type: "tune.uniform(0.3, 1.0)" # Between [0,1], default 1
-
-      colsample_bynode:
-        type: "tune.uniform(0.3, 1.0)" # Between [0,1], default 1
+#      max_depth:
+#        type: "tune.choice([4,5,6,7,8,9,10,11,12])"
+#
+#      ## Regularization
+#
+#      reg_lambda: # Smoothness
+#        type: "tune.uniform(0.0, 5.0)"
+#
+#      reg_alpha: # Sparsity
+#        type: "tune.uniform(0.0, 0.5)"
+#
+#      ## Tree splitting
+#      
+#      gamma:
+#        type: "tune.uniform(0.0, 2.0)" # Between [0,inf] Default 0.
+#
+#      #min_child_weight:
+#      #  type: "tune.uniform(0.1, 2.0)" # Between [0, inf] Default 1.
+#      
+#      #max_delta_step:
+#      #  type: "tune.uniform(0.0, 1.5)" # Between [0, inf] Default 0.
+#
+#      #subsample:
+#      #  type: "tune.uniform(0.5, 1)"   # Between [0, 1] # Default 1.
+#
+#      colsample_bytree:
+#        type: "tune.uniform(0.3, 1.0)" # Between [0,1], default 1.
+#
+#      colsample_bylevel:
+#        type: "tune.uniform(0.3, 1.0)" # Between [0,1], default 1.
+#
+#      colsample_bynode:
+#        type: "tune.uniform(0.3, 1.0)" # Between [0,1], default 1.

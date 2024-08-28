@@ -101,7 +101,7 @@ setup:
       
       ## Booster parameters
       num_boost_round:
-        type: "tune.choice([1])"
+        type: "tune.choice([10])"
       
       ## Tree parameters
       max_depth:

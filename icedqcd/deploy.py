@@ -1,6 +1,6 @@
 # Deploy MVA-model to data (or MC) files (work in progress, not all models supported ...)
 #
-# This code is compatible with Oracle Grid Engine submission
+# This code is compatible with grid (SGE, HTCondor) submission
 #
 # m.mieskolainen@imperial.ac.uk, 2024
 
@@ -16,13 +16,15 @@ import gc
 
 from importlib import import_module
 from datetime import datetime
-from termcolor import colored, cprint
 
 from icedqcd import common
 from icenet.tools import iceroot, io, aux, process
 from icenet.deep import predict
 from tqdm import tqdm
 
+# ------------------------------------------
+#from icenet import print # (reservation)
+# ------------------------------------------
 
 def f2s(value, decimals=2):
     """
@@ -62,10 +64,10 @@ def zscore_normalization(X, args):
     Z-score normalization
     """
     if   args['varnorm'] == 'zscore':                            
-        print(__name__ + f'.process_data: Z-score normalizing variables ...')
+        print(f'Z-score normalizing variables ...')
         X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
 
-        print(__name__ + f'.process_data: X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
+        print(f'X.shape = {X.shape} | X_mu.shape = {X_mu.shape} | X_std.shape = {X_std.shape}')
         X = io.apply_zscore(X, X_mu, X_std)
 
     return X
@@ -77,9 +79,9 @@ def process_data(args):
     rootname  = args["rootname"]
     inputvars = import_module("configs." + rootname + "." + args["inputvars"])
     
-    cprint(__name__ + f'.process_data:', 'green')
+    print(f'Processing data', 'green')
     print(args)
-
+    
     ## ** Special YAML loader here **
     from libs.ccorp.ruamel.yaml.include import YAML
     yaml = YAML()
@@ -99,11 +101,21 @@ def process_data(args):
     root_path = args['root_files']
     if type(root_path) is list:
         root_path = root_path[0] # Remove [] list
-
+    
+    # ------------------
+    # Phase 0: Create output path
+    
+    path_str = f"{cwd}/output/{rootname}/deploy/modeltag__{args['modeltag']}"
+    
+    # Add conditional tag
+    conditional_tag = f'--use_conditional__{args["use_conditional"]}' if args["use_conditional"] else ""
+    path_str += conditional_tag
+    
+    basepath = aux.makedir(path_str)
+    
     # ------------------
     # Phase 1: Read ROOT-file to awkward-format
-    basepath = aux.makedir(f"{cwd}/output/{rootname}/deploy/modeltag__{args['modeltag']}")
-
+    
     nodestr  = (f"inputmap__{io.safetxt(args['inputmap'])}--grid_id__{args['grid_id']}--hostname__{socket.gethostname()}--time__{datetime.now()}").replace(' ', '')
     logging.basicConfig(filename=f'{basepath}/deploy--{nodestr}.log', encoding='utf-8',
         level=logging.DEBUG, format='%(asctime)s | %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
@@ -138,7 +150,7 @@ def process_data(args):
 
         try:
             file_id = all_file_id[args['grid_id']]
-            print(__name__ + f".deploy: file_id = {file_id} (grid_id = {args['grid_id']})")
+            print(f"file_id = {file_id} (grid_id = {args['grid_id']})")
             
         except Exception as e:
             logging.debug('Subfolder already saturated -- no processing under this grid PC node -- continue')
@@ -166,7 +178,7 @@ def process_data(args):
                 total_num_events += len(X_nocut)
 
             except Exception as e:
-                cprint(__name__ + f'.process_data: A fatal error in iceroot.load_tree with a file "{filename}": ' + str(e), 'red')
+                print(f'A fatal error in iceroot.load_tree with a file "{filename}": ' + str(e), 'red')
                 
                 # Write to log-file
                 logging.debug(f'{filename} | A fatal error in iceroot.load_tree: ' + str(e))
@@ -177,7 +189,7 @@ def process_data(args):
 
             if args['use_conditional']:
 
-                print(__name__ + f'.process_data: Initializing conditional theory (model) parameters')
+                print(f'Initializing conditional theory (model) parameters')
                 for var in mc_param.keys():
                     # Create new 'record' (column) to ak-array and init to zero
                     col_name          = f'MODEL_{var}'
@@ -239,9 +251,11 @@ def process_data(args):
 
                     ## 1. Impute data
                     if args['imputation_param']['active']:
-                        imputer = pickle.load(open(args["modeldir"] + f'/imputer.pkl', 'rb'))
+                        
+                        fmodel  = f'{args["modeldir"]}/imputer.pkl'
+                        imputer = pickle.load(open(fmodel, 'rb'))
                         data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
-
+                    
                     ## 2. Apply the input variable set reductor
                     X,ids = aux.red(X=data['data'].x, ids=data['data'].ids, param=param)
 
@@ -313,7 +327,7 @@ def process_data(args):
             aux.makedir(basepath + '/' + filename.rsplit('/', 1)[0]) # Create dir
             outputfile = basepath + '/' + filename.replace('.root', '-icenet.root')
             
-            print(__name__ + f'.process_data: Saving root output to "{outputfile}"')
+            print(f'Saving root output to "{outputfile}"')
 
             with uproot.recreate(outputfile, compression=uproot.ZLIB(4)) as rfile:
                 rfile[f"Events"] = ALL_scores
@@ -336,58 +350,13 @@ def get_predictor(args, param, feature_names=None):
     elif param['predict'] == 'xgb_logistic':
         func_predict, model = predict.pred_xgb_logistic(args=args, param=param, feature_names=feature_names, return_model=True)
 
-    elif param['predict'] == 'torch_vector':
-        func_predict = predict.pred_torch_generic(args=args, param=param)
+    #elif param['predict'] == 'torch_vector':
+    #    func_predict = predict.pred_torch_generic(args=args, param=param)
 
-    elif param['predict'] == 'torch_graph':
-        func_predict = predict.pred_torch_graph(args=args, param=param)
+    #elif param['predict'] == 'torch_graph':
+    #    func_predict = predict.pred_torch_graph(args=args, param=param)
     
     else:
         raise Exception(__name__ + f'.get_predictor: Unknown param["predict"] = {param["predict"]}')
 
     return func_predict, model
-
-"""
-def apply_models(data=None, args=None):
-    #
-    #Evaluate ML/AI models.
-    #
-    #Args:
-    #    Different datatype objects (see the code)
-    #
-
-    try:
-        ### Tensor variable normalization
-        if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
-
-            print('\nZ-score normalizing tensor variables ...')
-            X_mu_tensor, X_std_tensor = pickle.load(open(args["modeldir"] + '/zscore_tensor.pkl', 'rb'))
-            X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
-        
-        ### Variable normalization
-        if   args['varnorm'] == 'zscore':
-
-            print('\nZ-score normalizing variables ...')
-            X_mu, X_std = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
-            X = io.apply_zscore(X, X_mu, X_std)
-
-        elif args['varnorm'] == 'madscore':
-
-            print('\nMAD-score normalizing variables ...')
-            X_m, X_mad = pickle.load(open(args["modeldir"] + '/madscore.pkl', 'rb'))
-            X = io.apply_madscore(X, X_m, X_mad)
-
-    except:
-        cprint('\n' + __name__ + f' WARNING: {sys.exc_info()[0]} in normalization. Continue without! \n', 'red')
-    
-    # --------------------------------------------------------------------
-    # For pytorch based
-    if X is not None:
-        X_ptr      = torch.from_numpy(X).type(torch.FloatTensor)
-
-    if X_2D is not None:
-        X_2D_ptr   = torch.from_numpy(X_2D).type(torch.FloatTensor)
-        
-    if X_deps is not None:
-        X_deps_ptr = torch.from_numpy(X_deps).type(torch.FloatTensor)
-"""

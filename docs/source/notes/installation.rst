@@ -11,7 +11,7 @@ Preliminaries: Conda installation
 ----------------------------------
 .. code-block:: none
 
-	wget https://repo.anaconda.com/archive/Anaconda3-2023.03-Linux-x86_64.sh 
+	wget https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Linux-x86_64.sh
 
 Then execute the installer with ``bash filename.sh`` and finally set ``.condarc`` as follows ``nano .condarc`` (home directory)
 
@@ -23,42 +23,43 @@ Then execute the installer with ``bash filename.sh`` and finally set ``.condarc`
       - defaults
 
 
-Pre-installed CUDA paths (DEPRECATED)
+Pre-installed CUDA paths (EXPERIMENTAL)
 ------------------------------------
 .. code-block:: none
 
-	source /vols/software/cuda/setup.sh 11.2.0
+	source /vols/software/cuda/setup.sh 11.8.0
 
-This can be used with IC machines in principle, however, is not supported.
+This can be used with IC machines in principle, however, is not tested.
 
 
 Automated setup
 ----------------------------------
 
-Remark: To avoid ``No space left on device`` problem with conda or pip, set the temporary path first, e.g.
+Remark: To avoid ``No space left on device`` problem with conda or pip, set the temporary path first
 
 .. code-block:: none
 	
-	mkdir $HOME/tmp
-	export TMPDIR=$HOME/tmp
+	mkdir <PATH_WITH_SPACE>/tmp
+	export TMPDIR=<PATH_WITH_SPACE>/tmp
+
+Also after activating the icenet conda environment.
 
 Execute
 
 .. code-block:: none
-
+	
 	git clone git@github.com:mieskolainen/icenet.git && cd icenet
 	
-	# Create environment
-	conda create -y --name icenet -c conda-forge python==3.10.11 cmake==3.26.4 gxx_linux-64==11.3.0 sysroot_linux-64==2.28
+	# Create the environment
+	conda env create -f environment.yml
 	conda activate icenet
 	
-	# Install cudatoolkit and cudnn
-	conda install -c conda-forge cudatoolkit==11.7.0 cudatoolkit-dev==11.7.0 cudnn=8.8.0.121 
-	
 	# Install dependencies with pip
-	pip install -r requirements.txt
+	python -m pip install -r requirements.txt
 	
-	(OR pip install -r requirements-cpu-only.txt e.g. for Github Actions)
+	(OR -r requirements-cpu-only.txt e.g. for Github Actions)
+
+Note: The command ``python -m pip`` should use the pip installed under the conda environment.
 
 
 Initialize the environment
@@ -75,12 +76,17 @@ Always start with
 Possible problems
 ----------------------------------
 
+Note: One may need to steer where ``pip`` installs the packages, for example
+
+.. code-block:: none
+
+	python -m pip install --target $CONDA_PREFIX <package>
+
 Note: If you experience ``OSError: libcusparse.so.11`` (or similar) with torch-geometric, set the system path
 
 .. code-block:: none
 
 	export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-
 
 Note: If you experience ``Could not load dynamic library libcusolver.so.10`` with tensorflow, make a symbolic link
 
@@ -97,8 +103,16 @@ removing e.g. ``tensorflow`` from requirements.txt, and install it separately wi
 	
 	pip install tensorflow
 
-
 Then if something else fails, google with the error message.
+
+
+Show installation paths of binaries
+--------------------------------------
+
+.. code-block:: none
+	
+	which -a pip
+	which -a python
 
 
 GPU-support commands
@@ -129,14 +143,18 @@ Show Tensorflow and Pytorch GPU support in Python
 	print(torch.cuda.get_device_name(0))
 
 
-Grid engine GPU job submission
+HTCondor GPU job submission
 -------------------------------
 
 Use the following command with IC machines
 
 .. code-block:: none
 
-	qsub -q gpu.q@lxcgpu* <other commands>
+	condor_submit <job_description_file>
+	condor_rm <job_id>
+	condor_ssh_to_job <job_id> (DEBUG)
+	condor_q
+	condor_status --gpus
 
 
 Conda virtual environment commands
@@ -155,6 +173,7 @@ Conda virtual environment commands
 	
 	# Remove environment completely
 	conda env remove --name icenet
+
 
 C-library versions
 -----------------------------------

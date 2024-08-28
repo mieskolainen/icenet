@@ -86,7 +86,7 @@ def main() :
     Y = output['Y']
 
     print(__name__ + ': Variables before normalization:')
-    prints.print_variables(X, VARS)    
+    prints.print_variables(X=X, ids=VARS)    
     # =======================================================================
     
     targetdir = aux.makedir(f'figs/{args["rootname"]}/{args["config"]}/train/')
@@ -130,8 +130,8 @@ def main() :
         VARS = features.generate_feature_names(args['MAXT3'])
 
         print(__name__ + ': Variables after normalization:')
-        prints.print_variables(X, VARS)
-
+        prints.print_variables(X=X, ids=VARS)  
+        
         # Save it for the evaluation
         pickle.dump([X_mu, X_std], open(args['modeldir'] + '/zscore.dat', 'wb'))
 

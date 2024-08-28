@@ -8,15 +8,24 @@ import awkward as ak
 import torch
 import gc
 from pprint import pprint
-from termcolor import colored, cprint
 import copy
-
+from prettytable import PrettyTable
+import multiprocessing
+import time
 from tqdm import tqdm
+import pandas as pd
 
 from iceplot import iceplot
 from icefit import statstools
-from icenet.tools import aux
 from icefit import cortools
+
+from icenet.tools import aux
+from icenet.tools import reweight
+from icenet.tools import prints
+
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 
 def binengine(bindef, x):
@@ -38,7 +47,7 @@ def binengine(bindef, x):
     """
     
     if len(x) == 0:
-        print(__name__ + f'.binengine: Input is zero-array, returning [0,0]')
+        print(f'Input is zero-array, returning [0,0]')
         return np.array([0,0])
 
     def mylinspace(minval, maxval, nbin):
@@ -63,12 +72,12 @@ def binengine(bindef, x):
 
     # Automatic with quantiles
     elif type(bindef) is dict and 'q' in bindef:
-        return mylinspace(minval=np.percentile(x, 100*bindef['q'][0]), maxval=np.percentile(x, 100*bindef['q'][1]), nbin=bindef['nbin'] + 1)
+        return mylinspace(minval=np.percentile(x, 100*bindef['q'][0]), maxval=np.percentile(x, 100*bindef['q'][1]), nbin=bindef['nbin'])
 
     # Automatic with boundaries
     elif type(bindef) is dict and 'minmax' in bindef:
-        return mylinspace(minval=bindef['minmax'][0], maxval=bindef['minmax'][1], nbin=bindef['nbin'] + 1)
-
+        return mylinspace(minval=bindef['minmax'][0], maxval=bindef['minmax'][1], nbin=bindef['nbin'])
+    
     else:
         raise Exception(__name__ + f'.bin_processor: Unknown binning description in {bindef}')
 
@@ -161,7 +170,8 @@ def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3
     return fig,ax,c
 
 
-def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
+def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85,
+                               yscale='linear', xscale='linear'):
     """ Training evolution plots.
 
     Args:
@@ -176,9 +186,16 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     fig,ax = plt.subplots(1,2, figsize=(10, 7.5))
     
+    # How many loss terms
+    N_terms = 0
     for key in losses.keys():
-        if (key == 'sum') and (len(losses.keys()) == 2):
-            continue # Do not plot sum if only one loss term
+        if 'eval' in key:
+            N_terms += 1
+    
+    for key in losses.keys():
+        if ('sum' in key) and (N_terms == 2):
+            continue # Do not plot 'sum' if only sum made of one term
+        
         ax[0].plot(losses[key], label=key)
     
     ax[0].set_xlabel('k (epoch)')
@@ -188,6 +205,8 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     plt.sca(ax[0])
     plt.autoscale(enable=True, axis='x', tight=True)
+    plt.yscale(yscale)
+    plt.xscale(xscale)
     
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
@@ -198,9 +217,11 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85):
     
     plt.sca(ax[1])
     plt.autoscale(enable=True, axis='x', tight=True)
+    plt.yscale(yscale)
+    plt.xscale(xscale)
     
     ax[0].set_aspect(1.0/ax[0].get_data_ratio()*aspect)
-
+    
     for i in [1]:
         ax[1].set_ylim([np.min([np.min(trn_aucs), np.min(val_aucs)]), 1.0])
         ax[1].set_aspect(1.0/ax[i].get_data_ratio()*aspect)
@@ -265,11 +286,11 @@ def binned_2D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, label, weights=None,
                 else:
                     met = aux.Metric(y_true=y[ind], y_pred=y_pred[ind])
 
-                print(__name__ + f'.binned_2D_AUC: {string} | AUC = {met.auc:.5f}')
+                print(f'{string} | AUC = {met.auc:.5f}')
                 AUC[i,j] = met.auc
 
             else:
-                print(__name__ + f'.binned_2D_AUC: {string} | No events found in this cell!')
+                print(f'{string} | No events found in this cell!')
     
     # Evaluate total performance
     met = aux.Metric(y_true=y, y_pred=y_pred, weights=weights)
@@ -338,10 +359,10 @@ def binned_1D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, weights=None,
 
                 AUC[i] = met.auc
                 METS.append(met)
-                print(__name__ + f'.binned_1D_AUC: {string} | AUC = {AUC[i]}')
+                print(f'{string} | AUC = {AUC[i]}')
             else:
                 METS.append(None)
-                print(__name__ + f'.binned_1D_AUC: {string} | No events found in this cell!')
+                print(f'{string} | No events found in this cell!')
 
             LABELS.append(f'{VAR}$ \\in [{range_[0]:.1f},{range_[1]:.1f})$')
 
@@ -372,38 +393,64 @@ def density_MVA_wclass(y_pred, y, label, weights=None, class_ids=None, edges=80,
         weights = np.sum(weights, axis=1)
     
     if weights is not None:
-        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (weighted {np.sum(weights[y == k]):0.1f})' for k in class_ids]
+        classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ ($\\Sigma_w = {np.sum(weights[y == k]):0.1f}$)' for k in class_ids]
     else:
         classlegs = [f'$\\mathcal{{C}} = {k}$, $N={np.sum(y == k)}$ (no weights)' for k in class_ids]
+    
+    # Handle logits vs probabilities
+    THRESH = 1E-5
+    if np.min(y_pred) < (-THRESH) or np.max(y_pred) > (1.0 + THRESH):
+        logit = copy.deepcopy(y_pred)
+        prob  = aux.sigmoid(logit)
+    else:
+        prob  = copy.deepcopy(y_pred)
+        logit = aux.inverse_sigmoid(prob)    
+    
+    # Plot both
+    for mode in ['logit', 'prob']:
+        
+        # Over classes
+        fig,ax = plt.subplots()
+        
+        for k in class_ids:
+            ind = (y == k)
 
-    # Over classes
-    fig,ax = plt.subplots()
-    
-    for k in class_ids:
-        ind = (y == k)
-
-        w = weights[ind] if weights is not None else None
-        x = y_pred[ind]
-
-        hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=edges, x=x), weights=w,
-            density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
-    
-    plt.legend(classlegs, loc='upper center')
-    plt.xlabel('MVA output $f(\\mathbf{{x}})$')
-    plt.ylabel('density')
-    plt.title(f'{label}', fontsize=9)
-    
-    for scale in ['linear', 'log']:
-        ax.set_yscale(scale)
-        outputdir = aux.makedir(f'{path}')
-        savepath  = f'{outputdir}/MVA-output--{scale}.pdf'
-        plt.savefig(savepath, bbox_inches='tight')
-        cprint(__name__ + f'.density_MVA_wclass: Saved: "{savepath}"', 'green')
-    
-    # --------        
-    fig.clf()
-    plt.close()
-    gc.collect()
+            if np.sum(ind) == 0:
+                print(f'No samples for class {k} -- continue')
+                continue
+            
+            w = weights[ind] if weights is not None else None
+            
+            if mode == 'logit':
+                x = logit[ind]
+            else:
+                x = prob[ind]
+            
+            hI, bins, patches = plt.hist(x=x, bins=binengine(bindef=edges, x=x), weights=w,
+                density = True, histtype = 'step', fill = False, linewidth = 2, label = 'inverse')
+        
+        plt.legend(classlegs, loc='upper center', fontsize=7)
+        plt.xlabel(f'MVA output $f(\\mathbf{{x}})$ [{mode}]')
+        plt.ylabel('density')
+        plt.title(f'{label}', fontsize=9)
+        
+        for scale in ['linear', 'log']:
+            try:
+                ax.set_yscale(scale)
+                outputdir = aux.makedir(f'{path}')
+                savepath  = f'{outputdir}/MVA-output__{mode}__{scale}.pdf'
+                plt.savefig(savepath, bbox_inches='tight')
+                print(f'Saved: "{savepath}"', 'green')
+            
+            except Exception as e:
+                print(e, 'red')
+                print(f'Plotting failed for {label} -- continue', 'red')
+                continue
+        
+        # --------        
+        fig.clf()
+        plt.close(fig)
+        gc.collect()
 
 
 def plot_correlation_comparison(corr_mstats, targetdir, xlim=None):
@@ -417,7 +464,8 @@ def plot_correlation_comparison(corr_mstats, targetdir, xlim=None):
     Returns:
         plots saved to a directory
     """
-    print(__name__ + f'.plot_correlation_comparison ...')
+    
+    print(f'Plotting correlation comparisons ...')
 
     class_ids = {}
     
@@ -538,7 +586,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
         w = weights[ind] if weights is not None else None
         
         if np.sum(ind) == 0:
-            print(__name__ + f'.density_COR_wclass: No samples for class {k} -- continue')
+            print(f'No samples for class {k} -- continue')
             continue
 
         # Loop over variables
@@ -611,7 +659,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     # -----
 
                     plt.savefig(savepath, bbox_inches='tight')
-                    cprint(__name__ + f'.density_COR_wclass: Saved: "{savepath}"', 'green')
+                    print(f'Saved: "{savepath}"', 'green')
                     
                     # -----                    
                     fig.clf()
@@ -619,7 +667,7 @@ def density_COR_wclass(y_pred, y, X, ids, label, \
                     gc.collect()
                 
                 except: # Matplotlib LogNorm() can be buggy
-                    print(__name__ + f'.density_COR_wclass: Failed to produce plot {savepath}')
+                    print(f'Failed to produce plot {savepath}')
     pprint(output)
 
     return output
@@ -649,7 +697,7 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
     
     # Loop over variables
     for var in ids:
-
+        
         fig,ax = plt.subplots()
 
         # Plot 2D
@@ -669,7 +717,7 @@ def density_COR(y_pred, X, ids, label, weights=None, hist_edges=[[50], [50]], pa
         outputdir = aux.makedir(f'{path}/{label}')
         savepath = f'{outputdir}/var-{var}.pdf'
         plt.savefig(savepath, bbox_inches='tight')
-        cprint(__name__ + f'.density_COR: Saved: "{savepath}"', 'green')
+        print(f'Saved: "{savepath}"', 'green')
 
         # -----                    
         fig.clf()
@@ -727,82 +775,146 @@ def plot_AUC_matrix(AUC, edges_A, edges_B):
     return fig, ax
 
 
-def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
-             exclude_vals=[None], plot_unweighted=True, title = '', targetdir = '.'):
-    """ Plot all variables.
+def multiprocess_plot_wrapper(p):
     """
-    print(__name__ + f'.plotvars: Creating plots ...')
-    for i in tqdm(range(X.shape[1])):
-        x = X[:,i]
+    Multiprocessing wrapper
+    """
+    i = p['i']
+    
+    # Exclude special values
+    ind = np.ones(len(p['X']), dtype=bool)
+    for k in range(len(p['exclude_vals'])):
+        ind = np.logical_and(ind, (p['X'][:,i] != p['exclude_vals'][k]))
 
-        # Exclude special values
-        ind = np.ones(len(x), dtype=bool)
-        for k in range(len(exclude_vals)):
-            ind = np.logical_and(ind, (x != exclude_vals[k]))
+    plotvar(x                = p['X'][ind,i],
+            y                = p['y'][ind],
+            weights          = p['weights'][ind],
+            var              = p['ids'][i],
+            nbins            = p['nbins'],
+            percentile_range = p['percentile_range'],
+            title            = p['title'],
+            targetdir        = p['targetdir'],
+            plot_unweighted  = p['plot_unweighted'])
 
-        plotvar(x=x[ind], y=y[ind], weights=weights[ind], var=ids[i], nbins=nbins,
-                percentile_range=percentile_range, title=title, targetdir=targetdir,
-                plot_unweighted=plot_unweighted)
+
+def plotvars(X, y, ids, weights, nbins=70, percentile_range=[0.5, 99.5],
+             exclude_vals=[None], plot_unweighted=True, title = '', targetdir = '.',
+             num_cpus: int=0):
+    """
+    Plot all variables.
+    """
+    
+    print(f'Creating plots | exclude_vals = {exclude_vals} ...')
+    
+    # Chunked loop [parallel processing]
+    param = {
+        'i':                None,
+        'X':                None,
+        'y':                None,
+        'weights':          None,
+        'ids':              ids,
+        'nbins':            nbins,
+        'percentile_range': percentile_range,
+        'exclude_vals':     exclude_vals,
+        'plot_unweighted':  plot_unweighted,
+        'title':            title,
+        'targetdir':        targetdir
+    }
+    
+    # Create parameter dictionaries for each process
+    paramlist = []
+    for i in range(X.shape[1]):
+        paramlist.append(copy.deepcopy(param)) 
+        paramlist[-1]['i'] = i 
+        paramlist[-1]['X'] = X # big numpy arrays should share the memory (i.e. no copy of X)
+        paramlist[-1]['y'] = y
+        paramlist[-1]['weights'] = weights
+    
+    # Start multiprocessing
+    print(f'Multiprocessing {X.shape[1]} plots', 'yellow')
+    
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus)
+    tic  = time.time()
+    pool.map(multiprocess_plot_wrapper, paramlist)
+    pool.close() # no more tasks
+    pool.join()  # wrap up current tasks
+    
+    toc  = time.time()
+    print(f'Took {toc-tic:0.2f} sec')
 
 
 def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
             plot_unweighted=True, title='', targetdir='.'):
-    """ Plot a single variable.
+    """
+    Plot a single variable.
     """
     try:
         binrange = (np.percentile(x, percentile_range[0]), np.percentile(x, percentile_range[1]))
         
         fig, axs = plot_reweight_result(X=x, y=y, nbins=nbins, binrange=binrange, weights=weights,
                                         title=title, xlabel=var, plot_unweighted=plot_unweighted)
-        plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')
-        
+        plt.savefig(f'{targetdir}/var-{var}.pdf', bbox_inches='tight')    
         fig.clf()
-        plt.close()
+        plt.close(fig)
         gc.collect()
     
     except Exception as e:
-        cprint(e, 'red')
-        cprint(__name__ + f'.plotvar: Problem plotting variable "{var}"', 'red')
+        print(e, 'red')
+        print(f'Problem plotting variable "{var}"', 'red')
 
 
 def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5,
                          plot_unweighted=True):
-    """ Here plot pure event counts
-        so we see that also integrated class fractions are equalized (or not) after weighting!
+    """
+    Here plot pure event counts
+    so we see that also integrated class fractions are equalized (or not) after weighting!
     """
 
     fig,ax    = plt.subplots(1, 2, figsize = (10, 4.25))
     class_ids = np.unique(y.astype(int))
     legends   = []
     
+    min_x =  1e30
+    max_x = -1e30
+    
     # Loop over classes
     for c in class_ids:
 
+        ind = (y == c)
+        
+        if np.sum(ind) == 0:
+            print(f'No samples for class {c} -- continue')
+            continue
+        
         # Compute histograms with numpy (we use nbins and range() for speed)
         if plot_unweighted:
-            counts,   edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=None)
+            counts, edges = np.histogram(X[ind], bins=nbins, range=binrange, weights=None)
         
-        counts_w, edges = np.histogram(X[y == c], bins=nbins, range=binrange, weights=weights[y == c])
-
-        mu, std = aux.weighted_avg_and_std(values=X[y == c], weights=weights[y == c])
+        counts_w, edges = np.histogram(X[ind], bins=nbins, range=binrange, weights=weights[ind])
+        mu, std = aux.weighted_avg_and_std(values=X[ind], weights=weights[ind])
+        
+        min_x = edges[0]  if edges[0]  < min_x else min_x
+        max_x = edges[-1] if edges[-1] > max_x else max_x
         
         # Linear and log scale scale (left and right plots)
         for i in range(2):
             
             plt.sca(ax[i])
             if plot_unweighted:
-                plt.stairs(counts,   edges, fill=False, linewidth = linewidth+0.75, linestyle='--') # bigger linewidth first
+                plt.stairs(counts, edges, fill=False, linewidth = linewidth+0.75, linestyle='--') # bigger linewidth first
             plt.stairs(counts_w, edges, fill=False, linewidth = linewidth, linestyle='-')
             
             if i == 0:
                 if plot_unweighted:
                     legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
                 legends.append(f'$\\mathcal{{C}} = {c}$ [$\\mu={mu:0.2f}, \\sigma={std:0.2f}$]')
-
+    
     ax[0].set_ylabel('[weighted] counts')
     ax[0].set_xlabel(xlabel)
-    ax[1].set_xlabel(xlabel)
+    ax[0].set_ylim([0,None])
+    ax[0].set_xlim([min_x, max_x])
     
+    ax[1].set_xlabel(xlabel)
     ax[1].set_title(title, fontsize=10)
     ax[1].legend(legends, fontsize=8)
     ax[1].set_yscale('log')
@@ -843,11 +955,14 @@ def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetd
         label = f'all' if (len(class_ids) == 1) else f'class_{k}'
 
         # Compute correlation matrix
+        tic = time.time()
         w = weights[y==k] if weights is not None else None
         C = statstools.correlation_matrix(X=X[y==k,:], weights=w)
         C[np.abs(C) < round_threshold] = np.nan
         C *= 100
-        
+        toc = time.time()
+        print(f'Computing C-matrix (took {toc-tic:0.2f} sec)')
+
         # Compute suitable figsize
         size = np.ceil(C.shape[0] / 3)
         
@@ -863,9 +978,15 @@ def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetd
             cb = plt.colorbar()
 
         if targetdir is not None:
-            fname = targetdir + f'{label}-correlation-matrix.pdf'
-            print(__name__ + f'.plot_correlations: Saved: "{fname}"')
-            plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
+            tic = time.time()
+            if X.shape[1] <= 100: # Not too many dimensions --> pdf OK
+                fname = targetdir + f'{label}-correlation-matrix.pdf'
+                plt.savefig(fname=fname, pad_inches=0.2, bbox_inches='tight')
+            else:
+                fname = targetdir + f'{label}-correlation-matrix.png'
+                plt.savefig(fname=fname, pad_inches=0.2, dpi=300, bbox_inches='tight')
+            toc = time.time()
+            print(f'Saved: "{fname} (took {toc-tic:0.2f} sec)"')
 
     return figs, axs
 
@@ -936,7 +1057,7 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
             marker = 'None'
             
             if metrics[i] is None:
-                print(__name__ + f'.ROC_plot: metrics[{i}] ({labels[i]}) is None, continue without')
+                print(f'metrics[{i}] ({labels[i]}) is None, continue without')
                 continue
             
             fpr        = metrics[i].fpr
@@ -1007,14 +1128,14 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
         ax.set_ylabel('True Positive Rate $1-\\beta$ (signal efficiency)')
         ax.set_title(title, fontsize=10)
         
-        # Legend
-        if len(metrics) > 12: # Put outside the figure
-            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
-        else:
-            plt.legend(loc='lower right', fontsize=legend_fontsize)
-        
         if k == 0: # Linear-Linear
-
+            
+            # Legend
+            if len(metrics) > 12: # Put outside the figure
+                plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
+            else:
+                plt.legend(loc='lower right', fontsize=legend_fontsize)
+            
             plt.ylim(0.0, 1.0)
             plt.xlim(0.0, 1.0)
             plt.locator_params(axis="x", nbins=11)
@@ -1022,10 +1143,16 @@ def ROC_plot(metrics, labels, title = '', plot_thresholds=True, \
 
             ax.set_aspect(1.0 / ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-            cprint(__name__ + f'.ROC_plot: Saved: ' + filename + '.pdf','green')
+            print(f'Saved: ' + filename + '.pdf','green')
         
         if k == 1: # Log-Linear
-
+            
+            # Legend
+            if len(metrics) > 12: # Put outside the figure
+                plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_fontsize)
+            else:
+                plt.legend(fontsize=legend_fontsize) # Automatic positioning
+            
             plt.ylim(0.0, 1.0)
             plt.xlim(xmin, 1.0)
             plt.locator_params(axis="x", nbins=int(-np.log10(xmin) + 1))
@@ -1047,13 +1174,13 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
     for i in range(len(metrics)):
 
         if metrics[i] is None:
-            print(__name__ + f'.MVA_plot: Error: metrics[{i}] ({labels[i]}) is None (check per class statistics), return -1')
+            print(f'Error: metrics[{i}] ({labels[i]}) is None (check per class statistics), return -1')
             return -1
         else:
             class_ids = metrics[i].class_ids
         
         if len(metrics[i].mva_hist) != len(class_ids):
-            print(__name__ + f'.MVA_plot: Error: num_classes != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
+            print(f'Error: num_classes != len(metrics[{i}].mva_hist) (check per class statistics), return -1')
             return -1
     
     for k in [0,1]: # linear & log
@@ -1071,11 +1198,11 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             for i in range(len(metrics)):
 
                 if metrics[i] is None:
-                    print(__name__ + f'.MVA_plot: metrics[{i}] is None, continue without')
+                    print(f'metrics[{i}] is None, continue without')
                     continue
 
                 if len(metrics[i].mva_bins) == 0:
-                    print(__name__ + f'.MVA_plot: len(metrics[{i}].mva_bins) == 0, continue without')
+                    print(f'len(metrics[{i}].mva_bins) == 0, continue without')
                     continue
 
                 bins       = metrics[i].mva_bins
@@ -1100,7 +1227,7 @@ def MVA_plot(metrics, labels, title='', filename='MVA', density=True, legend_fon
             #plt.xlim(0.0, 1.0)
             #ax.set_aspect(1.0/ax.get_data_ratio() * 1.0)
             plt.savefig(filename + '.pdf', bbox_inches='tight')
-            cprint(__name__ + f'.MVA_plot: Saved: ' + filename + '.pdf','green')
+            print(f'Saved: ' + filename + '.pdf','green')
         
         if k == 1:
             #plt.ylim(0.0, 1.0)
@@ -1133,7 +1260,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
         npoints:    number of points to draw
     """
     
-    print(__name__ + f'.plot_contour_grid: Evaluating, X.shape = {X.shape}...')
+    print(f'Evaluating, X.shape = {X.shape}...')
     MAXP = min(npoints, X.shape[0])
     D    = X.shape[1]
     pad  = 0.5
@@ -1162,7 +1289,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             elif transform == 'numpy':
                 Z = pred_func(XX)
             else:
-                raise Exception(__name__ + f'.plot_decision_contour: Unknown matrix type = {matrix}')
+                raise Exception(__name__ + f'.plot_decision_contour: Unknown matrix type = {transform}')
 
             Z = Z.reshape(PX.shape)
             
@@ -1183,7 +1310,7 @@ def plot_contour_grid(pred_func, X, y, ids, targetdir = '.', transform = 'numpy'
             
             filename = targetdir + f'{dim1}-{dim2}.pdf'
             plt.savefig(filename, bbox_inches='tight')
-            cprint(__name__ + f'.plot_contour_grid: Saved: ' + filename,'green')
+            print(f'Saved: ' + filename,'green')
             
             # --------        
             fig.clf()
@@ -1228,7 +1355,7 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
         s_ind  = np.array(np.argsort(yy), dtype=int)
         yy     = yy[s_ind]
         labels = [labels[i] for i in s_ind]
-
+    
     # Plot
     fig,ax = plt.subplots(figsize=(0.5 * (np.ceil(dim/6) + 2), np.ceil(dim/6) + 2))
     plt.barh(xx, yy, align='center', height=0.5, tick_label=labels)
@@ -1236,3 +1363,324 @@ def plot_xgb_importance(model, tick_label, importance_type='gain', label=None, s
     plt.title(f'[{label}]')
     
     return fig, ax
+
+
+def table_writer(filename, label, sublabel, tau, chi2_table, print_to_screen=False):
+    """
+    Helper function to write a chi2 table to a file
+    """
+    with open(filename, "a") as text_file:
+        
+        text_file.write(f'category: {sublabel} | AI model: {label} | tau: {tau:0.2f}')
+        text_file.write('\n')
+        text_file.write(chi2_table.get_string())
+        text_file.write('\n')
+        text_file.write('\n')
+        if print_to_screen:
+            print(chi2_table, 'magenta')
+            print('')
+
+
+def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
+              label, sublabel, param, tau=1.0, targetdir=None, num_cpus=0):
+    """
+    Plot AI based reweighting results
+    """
+    
+    print(f'label = {label} | sublabel = {sublabel} | tau = {tau}', 'green')
+    
+    dir       = aux.makedir(f'{targetdir}/{label}/{sublabel}')
+    local_dir = aux.makedir(dir + f'/tau_{tau:0.2f}')
+    
+    ## Print stats
+    output_file = f'{local_dir}/stats_AIRW_weight_flow.log'
+    prints.print_weights(weights=weights, y=y, output_file=output_file,
+        header='Step 1. Input event weights', write_mode='w')
+    
+    # ---------------------------------------------------
+    ## 1. Transform model output scores to AI weights
+    
+    EPS   = param['EPS']
+    maxW  = param['maxW']
+    C0    = param['C0']
+    C1    = param['C1']
+    RN_ID = param['renorm_origin']
+    mode  = param['transform_mode']
+    
+    # Handle logits vs probabilities
+    min_y_pred, max_y_pred = np.min(y_pred), np.max(y_pred)
+    
+    THRESH = 1E-5
+    if min_y_pred < (-THRESH) or max_y_pred > (1.0 + THRESH):
+        print(f'Detected raw logit output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+        logits = y_pred[y == C0]
+        probs  = aux.sigmoid(logits)
+        print(f'Corresponding probability output [{np.min(probs):0.4f}, {np.max(probs):0.4f}]')
+    else:
+        print(f'Detected probability output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+        logits = aux.inverse_sigmoid(p = y_pred[y == C0], EPS=EPS)
+        print(f'Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
+    
+    # 1. Apply temperature scaling
+    logits /= tau
+    
+    # 2. Get weights after the re-weighting transform
+    AIw0 = reweight.rw_transform_with_logits(logits=logits, mode=mode)
+    
+    ## Print stats
+    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+        header='Step 2. AI weights [raw]', write_mode='a')
+    
+    # 3. Cut-off regularize anomalous high weights before event weights
+    AIw0 = np.clip(AIw0, 0.0, maxW)
+    
+    ## Print stats
+    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+        header=f'Step 3. AI weights [cutoff regularized with maxW = {maxW}]', write_mode='a')
+    
+    # 4. Apply multiplicatively to event weights (which can be negative)
+    AIw0 = AIw0 * weights[y == C0]
+    
+    ## Print stats
+    prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+        header=f'Step 4. Total weights [input weights x AI weights]', write_mode='a')
+    
+    # ---------------------------------------------------
+    ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
+    
+    if RN_ID is not None:
+        print(f'Renormalizing with class [{RN_ID}] weight sum', 'yellow')
+        
+        sum_before = AIw0.sum()
+        print(f'Sum(before): {sum_before:0.1f}')
+        
+        AIw0 /= np.sum(AIw0)                # Normalize
+        AIw0 *= np.sum(weights[y == RN_ID]) # Scale
+        
+        sum_after = AIw0.sum()
+        print(f'Sum(after):  {sum_after:0.1f}')
+        ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.2f}'
+        print(ratio)
+        print('')
+        
+        # Print stats
+        prints.print_weights(weights=AIw0, y=np.zeros(len(AIw0)), output_file=output_file,
+            header=f'Step 5. Total weights sum renormalized [wrt. class ID = {RN_ID}] | {ratio}', write_mode='a')
+    
+    
+    # ===================================================
+    # Save data to a parquet file
+    
+    if param['save_parquet']:
+        
+        # Create DataFrame
+        df_X         = pd.DataFrame(X,         columns=ids)
+        df_y         = pd.DataFrame(y,         columns=['y'])
+        df_y_pred    = pd.DataFrame(y_pred,    columns=['y_pred'])
+        df_w_post_S1 = pd.DataFrame(weights,   columns=['w_post_S1'])
+        
+        w_post_S2    = copy.deepcopy(weights)
+        w_post_S2[y == C0] = AIw0 # only C0
+        
+        df_w_post_S2 = pd.DataFrame(w_post_S2, columns=['w_post_S2'])
+        
+        # Concatenate all into one DataFrame
+        df = pd.concat([df_X, df_y, df_y_pred, df_w_post_S1, df_w_post_S2], axis=1)
+        
+        # Save to a parquet file
+        parquet_file = f'{local_dir}/dataframe.parquet'
+        df.to_parquet(parquet_file, index=False, compression='gzip')
+        
+        print(f'Saved dataframe to a parquet file with gzip compression: {parquet_file}')
+    
+    
+    # ===================================================
+    # Visualization
+    # ---------------------------------------------------
+    
+    total_ndf     = 0.0
+    total_chi2    = 0.0
+    total_chi2_AI = 0.0
+    
+    chi2_table    = PrettyTable(["observable", "ndf", "chi2 / ndf", "(AI) chi2 / ndf"]) 
+    
+    # ---------------------------------------------------
+    param = {
+        'i':         None,
+        
+        'X':         None,
+        'y':         None,
+        'weights':   None,
+        'ids':       None,
+        'AIw0':      None,
+        
+        'C0':        C0,
+        'C1':        C1,
+        
+        'label':     label,
+        'param':     param,
+        'local_dir': local_dir
+    }
+    
+    # Loop over each observable (specific column of X)
+    paramlist = []
+    
+    for i in pick_ind:
+        paramlist.append(copy.deepcopy(param)) 
+        
+        # big numpy arrays should share the memory (i.e. no copy of X)
+        paramlist[-1]['i']       = i
+        paramlist[-1]['X']       = X
+        paramlist[-1]['y']       = y
+        paramlist[-1]['weights'] = weights
+        paramlist[-1]['ids']     = ids
+        paramlist[-1]['AIw0']    = AIw0
+    
+    # Start multiprocessing
+    num_workers = multiprocessing.cpu_count() // 2 if num_cpus == 0 else num_cpus
+    print(f'Multiprocessing {len(pick_ind)} plots with {num_workers} processes', 'yellow')
+
+    pool = multiprocessing.Pool(processes=num_workers)
+    tic  = time.time()
+    r    = pool.map(multiprocess_AIRW_wrapper, paramlist)
+    pool.close() # no more tasks
+    pool.join()  # wrap up current tasks
+    
+    toc  = time.time()
+    print(f'Took {toc-tic:0.2f} sec')
+    
+    # Collect summary statistics from the pool
+    for i in range(len(r)):
+        total_ndf     += r[i]['ndf_0']
+        total_chi2    += r[i]['chi2_0']
+        total_chi2_AI += r[i]['chi2_0_AI']
+
+        chi2_table.add_row(r[i]['chi2_row'], divider=True if i == len(r)-1 else False)
+    
+    chi2_table.add_row(['total', f'{total_ndf}', f'{total_chi2/total_ndf:0.1f}', f'{total_chi2_AI/total_ndf:0.1f}'])
+    
+    # -----------------------------------------------
+    filename = local_dir + f"/stats_chi2.log"
+    open(filename, 'w').close() # Clear content
+    table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table, print_to_screen=True)
+    # -----------------------------------------------
+    
+    return chi2_table
+
+
+def multiprocess_AIRW_wrapper(p):
+    """
+    Multiprocessing plots
+    """
+    
+    i         = p['i'] # Column index
+    
+    X         = p['X']
+    y         = p['y']
+    w         = p['weights']
+    ids       = p['ids']
+    
+    AIw0      = p['AIw0']
+    
+    C0        = p['C0']
+    C1        = p['C1']
+    
+    label     = p['label']
+    param     = p['param']
+    local_dir = p['local_dir']
+    
+    X_col = copy.deepcopy(X[:, i])
+    bins  = binengine(bindef=param['edges'], x=X_col)
+    
+    # ----------------------------------------------------
+    
+    obs_X = {
+        
+        # Axis limits
+        'xlim'    : (bins[0], bins[-1]),
+        'ylim'    : None,
+        'xlabel'  : f'{ids[i]}',
+        'ylabel'  : r'Weighted counts',
+        'units'   : {'x': r'a.u.', 'y' : r'1'},
+        'label'   : f'{label}',
+        'figsize' : (4, 3.75),
+        
+        # Ratio
+        'ylim_ratio' : (0.75, 1.25),
+        
+        # Histogramming
+        'bins'    : None,
+        'density' : False,
+        
+        # Function to calculate
+        'func'    : None
+    }
+    
+    data_template = {
+        'data'   : None,
+        'weights': None,
+        'label'  : 'Data',
+        'hfunc'  : 'errorbar',
+        'style'  : iceplot.errorbar_style,
+        'obs'    : obs_X,
+        'hdata'  : None,
+        'color'  : None
+    }
+    
+    # Data source <-> Observable collections
+    class1    = data_template.copy() # Deep copies
+    class0    = data_template.copy()
+    class0_ML = data_template.copy()
+    
+    class1.update({
+        'label' : '$C_1$',
+        'hfunc' : 'hist',
+        'style' : iceplot.hist_style_step,
+        'color' : (0,0,0)
+    })
+    class0.update({
+        'label' : '$C_0$',
+        'hfunc' : 'hist',
+        'style' : iceplot.hist_style_step,
+        'color' : iceplot.imperial_green
+    })
+    class0_ML.update({
+        'label' : '$C_0$ (AI)',
+        'hfunc' : 'hist',
+        'style' : iceplot.hist_style_step,
+        'color' : iceplot.imperial_dark_red
+    })
+
+    data = [class1, class0, class0_ML]
+    
+    data[0]['hdata'] = iceplot.hist_obj(X_col[y == C1], bins=bins, weights=w[y == C1])
+    data[1]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w[y == C0])
+    data[2]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=AIw0)
+    
+    # Update labels with chi2
+    chi2_0, ndf_0       = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+    chi2_0_AI, ndf_0_AI = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], return_nbins=True)
+    
+    data[1]['label'] += f' | $\\chi^2 = {chi2_0:0.0f} \, / \, {ndf_0} = {chi2_0/ndf_0:0.1f}$'
+    data[2]['label'] += f' | $\\chi^2 = {chi2_0_AI:0.0f} \, / \, {ndf_0_AI} = {chi2_0_AI/ndf_0_AI:0.1f}$'
+    
+    # --------------------
+    
+    # Plot it
+    fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale='log', ratio_error_plot=True)
+    fig1, ax1 = iceplot.superplot(data, ratio_plot=True, yscale='linear', ratio_error_plot=True)
+    
+    fig0.savefig(aux.makedir(local_dir + '/pdf/') + f'/reweight_[{ids[i]}]__log.pdf', bbox_inches='tight')
+    fig0.savefig(aux.makedir(local_dir + '/png/') + f'/reweight_[{ids[i]}]__log.png', bbox_inches='tight', dpi=300)
+    
+    fig1.savefig(aux.makedir(local_dir + '/pdf/') + f'/reweight_[{ids[i]}]__linear.pdf', bbox_inches='tight')
+    fig1.savefig(aux.makedir(local_dir + '/png/') + f'/reweight_[{ids[i]}]__linear.png', bbox_inches='tight', dpi=300)
+    
+    fig0.clf()
+    fig1.clf()
+    plt.close(fig0)
+    plt.close(fig1)
+
+    chi2_row = [ids[i], f'{ndf_0}', f'{chi2_0/ndf_0:0.1f}', f'{chi2_0_AI/ndf_0:0.1f}']
+    
+    return {'ndf_0': ndf_0, 'ndf_0_AI': ndf_0_AI, 'chi2_0': chi2_0, 'chi2_0_AI': chi2_0_AI, 'chi2_row': chi2_row}

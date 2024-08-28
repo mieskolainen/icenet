@@ -5,22 +5,27 @@
 import numpy as np
 import psutil
 from typing import List
+from prettytable import PrettyTable
 
-from termcolor import colored, cprint
-from icenet.tools import aux
+from termcolor import colored
+from icenet.tools import aux, io
+
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 
 def print_RAM_usage():
     """ 
     """
-    cprint(__name__ + f""".prints: Process RAM usage: {io.process_memory_use():0.2f} GB [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
+    print(f"""Process RAM usage: {io.process_memory_use():0.2f} GB [total RAM in use: {psutil.virtual_memory()[2]} %]""", 'red')
 
 
-def printbar(marker='-', marks = 75):
+def printbar(marker='-', marks:int = 75):
     """ Print bar.
     """
-    for i in range(marks):
-        print(marker, end='')
+    txt = marker*marks
+    print(txt)
     print('')
 
 
@@ -69,19 +74,72 @@ def print_flow(flow):
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
 
-def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
-    """ Print in a format (# samples x # dimensions)
+def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
     """
+    Print event weights table
+    """
+    
+    class_ids = np.unique(y.astype(int))
+    
+    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)",
+                         "min(w)", "Q1(w)", "Q5(w)", "med(w)", "Q95(w)", "Q99(w)", "max(w)"]) 
+    
+    for c in class_ids:
+        ind = (y == c)
+        
+        prc = np.percentile(weights[ind], [0, 1, 5, 50, 95, 99, 100])
+        
+        table.add_row([f'{c}',
+                       f'{np.sum(ind)}',
+                       f'{np.round(np.sum(weights[ind]), 2)}',
+                       f'{np.mean(weights[ind]):0.3E}',
+                       f'{np.std(weights[ind]):0.3E}',
+                       f'{prc[0]:0.3E}',
+                       f'{prc[1]:0.3E}',
+                       f'{prc[2]:0.3E}',
+                       f'{prc[3]:0.3E}',
+                       f'{prc[4]:0.3E}',
+                       f'{prc[5]:0.3E}',
+                       f'{prc[6]:0.3E}'
+                       ])
+    
+    print(table)
+    print('')
+    
+    # Print to file
+    if output_file is not None:
+        with open(output_file, write_mode) as f:
+            if header is not None:
+                print(header, file=f)
+                print('\n', file=f)
+            print(table, file=f)
+            if header is not None:
+                print('\n', file=f)
+    
+    return table
 
-    print('\n')
-    print(__name__ + f'.print_variables:')
 
+def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, output_file=None):
+    """ Print statistics of X
+    
+    Args:
+        X            : array (n x dim)
+        ids          : variable names (dim)
+        W            : event weights
+        exclude_vals : exclude special values from the stats
+    
+    Returns:
+        prettyprint table of stats
+    """
+    
+    print('')
     print(f'Excluding values: {exclude_vals}')
-    print('[i] variable_name : [min, med, max] [#unique]   mean +- std   [[isinf, isnan]]')
+    
+    table = PrettyTable(["i", "variable", "min", "Q1", "Q5", "med", "Q95", "Q99", "max", "# unique", "mean", "std", "#Inf", "#NaN"]) 
     
     for j in range(len(ids)):
         try:
-            x   = np.array(X[:,j], dtype=np.float).squeeze()
+            x   = np.array(X[:,j], dtype=np.float32).squeeze()
             ind = np.ones(len(x), dtype=bool)
             
             if exclude_vals is not None:
@@ -91,20 +149,40 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None):
 
             x = x[ind]
 
-            minval     = np.min(x)
-            med        = np.median(x)
-            maxval     = np.max(x)
-            mean,std   = aux.weighted_avg_and_std(values=x, weights=W[ind])
+            prc = np.percentile(x, [0, 1, 5, 50, 95, 99, 100])
+            
+            if W is not None:
+                mean,std = aux.weighted_avg_and_std(values=x, weights=W[ind])
+            else:
+                mean,std = np.mean(x), np.std(x) 
             num_unique = len(np.unique(x))
+            
+            isinf  = np.sum(np.isinf(x))
+            isnan  = np.sum(np.isnan(x))
 
-            isinf  = np.any(np.isinf(x))
-            isnan  = np.any(np.isnan(x))
-
-            print('[{: >3}]{: >40} : [{: >10.2E}, {: >10.2E}, {: >10.2E}] {: >10} \t ({: >10.2E} +- {: >10.2E})   [[{}, {}]]'
-                .format(j, ids[j], minval, med, maxval, num_unique, mean, std, isinf, isnan))
+            table.add_row([f'{j}',
+                           f'{ids[j]}',
+                           f'{prc[0]:10.2E}',
+                           f'{prc[1]:10.2E}',
+                           f'{prc[2]:10.2E}',
+                           f'{prc[3]:10.2E}',
+                           f'{prc[4]:10.2E}',
+                           f'{prc[5]:10.2E}',
+                           f'{prc[6]:10.2E}',
+                           f'{num_unique}',
+                           f'{mean:10.2E}', f'{std:10.2E}',
+                           f'{isinf}', f'{isnan}'])
+        
         except Exception as e:
             print(e)
             print(f'[{j: >3}] Cannot print variable "{ids[j]}" (probably non-scalar type)')
+    
+    print(table)
+    print('')
 
-    print('\n')
-
+    # Print to file
+    if output_file is not None:
+        with open(output_file, 'w') as f:
+            print(table, file=f)
+    
+    return table

@@ -14,15 +14,21 @@ class MAXOUT(nn.Module):
     """ MAXOUT network
 
     """
-    def __init__(self, D, C, num_units, neurons, dropout):
+    def __init__(self, D, C, num_units, neurons, dropout, out_dim=None, **kwargs):
         """
         Args:
             D: Input dimension
             C: Output dimension
         """
-        super(MAXOUT,self).__init__()
+        super(MAXOUT, self).__init__()
+        
         self.D = D
         self.C = C
+        
+        if out_dim is None:
+            self.out_dim = C
+        else:
+            self.out_dim = out_dim
         
         # Network modules
         self.fc1_list  = nn.ModuleList()
@@ -35,9 +41,9 @@ class MAXOUT(nn.Module):
             self.fc1_list.append(nn.Linear(self.D, neurons))
             nn.init.xavier_normal_(self.fc1_list[-1].weight) # xavier init
             
-            self.fc2_list.append(nn.Linear(neurons, self.C))
+            self.fc2_list.append(nn.Linear(neurons, self.out_dim))
             nn.init.xavier_normal_(self.fc2_list[-1].weight) # xavier init
-    
+
     def forward(self, x):
         
         x = self.maxout(x, self.fc1_list)
@@ -53,16 +59,25 @@ class MAXOUT(nn.Module):
             max_output = torch.max(layer(x), max_output)
         return max_output
     
-    def softpredict(self, x) :
+    def forward(self,x):
+        
+        x = self.mlp(x)
+        return x
+
+    def softpredict(self,x) :
         """ Softmax probability
         """
-        #if self.training:
-        #    return F.log_softmax(self.forward(x), dim=-1) # Numerically more stable
-        #else:
-        return F.softmax(self.forward(x), dim=-1)
+        
+        if self.out_dim > 1:
+            return F.softmax(self.forward(x), dim=-1)
+        else:
+            return torch.sigmoid(self.forward(x))
     
-    def binarypredict(self, x) :
-        """ Return max probability class.
-        """        
-        prob = list(self.softpredict(x).detach().numpy())
-        return np.argmax(prob, axis=1)
+    def binarypredict(self,x) :
+        """ Return maximum probability class
+        """
+        if self.out_dim > 1:
+            prob = list(self.softpredict(x).detach().numpy())
+            return np.argmax(prob, axis=1)
+        else:
+            return np.round(self.softpredict(x).detach().numpy()).astype(int)

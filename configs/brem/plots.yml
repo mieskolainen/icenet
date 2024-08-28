@@ -20,7 +20,7 @@ ROC:
 ROC_binned:
   active: false
   num_bootstrap: 0 #200
-  xmin: 1.0E-3
+  xmin: 1.0E-4
   
   plot[0]:
     var:   ['trk_pt']

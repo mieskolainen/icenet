@@ -6,7 +6,9 @@
 
 rootname: 'eid'
 rngseed: 123456                      # Fixed seed for training data mixing
+num_cpus: 0                          # 0 for automatic
 inputvars: 'mvavars'                 # Main file input description python file
+
 
 # ----------------------------------------------------
 mva_param: &MVA_INPUT_PARAM
@@ -18,7 +20,7 @@ mva_param: &MVA_INPUT_PARAM
   inputvar_scalar: 'CMSSW_MVA_SCALAR_VARS_ORIG' # Input variables, implemented under mvavars.py
   inputvar_image: null               # Image variables, set 'CMSSW_MVA_IMAGE_VARS'
   
-  varnorm: 'zscore'                  # Variable normalization: 'zscore', 'madscore', null
+  varnorm: 'zscore'                  # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   varnorm_tensor: 'zscore'           # Tensor variable normalization
   #varnorm_graph: null               # Not implemented yet
   
@@ -90,7 +92,7 @@ genesis_runmode:
   cutfunc:    'cut_standard'          # Basic cuts,         implemented under cuts.py
 
   xcorr_flow: True                    # Full N-point correlations computed between cuts
-  pickle_size: 100000                  # Number of entries (events) per pickle file
+  pickle_size: 100000                 # Number of entries (events) per pickle file
 
 
 # ----------------------------------------------------
@@ -101,46 +103,61 @@ train_runmode:
   maxevents: null
   modeltag:  null
 
+  tech: &TECH
+    concat_max_pickle: 32           # (technical) [Recursive] concatenation max size, adjust this if encounter problems e.g. with awkward ("127 limit")
+  
   ## Reweighting setup
   reweight: true
-  reweight_mode: 'write'          # 'write', 'load'
-  reweight_file: 'reweight_train.pkl' # differential reweighting model file
-
+  reweight_mode: 'write'              # 'write', 'load'
+  reweight_file: null                 # null for automatic, or string for specific
+  
   reweight_param: &REWEIGHT_PARAM
-
-    maxevents: 100000             # Maximum number of events for the PDF construction
+    
     equal_frac: true              # Equalize integrated class fractions
     differential: true            # Differential reweighting
-    
-    reference_class: 0            # Reference class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
+    reference_class: 0            # Reference (target) class: 0 = (background), 1 = (signal), 2 = (another class) ..., 
     
     # -----------------------------
+    # Different reweighting
 
     # Note about asymmetry: Keep the reference class as 0 == background, because signal
     # MC has much longer tail over pt. Thus, it is not possible to re-weight background
     # to signal very easily, but it is possible to re-weight signal to background.
     # This is seen by inspecting the re-weighted distributions with small and large statistics.
 
-    dimension: '2D'               # '2D', 'pseudo-2D', '1D'
-    pseudo_type: 'product'        # 'product', 'geometric_mean'
+    diff_param:
 
-    var:  ['trk_pt', 'trk_eta']
+      maxevents: 100000              # Maximum number of events for the PDF construction (eid_deep_train)
+      renorm_weight_to_count: True   # Renormalize sum(weights) == sum(counts) per class
+      
+      var:  ['trk_pt', 'trk_eta']
+      type: '2D'                     # 'AIRW', 'pseudo-ND', '2D', '1D'
+      
+      hist_param:
 
-    bins:  [[0.0001, 50.0, 100], [-3.1, 3.1, 100]] # Make sure the bounds cover the phase space
-    binmode:  ['linear', 'linear']         # 'log10' or 'linear' or 'edges' (custom array) binning
-    
-    # ! Variable, and binning min/max boundaries are both transformed !
-    transform: ['log10', null]   # 'log10', 'sqrt', 'square', null
-    
-    max_reg: 1000.0              # Maximum weight cut-off regularization
+        pseudo_type: 'product'         # 'product', 'geometric_mean'
 
+        bins:  [[0.0001, 50.0, 100], [-3.1, 3.1, 100]] # Make sure the bounds cover the phase space
+        binmode:  ['linear', 'linear'] # 'log10' or 'linear' or 'edges' (custom array) binning
 
+        # ! Variable, and binning min/max boundaries are both transformed !
+        transform: ['log10', null]     # 'log10', 'sqrt', 'square', null
+
+        max_reg: 1000.0                # Maximum weight cut-off regularization
+
+      AIRW_param:
+        active_model: xgb3Drw          # Under models.yml
+        max_reg:      1000.0           # Maximum weight cut-off regularization
+        mode:         'LR'             # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
+  
   ## Outlier protection in the training
   outlier_param:
     algo: 'truncate'   # algorithm: 'truncate', null
     qmin: 0.01         # in [0,100] 
     qmax: 99.9         # in [0,100]
-
+    
+    truncate_weights: True # Truncate outlier event weights
+    process_validate: True # Protect also validation sample
 
   # ** Activate models here **
   # Give all models some unique identifier and label
@@ -196,10 +213,12 @@ eval_runmode:
   maxevents: null
   modeltag:  null
   
+  tech: *TECH
+  
   reweight: true
   reweight_mode: 'load'          # 'write', 'load'
-  reweight_file: 'reweight_train.pkl'
-
+  reweight_file: null                 # null for automatic, or string for specific
+  
   reweight_param: *REWEIGHT_PARAM
 
   models:  !include configs/eid/models.yml

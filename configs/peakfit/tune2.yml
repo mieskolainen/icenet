@@ -19,9 +19,11 @@ fitrange: [2.91, 3.29] # Nominal fit window (GeV)
 systematics: ['Nominal'] # ['Nominal', 'nVertices_Up', 'nVertices_Down']
 
 # List of systematic variations active
-variations: ['DEFAULT', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
+variations: ['DEFAULT'] #, 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
-num_cpus: 0 # put 0 for automatic, set manually if problems
+num_cpus: 0 # put 0 for automatic, set manually to 1 if problems (ray not used with 1)
+
+fit_type: 'single' # 'single', 'dual', 'dual-unitary-I', 'dual-unitary-II'
 
 
 fit:
@@ -32,9 +34,9 @@ fit:
       norm:     True
     
     # Function weight (fit contribution) parameter
-    w_start:  100.0
-    w_limit:  [1.0e-4, 1.0e+5]
-    w_fixed:  False
+    theta_start:  100.0
+    theta_limit:  [1.0e-4, 1.0e+5]
+    theta_fixed:  False
     
     p_name:   ['M0', 'sigma', 'n_low', 'alpha_low', 'n_high', 'alpha_high']
     p_start:  [3.097, 0.03, 1.5, 1.1, 1.5, 1.1]
@@ -45,12 +47,11 @@ fit:
     func:    'exp_pdf'
     args:
       norm:     True
-      #Nmin:     null # not active
     
     # Function weight (fit contribution) parameter
-    w_start:  0.1
-    w_limit:  [1.0e-4, 1.0e+5]
-    w_fixed:  False
+    theta_start:  0.1
+    theta_limit:  [1.0e-4, 1.0e+5]
+    theta_fixed:  False
 
     p_name:   ['lambda']
     p_start:  [1.0e-4]
@@ -58,15 +59,19 @@ fit:
     p_fixed:  [False]
 
 
-  # Add here more fit components in linear superposition, by giving a unique string label
+  # Add here more fit components in linear superposition (only with 'single' mode), by giving a unique string label
   # ...
 
 
 # Fit algorithm parameters
 techno:
-  losstype: 'nll'               # 'chi2', 'nll' or 'wasserstein'
-  use_limits: True              # Use parameter bounds
-  zerobin: 0.1                  # Minimum number of counts in a valid bin
+  rng_seed: 1234
+
+  loss_type: 'chi2'                # 'chi2', 'huber', 'nll'
+  use_limits: True                 # Use parameter bounds
+  zerobin: 0.1                     # Minimum number of counts in a valid bin
+  
+  huber_delta: 1.0                 # 'huber' loss threshold parameter
   
   # Use enough calls / iterations (otherwise can get stuck in bad local minima)
   
@@ -78,13 +83,16 @@ techno:
   ncall_minuit_simplex:  0         # Number of Nelder-Mead simplex search calls
   ncall_minuit_gradient: 10000     # Number of Minuit gradient search calls
   
-  minos: False       # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
+  minos: True       # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
 
+  min_ndof: 1       # Minimum number of d.o.f required
   max_chi2: 1200    # Maximum chi2/ndf for a succesful fit
-  min_count: 5      # Minimum number of entries in the histogram
+  min_count: 5      # Minimum number of total entries (sum of bin content) in the histogram
   max_trials: 3     # Number of restarts
 
   set_to_nan: True  # Set parameters after the fit to NaN if not passing max_chi2 or min_count
 
   strategy: 1       # Default 1
   tol: 0.1          # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
+
+  cov_eps: 0.0      # Covariance matrix post-regularization (added to diagonal) (set to 0 for none, can bias!)

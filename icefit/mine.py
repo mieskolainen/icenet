@@ -6,7 +6,7 @@
 # when using MINE as a regulator cost and maximizing MI (it has no strict upper bound).
 # The minimum MI is bounded by zero, to remind.
 # 
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 

@@ -12,7 +12,7 @@ gnet0:
   model_param:
     task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 64                # Convolution output dimension
+    z_dim: 64                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -39,7 +39,7 @@ gnet0:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 80
@@ -49,6 +49,7 @@ gnet0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
@@ -56,7 +57,7 @@ gnet0:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
 
 
@@ -73,7 +74,7 @@ gnet1:
   model_param:
     task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 64                # Convolution output dimension
+    z_dim: 64                 # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -100,7 +101,7 @@ gnet1:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 80
@@ -110,6 +111,7 @@ gnet1:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
@@ -117,7 +119,7 @@ gnet1:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
 
 
@@ -161,7 +163,7 @@ gnet2:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 80
@@ -171,6 +173,7 @@ gnet2:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
@@ -178,5 +181,5 @@ gnet2:
   num_workers: 4
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch

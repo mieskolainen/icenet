@@ -1,11 +1,11 @@
 # Github actions CI requirements 2/2 (need to be separate files)
 
 # PYTORCH-GEOMETRIC
-torch_geometric==2.3.0
-pyg_lib==0.2.0
-torch_scatter==2.1.1
-torch_sparse==0.6.17
-torch_cluster==1.6.1
-# spline_conv can give problems with GLIBC 2.27
+torch_geometric==2.5.3
+pyg_lib==0.4.0
+torch_scatter==2.1.2
+torch_sparse==0.6.18
+torch_cluster==1.6.3
+# spline_conv can give problems with GLIBC 2.27 (comment out)
 torch_spline_conv==1.2.2
--f https://data.pyg.org/whl/torch-2.0.0+cpu.html
+-f https://data.pyg.org/whl/torch-2.3.0+cpu.html

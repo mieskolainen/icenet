@@ -6,7 +6,6 @@
 import numpy as np
 from   tqdm import tqdm
 import ray
-from termcolor import colored, cprint
 
 import torch
 from   torch_geometric.data import Data
@@ -15,6 +14,9 @@ import icenet.algo.analytic as analytic
 from   icenet.tools import aux
 from   icenet.tools.icevec import vec4
 
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 def parse_tensor_data(X, ids, image_vars, args):
     """
@@ -51,7 +53,7 @@ def parse_tensor_data(X, ids, image_vars, args):
     phi_binedges = args['image_param']['phi_bins']    
 
     # Pick tensor data out
-    cprint(__name__ + f'.splitfactor: jagged2tensor processing ...', 'yellow')
+    print(f'jagged2tensor processing ...', 'yellow')
     tensor = aux.jagged2tensor(X=X_image, ids=newvars, xyz=xyz, x_binedges=eta_binedges, y_binedges=phi_binedges)
 
     return tensor
@@ -186,7 +188,7 @@ def parse_graph_data(X, ids, features, graph_param, Y=None, weights=None, entry_
         
         dataset.append(Data(num_nodes=x.shape[0], x=x, edge_index=edge_index, edge_attr=edge_attr, y=y, w=w, u=u))
     
-    print(__name__ + f'.parse_graph_data: Empty ECAL events: {num_empty_ECAL} / {num_events} = {num_empty_ECAL/num_events:0.5f} (using only global data u)')        
+    print(f'Empty ECAL events: {num_empty_ECAL} / {num_events} = {num_empty_ECAL/num_events:0.5f} (using only global data u)')        
     
     return dataset
 

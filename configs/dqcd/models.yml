@@ -85,12 +85,12 @@ MI_DOMAIN_FILTER: &MI_DOMAIN_FILTER
 # ** Mutual Information regularization **
 MI_REG_PARAM: &MI_REG_PARAM
   
-  classes: [-2]            #  Which classes to use in the regularization
+  classes: [0,-2]          #  Which classes to use in the regularization
   
   losstype: 'DCORR'        # 'MINE', 'MINE_EMA', 'DENSITY', 'DCORR', 'PEARSON' (use PEARSON only for debug)
   min_count: 32            #  Minimum number of events (per category)
-  max_N: null              #  Maximum number of events per function call (use to limit sample size)
-  min_score: 0.75          #  Consider only events with MVA output larger than this value (null for None)
+  max_N: 5000              #  Maximum number of events per function call (use to limit sample size for DCORR)
+  min_score: 0.6           #  Consider only events with MVA output [0,1] larger than this value (null for None)
   poisson_weight: False    #  Per category Poisson sqrt(N) weighted loss
   
   # ------------------
@@ -98,7 +98,7 @@ MI_REG_PARAM: &MI_REG_PARAM
 
   eval_batch_size: 8192    #  Evaluation batch size (pure memory <-> time tradeoff)
   alpha:  0.01             #  Exponential Moving Average (EMA) coupling parameter
-  ma_eT:  [null]           #  EMA tracking values
+  ma_eT:  [null, null]     #  EMA tracking values (set for each class!)
   
   y_dim: [1]               #  dimensionality ([1] for NN scalar output Z vs target X)
   
@@ -115,7 +115,7 @@ MI_REG_PARAM: &MI_REG_PARAM
   activation: 'relu'
   
   # -------------------------
-
+  
   # Comment out for no categories (N.B. dependence structure over inclusive sample != categorical)
   set_filter: *MI_DOMAIN_FILTER
 # -----------------------------------------------
@@ -172,11 +172,14 @@ exp:
   transform: null
 
 
+# ------------------------------------------------------------------------------------------
+
+
 # XGBoost
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb01:
+xgb01: &XGB01
   train:   'xgb'
-  predict: 'xgb_logistic'
+  predict: 'xgb'
   label:   'XGB'
   raytune:  xgb_trial_0
   
@@ -185,111 +188,7 @@ xgb01:
   
   # general parameters
   model_param:
-    num_boost_round: 150       # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'       # 'auto', 'cpu', 'cuda'
-    
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    #objective: 'binary:logistic'             # Note that 'multi:softprob' does not work with distillation
-    #eval_metric: ['logloss']                 # for custom losses, otherwise 'logloss', 'mlogloss' ...
-    objective: 'custom:binary_cross_entropy'  # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                   # for custom losses, otherwise 'logloss', 'mlogloss' ...
-  
-  # BCE loss domains
-  BCE_param:
-    main:
-      classes: [0,1]
-      beta: 1.0
-      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-  
-  plot_trees: False
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-xgb01-NOJETS:
-  train:   'xgb'
-  predict: 'xgb_logistic'
-  label:   'XGB-NOJETS'
-  raytune:  xgb_trial_0
-  
-  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_.*']
-  #include_MVA_vars: ['.*']
-  
-  # general parameters
-  model_param:
-    num_boost_round: 150       # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'       # 'auto', 'cpu', 'cuda'
-    
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    #objective: 'binary:logistic'             # Note that 'multi:softprob' does not work with distillation
-    #eval_metric: ['logloss']                 # for custom losses, otherwise 'logloss', 'mlogloss' ...
-    objective: 'custom:binary_cross_entropy'  # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                   # for custom losses, otherwise 'logloss', 'mlogloss' ...
-  
-  # BCE loss domains
-  BCE_param:
-    main:
-      classes: [0,1]
-      beta: 1.0
-      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-  
-  plot_trees: False
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost01-DA:
-  train:   'xgb'
-  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST-DA'
-  raytune:  xgb_trial_0
-  
-  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
-  #include_MVA_vars: ['.*']
-  
-  # general parameters
-  model_param:
-    num_boost_round: 150       # number of epochs (equal to the number of trees!)
+    num_boost_round: 250       # number of epochs (equal to the number of trees!)
     booster: 'gbtree'          # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'        # 'auto', 'cpu', 'cuda'
@@ -309,178 +208,184 @@ iceboost01-DA:
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    objective: 'binary:logistic'               # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']                   
+    #objective: 'custom:binary_cross_entropy'  # Use 'custom:binary_cross_entropy:hessian' for 2nd order descent
+    #eval_metric: ['custom']                   # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  plot_trees: false
+  tensorboard: true
+  
+  # Read/Write of epochs
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# ICEBOOST (XGB with torch driven custom loss)
+# https://xgboost.readthedocs.io/en/latest/parameter.html
+iceboost01: &ICEBOOST01
+  train:   'xgb'
+  predict: 'xgb_logistic'
+  label:   'ICEBOOST'
+  raytune:  xgb_trial_0
+
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  #include_MVA_vars: ['.*']
+  
+  # general parameters
+  model_param:
+    num_boost_round: 250       # number of epochs (equal to the number of trees!)
+    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'
+    device:      'auto'       # 'auto', 'cpu', 'cuda'
+    
+    learning_rate: 0.1
+    gamma: 1.67
+    max_depth: 10
+    min_child_weight: 1.0
+    max_delta_step: 1
+    subsample: 1
+
+    colsample_bytree:  0.86
+    colsample_bylevel: 0.6
+    colsample_bynode:  0.8
+    
+    reg_lambda: 2.0               # L2 regularization
+    reg_alpha: 0.05               # L1 regularization
+    
+    # learning task parameters
+    #objective: 'binary:logistic'             # Note that 'multi:softprob' does not work with distillation
+    #eval_metric: ['logloss']                 
+    objective: 'custom:binary_cross_entropy'  # Use 'custom:binary_cross_entropy:hessian' for 2nd order descent
+    eval_metric: ['custom']                   # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0, 1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+  
+  plot_trees: false
+  tensorboard: true
+
+  # Read/Write of epochs
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
+  readmode: -1                 # -1 is the last saved epoch
+
+
+# ICEBOOST without Jets
+#
+iceboost01-NOJETS:
+
+  <<: *ICEBOOST01
+
+  label:   'ICEBOOST-NOJETS'
+
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_.*']
+  #include_MVA_vars: ['.*']
+
+
+# ICEBOOST with MI-regularization
+#
+iceboost01-MI:
+
+  <<: *ICEBOOST01
+
+  label:   'ICEBOOST-MI'
+
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  #include_MVA_vars: ['.*']
+  
+  MI_param:
+    beta: [0.1, 0.1]         # Positive for minimizing (per class in use)
+    <<: *MI_REG_PARAM
+
+
+# ICEBOOST with Domain Adaptation
+#
+iceboost01-DA:
+
+  <<: *ICEBOOST01
+
+  label:   'ICEBOOST-DA'
+  
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
+  #include_MVA_vars: ['.*']
 
   # BCE loss domains
   BCE_param:
     main:
-      classes: [0,1]
+      classes: [0, 1]
       beta: 1.0
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
       beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
+
+
+# ICEBOOST with Domain Adaptation and without Jets
+#
+iceboost01-DA-NOJETS:
   
-  plot_trees: False
+  <<: *ICEBOOST01
 
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
+  label:   'ICEBOOST-DA-NOJETS'
+
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet.*']
+  #include_MVA_vars: ['.*']
+
+  # BCE loss domains
+  BCE_param:
+    main:
+      classes: [0, 1]
+      beta: 1.0
+      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
+    DA:
+      classes: [0,-2]
+      beta: -0.08
+      set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
 
 
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
+# ICEBOOST with Domain Adaptation and without theory conditional (MODEL_) parameters
+#
 iceboost01-DA-NC:
-  train:   'xgb'
-  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+
+  <<: *ICEBOOST01
+
   label:   'ICEBOOST-DA-NC'
-  raytune:  xgb_trial_0
-  
+
   exclude_MVA_vars: ['MODEL.*', 'muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
   #include_MVA_vars: ['.*']
   
-  # general parameters
-  model_param:
-    num_boost_round: 150       # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'          # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'        # 'auto', 'cpu', 'cuda'
-    
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
-
   # BCE loss domains
   BCE_param:
     main:
-      classes: [0,1]
+      classes: [0, 1]
       beta: 1.0
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
       classes: [0,-2]
       beta: -0.08
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
-  
-  plot_trees: False
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
 
 
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost01-MI:
-  train:   'xgb'
-  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST-MI'
-  raytune:  xgb_trial_0
-  
-  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
-  #include_MVA_vars: ['.*']
-  
-  # general parameters
-  model_param:
-    num_boost_round: 150      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'      # 'auto', 'cpu', 'cuda'
-
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
-  
-  # BCE loss domains
-  BCE_param:
-    main:
-      classes: [0,1]
-      beta: 1.0
-      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-  
-  MI_param:
-    beta: [0.1]               # Positive for minimizing, regularization strength [per class]
-    <<: *MI_REG_PARAM
-  
-  plot_trees: False
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
+# ICEBOOST with Domain Adaptation and MI-regularization
+#
 iceboost01-DA-MI:
-  train:   'xgb'
-  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+
+  <<: *ICEBOOST01
+
   label:   'ICEBOOST-DA-MI'
-  raytune:  xgb_trial_0
-  
+
   exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_mass.*']
   #include_MVA_vars: ['.*']
   
-  # general parameters
-  model_param:
-    num_boost_round: 150      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'       # 'auto', 'cpu', 'cuda'
-
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
-
   # BCE loss domains
   BCE_param:
     main:
-      classes: [0,1]
+      classes: [0, 1]
       beta: 1.0
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
@@ -489,110 +394,25 @@ iceboost01-DA-MI:
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
-    beta: [0.1]                # Positive for minimizing
+    beta: [0.1, 0.1]                # Positive for minimizing (per class in use)
     <<: *MI_REG_PARAM
-  
-  plot_trees: False
 
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
 
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost01-DA-NOJETS:
-  train:   'xgb'
-  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
-  label:   'ICEBOOST-DA-NOJETS'
-  raytune:  xgb_trial_0
-  
-  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet_.*']
-  #include_MVA_vars: ['.*']
-  
-  # general parameters
-  model_param:
-    num_boost_round: 150      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'       # 'auto', 'cpu', 'cuda'
-
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
-
-  # BCE loss domains
-  BCE_param:
-    main:
-      classes: [0,1]
-      beta: 1.0
-      set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-    DA:
-      classes: [0,-2]
-      beta: -0.08
-      set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
-  
-  plot_trees: False
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
-
-# XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
+# ICEBOOST with Domain Adaptation and MI-regularization and without Jets
+#
 iceboost01-DA-MI-NOJETS:
-  train:   'xgb'
-  predict: 'xgb_logistic'     # We apply logistic link function manually (because custom loss)
+
+  <<: *ICEBOOST01
+
   label:   'ICEBOOST-DA-MI-NOJETS'
-  raytune:  xgb_trial_0
-  
+
   exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet.*']
   #include_MVA_vars: ['.*']
   
-  # general parameters
-  model_param:
-    num_boost_round: 150      # number of epochs (equal to the number of trees!)
-    booster: 'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
-    device:      'auto'       # 'auto', 'cpu', 'cuda'
-
-    learning_rate: 0.1
-    gamma: 1.67
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1
-    subsample: 1
-
-    colsample_bytree:  0.86
-    colsample_bylevel: 0.6
-    colsample_bynode:  0.8
-    
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
-    
-    # learning task parameters
-    #objective: 'binary:logistic'            # Note that 'multi:softprob' does not work with distillation
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
-
   # BCE loss domains
   BCE_param:
     main:
-      classes: [0,1]
+      classes: [0, 1]
       beta: 1.0
       set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
     DA:
@@ -601,19 +421,16 @@ iceboost01-DA-MI-NOJETS:
       set_filter: *DA_DOMAIN_FILTER   # Comment out for 'inclusive'
   
   MI_param:
-    beta: [0.1]                # Positive for minimizing
+    beta: [0.1, 0.1]                  # Positive for minimizing (per class in use)
     <<: *MI_REG_PARAM
-  
-  plot_trees: False
 
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
 
 # -----------------------------------------------------------------------------
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
 
-
-# Logistic Regression (convex model = global optimum guarantee)
+# Logistic Regression (simple linear convex model = global optimum guarantee)
 lgr0:
   train:   'torch_generic'
   predict: 'torch_vector'
@@ -634,25 +451,25 @@ lgr0:
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 150
-    batch_size: 196
+    epochs: 200
+    batch_size: 1024
     lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
+    weight_decay: 1.0e-2       # L2-regularization
+  
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
   
-  post_process:
-    temperature_scale: true
-
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
+  evalmode: 1                   # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
+
+  eval_batch_size: 1024
 
 
 # Permutation Equivariant Network
@@ -677,25 +494,28 @@ deps:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
     
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs:  200
-    batch_size:  128
+    batch_size:  1024
     lr: 1.0e-3
-    weight_decay: 0.0001       # L2-regularization
+    weight_decay: 1.0e-4       # L2-regularization
 
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
-    
-  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
   
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
+  evalmode:  1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
+
+  eval_batch_size: 1024
 
 
 # Deep MAXOUT network
@@ -718,65 +538,29 @@ dmx0:
     gamma: 2                   # focal_entropy exponent
     temperature: 1             # logit norm temperature
 
-    optimizer: 'Adam'          # Adam, AdamW
+    optimizer: 'AdamW'          # Adam, AdamW
     clip_norm: 1.0
 
     epochs: 200
-    batch_size: 128
+    batch_size: 1024
     lr: 1.0e-3
-    weight_decay: 0.00001      # L2-regularization
+    weight_decay: 1.0e-2       # L2-regularization
 
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
-    
+  
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
-# Deep MAXOUT network
-dmx1:
-  train:   'torch_generic'
-  predict: 'torch_vector'
-  label:   'MAXO-LNCE'
-  raytune:  null
+  eval_batch_size: 1024
 
-  # Model parameter
-  conv_type: 'maxo'
-  model_param:
-    num_units: 8
-    neurons:  50
-    dropout:  0.1
-
-  # Optimization
-  opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
-    
-    optimizer: 'Adam'         # Adam, AdamW
-    clip_norm: 1.0
-
-    epochs: 200
-    batch_size: 128
-    lr: 1.0e-3
-    weight_decay: 0.00001     # L2-regularization
-
-  # Scheduler
-  scheduler_param:
-    step_size: 200
-    gamma: 0.1
-
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
-  readmode: -1                # -1 is the last saved epoch
 
 # Deep MLP
 dmlp:
@@ -784,40 +568,43 @@ dmlp:
   predict: 'torch_vector'
   label:   'DMLP'
   raytune:  null
-
+  
   # Model
   conv_type: 'dmlp'
   model_param:
-    mlp_dim: [64, 64, 64]     # hidden layer dimensions
-    activation: 'relu'
+    mlp_dim: [64, 64, 64, 64] # hidden layer dimensions
+    activation: 'silu'
     batch_norm: False
-    dropout: 0.1
-  
+    dropout: 0.0
+
   # Optimization
   opt_param:  
     lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 200
-    batch_size: 196
-    lr: 1.0e-3
-    weight_decay: 0.0000      # L2-regularization
+    batch_size: 1024
+    lr: 1.0e-4
+    weight_decay: 1.0e-2      # L2-regularization
 
   # Scheduler
   scheduler_param:
-    step_size: 200
+    step_size: 150
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 1024
 
 
 # Variational Autoencoder
@@ -828,26 +615,29 @@ vae0:
   raytune:  null
 
   # ** Custom set of variables **
-  exclude_MVA_vars: ['MODEL_.*'] # No conditional
-  
+  exclude_MVA_vars: ['muonSV_mass.*', 'SV_mass.*', 'Jet.*', 'MODEL.*']
+  #include_MVA_vars: ['.*']
+
   # Model param
   conv_type: 'vae'
   model_param:
-    hidden_dim: 64
-    latent_dim: 12
+    encoder_hidden_dim: [64, 64, 64]
+    var_hidden_dim:     [64]        # First dimension needs to match with the last of 'encoder_hidden_dim'
+    latent_dim:          12
+    decoder_hidden_dim: [64, 64, 64]
     
-    encoder_act: 'relu'
+    encoder_act: 'silu'
     encoder_bn: False
-    encoder_dropout: 0.05
+    encoder_dropout: 0.01
 
-    decoder_act: 'tanh'
+    decoder_act: 'silu'
     decoder_bn: False
-    decoder_dropout: 0.05
-
+    decoder_dropout: 0.01
+    
     reco_prob: 'Gaussian'           # 'Gaussian', 'Bernoulli'
     kl_prob:   'Gaussian'           # 'Gaussian'
     anomaly_score: 'RECO'           # 'RECO', 'KL_RECO'
-    
+  
   # Optimization
   opt_param:  
     lossfunc: 'VAE_background_only' # cross_entropy, focal_entropy, logit_norm_cross_entropy
@@ -855,79 +645,30 @@ vae0:
     gamma: 2                        # focal_entropy exponent
     temperature: 1                  # logit norm temperature
     
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 200
-    batch_size: 256
-    lr: 1.0e-3
-    weight_decay: 0.00001       # L2-regularization
-
-  # Mutual information regularization
-  #MI_reg_param:
-  #  beta: 0.99                  # Positive for minimizing
-  #  x_dim: 12
-  #  y_index: "param['model_param']['latent_dim']"
-  #  <<: *MI_REG_PARAM
+    batch_size: 1024
+    lr: 3.0e-4
+    weight_decay: 1.0e-3       # L2-regularization
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
+  evalmode: 1                   # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
 
+  eval_batch_size: 1024
 
-# Deep Normalizing Flow
-dbnf0:
-  train:   'flow'
-  predict: 'torch_flow'
-  label:   'DBNF'
-  raytune:  null
-
-  # Gradient descent
-  opt_param:
-    lossfunc: 'flow_logpx'
-    optimizer: 'Adam'
-    clip_norm: 0.1
-    
-    epochs: 100
-    batch_size: 512           # Keep it high!
-    lr: 1.0e-3
-    weight_decay: 0.0         # L2-regularization
-    polyak: 0.998
-
-    start_epoch: 0
-
-  # Learning rate reduction on plateau
-  scheduler_param:  
-    factor:  0.1
-    patience: 20
-    cooldown: 10
-    min_lr: 0.0005
-    early_stopping: 100
-
-  # Model structure
-  model_param:  
-    flows: 10                 # number of flow blocks
-    layers: 0                 # intermediate layers in a flow block
-    hidden_dim: 10            # 
-    residual: 'gated'         # choises 'none', 'normal', 'gated'
-    perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
-  
-  modelname: 'null'
-  tensorboard: 'tensorboard'
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
-  num_workers: 4
-
-  # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
-  readmode: -1                 # -1 is the last saved epoch
 
 # Graph net
 gnet1:
@@ -969,25 +710,29 @@ gnet1:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 150
-    batch_size: 128
+    batch_size: 1024
     lr: 3.0e-4
-    weight_decay:  0.0        # L2-regularization
+    weight_decay:  1.0e-4        # L2-regularization
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 1024
 
 
 # Graph net
@@ -1030,25 +775,29 @@ gnet2:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 150
-    batch_size: 128
+    batch_size: 1024
     lr: 3.0e-4
-    weight_decay:  0.0      # L2-regularization
+    weight_decay:  1.0e-4      # L2-regularization
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 1024
 
 
 # Graph net
@@ -1091,22 +840,27 @@ gnet3:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
 
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
 
     epochs: 150
-    batch_size: 128
+    batch_size: 1024
     lr: 3.0e-4
-    weight_decay:  0.0        # L2-regularization
+    weight_decay:  1.0e-4        # L2-regularization
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 1024
+

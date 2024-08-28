@@ -27,7 +27,7 @@ class ReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
         else:
             self.num_bad_epochs += 1
             self.early_stopping_counter += 1
-
+        
         if self.in_cooldown:
             self.cooldown_counter -= 1
             self.num_bad_epochs = 0 # ignore any bad epochs in cooldown

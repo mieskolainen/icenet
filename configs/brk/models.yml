@@ -34,14 +34,19 @@ xgb:
     
     # learning task parameters
     objective: 'multi:softprob' # 'binary:logitraw'  # 'binary:logistic'
-    eval_metric: ['mlogloss', 'auc']   # 'mlogloss' is multiclass log-loss, 'logloss'
-    
-  plot_trees: False
+    eval_metric: ['mlogloss']   # for evaluation, 'logloss', 'mlogloss'
   
+  plot_trees: false
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
+# -----------------------------------------------------------------------------
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
 
 # Deep MaxOut network
 maxo:
@@ -78,11 +83,14 @@ maxo:
     gamma: 0.1
     
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Permutation Equivariant Network
@@ -122,8 +130,11 @@ deps:
     gamma: 0.1
     
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
-  num_workers: 1
+  num_workers: 4
+  tensorboard: true
   
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096

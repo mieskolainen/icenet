@@ -67,16 +67,20 @@ gxgb0:
 
     # Scheduler
     scheduler_param:
+      type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
       step_size: 200
       gamma: 0.1
     
     device: 'auto'               # alternative 'cpu:0', 'cuda:0'
     num_workers: 4
+    tensorboard: true
     
     # Read/Write of epochs
-    savemode: 'all'              # 'all', 'latest'
+    evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
     readmode: -1                 # -1 is the last saved epoch
 
+    eval_batch_size: 512
+  
   # ** XGBOOST **
   xgb:
     train:   'xgb'
@@ -111,10 +115,11 @@ gxgb0:
       objective:  'binary:logistic'  # Note that 'multi:softprob' does not work with distillation
       eval_metric: ['logloss']       # for evaluation, 'mlogloss'
 
-    plot_trees: False
-    
+    plot_trees: false
+    tensorboard: true
+
     # Read/Write of epochs
-    savemode: 'all'                  # 'all', 'latest'
+    evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
     readmode: -1                     # -1 is the last saved epoch
 
 
@@ -168,15 +173,19 @@ gnet0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -229,15 +238,19 @@ gnet1:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -290,15 +303,19 @@ gnet2:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Graph net
@@ -351,15 +368,19 @@ gnet3:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'             # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+
+  eval_batch_size: 512
 
 
 # Factorized Likelihood Ratio
@@ -407,14 +428,19 @@ xgb0:
     
     # learning task parameters
     objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']     # for evaluation, 'mlogloss'
+    eval_metric: ['logloss']      # for evaluation, 'logloss', 'mlogloss'
 
-  plot_trees: False
+  plot_trees: false
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
+# -----------------------------------------------------------------------------
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
 
 # Deep MLP
 dmlp:
@@ -447,15 +473,19 @@ dmlp:
   
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Logistic Regression (convex model = global optimum guarantee)
@@ -487,15 +517,19 @@ lgr0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1  
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Convolutional Neural Net + MAXOUT MLP
@@ -533,15 +567,19 @@ cnn0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
       
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Deep MAXOUT network
@@ -574,15 +612,19 @@ dmx0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096
 
 
 # Deep Normalizing Flow
@@ -601,11 +643,11 @@ dbnf0:
     epochs: 100
     batch_size: 512           # Keep it high!
     lr: 1.0e-3
-    weight_decay: 0.0         # L2-regularization
+    weight_decay: 0.0         # L2-regularization (without any weight decay seems OK)
     polyak: 0.998
-
+    
     start_epoch: 0
-
+  
   # Learning rate reduction on plateau
   scheduler_param:  
     factor:  0.1
@@ -622,11 +664,12 @@ dbnf0:
     residual: 'gated'         # choises 'none', 'normal', 'gated'
     perm: 'rand'              # flow permutation: choises 'none', 'flip', 'rand'
   
-  modelname: 'null'
-  tensorboard: 'tensorboard'
-  device: 'auto'            # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+  
+  eval_batch_size: 4096

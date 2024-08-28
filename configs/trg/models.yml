@@ -151,10 +151,11 @@ xgb0:
     objective: 'binary:logistic'          # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']              # for evaluation, 'logloss', 'mlogloss'
   
-  plot_trees: False
-  
+  plot_trees: false
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -192,10 +193,11 @@ xgb1:
     objective:  'binary:logistic' # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['logloss']     # for evaluation, 'mlogloss'
   
-  plot_trees: True
-  
+  plot_trees: true
+  tensorboard: true
+
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
 
 
@@ -227,16 +229,24 @@ lgr0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
   
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
+  tensorboard: true
 
   # Read/Write of epochs
-  savemode: 'all'               # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                  # -1 is the last saved epoch
+  
+  eval_batch_size: 4096
 
+# -----------------------------------------------------------------------------
+# Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
+# however, performance with BDTs may be better without.
+# -----------------------------------------------------------------------------
 
 # Deep MLP
 dmlp0:
@@ -259,7 +269,7 @@ dmlp0:
     gamma: 2                  # focal_entropy exponent
     temperature: 1            # logit norm temperature
     
-    optimizer: 'Adam'
+    optimizer: 'AdamW'
     clip_norm: 1.0
     
     epochs: 50
@@ -269,12 +279,16 @@ dmlp0:
 
   # Scheduler
   scheduler_param:
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-
+  tensorboard: true
+  
   # Read/Write of epochs
-  savemode: 'all'              # 'all', 'latest'
+  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
   readmode: -1                 # -1 is the last saved epoch
+
+  eval_batch_size: 4096

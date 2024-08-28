@@ -14,7 +14,7 @@ import math
 import copy
 
 
-def chi2_cost(h_mc, h_data):
+def chi2_cost(h_mc, h_data, return_nbins=False):
     """
     Chi2 cost function between two histograms
     """
@@ -24,7 +24,14 @@ def chi2_cost(h_mc, h_data):
     counts_data = h_data.counts * h_data.binscale
     err_data    = h_data.errs   * h_data.binscale
 
-    return np.sum((counts_mc - counts_data)**2 / (err_mc**2 + err_data**2))
+    ind = (counts_data > 0) & (counts_mc > 0)
+    
+    chi2 = np.sum((counts_mc[ind] - counts_data[ind])**2 / (err_mc[ind]**2 + err_data[ind]**2))
+
+    if not return_nbins:
+        return chi2
+    else:
+        return chi2, int(np.sum(ind))    
 
 
 def set_global_style(dpi=120, figsize=(4,3.75), font='serif', font_size=8, legend_fontsize=7, legend_handlelength=1):
@@ -130,11 +137,11 @@ def stepspace(start, stop, step):
     return np.arange(start, stop + step, step)
 
 
-def plot_horizontal_line(ax, color=(0.5,0.5,0.5), linewidth=0.9):
+def plot_horizontal_line(ax, ypos=1.0, color=(0.5,0.5,0.5), linewidth=0.9):
     """ For the ratio plot
     """
     xlim = ax.get_xlim()
-    ax.plot(np.linspace(xlim[0], xlim[1], 2), np.array([1,1]), color=color, linewidth=linewidth)
+    ax.plot(np.linspace(xlim[0], xlim[1], 2), ypos*np.array([1,1]), color=color, linewidth=linewidth)
 
 
 def tick_calc(lim, step, N=6):
@@ -153,8 +160,8 @@ def set_axis_ticks(ax, ticks, dim='x'):
         ax.set_yticklabels(list(map(str, ticks)))
 
 def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.5, 1.5),
-        ratio_plot=True, minorticks_on=True, ytick_ratio_step=0.25, labelsize=9,
-        labelsize_ratio=8, **kwargs) :
+        ratio_plot=True, minorticks_on=True, ytick_ratio_step=0.25, labelsize=8,
+        labelsize_ratio=7, **kwargs) :
     """ Axis tick constructor.
     """
 
@@ -190,7 +197,7 @@ def tick_creator(ax, xtick_step=None, ytick_step=None, ylim_ratio=(0.5, 1.5),
     return ax
 
 def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
-    xlim=(0,1), ylim=None, ratio_plot=True, figsize=(5,4), fontsize=9, units={'x': '', 'y': ''}, **kwargs):
+    xlim=(0,1), ylim=None, ratio_plot=True, figsize=(5,4), fontsize=8, units={'x': '', 'y': ''}, **kwargs):
     """ Axes creator.
     """
     
@@ -352,14 +359,15 @@ def hist_filled_error(ax, bins, cbins, y, err, color, **kwargs):
 
 
 def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_error_plot=True, \
-    legend_counts=False, color=None, legend_properties={'fontsize': 7}, bottom_PRC=5, EPS=1E-12):
+    legend_counts=False, color=None, legend_properties={'fontsize': 7}, bottom_PRC=5, EPS=1E-12, verbose=False):
     """ Superposition (overlaid) plotting
     """
     if observable == None:
         observable = data[0]['obs']
     
-    print(observable)
-
+    if verbose:
+        print(observable)
+    
     fig, ax = create_axes(**observable, ratio_plot=ratio_plot)
 
     if color == None:
@@ -375,9 +383,9 @@ def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_err
     for i in range(len(data)):
 
         if data[i]['hdata'].is_empty:
-            print(__name__ + f'.superplot: Skipping empty histogram for entry {i}')
+            print(f'Skipping empty histogram for entry {i}')
             continue
-
+        
         c = data[i]['color']
         if c is None: c = color[i]
 
@@ -421,9 +429,9 @@ def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_err
         for i in range(len(data)):
 
             if data[i]['hdata'].is_empty:
-                print(__name__ + f'.superplot: Skipping empty histogram for entry {i} (ratioplot)')
+                print(f'Skipping empty histogram for entry {i} (ratioplot)')
                 continue
-
+            
             c = data[i]['color']
             if c is None: c = color[i]
 
@@ -477,7 +485,7 @@ def superplot(data, observable=None, ratio_plot=True, yscale='linear', ratio_err
         else:
             ax[0].set_ylim([0, ceiling_count * 1.5])
     else:
-        ax[0].set_ylim(observables.ylim)
+        ax[0].set_ylim(observable.ylim)
     # --------------------------------------------------------------------    
 
     return fig, ax
@@ -520,8 +528,8 @@ def histmc(mcdata, all_obs, density=False, scale=None, color=(0,0,1), label='non
         obj[OBS] = {'hdata': hobj(counts, errs, bins, cbins, binscale),
                     'hfunc' : 'hist', 'color': color, 'label': label, 'style' : style}
 
-        print(f'histmc: integral = {obj[OBS]["hdata"].integral():0.2E} ({OBS})')
-        
+        print(f'integral = {obj[OBS]["hdata"].integral():0.2E} ({OBS})')
+    
     return obj
 
 
@@ -554,7 +562,7 @@ def histhepdata(hepdata, all_obs, scale=None, density=False, MC_XS_SCALE=1E12, l
         obj[OBS] = {'hdata': hobj(y, yerr, bins, cbins, binscale),
                     'hfunc' : 'hist', 'color': (0,0,0), 'label': label, 'style' : style}
 
-        print(f'histhepdata: integral = {obj[OBS]["hdata"].integral():0.2E} ({OBS})')
+        print(f'integral = {obj[OBS]["hdata"].integral():0.2E} ({OBS})')
     
     return obj
 

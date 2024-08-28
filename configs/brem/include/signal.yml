@@ -1,7 +1,8 @@
 # [0]
 SIGNAL: &SIGNAL
-  path: ''
-  files: 'output_signal_10k.root'
+  path: 'local-stash/input/icebrem/output_signal_1M'
+  #files: 'output_0.root'
+  files: 'output_[0-4].root'
   xs: 1.
   model_param: null
   force_xs: false
