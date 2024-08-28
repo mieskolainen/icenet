@@ -317,9 +317,9 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
     # ----------------------------------------
     
     print(f'Training N-dim reweighting', 'magenta')
-    print(f'x.shape = {x.shape} | x_val.shape = {x_val.shape}', 'magenta') 
+    print(f'x.shape = {x.shape}', 'magenta')
     print(f'variables = {variables}', 'magenta')
-        
+    
     # Train model per class pair
     if pdf is None:
         
