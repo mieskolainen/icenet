@@ -3,6 +3,7 @@
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
+import awkward as ak
 import numba
 from scipy import special as special
 
@@ -54,6 +55,36 @@ def deltaR(x, eta1: str, eta2: str, phi1: str, phi2: str):
     
     return np.sqrt(deltaEta**2 + deltaPhi**2)
 
+def muonSV_deltaR(X, x: str, y: str, z: str):
+    """
+    dR between each muon SV and the leading muon SV 
+    (dR w.r.t. the origin for the leading muon SV)
+    """
+
+    muonSV_phi = np.sign(X[y])*np.arccos(X[y]/np.sqrt((X[x])**2 + (X[y])**2))
+    muonSV_theta = np.arccos(X[z]/np.sqrt((X[x])**2 + (X[y])**2+(X[z])**2))
+    muonSV_eta = -np.log(np.tan(muonSV_theta/2))
+
+    muonSV_dphi = []
+    muonSV_deta = []
+    for i in range(len(muonSV_phi)):
+        dphi = []
+        deta = []
+        for j in range(len(muonSV_phi[i])):
+            if j == 0:
+                dphi.append(muonSV_phi[i][j])
+                deta.append(muonSV_eta[i][j])
+            else:
+                dphi.append(muonSV_phi[i][j] - muonSV_phi[i][0])
+                deta.append(muonSV_eta[i][j] - muonSV_eta[i][0])
+        muonSV_dphi.append(dphi)
+        muonSV_deta.append(deta)
+
+    muonSV_dphi = ak.Array(muonSV_dphi)
+    muonSV_dphi = phi_phasewrap(muonSV_dphi)
+    muonSV_deta = ak.Array(muonSV_deta)
+
+    return np.sqrt(muonSV_dphi**2 + muonSV_deta**2)
 
 def fox_wolfram_boost_inv(p, L=10):
     """
