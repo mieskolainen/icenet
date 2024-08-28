@@ -367,7 +367,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # -------------------------------------------------------------------
     # Technical
     
-    args['__runmode__']         = bool(cli_dict['runmode'])
+    args['__runmode__']         = cli_dict['runmode']
     args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__compute__']         = bool(cli_dict['compute'])
     args['__raytune_running__'] = False
@@ -393,7 +393,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     # -------------------------------------------------------------------
     # Set random seeds for reproducability and train-validate-test splits
-
+    
     print('')
     print(" torch.__version__: " + torch.__version__)
 
@@ -435,7 +435,7 @@ def generic_flow(rootname, func_loader, func_factor):
             print(cli) # for output log
             data = read_data_processed(args=args, func_loader=func_loader,
                     func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
-            
+
         if args['__compute__']:
             
             if runmode == 'train':

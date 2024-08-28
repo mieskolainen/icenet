@@ -138,6 +138,14 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     #W    = W[rand].squeeze()
     # -------------------------------------------------------------------------
     
+    # -------------------------------------------------------------------------
+    ## Add event weights as an aux variable called `raw_weight` for plots etc.
+    
+    X   = np.hstack((X, W[None].T))
+    ids = ids + ['raw_weight']
+    
+    # -------------------------------------------------------------------------
+    
     ## Print some diagnostics
     print(f'Total number of events: {len(X)}')
     
@@ -221,11 +229,11 @@ def splitfactor(x, y, w, ids, args):
     data = io.IceXYW(x=x, y=y, w=w, ids=ids)
 
     # -------------------------------------------------------------------------
-    ### Pick kinematic variables out
+    ### Pick kinematic variables out (note also 'raw_weight')
     data_kin = None
 
     if inputvars.KINEMATIC_VARS is not None:
-        vars       = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.KINEMATIC_VARS)
+        vars       = aux.process_regexp_ids(all_ids=data.ids, ids=inputvars.KINEMATIC_VARS + ['raw_weight'])
         data_kin   = data[vars]
         data_kin.x = data_kin.x.astype(np.float32)
     
@@ -277,7 +285,5 @@ def splitfactor(x, y, w, ids, args):
             
             # Change the variable name [+ have the same original variables in data_kin]
             data.ids[ind] = f'TRF__{v}'
-    
-    # -------------------------------------------------------------------------
     
     return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}

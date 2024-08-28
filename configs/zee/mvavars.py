@@ -1,5 +1,5 @@
 # AUX variables + for other re-shuffling purposes
-KINEMATIC_VARS  = ['probe_mvaID',
+KINEMATIC_VARS = ['probe_mvaID',
                    'probe_pfChargedIso',
                    'probe_ecalPFClusterIso',
                    'probe_trkSumPtHollowConeDR03',
