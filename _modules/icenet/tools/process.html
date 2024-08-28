@@ -892,7 +892,7 @@
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1"># Technical</span>
     
-    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__runmode__&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;runmode&#39;</span><span class="p">])</span>
+    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__runmode__&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;runmode&#39;</span><span class="p">]</span>
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;use_cache&#39;</span><span class="p">])</span>
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__compute__&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cli_dict</span><span class="p">[</span><span class="s1">&#39;compute&#39;</span><span class="p">])</span>
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -918,7 +918,7 @@
     
     <span class="c1"># -------------------------------------------------------------------</span>
     <span class="c1"># Set random seeds for reproducability and train-validate-test splits</span>
-
+    
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; torch.__version__: &quot;</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
 
@@ -963,7 +963,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">cli</span><span class="p">)</span> <span class="c1"># for output log</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">read_data_processed</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="o">=</span><span class="n">func_loader</span><span class="p">,</span>
                     <span class="n">func_factor</span><span class="o">=</span><span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;configs.</span><span class="si">{</span><span class="n">rootname</span><span class="si">}</span><span class="s1">.mvavars&#39;</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="n">runmode</span><span class="p">)</span>
-            
+
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__compute__&#39;</span><span class="p">]:</span>
             
             <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
