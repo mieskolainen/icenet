@@ -45,55 +45,60 @@ class LogitsWithTemperature(nn.Module):
             labels:  class label per event (torch.float32)
             weights: weights per event
         """
-
-        if weights is None:
-            weights = torch.ones_like(logits).to(self.device)
         
-        if   self.mode == 'softmax':
-            nll_criterion = nn.CrossEntropyLoss(reduction='none').to(self.device)
-        elif self.mode == 'binary':
-            nll_criterion = nn.BCEWithLogitsLoss(reduction='none').to(self.device)
-        else:
-            raise Exception(__name__ + f'.set_temperature: Unknown mode, should be "softmax" or "binary')
-        
-        weights = weights / torch.sum(weights.flatten())
-        
-        ece_criterion_before = _ECELoss(weights=weights, mode=self.mode).to(self.device)
-        
-        # Calculate NLL and ECE before temperature scaling
-        before_temperature_nll = torch.sum(weights * nll_criterion(logits, labels)).item()
-        before_temperature_ece = ece_criterion_before(logits, labels).item()
-        print(f'Before temperature scale: NLL: {before_temperature_nll:0.4f}, ECE: {ece_criterion_before.ECE.item():0.4f}, ECE2: {ece_criterion_before.ECE2.item():0.4f}')
-        ece_criterion_before.print()
-        
-        # Optimize the temperature parameter
-        optimizer = optim.LBFGS([self.temperature], lr = lr, max_iter = max_iter)
-
-        ece_criterion_after = _ECELoss(weights=weights, mode=self.mode).to(self.device)
-
-        def eval():
-            optimizer.zero_grad()
+        try:
             
-            #loss = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels))
-            loss = torch.sum(weights * ece_criterion_after(self.temperature_scale(logits), labels))
+            if weights is None:
+                weights = torch.ones_like(logits).to(self.device)
             
-            loss.backward()
-            return loss
-        
-        optimizer.step(eval)
+            if   self.mode == 'softmax':
+                nll_criterion = nn.CrossEntropyLoss(reduction='none').to(self.device)
+            elif self.mode == 'binary':
+                nll_criterion = nn.BCEWithLogitsLoss(reduction='none').to(self.device)
+            else:
+                raise Exception(__name__ + f'.set_temperature: Unknown mode, should be "softmax" or "binary')
+            
+            weights = weights / torch.sum(weights.flatten())
+            
+            ece_criterion_before = _ECELoss(weights=weights, mode=self.mode).to(self.device)
+            
+            # Calculate NLL and ECE before temperature scaling
+            before_temperature_nll = torch.sum(weights * nll_criterion(logits, labels)).item()
+            before_temperature_ece = ece_criterion_before(logits, labels).item()
+            print(f'Before temperature scale: NLL: {before_temperature_nll:0.4f}, ECE: {ece_criterion_before.ECE.item():0.4f}, ECE2: {ece_criterion_before.ECE2.item():0.4f}')
+            ece_criterion_before.print()
+            
+            # Optimize the temperature parameter
+            optimizer = optim.LBFGS([self.temperature], lr = lr, max_iter = max_iter)
 
-        # Calculate NLL and ECE after temperature scaling
-        after_temperature_nll = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels)).item()
-        after_temperature_ece = ece_criterion_after(self.temperature_scale(logits), labels).item()
-        
-        print('')
-        print(f'Optimal temperature: {self.temperature.item():0.4f}', 'green')
-        print(f'After temperature scale: NLL: {after_temperature_nll:0.4f}, ECE: {ece_criterion_after.ECE.item():0.4f}, ECE2: {ece_criterion_after.ECE2.item():0.4f}')
-        
-        ece_criterion_after.print()
-        
-        return ece_criterion_before, ece_criterion_after
+            ece_criterion_after = _ECELoss(weights=weights, mode=self.mode).to(self.device)
 
+            def eval():
+                optimizer.zero_grad()
+                
+                #loss = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels))
+                loss = torch.sum(weights * ece_criterion_after(self.temperature_scale(logits), labels))
+                
+                loss.backward()
+                return loss
+            
+            optimizer.step(eval)
+
+            # Calculate NLL and ECE after temperature scaling
+            after_temperature_nll = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels)).item()
+            after_temperature_ece = ece_criterion_after(self.temperature_scale(logits), labels).item()
+            
+            print('')
+            print(f'Optimal temperature: {self.temperature.item():0.4f}', 'green')
+            print(f'After temperature scale: NLL: {after_temperature_nll:0.4f}, ECE: {ece_criterion_after.ECE.item():0.4f}, ECE2: {ece_criterion_after.ECE2.item():0.4f}')
+            
+            ece_criterion_after.print()
+            
+            return ece_criterion_before, ece_criterion_after
+
+        except Exception as e:
+            print(e)
+            return -1, -1
 
 class ModelWithTemperature(nn.Module):
     """
@@ -131,97 +136,102 @@ class ModelWithTemperature(nn.Module):
             valid_loader: validation set loader (DataLoader)
         """
         
-        self.model.eval() #!
-        
-        # Collect all the logits, labels and weights for the validation set
-        logits_list  = []
-        labels_list  = []
-        weights_list = []
-
-        with torch.no_grad():
+        try:
             
-            for i, batch_ in enumerate(valid_loader):
-                
-                # -----------------------------------------
-                # Torch models
-                if type(batch_) is dict:
-                    x,y,w = batch_['x'], batch_['y'], batch_['w']
-
-                    if 'u' in batch_: # Dual models
-                        x = {'x': batch_['x'], 'u': batch_['u']}
-
-                # Torch-geometric
-                else:
-                    x,y,w = batch_, batch_.y, batch_.w
-                # -----------------------------------------
-                
-                # logits
-                logits = self.model(x.to(self.device))
-                logits_list.append(logits)
-                
-                # y
-                labels_list.append(y)
-
-                # w
-                weights_list.append(w)
-
-            logits  = torch.cat(logits_list).to(self.device)
-            labels  = torch.cat(labels_list).to(self.device)
-            weights = torch.cat(weights_list).to(self.device)
-
-        logits  = logits.squeeze()
-        labels  = labels.squeeze()
-        weights = weights.squeeze()
-        
-        if self.mode == 'binary':
-            labels = labels.float()
-        
-        weights = weights / torch.sum(weights.flatten())
-        
-        # Losses
-        if   self.mode == 'softmax':
-            nll_criterion = nn.CrossEntropyLoss(reduction='none').to(self.device)
-        elif self.mode == 'binary':
-            nll_criterion = nn.BCEWithLogitsLoss(reduction='none').to(self.device)
-        else:
-            raise Exception(__name__ + f'.set_temperature: Unknown mode, should be "softmax" or "binary')
-        
-        ece_criterion_before = _ECELoss(weights=weights, mode=self.mode).to(self.device)
-        
-        # Calculate NLL and ECE before temperature scaling
-        before_temperature_nll = torch.sum(weights * nll_criterion(logits, labels)).item()
-        before_temperature_ece = ece_criterion_before(logits, labels).item()
-        print(f'Before temperature scale: NLL: {before_temperature_nll:0.4f}, ECE: {ece_criterion_before.ECE.item():0.4f}, ECE2: {ece_criterion_before.ECE2.item():0.4f}')
-        ece_criterion_before.print()
-        
-        # Optimize the temperature parameter
-        optimizer = optim.LBFGS([self.temperature], lr = lr, max_iter = max_iter)
-
-        ece_criterion_after = _ECELoss(weights=weights, mode=self.mode).to(self.device)
-
-        def eval():
-            optimizer.zero_grad()
+            self.model.eval() #!
             
-            #loss = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels))
-            loss = torch.sum(weights * ece_criterion_after(self.temperature_scale(logits), labels))
+            # Collect all the logits, labels and weights for the validation set
+            logits_list  = []
+            labels_list  = []
+            weights_list = []
+
+            with torch.no_grad():
+                
+                for i, batch_ in enumerate(valid_loader):
+                    
+                    # -----------------------------------------
+                    # Torch models
+                    if type(batch_) is dict:
+                        x,y,w = batch_['x'], batch_['y'], batch_['w']
+
+                        if 'u' in batch_: # Dual models
+                            x = {'x': batch_['x'], 'u': batch_['u']}
+
+                    # Torch-geometric
+                    else:
+                        x,y,w = batch_, batch_.y, batch_.w
+                    # -----------------------------------------
+                    
+                    # logits
+                    logits = self.model(x.to(self.device))
+                    logits_list.append(logits)
+                    
+                    # y
+                    labels_list.append(y)
+
+                    # w
+                    weights_list.append(w)
+
+                logits  = torch.cat(logits_list).to(self.device)
+                labels  = torch.cat(labels_list).to(self.device)
+                weights = torch.cat(weights_list).to(self.device)
+
+            logits  = logits.squeeze()
+            labels  = labels.squeeze()
+            weights = weights.squeeze()
             
-            loss.backward()
-            return loss
-        
-        optimizer.step(eval)
+            if self.mode == 'binary':
+                labels = labels.float()
+            
+            weights = weights / torch.sum(weights.flatten())
+            
+            # Losses
+            if   self.mode == 'softmax':
+                nll_criterion = nn.CrossEntropyLoss(reduction='none').to(self.device)
+            elif self.mode == 'binary':
+                nll_criterion = nn.BCEWithLogitsLoss(reduction='none').to(self.device)
+            else:
+                raise Exception(__name__ + f'.set_temperature: Unknown mode, should be "softmax" or "binary')
+            
+            ece_criterion_before = _ECELoss(weights=weights, mode=self.mode).to(self.device)
+            
+            # Calculate NLL and ECE before temperature scaling
+            before_temperature_nll = torch.sum(weights * nll_criterion(logits, labels)).item()
+            before_temperature_ece = ece_criterion_before(logits, labels).item()
+            print(f'Before temperature scale: NLL: {before_temperature_nll:0.4f}, ECE: {ece_criterion_before.ECE.item():0.4f}, ECE2: {ece_criterion_before.ECE2.item():0.4f}')
+            ece_criterion_before.print()
+            
+            # Optimize the temperature parameter
+            optimizer = optim.LBFGS([self.temperature], lr = lr, max_iter = max_iter)
 
-        # Calculate NLL and ECE after temperature scaling
-        after_temperature_nll = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels)).item()
-        after_temperature_ece = ece_criterion_after(self.temperature_scale(logits), labels).item()
-        
-        print('')
-        print(f'Optimal temperature: {self.temperature.item():0.4f}', 'green')
-        print(f'After temperature scale: NLL: {after_temperature_nll:0.4f}, ECE: {ece_criterion_after.ECE.item():0.4f}, ECE2: {ece_criterion_after.ECE2.item():0.4f}')
-        
-        ece_criterion_after.print()
-        
-        return ece_criterion_before, ece_criterion_after
+            ece_criterion_after = _ECELoss(weights=weights, mode=self.mode).to(self.device)
 
+            def eval():
+                optimizer.zero_grad()
+                
+                #loss = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels))
+                loss = torch.sum(weights * ece_criterion_after(self.temperature_scale(logits), labels))
+                
+                loss.backward()
+                return loss
+            
+            optimizer.step(eval)
+
+            # Calculate NLL and ECE after temperature scaling
+            after_temperature_nll = torch.sum(weights * nll_criterion(self.temperature_scale(logits), labels)).item()
+            after_temperature_ece = ece_criterion_after(self.temperature_scale(logits), labels).item()
+            
+            print('')
+            print(f'Optimal temperature: {self.temperature.item():0.4f}', 'green')
+            print(f'After temperature scale: NLL: {after_temperature_nll:0.4f}, ECE: {ece_criterion_after.ECE.item():0.4f}, ECE2: {ece_criterion_after.ECE2.item():0.4f}')
+            
+            ece_criterion_after.print()
+            
+            return ece_criterion_before, ece_criterion_after
+
+        except Exception as e:
+            print(e)
+            return -1, -1
 
 class _ECELoss(nn.Module):
     """
