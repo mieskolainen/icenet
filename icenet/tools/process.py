@@ -420,20 +420,22 @@ def generic_flow(rootname, func_loader, func_factor):
     runmode       = cli_dict['runmode']
     
     args, cli     = read_config(config_path=f'configs/{rootname}', runmode=runmode)
-    
+
     try:
             
         if runmode == 'genesis':
             
             icelogger.set_global_log_file(f'{args["datadir"]}/genesis_{args["__hash_genesis__"]}.log')
+            print(cli) # for output log
             read_data(args=args, func_loader=func_loader, runmode=runmode) 
             
         if runmode == 'train' or runmode == 'eval':
-
+            
             icelogger.set_global_log_file(f'{args["plotdir"]}/{runmode}/execution.log')
+            print(cli) # for output log
             data = read_data_processed(args=args, func_loader=func_loader,
                     func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
-        
+            
         if args['__compute__']:
             
             if runmode == 'train':

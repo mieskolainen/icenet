@@ -18,6 +18,16 @@ from icenet import print
 #from configs.zee.cuts import *
 #from configs.zee.filter import *
 
+def truncate(X,Y,W,maxevents):
+
+    # Apply maxevents cutoff
+    maxevents = np.min([maxevents, len(X)])
+    if maxevents < len(X):
+        print(f'Applying maxevents cutoff {maxevents}')
+        X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
+    
+    return X,Y,W   
+
 def load_helper(mcfiles, datafiles, maxevents, args):
 
     print(__name__ + '.load_helper:')
@@ -54,6 +64,8 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     print(f'X_MC.shape = {X_MC.shape}')
     print(f'W_MC.shape = {W_MC.shape}')
     
+    # Apply maxevents cutoff
+    X_MC, Y_MC, W_MC = truncate(X=X_MC, Y=Y_MC, W=W_MC, maxevents=maxevents)
     
     # -------------------------------------------------------------------------
     # *** Data ***
@@ -89,6 +101,9 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     print(f'X_data.shape = {X_data.shape}')
     print(f'W_data.shape = {W_data.shape}')
     
+    # Apply maxevents cutoff
+    X_data, Y_data, W_data = truncate(X=X_data, Y=Y_data, W=W_data, maxevents=maxevents)
+    
     # -------------------------------------------------------------------------
     # Combine MC and Data samples
     
@@ -99,7 +114,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     ids = LOAD_VARS # We use these
     
     ## -------------------------------------------------
-    # ** Drop negative weight events **
+    # ** Drop negative weight (MC) events **
     if args['drop_negative']:
         ind = W < 0
         if np.sum(ind) > 0:
@@ -108,27 +123,23 @@ def load_helper(mcfiles, datafiles, maxevents, args):
             W = W[~ind] # Boolean NOT
             Y = Y[~ind]
     
-    # -------------------------------------------------------------------------
-    # ** Randomize MC vs Data order to avoid problems with other functions **
-    rand = np.random.permutation(len(X))
-    X    = X[rand].squeeze() # Squeeze removes additional [] dimension
-    Y    = Y[rand].squeeze()
-    W    = W[rand].squeeze()
-    # -------------------------------------------------------------------------
-    
-    # Apply maxevents cutoff
-    maxevents = np.min([maxevents, len(X)])
-    if maxevents < len(X):
-        print(f'Applying maxevents cutoff {maxevents}')
-        X, Y, W = X[0:maxevents], Y[0:maxevents], W[0:maxevents]
-    
     # Re-nenormalize MC to the event count
     ind    = (Y == 0)
     W[ind] = W[ind] / np.sum(W[ind]) * len(W[ind])
     ## -------------------------------------------------
-
+    
+    # -------------------------------------------------------------------------
+    # ** Randomize MC vs Data order to avoid problems with other functions **
+    # ** No need to randomize in this application. We have fixed (eval, validate, test) file structure **
+    
+    #rand = np.random.permutation(len(X))
+    #X    = X[rand].squeeze() # Squeeze removes additional [] dimension
+    #Y    = Y[rand].squeeze()
+    #W    = W[rand].squeeze()
+    # -------------------------------------------------------------------------
+    
     ## Print some diagnostics
-    print(f'Number of events: {len(X)}')
+    print(f'Total number of events: {len(X)}')
     
     for c in np.unique(Y):
         print(f'class[{c}] | N = {np.sum(Y == c)} | weight[mean,std,min,max] = {np.mean(W[Y==c]):0.3E}, {np.std(W[Y==c]):0.3E}, {np.min(W[Y==c]):0.3E}, {np.max(W[Y==c]):0.3E}')

@@ -47,7 +47,7 @@ genesis_runmode:
                'tst': ['Data_test_EB.parquet']}
   
   drop_negative: true                 # Drop negative weight (MC) events
-
+  
   tree_name:  null                    # 'ntuplizer/tree'
   targetfunc: null                    # Training target,    implemented under mctargets.py
   filterfunc: 'filter_nofilter'       # Training filtering, implemented under mcfilter.py
