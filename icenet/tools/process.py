@@ -435,25 +435,25 @@ def generic_flow(rootname, func_loader, func_factor):
             print(cli) # for output log
             data = read_data_processed(args=args, func_loader=func_loader,
                     func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
-
-        if args['__compute__']:
             
             if runmode == 'train':
-                
+
                 output_file = f'{args["plotdir"]}/train/stats_train.log'
                 prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
                 make_plots(data=data['trn'], args=args, runmode=runmode)
                 
-                train_models(data_trn=data['trn'], data_val=data['val'], args=args)
-            
+                if args['__compute__']:
+                    train_models(data_trn=data['trn'], data_val=data['val'], args=args)
+
             if runmode == 'eval':
                 
                 output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
                 prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)        
                 make_plots(data=data['tst'], args=args, runmode=runmode)
-                    
-                evaluate_models(data=data['tst'], info=data['info'], args=args)
-    
+                
+                if args['__compute__']:
+                    evaluate_models(data=data['tst'], info=data['info'], args=args)
+            
     except Exception as e:
         print(e)
         raise Exception(e)
