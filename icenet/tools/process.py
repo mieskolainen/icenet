@@ -367,6 +367,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # -------------------------------------------------------------------
     # Technical
     
+    args['__runmode__']         = bool(cli_dict['runmode'])
     args['__use_cache__']       = bool(cli_dict['use_cache'])
     args['__compute__']         = bool(cli_dict['compute'])
     args['__raytune_running__'] = False
@@ -419,40 +420,42 @@ def generic_flow(rootname, func_loader, func_factor):
     runmode       = cli_dict['runmode']
     
     args, cli     = read_config(config_path=f'configs/{rootname}', runmode=runmode)
-
-    if runmode == 'genesis':
-        
-        icelogger.set_global_log_file(f'{args["datadir"]}/genesis_{args["__hash_genesis__"]}.log')
-        
-        read_data(args=args, func_loader=func_loader, runmode=runmode) 
-        
-    if runmode == 'train' or runmode == 'eval':
-
-        icelogger.set_global_log_file(f'{args["plotdir"]}/{runmode}/execution.log')
-        
-        data = read_data_processed(args=args, func_loader=func_loader,
-                func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
     
-    if args['__compute__']:
-        
-        if runmode == 'train':
+    try:
             
-            output_file = f'{args["plotdir"]}/train/stats_train.log'
-            prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
+        if runmode == 'genesis':
             
-            make_plots(data=data['trn'], args=args, runmode=runmode)
+            icelogger.set_global_log_file(f'{args["datadir"]}/genesis_{args["__hash_genesis__"]}.log')
+            read_data(args=args, func_loader=func_loader, runmode=runmode) 
             
-            train_models(data_trn=data['trn'], data_val=data['val'], args=args)
+        if runmode == 'train' or runmode == 'eval':
 
-        if runmode == 'eval':
-            
-            output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
-            prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)
-            
-            make_plots(data=data['tst'], args=args, runmode=runmode)
-            
-            evaluate_models(data=data['tst'], info=data['info'], args=args)
+            icelogger.set_global_log_file(f'{args["plotdir"]}/{runmode}/execution.log')
+            data = read_data_processed(args=args, func_loader=func_loader,
+                    func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
         
+        if args['__compute__']:
+            
+            if runmode == 'train':
+                
+                output_file = f'{args["plotdir"]}/train/stats_train.log'
+                prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
+                make_plots(data=data['trn'], args=args, runmode=runmode)
+                
+                train_models(data_trn=data['trn'], data_val=data['val'], args=args)
+            
+            if runmode == 'eval':
+                
+                output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
+                prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)        
+                make_plots(data=data['tst'], args=args, runmode=runmode)
+                    
+                evaluate_models(data=data['tst'], info=data['info'], args=args)
+    
+    except Exception as e:
+        print(e)
+        raise Exception(e)
+    
     return args, runmode
 
 # -------------------------------------------------------------------
