@@ -829,8 +829,8 @@ def process_data(args, predata, func_factor, mvavars, runmode):
     
     # ----------------------------------------------------------
     # ** Re-permute train and validation events for safety **
-    trn = trn.permute(np.random.permutation(trn.x.shape[0]))
-    val = val.permute(np.random.permutation(val.x.shape[0]))
+    trn = trn.permute(np.random.permutation(len(trn.x)))
+    val = val.permute(np.random.permutation(len(val.x)))
     # ----------------------------------------------------------    
     
     # ----------------------------------------------------------
