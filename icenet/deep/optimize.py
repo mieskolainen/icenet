@@ -428,9 +428,9 @@ def model_to_cuda(model, device_type: str='auto'):
     print(f'Computing device <{device}> chosen')
     
     if GPU_chosen:
-        used  = io.get_gpu_memory_map()[0]
-        total = io.torch_cuda_total_memory(device)
-        print(f'device <{device}> VRAM in use: {used:0.2f} / {total:0.2f} GB', 'yellow')
-        print('')
-
+        io.showmem_cuda(device)
+    else:
+        io.showmem()
+    print('')
+    
     return model, device

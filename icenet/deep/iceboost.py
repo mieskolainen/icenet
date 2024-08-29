@@ -474,7 +474,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     
     loss_history_train = {}
     loss_history_eval  = {}
-
+    
+    # --------------------------------------------------------------
+    
     # TensorboardX
     if not args['__raytune_running__'] and param['tensorboard']:
         from tensorboardX import SummaryWriter
@@ -527,7 +529,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     # ---------------------------------------------------------
     # Choose weight mode
     if np.min(w_trn) < 0.0 or np.min(w_val) < 0.0:
-        print(f'Negative weights in the sample -- handled via custom loss')
+        print(f'Negative weights in the sample -- handled via custom loss', 'magenta')
         out_weights_on = True
         
         if not use_custom:

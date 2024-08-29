@@ -97,7 +97,7 @@ class LogitsWithTemperature(nn.Module):
             return ece_criterion_before, ece_criterion_after
 
         except Exception as e:
-            print(e)
+            print(f'Error: {e}')
             return -1, -1
 
 class ModelWithTemperature(nn.Module):
@@ -230,7 +230,7 @@ class ModelWithTemperature(nn.Module):
             return ece_criterion_before, ece_criterion_after
 
         except Exception as e:
-            print(e)
+            print(f'Error: {e}')
             return -1, -1
 
 class _ECELoss(nn.Module):

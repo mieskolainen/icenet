@@ -23,7 +23,7 @@ iceboost3D:
     
     learning_rate: 0.05
     gamma: 1.5
-    max_depth: 15
+    max_depth: 13
     min_child_weight: 1.0
     max_delta_step: 1.0
     subsample: 1
@@ -38,6 +38,10 @@ iceboost3D:
     # learning task parameters
     objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+
+  # Special optimization
+  opt_param:
+    noise_reg: 0.1                # Scheduled noise regularization
   
   # BCE loss domains
   BCE_param:
@@ -58,7 +62,7 @@ iceboost3D:
   
   tensorboard: true
   plot_trees: false
-
+  
   # Read/Write of epochs
   evalmode: 5             # Evaluation and saving of the model every n-th epoch (int) during training
   readmode: -1            # -1 takes the minimum loss model

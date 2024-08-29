@@ -351,7 +351,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         args['plotdir']  = aux.makedir(f"{args['plotdir']}/{run_id}")
         
         if runmode == 'eval' and cli_dict['evaltag'] is not None:
-            args['plotdir'] = aux.makedir(f"{args['plotdir']}/{run_id}/evaltag__{cli_dict['evaltag']}")
+            args['plotdir'] = aux.makedir(f"{args['plotdir']}/evaltag__{cli_dict['evaltag']}")
             print(f'Changing eval plotdir to: {args["plotdir"]}', 'red')
         
         # ----------------------------------------------------------------
@@ -826,7 +826,13 @@ def process_data(args, predata, func_factor, mvavars, runmode):
         
         permute = args['permute'] if 'permute' in args else True
         trn, val, tst = io.split_data(X=X, Y=Y, W=W, ids=ids, frac=args['frac'], permute=permute)
-       
+    
+    # ----------------------------------------------------------
+    # ** Re-permute train and validation events for safety **
+    trn = trn.permute(np.random.permutation(trn.x.shape[0]))
+    val = val.permute(np.random.permutation(val.x.shape[0]))
+    # ----------------------------------------------------------    
+    
     # ----------------------------------------------------------
     if args['imputation_param']['active']:
         module = import_module(mvavars, 'configs.subpkg')

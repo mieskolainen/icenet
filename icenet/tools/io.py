@@ -214,10 +214,10 @@ def get_gpu_memory_map():
         gpu_memory = [int(x)/1024.0 for x in result.strip().split('\n')]
         gpu_memory_map = dict(zip(range(len(gpu_memory)), gpu_memory))
         return gpu_memory_map
-
+    
     except Exception as e:
-        print(f'Could not run nvidia-smi: {e}')
-        return ["null"]
+        print(f'Error: Could not run nvidia-smi: {e}')
+        return None
 
 def torch_cuda_total_memory(device):
     """
