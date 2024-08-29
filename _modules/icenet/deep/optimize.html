@@ -32,7 +32,7 @@
             
           </a>
               <div class="version">
-                0.1.2.4
+                0.1.2.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -977,11 +977,11 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; chosen&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">GPU_chosen</span><span class="p">:</span>
-        <span class="n">used</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_gpu_memory_map</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">total</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">torch_cuda_total_memory</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;device &lt;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&gt; VRAM in use: </span><span class="si">{</span><span class="n">used</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> GB&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-
+        <span class="n">io</span><span class="o">.</span><span class="n">showmem_cuda</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">device</span></div>
 
 </pre></div>
