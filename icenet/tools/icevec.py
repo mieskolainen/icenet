@@ -68,8 +68,8 @@ class vec4:
 
     def scale(self, a):
         # Scale all components
-        self.x, self.y, self.z, self.t = a*self.x, a*self.y, a*self.y, a*self.t
-
+        self.x, self.y, self.z, self.t = a*self.x, a*self.y, a*self.z, a*self.t
+    
     def dot4(self, other):
         # 4-vector dot product
         return self.t*other.t - (self.x*other.x + self.y*other.y + self.z*other.z)
