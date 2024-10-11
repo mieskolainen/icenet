@@ -23,7 +23,7 @@ Then execute the installer with ``bash filename.sh`` and finally set ``.condarc`
       - defaults
 
 
-Pre-installed CUDA paths (EXPERIMENTAL)
+Pre-installed CUDA paths (OBSOLETE)
 ------------------------------------
 .. code-block:: none
 
