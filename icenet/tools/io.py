@@ -219,7 +219,7 @@ def get_gpu_memory_map():
         print(f'Error: Could not run nvidia-smi: {e}')
         return None
 
-def torch_cuda_total_memory(device):
+def torch_cuda_total_memory(device='cuda:0'):
     """
     Return CUDA device VRAM available in GB.
     """
