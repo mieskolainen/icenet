@@ -9,13 +9,13 @@ The framework installation goes as follows.
 
 Preliminaries: Conda installation
 ----------------------------------
-.. code-block:: none
+.. code-block::
 
 	wget https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Linux-x86_64.sh
 
 Then execute the installer with ``bash filename.sh`` and finally set ``.condarc`` as follows ``nano .condarc`` (home directory)
 
-.. code-block:: none
+.. code-block::
 
     channel_priority: strict
     channels:
@@ -25,7 +25,7 @@ Then execute the installer with ``bash filename.sh`` and finally set ``.condarc`
 
 Pre-installed CUDA paths (OBSOLETE)
 ------------------------------------
-.. code-block:: none
+.. code-block::
 
 	source /vols/software/cuda/setup.sh 11.8.0
 
@@ -37,7 +37,7 @@ Automated setup
 
 Remark: To avoid ``No space left on device`` problem with conda or pip, set the temporary path first
 
-.. code-block:: none
+.. code-block::
 	
 	mkdir <PATH_WITH_SPACE>/tmp
 	export TMPDIR=<PATH_WITH_SPACE>/tmp
@@ -46,7 +46,7 @@ Also after activating the icenet conda environment.
 
 Execute
 
-.. code-block:: none
+.. code-block::
 	
 	git clone git@github.com:mieskolainen/icenet.git && cd icenet
 	
@@ -67,7 +67,7 @@ Initialize the environment
 
 Always start with
 
-.. code-block:: none
+.. code-block::
 
 	conda activate icenet
 	source setenv.sh
@@ -78,19 +78,19 @@ Possible problems
 
 Note: One may need to steer where ``pip`` installs the packages, for example
 
-.. code-block:: none
+.. code-block::
 
 	python -m pip install --target $CONDA_PREFIX <package>
 
 Note: If you experience ``OSError: libcusparse.so.11`` (or similar) with torch-geometric, set the system path
 
-.. code-block:: none
+.. code-block::
 
 	export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 
 Note: If you experience ``Could not load dynamic library libcusolver.so.10`` with tensorflow, make a symbolic link
 
-.. code-block:: none
+.. code-block::
 
 	ln -s $CONDA_PREFIX/lib/libcusolver.so.11 $CONDA_PREFIX/lib/libcusolver.so.10
 
@@ -99,7 +99,7 @@ Note: ``$CONDA_PREFIX`` will be found after ``conda activate icenet``
 Note: If you experience "Requirement already satisfied" infinite loop with pip, try
 removing e.g. ``tensorflow`` from requirements.txt, and install it separately with
 
-.. code-block:: none
+.. code-block::
 	
 	pip install tensorflow
 
@@ -109,7 +109,7 @@ Then if something else fails, google with the error message.
 Show installation paths of binaries
 --------------------------------------
 
-.. code-block:: none
+.. code-block::
 	
 	which -a pip
 	which -a python
@@ -120,19 +120,19 @@ GPU-support commands
 
 Show the graphics card status
 
-.. code-block:: none
+.. code-block::
 	
 	nvidia-smi
 
 Show CUDA-compiler tools status
 
-.. code-block:: none
+.. code-block::
 	
 	nvcc --version
 
 Show Tensorflow and Pytorch GPU support in Python
 
-.. code-block:: none
+.. code-block::
 	
 	import tensorflow
 	from tensorflow.python.client import device_lib
@@ -148,7 +148,7 @@ HTCondor GPU job submission
 
 Use the following command with IC machines
 
-.. code-block:: none
+.. code-block::
 
 	condor_submit <job_description_file>
 	condor_rm <job_id>
@@ -156,10 +156,34 @@ Use the following command with IC machines
 	condor_q
 	condor_status --gpus
 
+With an example job description file as
+
+.. code-block::
+
+	executable     = gpu_task.sh
+	error          = gpu.$(CLUSTER).error
+	output         = gpu.$(CLUSTER).output
+	log            = gpu.$(CLUSTER).log
+	request_gpus   = 1
+	request_memory = 10G
+	+MaxRuntime    = 3600
+	queue
+
+Where ``gpu_task.sh`` is the actual steering shell script to be run
+
+.. code-block::
+
+	source setconda.sh
+	conda activate icenet
+	python icecool.py
+
+where ``source setconda.sh`` has the Conda (system specific) init commands.
+
 
 Conda virtual environment commands
 -----------------------------------
-.. code-block:: none
+
+.. code-block::
 
 	conda create -y --name icenet python==3.X.Y
 	conda activate icenet
@@ -178,6 +202,6 @@ Conda virtual environment commands
 C-library versions
 -----------------------------------
 
-.. code-block:: none
+.. code-block::
 
 	ldd --version
