@@ -2,7 +2,7 @@
 #
 # -------------------------------------------------------------------
 
-rootname: 'zee'
+rootname: 'zee_EEm'                   # KEEP it unique to avoid possible icecache problems
 rngseed: 123456                       # Fixed seed for training data mixing
 num_cpus: 0                           # 0 for automatic
 inputvars: 'mvavars'                  # Main file input description python file
