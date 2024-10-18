@@ -11,7 +11,7 @@ if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
 for CONFIG in "tune0_EEp.yml" # "tune0_EB.yml" "tune0_EEm.yml" 
 do
-  python analysis/zee.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH
-  python analysis/zee.py --runmode "train"   $MAX --config $CONFIG --datapath $DATAPATH
-  python analysis/zee.py --runmode "eval"    $MAX --config $CONFIG --datapath $DATAPATH --evaltag "mytest"
+  python analysis/zee.py --runmode "genesis" $MAX --config $CONFIG --datapath $DATAPATH --hash_genesis "minimal_${CONFIG}"
+  python analysis/zee.py --runmode "train"   $MAX --config $CONFIG --datapath $DATAPATH --hash_genesis "minimal_${CONFIG}" --hash_post_genesis "minimal_${CONFIG}__train"
+  python analysis/zee.py --runmode "eval"    $MAX --config $CONFIG --datapath $DATAPATH --hash_genesis "minimal_${CONFIG}" --hash_post_genesis "minimal_${CONFIG}__eval" --evaltag "mytest"
 done
