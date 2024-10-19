@@ -521,6 +521,7 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
@@ -549,10 +550,6 @@
 <div class="viewcode-block" id="load_helper">
 <a class="viewcode-back" href="../../modules/icezee.html#icezee.common.load_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">load_helper</span><span class="p">(</span><span class="n">mcfiles</span><span class="p">,</span> <span class="n">datafiles</span><span class="p">,</span> <span class="n">maxevents</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.load_helper:&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mcfiles</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">datafiles</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="n">inputvars</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;configs.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rootname&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inputvars&quot;</span><span class="p">])</span>
     <span class="n">LOAD_VARS</span> <span class="o">=</span> <span class="n">inputvars</span><span class="o">.</span><span class="n">LOAD_VARS</span>
@@ -718,8 +715,16 @@
     
     <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;trn&#39;</span><span class="p">,</span> <span class="s1">&#39;val&#39;</span><span class="p">,</span> <span class="s1">&#39;tst&#39;</span><span class="p">]:</span>
         
+        <span class="c1"># Glob expansion type (be careful not to have &quot;label noise&quot; under the folder or subfolders)</span>
         <span class="n">mc_files</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;mcfile&quot;</span><span class="p">][</span><span class="n">mode</span><span class="p">],</span>   <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
         <span class="n">da_files</span>  <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">glob_expand_files</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datafile&quot;</span><span class="p">][</span><span class="n">mode</span><span class="p">],</span> <span class="n">datapath</span><span class="o">=</span><span class="n">root_path</span><span class="p">)</span>
+        
+        <span class="c1"># Simple fixed one file</span>
+        <span class="c1">#mc_files = [os.path.join(root_path, args[&#39;mcfile&#39;][mode][0])]</span>
+        <span class="c1">#da_files = [os.path.join(root_path, args[&#39;mcfile&#39;][mode][0])]</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found mcfiles:   </span><span class="si">{</span><span class="n">mc_files</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found datafiles: </span><span class="si">{</span><span class="n">da_files</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
         <span class="n">X</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span><span class="n">Y</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span><span class="n">W</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span><span class="n">ids</span> <span class="o">=</span> <span class="n">load_helper</span><span class="p">(</span><span class="n">mcfiles</span><span class="o">=</span><span class="n">mc_files</span><span class="p">,</span> <span class="n">datafiles</span><span class="o">=</span><span class="n">da_files</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="n">maxevents</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
         <span class="n">running_split</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N_prev</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">mode</span><span class="p">])</span> <span class="o">+</span> <span class="n">N_prev</span><span class="p">)</span>
