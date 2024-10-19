@@ -524,7 +524,7 @@ def process_raw_data(args, func_loader):
         chunks = int(np.ceil(N / args['pickle_size']))
         return aux.split_start_end(range(N), chunks)
 
-    cache_directory = aux.makedir(f'{args["datadir"]}/data_{args["__hash_genesis__"]}')
+    cache_directory = aux.makedir(f'{args["datadir"]}/data__{args["__hash_genesis__"]}')
 
     # Check do we have already computed pickles ready
     if (os.path.exists(f'{cache_directory}/output_0.pkl') and args['__use_cache__']):
@@ -595,12 +595,12 @@ def combine_pickle_data(args):
     Load splitted pickle data and return full dataset arrays
     
     Args:
-        args:         main argument dictionary
+        args: main argument dictionary
     """
     
     num_cpus = args['num_cpus']
     
-    cache_directory = aux.makedir(f'{args["datadir"]}/data_{args["__hash_genesis__"]}')
+    cache_directory = aux.makedir(f'{args["datadir"]}/data__{args["__hash_genesis__"]}')
 
     if (not os.path.exists(f'{cache_directory}/output_0.pkl')):
         raise Exception(__name__ + f'.process_pickle_data: No genesis stage pickle data under "{cache_directory}" [execute --runmode genesis and set --maxevents N]')
@@ -688,7 +688,7 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
     # --------------------------------------------------------------------
     # 1. Pickle data combiner step
     
-    cache_filename = f'{args["datadir"]}/data_{args["__hash_genesis__"]}.pkl'
+    cache_filename = f'{args["datadir"]}/data__{args["__hash_genesis__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
@@ -729,7 +729,7 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
     # --------------------------------------------------------------------
     # 2. High level data step
     
-    cache_filename = f'{args["datadir"]}/processed_data_{runmode}_{args["__hash_genesis__"]}__{args["__hash_post_genesis__"]}.pkl'
+    cache_filename = f'{args["datadir"]}/processed_data__{runmode}__{args["__hash_post_genesis__"]}.pkl'
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
         
@@ -858,7 +858,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
         if args['reweight']:
             
             if args["reweight_file"] is None:
-                fmodel = f'{args["datadir"]}/reweighter_{args["__hash_genesis__"]}.pkl' 
+                fmodel = f'{args["datadir"]}/reweighter__{args["__hash_post_genesis__"]}.pkl' 
             else:
                 fmodel = f'{args["datadir"]}/{args["reweight_file"]}'
             
