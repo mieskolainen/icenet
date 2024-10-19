@@ -9,7 +9,7 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2023
 
-input_path:   './travis-stash/input/icefit/dqcd_2018_test/flat/muon/generalTracks/JPsi'
+input_path:   './actions-stash/input/icefit/dqcd_2018_test/flat/muon/generalTracks/JPsi'
 output_name:  'tune0'
 
 years:    [2018] #[2016, 2017, 2018]
