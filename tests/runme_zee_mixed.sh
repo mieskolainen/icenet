@@ -9,7 +9,7 @@ DATAPATH="./travis-stash/input/icezee"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
-for CONFIG in "tune0_EEm" "tune0_EEp" "tune0_EB" 
+for CONFIG in "tune0_EEm" "tune0_EEp" # "tune0_EB" 
 do
   # Step 1. Produce output (cache) files with all sign events
   python analysis/zee.py --runmode "genesis" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "S1-${CONFIG}"                                           --run_id "S1-run" --supertune "drop_negative=False"

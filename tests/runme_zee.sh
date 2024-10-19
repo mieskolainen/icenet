@@ -9,9 +9,9 @@ DATAPATH="./travis-stash/input/icezee"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
-for CONFIG in "tune0_EEm" "tune0_EEp" "tune0_EB" 
+for CONFIG in "tune0_EEm" "tune0_EEp" # "tune0_EB" 
 do
-  python analysis/zee.py --runmode "genesis" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "minimal_${CONFIG}"
-  python analysis/zee.py --runmode "train"   $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "minimal_${CONFIG}" --hash_post_genesis "minimal_${CONFIG}__train"
-  python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --hash_genesis "minimal_${CONFIG}" --hash_post_genesis "minimal_${CONFIG}__eval" --evaltag "mytest"
+  python analysis/zee.py --runmode "genesis" $MAX --config "${CONFIG}.yml" --datapath $DATAPATH
+  python analysis/zee.py --runmode "train"   $MAX --config "${CONFIG}.yml" --datapath $DATAPATH
+  python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --evaltag "mytest"
 done

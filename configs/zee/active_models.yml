@@ -1,6 +1,6 @@
-# Active ML models for 'EB', 'EEm', 'EEp'
-#
+# Active AI models for 'EB', 'EEm', 'EEp'
 
+## Test models
 #- dbnf0
 
 #- lzmlp0_nozero
@@ -13,12 +13,12 @@
 #- lzmlp3
 #- lzmlp4
 
-# BDT based
+## BDT based
 - iceboost_swd
-- iceboost0
-- xgb0
+#- iceboost0
+#- xgb0
 
-# Neural Nets
-- fastkan0
-- lzmlp0
-- dmlp0
+## Neural Nets
+#- fastkan0
+#- lzmlp0
+#- dmlp0
