@@ -4732,6 +4732,17 @@ ax:  figure axis</p>
 <section id="module-icenet.tools.process">
 <span id="icenet-tools-process"></span><h3>icenet.tools.process<a class="headerlink" href="#module-icenet.tools.process" title="Link to this heading">¶</a></h3>
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.combine_pickle_data">
+<span class="sig-name descname"><span class="pre">combine_pickle_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#combine_pickle_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.combine_pickle_data" title="Link to this definition">¶</a></dt>
+<dd><p>Load splitted pickle data and return full dataset arrays</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> – main argument dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.concatenate_data">
 <span class="sig-name descname"><span class="pre">concatenate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#concatenate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.concatenate_data" title="Link to this definition">¶</a></dt>
 <dd><p>Helper function to concatenate arrays with a specified maximum batch size</p>
@@ -4811,8 +4822,14 @@ Add new plot types here, steered from plots.yml</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.process.process_data">
-<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#process_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.process_data" title="Link to this definition">¶</a></dt>
-<dd><p>Process data further</p>
+<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#process_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.process_data" title="Link to this definition">¶</a></dt>
+<dd><p>Process data to high level representations and split to train/eval/test</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.process.process_raw_data">
+<span class="sig-name descname"><span class="pre">process_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#process_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.process_raw_data" title="Link to this definition">¶</a></dt>
+<dd><p>Load raw input from the disk – this is executed only by ‘genesis’</p>
 </dd></dl>
 
 <dl class="py function">
@@ -4827,22 +4844,8 @@ Add new plot types here, steered from plots.yml</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.process.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data" title="Link to this definition">¶</a></dt>
-<dd><p>Load input data and return full dataset arrays</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> – main argument dictionary</p></li>
-<li><p><strong>func_loader</strong> – application specific root file loader function</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="icenet.tools.process.read_data_processed">
-<span class="sig-name descname"><span class="pre">read_data_processed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#read_data_processed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.read_data_processed" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="icenet.tools.process.train_eval_data_processor">
+<span class="sig-name descname"><span class="pre">train_eval_data_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvavars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runmode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/process.html#train_eval_data_processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.process.train_eval_data_processor" title="Link to this definition">¶</a></dt>
 <dd><p>Read/write (MVA) data and return full processed dataset</p>
 </dd></dl>
 

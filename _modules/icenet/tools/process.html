@@ -761,7 +761,7 @@
     <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">]</span>
     <span class="n">hash_args</span><span class="p">[</span><span class="s1">&#39;inputvars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;inputvars&#39;</span><span class="p">]</span>
     <span class="n">hash_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inputmap</span><span class="p">)</span>
-
+    
     <span class="c1"># Finally create the hash</span>
     <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__hash_genesis__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">make_hash_sha256_object</span><span class="p">(</span><span class="n">hash_args</span><span class="p">)</span>
     
@@ -950,15 +950,15 @@
             
             <span class="n">icelogger</span><span class="o">.</span><span class="n">set_global_log_file</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/genesis_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.log&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">cli</span><span class="p">)</span> <span class="c1"># for output log</span>
-            <span class="n">read_data</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="o">=</span><span class="n">func_loader</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="n">runmode</span><span class="p">)</span> 
+            <span class="n">process_raw_data</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="o">=</span><span class="n">func_loader</span><span class="p">)</span> 
             
         <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span> <span class="ow">or</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
             
             <span class="n">icelogger</span><span class="o">.</span><span class="n">set_global_log_file</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">/execution.log&#39;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">cli</span><span class="p">)</span> <span class="c1"># for output log</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">read_data_processed</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="o">=</span><span class="n">func_loader</span><span class="p">,</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">train_eval_data_processor</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
                     <span class="n">func_factor</span><span class="o">=</span><span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;configs.</span><span class="si">{</span><span class="n">rootname</span><span class="si">}</span><span class="s1">.mvavars&#39;</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="n">runmode</span><span class="p">)</span>
-        
+            
         <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span><span class="p">:</span>
 
             <span class="n">output_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/train/stats_train.log&#39;</span>
@@ -1042,16 +1042,12 @@
 
 <span class="c1"># -------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="read_data">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_data">[docs]</a>
+<div class="viewcode-block" id="process_raw_data">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.process_raw_data">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">process_raw_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load input data and return full dataset arrays</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        args:         main argument dictionary</span>
-<span class="sd">        func_loader:  application specific root file loader function</span>
+<span class="sd">    Load raw input from the disk -- this is executed only by &#39;genesis&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">num_cpus</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">]</span>
@@ -1062,170 +1058,181 @@
 
     <span class="n">cache_directory</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">/output_0.pkl&#39;</span><span class="p">)):</span>
+    <span class="c1"># Check do we have already computed pickles ready</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">/output_0.pkl&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found existing pickle data under: </span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1"> and --use_cache 1. [done] &#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="c1"># func_loader does the multifile processing</span>
+    <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;entry_stop&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;maxevents&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">],</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
+    <span class="n">data</span>      <span class="o">=</span> <span class="n">func_loader</span><span class="p">(</span><span class="n">root_path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">load_args</span><span class="p">)</span>
+    
+    <span class="n">X</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span>
+    <span class="n">Y</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+    <span class="n">W</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">]</span>
+    <span class="n">ids</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">runmode</span> <span class="o">!=</span> <span class="s2">&quot;genesis&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data: [--use_cache 0] is to be used only with [--runmode genesis]&#39;</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">get_chunk_ind</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="si">}</span><span class="s1"> pickle files to path: &quot;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
 
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.read_data: Data &quot;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">&quot; not found [execute --runmode genesis and set --maxevents N]&#39;</span><span class="p">)</span>
-        
-        <span class="c1"># func_loader does the multifile processing</span>
-        <span class="n">load_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;entry_start&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;entry_stop&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;maxevents&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;maxevents&#39;</span><span class="p">],</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">args</span><span class="p">}</span>
-        <span class="n">data</span>   <span class="o">=</span> <span class="n">func_loader</span><span class="p">(</span><span class="n">root_path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;root_files&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">load_args</span><span class="p">)</span>
-        
-        <span class="n">X</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span>
-        <span class="n">Y</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
-        <span class="n">W</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">]</span>
-        <span class="n">ids</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">]</span>
+    <span class="c1">## New code</span>
+    
+    <span class="k">def</span> <span class="nf">save_pickle</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">/output_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">Y</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">W</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">ids</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">args</span><span class="p">],</span> 
+                        <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
 
-        <span class="n">C</span> <span class="o">=</span> <span class="n">get_chunk_ind</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="si">}</span><span class="s1"> pickle files to path: &quot;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="c1"># Create a thread pool</span>
+    <span class="n">max_workers</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">num_cpus</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">num_cpus</span>
+    <span class="n">max_workers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">),</span> <span class="n">max_workers</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="c1"># Map the save_pickle function to each index in the range</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">save_pickle</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">))),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)))</span>
 
-        <span class="c1">## New code</span>
-        
-        <span class="k">def</span> <span class="nf">save_pickle</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">/output_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">Y</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">W</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">ids</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">args</span><span class="p">],</span> 
-                            <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
-
-        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        
-        <span class="c1"># Create a thread pool</span>
-        <span class="n">max_workers</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">num_cpus</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">num_cpus</span>
-        <span class="n">max_workers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">),</span> <span class="n">max_workers</span><span class="p">)</span>
-        
-        <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
-            <span class="c1"># Map the save_pickle function to each index in the range</span>
-            <span class="nb">list</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">save_pickle</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">))),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)))</span>
-
-        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tic</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving took </span><span class="si">{</span><span class="n">toc</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
-        
-        <span class="c1"># Save args</span>
-        <span class="n">aux</span><span class="o">.</span><span class="n">yaml_dump</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.yml&#39;</span><span class="p">)</span>
-<span class="w">        </span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        # OLD code</span>
-<span class="sd">        </span>
-<span class="sd">        tic = time.time()</span>
-<span class="sd">        </span>
-<span class="sd">        for i in tqdm(range(len(C))):</span>
-<span class="sd">            with open(f&#39;{cache_directory}/output_{i}.pkl&#39;, &#39;wb&#39;) as handle:</span>
-<span class="sd">                pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \</span>
-<span class="sd">                    handle, protocol=pickle.HIGHEST_PROTOCOL)</span>
-<span class="sd">        </span>
-<span class="sd">        toc = time.time() - tic</span>
-<span class="sd">        print(f&#39;Saving took {toc:0.2f} sec&#39;)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-        <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[done]&#39;</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="n">data</span>
-        
-    <span class="k">else</span><span class="p">:</span>
-        
-        <span class="k">if</span> <span class="n">runmode</span> <span class="o">==</span> <span class="s2">&quot;genesis&quot;</span><span class="p">:</span> <span class="c1"># Genesis mode does not need this</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&quot;genesis&quot; already done and the cache files are ready.&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
-        
-        <span class="c1">## New version</span>
-<span class="w">        </span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;    </span>
-<span class="sd">        Using ThreadPool, not fully parallel because of GIL (Global Interpreter Lock), but</span>
-<span class="sd">        should keep memory in control (vs. ProcessPool uses processes, but memory can be a problem)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="n">files</span>        <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_directory</span><span class="p">)</span>
-        <span class="n">sorted_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
-        
-        <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">sorted_files</span><span class="p">]</span>
-        <span class="n">num_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading </span><span class="si">{</span><span class="n">num_files</span><span class="si">}</span><span class="s1"> pickle files from path: &quot;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">sorted_files</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span>
-        
-        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        
-        <span class="n">max_workers</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">num_cpus</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">num_cpus</span>
-        <span class="n">max_workers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">num_files</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">)</span>
-        
-        <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
-            <span class="n">future_to_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">load_file_wrapper</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)}</span>
-            <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">as_completed</span><span class="p">(</span><span class="n">future_to_index</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="n">num_files</span><span class="p">):</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">X_</span><span class="p">,</span> <span class="n">Y_</span><span class="p">,</span> <span class="n">W_</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">genesis_args</span><span class="p">)</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-                    <span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_</span><span class="p">,</span> <span class="n">Y_</span><span class="p">,</span> <span class="n">W_</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Error loading file: </span><span class="si">{</span><span class="n">filepaths</span><span class="p">[</span><span class="n">future_to_index</span><span class="p">[</span><span class="n">future</span><span class="p">]]</span><span class="si">}</span><span class="s1"> -- </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                
-                <span class="k">finally</span><span class="p">:</span>
-                    <span class="k">del</span> <span class="n">future</span>  <span class="c1"># Ensure the future is deleted to free memory</span>
-        
-        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tic</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading took </span><span class="si">{</span><span class="n">toc</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
-        
-        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">concatenate_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">max_batch_size</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;tech&#39;</span><span class="p">][</span><span class="s1">&#39;concat_max_pickle&#39;</span><span class="p">])</span>
-        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>  <span class="c1"># Call garbage collection once after the loop</span>
-<span class="w">        </span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        ## Old version</span>
-<span class="sd">        </span>
-<span class="sd">        num_files = io.count_files_in_dir(cache_directory)</span>
-<span class="sd">        print(f&#39;Loading from path: &quot;{cache_directory}&quot;&#39;, &#39;yellow&#39;)</span>
-<span class="sd">        </span>
-<span class="sd">        tic = time.time()</span>
-<span class="sd">        for i in tqdm(range(num_files)):</span>
-<span class="sd">            </span>
-<span class="sd">            with open(f&#39;{cache_directory}/output_{i}.pkl&#39;, &#39;rb&#39;) as handle:</span>
-<span class="sd">                X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)</span>
-
-<span class="sd">                if i &gt; 0:</span>
-<span class="sd">                    X = np.concatenate((X, X_), axis=0) # awkward will cast numpy automatically</span>
-<span class="sd">                    Y = np.concatenate((Y, Y_), axis=0)</span>
-<span class="sd">                    W = np.concatenate((W, W_), axis=0)</span>
-<span class="sd">                else:</span>
-<span class="sd">                    X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)</span>
-<span class="sd">                </span>
-<span class="sd">                gc.collect() # important!</span>
-<span class="sd">        toc = time.time() - tic</span>
-<span class="sd">        print(f&#39;Took {toc:0.2f} sec&#39;)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[done]&#39;</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span><span class="n">Y</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">:</span><span class="n">W</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">:</span><span class="n">info</span><span class="p">}</span></div>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tic</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving took </span><span class="si">{</span><span class="n">toc</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Save args</span>
+    <span class="n">aux</span><span class="o">.</span><span class="n">yaml_dump</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.yml&#39;</span><span class="p">)</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # OLD code</span>
+<span class="sd">    </span>
+<span class="sd">    tic = time.time()</span>
+<span class="sd">    </span>
+<span class="sd">    for i in tqdm(range(len(C))):</span>
+<span class="sd">        with open(f&#39;{cache_directory}/output_{i}.pkl&#39;, &#39;wb&#39;) as handle:</span>
+<span class="sd">            pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \</span>
+<span class="sd">                handle, protocol=pickle.HIGHEST_PROTOCOL)</span>
+<span class="sd">    </span>
+<span class="sd">    toc = time.time() - tic</span>
+<span class="sd">    print(f&#39;Saving took {toc:0.2f} sec&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[done]&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="read_data_processed">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_data_processed">[docs]</a>
+<div class="viewcode-block" id="combine_pickle_data">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.combine_pickle_data">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">read_data_processed</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">combine_pickle_data</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load splitted pickle data and return full dataset arrays</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        args:         main argument dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">num_cpus</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">]</span>
+    
+    <span class="n">cache_directory</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">/output_0.pkl&#39;</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process_pickle_data: No genesis stage pickle data under &quot;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">&quot; [execute --runmode genesis and set --maxevents N]&#39;</span><span class="p">)</span>
+    
+    <span class="c1">## New version</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;    </span>
+<span class="sd">    Using ThreadPool, not fully parallel because of GIL (Global Interpreter Lock), but</span>
+<span class="sd">    should keep memory in control (vs. ProcessPool uses processes, but memory can be a problem)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">files</span>        <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_directory</span><span class="p">)</span>
+    <span class="n">sorted_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+    
+    <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">sorted_files</span><span class="p">]</span>
+    <span class="n">num_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading </span><span class="si">{</span><span class="n">num_files</span><span class="si">}</span><span class="s1"> pickle files from path: &quot;</span><span class="si">{</span><span class="n">cache_directory</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sorted_files</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span>
+    
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="n">max_workers</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">num_cpus</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">num_cpus</span>
+    <span class="n">max_workers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">num_files</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="n">future_to_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">load_file_wrapper</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)}</span>
+        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">as_completed</span><span class="p">(</span><span class="n">future_to_index</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="n">num_files</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">X_</span><span class="p">,</span> <span class="n">Y_</span><span class="p">,</span> <span class="n">W_</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">genesis_args</span><span class="p">)</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_</span><span class="p">,</span> <span class="n">Y_</span><span class="p">,</span> <span class="n">W_</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Error loading file: </span><span class="si">{</span><span class="n">filepaths</span><span class="p">[</span><span class="n">future_to_index</span><span class="p">[</span><span class="n">future</span><span class="p">]]</span><span class="si">}</span><span class="s1"> -- </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">future</span>  <span class="c1"># Ensure the future is deleted to free memory</span>
+    
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tic</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading took </span><span class="si">{</span><span class="n">toc</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
+    
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">concatenate_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">max_batch_size</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;tech&#39;</span><span class="p">][</span><span class="s1">&#39;concat_max_pickle&#39;</span><span class="p">])</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>  <span class="c1"># Call garbage collection once after the loop</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ## Old version</span>
+<span class="sd">    </span>
+<span class="sd">    num_files = io.count_files_in_dir(cache_directory)</span>
+<span class="sd">    print(f&#39;Loading from path: &quot;{cache_directory}&quot;&#39;, &#39;yellow&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    tic = time.time()</span>
+<span class="sd">    for i in tqdm(range(num_files)):</span>
+<span class="sd">        </span>
+<span class="sd">        with open(f&#39;{cache_directory}/output_{i}.pkl&#39;, &#39;rb&#39;) as handle:</span>
+<span class="sd">            X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)</span>
+
+<span class="sd">            if i &gt; 0:</span>
+<span class="sd">                X = np.concatenate((X, X_), axis=0) # awkward will cast numpy automatically</span>
+<span class="sd">                Y = np.concatenate((Y, Y_), axis=0)</span>
+<span class="sd">                W = np.concatenate((W, W_), axis=0)</span>
+<span class="sd">            else:</span>
+<span class="sd">                X,Y,W = copy.deepcopy(X_), copy.deepcopy(Y_), copy.deepcopy(W_)</span>
+<span class="sd">            </span>
+<span class="sd">            gc.collect() # important!</span>
+<span class="sd">    toc = time.time() - tic</span>
+<span class="sd">    print(f&#39;Took {toc:0.2f} sec&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[done]&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span><span class="n">Y</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">:</span><span class="n">W</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">:</span><span class="n">info</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="train_eval_data_processor">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_eval_data_processor">[docs]</a>
+<span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">train_eval_data_processor</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read/write (MVA) data and return full processed dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># --------------------------------------------------------------------</span>
-    <span class="c1"># &#39;DATA&#39;: Raw input reading and processing</span>
+    <span class="c1"># 1. Pickle data combiner step</span>
     
-    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/data_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
     
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">)):</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;File &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot; for &lt;DATA&gt; does not exist, creating.&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         
-        <span class="n">data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="o">=</span><span class="n">func_loader</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="n">runmode</span><span class="p">)</span> 
+        <span class="n">data</span> <span class="o">=</span> <span class="n">combine_pickle_data</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span> 
         
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving &lt;DATA&gt; to a pickle file: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
@@ -1258,16 +1265,16 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[done]&#39;</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
-    <span class="c1"># &#39;PROCESSED DATA&#39;: Further processing step</span>
+    <span class="c1"># 2. High level data step</span>
     
-    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/processed_data_</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_post_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+    <span class="n">cache_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;datadir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/processed_data_</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;__hash_post_genesis__&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
     
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__use_cache__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">)):</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;File &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot; for &lt;PROCESSED DATA&gt; does not exist, creating.&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
         
         <span class="c1"># Process it</span>
-        <span class="n">processed_data</span> <span class="o">=</span> <span class="n">process_data</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">predata</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">func_factor</span><span class="o">=</span><span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="o">=</span><span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="n">runmode</span><span class="p">)</span>
+        <span class="n">processed_data</span> <span class="o">=</span> <span class="n">process_data</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">func_factor</span><span class="o">=</span><span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="o">=</span><span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="n">runmode</span><span class="p">)</span>
         
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving &lt;PROCESSED DATA&gt; to a pickle file: &quot;</span><span class="si">{</span><span class="n">cache_filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
@@ -1303,19 +1310,20 @@
     <span class="k">return</span> <span class="n">processed_data</span></div>
 
 
+
 <div class="viewcode-block" id="process_data">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.process_data">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">predata</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Process data further</span>
+<span class="sd">    Process data to high level representations and split to train/eval/test</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">X</span>    <span class="o">=</span> <span class="n">predata</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span>
-    <span class="n">Y</span>    <span class="o">=</span> <span class="n">predata</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
-    <span class="n">W</span>    <span class="o">=</span> <span class="n">predata</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">]</span>
-    <span class="n">ids</span>  <span class="o">=</span> <span class="n">predata</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span>
-    <span class="n">info</span> <span class="o">=</span> <span class="n">predata</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">]</span>
+    
+    <span class="n">X</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span>
+    <span class="n">Y</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+    <span class="n">W</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">]</span>
+    <span class="n">ids</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">]</span>
     
     <span class="c1"># ----------------------------------------------------------</span>
     <span class="c1"># Pop out conditional variables if they exist and no conditional training is used</span>
