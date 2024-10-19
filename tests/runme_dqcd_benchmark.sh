@@ -2,7 +2,7 @@
 #
 # Execute different training and evaluation runs for DQCD
 #
-# Run with: source runme.sh
+# Run with: source tests/runme.sh
 
 source $HOME/setconda.sh
 conda activate icenet

@@ -4,7 +4,7 @@
 #
 # Use * or other glob wildcards for filenames
 #
-# Run with: source runme.sh
+# Run with: source tests/runme.sh
 
 source $HOME/setconda.sh
 conda activate icenet

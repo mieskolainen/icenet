@@ -2,7 +2,7 @@
 # 
 # Execute training and evaluation for the electron ID
 # 
-# Run with: source runme.sh
+# Run with: maxevents=10000; source tests/runme.sh
 
 CONFIG="tune0.yml"
 

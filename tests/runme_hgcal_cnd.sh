@@ -2,7 +2,7 @@
 # 
 # Execute training and evaluation for HGCAL
 # 
-# Run with: source runme.sh
+# Run with: maxevents=10000; source tests/runme.sh
 
 CONFIG="tune0_cnd.yml"
 

@@ -82,6 +82,17 @@ jobs:
           git clone https://github.com/mieskolainen/travis-stash.git
       
       #
+      - name: Deep Learning system integration test (zee 1)
+        run: |
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh && echo "yes"
+      
+      #
+      - name: Deep Learning system integration test (zee 2)
+        run: |
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh && echo "yes"
+          source superclean.sh
+      
+      #
       - name: Peakfit (single)
         run: |
           source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --test_mode --fit_type single --output_name single
@@ -104,32 +115,26 @@ jobs:
       #
       - name: Deep Learning system integration test (brem 1)
         run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem.sh && echo "yes" | source superclean.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem.sh && echo "yes"
+          source superclean.sh
       
       #
       - name: Deep Learning system integration test (brem 2)
         run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem_reweight.sh && echo "yes" | source superclean.sh
-      
-      #
-      - name: Deep Learning system integration test (zee 1)
-        run: |
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh && echo "yes" | source superclean.sh
-      
-      #
-      - name: Deep Learning system integration test (zee 2)
-        run: |
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh && echo "yes" | source superclean.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem_reweight.sh && echo "yes"
+          source superclean.sh
       
       #
       - name: Deep Learning system integration test (hnl 1)
         run: |
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_hnl.sh && echo "yes" | source superclean.sh
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_hnl.sh && echo "yes"
+          source superclean.sh
       
       #
       - name: Deep Learning system integration test (trg 1)
         run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh && echo "yes" | source superclean.sh
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh && echo "yes"
+          source superclean.sh
 
       #
       - name: Deep Learning system integration test (eid 1)

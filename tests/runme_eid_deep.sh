@@ -2,7 +2,7 @@
 #
 # Execute "deep batched" training and evaluation for electron ID
 #
-# Run with: source runme.sh
+# Run with: maxevents=10000; source tests/runme.sh
 
 CONFIG="tune0.yml"
 DATAPATH="./travis-stash/input/iceid"

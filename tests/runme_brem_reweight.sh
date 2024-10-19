@@ -2,7 +2,7 @@
 # 
 # Execute training and evaluation for the electron ID
 # 
-# Run with: maxevents=10000; source runme.sh
+# Run with: maxevents=10000; source tests/runme.sh
 
 CONFIG="tune0_reweight.yml"
 #DATAPATH="/vols/cms/bainbrid/ntuples/icenet/"

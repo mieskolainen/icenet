@@ -1,7 +1,8 @@
 #!/bin/sh
 #
 # Execute distributed deployment for the DQCD analysis
-# Run with: source runme.sh
+#
+# Run with: source tests/runme.sh
 
 # Remember to execute first: runme_dqcd_newmodels_init_yaml.sh (only once, and just once)
 

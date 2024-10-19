@@ -2,6 +2,8 @@
 #
 # Execute training and evaluation for the DQCD analysis
 #
+# Run with: source tests/runme.sh
+
 # Remember to execute first: runme_dqcd_newmodels_init_yaml.sh (only once, and just once)
 
 source $HOME/setconda.sh
