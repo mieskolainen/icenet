@@ -39,29 +39,27 @@ from icenet.tools import plots
 from icenet.tools import process
 from icenet.algo import nmf
 
-import numba
 import numpy as np
 
 # iceid
-import iceid
 from iceid import common
 
 # Main function
 #
 def main() :
     
-    runmode        = 'genesis'
-    args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
-    process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
+    runmode     = 'genesis'
+    args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    process.process_raw_data(args=args, func_loader=common.load_root_file) 
     
-    runmode        = 'train'
-    args, cli      = process.read_config(config_path=f'configs/eid', runmode=runmode)
+    runmode     = 'train'
+    args, cli   = process.read_config(config_path=f'configs/eid', runmode=runmode)
     
     # Force tensor processing on
     args['inputvar_image'] = 'CMSSW_MVA_IMAGE_VARS'
     
-    predata        = process.read_data(args=args, func_loader=common.load_root_file, runmode=runmode) 
-    data           = process.process_data(args=args, predata=predata, func_factor=common.splitfactor, mvavars='configs.eid.mvavars', runmode='train')
+    rawdata     = process.combine_pickle_data(args=args) 
+    data        = process.process_data(args=args, data=rawdata, func_factor=common.splitfactor, mvavars='configs.eid.mvavars', runmode='train')
     
     # Pick them out
     data_tensor = data['trn']['data_tensor']
