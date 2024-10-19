@@ -1,6 +1,6 @@
 # [0]
 QCD: &QCD
-  path: 'travis-stash/input/icebrem'
+  path: 'actions-stash/input/icebrem'
   files: 'output_qcd_10k.root'
   xs: 1.
   model_param: null
