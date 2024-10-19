@@ -566,7 +566,7 @@ def process_raw_data(args, func_loader):
     print(f'Saving took {toc:0.2f} sec')
     
     # Save args
-    aux.yaml_dump(data=args, filename=f'{args["datadir"]}/data_{args["__hash_genesis__"]}.yml')
+    aux.yaml_dump(data=args, filename=f'{args["datadir"]}/data__{args["__hash_genesis__"]}.yml')
     
     """
     # OLD code
