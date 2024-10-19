@@ -105,7 +105,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
 
     args = {}
     config_yaml_file = cli.config
-    with open(f'{cwd}/{config_path}/{config_yaml_file}', 'r') as f:
+    with open(os.path.join(cwd, config_path, config_yaml_file), 'r') as f:
         try:
             args = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -130,7 +130,7 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         yaml = YAML()
         yaml.allow_duplicate_keys = True
 
-        with open(f'{cwd}/{config_path}/{file}', 'r') as f:
+        with open(os.path.join(cwd, config_path, file), 'r') as f:
             try:
                 inputmap = yaml.load(f)
 
@@ -223,9 +223,9 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     hash_args = {}
 
     # Critical Python files content
-    files = {'cuts':      f'{cwd}/{config_path}/cuts.py',
-             'filter':    f'{cwd}/{config_path}/filter.py',
-             'inputvars': f'{cwd}/{config_path}/{args["inputvars"]}.py'}
+    files = {'cuts':      os.path.join(cwd, config_path, 'cuts.py'),
+             'filter':    os.path.join(cwd, config_path, 'filter.py'),
+             'inputvars': os.path.join(cwd, config_path, f'{args["inputvars"]}.py')}
     
     for key in files.keys():
         if os.path.exists(files[key]):
@@ -524,10 +524,10 @@ def process_raw_data(args, func_loader):
         chunks = int(np.ceil(N / args['pickle_size']))
         return aux.split_start_end(range(N), chunks)
 
-    cache_directory = aux.makedir(f'{args["datadir"]}/data__{args["__hash_genesis__"]}')
+    cache_directory = aux.makedir(os.path.join(args["datadir"], f'data__{args["__hash_genesis__"]}'))
 
     # Check do we have already computed pickles ready
-    if (os.path.exists(f'{cache_directory}/output_0.pkl') and args['__use_cache__']):
+    if (os.path.exists(os.path.join(cache_directory, 'output_0.pkl')) and args['__use_cache__']):
         print(f'Found existing pickle data under: {cache_directory} and --use_cache 1. [done] ', 'green')
         return
     
@@ -548,7 +548,7 @@ def process_raw_data(args, func_loader):
     ## New code
     
     def save_pickle(i):
-        with open(f'{cache_directory}/output_{i}.pkl', 'wb') as handle:
+        with open(os.path.join(cache_directory, f'output_{i}.pkl'), 'wb') as handle:
             pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], 
                         handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -566,7 +566,7 @@ def process_raw_data(args, func_loader):
     print(f'Saving took {toc:0.2f} sec')
     
     # Save args
-    aux.yaml_dump(data=args, filename=f'{args["datadir"]}/data__{args["__hash_genesis__"]}.yml')
+    aux.yaml_dump(data=args, filename=os.path.join(args["datadir"], f'data__{args["__hash_genesis__"]}.yml'))
     
     """
     # OLD code
@@ -574,7 +574,7 @@ def process_raw_data(args, func_loader):
     tic = time.time()
     
     for i in tqdm(range(len(C))):
-        with open(f'{cache_directory}/output_{i}.pkl', 'wb') as handle:
+        with open(os.path.join(cache_directory, f'output_{i}.pkl'), 'wb') as handle:
             pickle.dump([X[C[i][0]:C[i][-1]], Y[C[i][0]:C[i][-1]], W[C[i][0]:C[i][-1]], ids, info, args], \
                 handle, protocol=pickle.HIGHEST_PROTOCOL)
     
@@ -600,9 +600,9 @@ def combine_pickle_data(args):
     
     num_cpus = args['num_cpus']
     
-    cache_directory = aux.makedir(f'{args["datadir"]}/data__{args["__hash_genesis__"]}')
-
-    if (not os.path.exists(f'{cache_directory}/output_0.pkl')):
+    cache_directory = aux.makedir(os.path.join(args["datadir"], f'data__{args["__hash_genesis__"]}'))
+    
+    if not os.path.exists(os.path.join(cache_directory, 'output_0.pkl')):
         raise Exception(__name__ + f'.process_pickle_data: No genesis stage pickle data under "{cache_directory}" [execute --runmode genesis and set --maxevents N]')
     
     ## New version
@@ -658,9 +658,9 @@ def combine_pickle_data(args):
     tic = time.time()
     for i in tqdm(range(num_files)):
         
-        with open(f'{cache_directory}/output_{i}.pkl', 'rb') as handle:
+        with open(os.path.join(cache_directory, f'output_{i}.pkl'), 'rb') as handle:
             X_, Y_, W_, ids, info, genesis_args = pickle.load(handle)
-
+            
             if i > 0:
                 X = np.concatenate((X, X_), axis=0) # awkward will cast numpy automatically
                 Y = np.concatenate((Y, Y_), axis=0)
@@ -688,7 +688,7 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
     # --------------------------------------------------------------------
     # 1. Pickle data combiner step
     
-    cache_filename = f'{args["datadir"]}/data__{args["__hash_genesis__"]}.pkl'
+    cache_filename = os.path.join(args["datadir"], f'data__{args["__hash_genesis__"]}.pkl')
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
@@ -729,7 +729,7 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
     # --------------------------------------------------------------------
     # 2. High level data step
     
-    cache_filename = f'{args["datadir"]}/processed_data__{runmode}__{args["__hash_post_genesis__"]}.pkl'
+    cache_filename = os.path.join(args["datadir"], f'processed_data__{runmode}__{args["__hash_post_genesis__"]}.pkl')
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
         
@@ -1020,20 +1020,19 @@ def train_models(data_trn, data_val, args=None):
     # -----------------------------
     # Prepare output folders
 
-    targetdir  = f'{args["plotdir"]}/train'
+    targetdir = os.path.join(f'{args["plotdir"]}', 'train')
 
     subdirs = ['']
     for sd in subdirs:
-        os.makedirs(targetdir + '/' + sd, exist_ok = True)
+        os.makedirs(os.path.join(targetdir, sd), exist_ok = True)
     # ----------------------------------
     
     # Print training stats
-    output_file = f'{args["plotdir"]}/train/stats_train_weights.log'
+    output_file = os.path.join(args["plotdir"], 'train', 'stats_train_weights.log')
     prints.print_weights(weights=data_trn['data'].w, y=data_trn['data'].y, output_file=output_file)
     
-    output_file = f'{args["plotdir"]}/train/stats_validate_weights.log'
+    output_file = os.path.join(args["plotdir"], 'train', 'stats_validate_weights.log')
     prints.print_weights(weights=data_val['data'].w, y=data_val['data'].y, output_file=output_file)
-    
     
     # @@ Tensor normalization @@
     if data_trn['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
@@ -1046,7 +1045,8 @@ def train_models(data_trn, data_val, args=None):
         data_val['data_tensor'] = io.apply_zscore_tensor(data_val['data_tensor'], X_mu_tensor, X_std_tensor)
         
         # Save it for the evaluation
-        pickle.dump({'X_mu_tensor': X_mu_tensor, 'X_std_tensor': X_std_tensor}, open(args["modeldir"] + '/zscore_tensor.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)    
+        pickle.dump({'X_mu_tensor': X_mu_tensor, 'X_std_tensor': X_std_tensor},
+                    open(os.path.join(args["modeldir"], 'zscore_tensor.pkl'), 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
     
     # --------------------------------------------------------------------
     
@@ -1128,10 +1128,11 @@ def train_models(data_trn, data_val, args=None):
         data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_mu, X_std)
 
         # Save it for the evaluation
-        pickle.dump({'X_mu': X_mu, 'X_std': X_std, 'ids': data_trn['data'].ids}, open(args['modeldir'] + '/zscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump({'X_mu': X_mu, 'X_std': X_std, 'ids': data_trn['data'].ids},
+                    open(os.path.join(args["modeldir"], 'zscore.pkl'), 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Print train
-        output_file = f'{args["plotdir"]}/train/stats_train_{args["varnorm"]}.log'
+        output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_{args["varnorm"]}.log')
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
 
     elif args['varnorm'] == 'madscore' :
@@ -1144,10 +1145,11 @@ def train_models(data_trn, data_val, args=None):
         data_val['data'].x = io.apply_zscore(data_val['data'].x, X_m, X_mad)
 
         # Save it for the evaluation
-        pickle.dump({'X_m': X_m, 'X_mad': X_mad, 'ids': data_trn['data'].ids}, open(args['modeldir'] + '/madscore.pkl', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump({'X_m': X_m, 'X_mad': X_mad, 'ids': data_trn['data'].ids},
+                    open(os.path.join(args["modeldir"], 'madscore.pkl'), 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Print train
-        output_file = f'{args["plotdir"]}/train/stats_train_{args["varnorm"]}.log'
+        output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_{args["varnorm"]}.log')
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
 
     # -------------------------------------------------------------
@@ -1314,7 +1316,7 @@ def train_models(data_trn, data_val, args=None):
                 else:
                     raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
             # --------------------------------------------------------
-
+        
         except KeyboardInterrupt:
             print(f'CTRL+C catched -- continue with the next model', 'red')
         
@@ -1373,16 +1375,16 @@ def evaluate_models(data=None, info=None, args=None):
     # -----------------------------
     # Prepare output folders
 
-    targetdir  = f'{args["plotdir"]}/eval'
+    targetdir = os.path.join(f'{args["plotdir"]}', 'eval')
 
     subdirs = ['', 'ROC', 'MVA', 'COR']
     for sd in subdirs:
-        os.makedirs(targetdir + '/' + sd, exist_ok = True)
+        os.makedirs(os.path.join(targetdir, sd), exist_ok = True)
 
     # --------------------------------------------------------------------
     
     # Print evaluation stats
-    output_file = f'{args["plotdir"]}/eval/stats_eval_weights.log'
+    output_file = os.path.join(args["plotdir"], 'eval', 'stats_eval_weights.log')
     prints.print_weights(weights=data['data'].w, y=data['data'].y, output_file=output_file)
     
     
@@ -1443,7 +1445,7 @@ def evaluate_models(data=None, info=None, args=None):
         if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
             
             print('\nZ-score normalizing tensor variables ...', 'magenta')
-            Z_data = pickle.load(open(args["modeldir"] + '/zscore_tensor.pkl', 'rb'))
+            Z_data = pickle.load(open(os.path.join(args["modeldir"], 'zscore_tensor.pkl'), 'rb'))
             X_mu_tensor  = Z_data['X_mu_tensor']
             X_std_tensor = Z_data['X_std_tensor']
             
@@ -1453,25 +1455,25 @@ def evaluate_models(data=None, info=None, args=None):
         if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
             
             print('\nZ-score normalizing variables ...', 'magenta')
-            Z_data = pickle.load(open(args["modeldir"] + '/zscore.pkl', 'rb'))
+            Z_data = pickle.load(open(os.path.join(args["modeldir"], 'zscore.pkl'), 'rb'))
             X_mu   = Z_data['X_mu']
             X_std  = Z_data['X_std']
             
             X = io.apply_zscore(X, X_mu, X_std)
             
-            output_file = f'{args["plotdir"]}/eval/stats_variables_{args["varnorm"]}.log'
+            output_file = os.path.join(args["plotdir"], 'eval', f'stats_variables_{args["varnorm"]}.log')
             prints.print_variables(X, ids, weights, output_file=output_file)
 
         elif args['varnorm'] == 'madscore':
             
             print('\nMAD-score normalizing variables ...', 'magenta')
-            Z_data = pickle.load(open(args["modeldir"] + '/madscore.pkl', 'rb'))
+            Z_data = pickle.load(open(os.path.join(args["modeldir"], 'madscore.pkl'), 'rb'))
             X_m    = Z_data['X_m']
             X_mad  = Z_data['X_mad']
             
             X = io.apply_madscore(X, X_m, X_mad)
             
-            output_file = f'{args["plotdir"]}/eval/stats_variables_{args["varnorm"]}.log'
+            output_file = os.path.join(args["plotdir"], 'eval', f'stats_variables_{args["varnorm"]}.log')
             prints.print_variables(X, ids, weights, output_file=output_file)
         
     except Exception as e:
@@ -1606,7 +1608,7 @@ def evaluate_models(data=None, info=None, args=None):
 
                 if args['plot_param']['contours']['active']:
                     plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
-                        targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
+                        targetdir=aux.makedir(os.path.join(f'{args["plotdir"]}', 'eval/2D-contours', f'{param["label"]}')))
             else:
                 raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
     
@@ -1632,7 +1634,7 @@ def evaluate_models(data=None, info=None, args=None):
                'ROC_binned_mlabel': ROC_binned_mlabel,
                'info':              info}
     
-    targetfile = targetdir + '/eval_results.pkl'
+    targetfile = os.path.join(targetdir, 'eval_results.pkl')
     print(f'Saving pickle output to:')
     print(f'{targetfile}')
     
