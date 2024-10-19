@@ -252,7 +252,7 @@ def process_data(args):
                     ## 1. Impute data
                     if args['imputation_param']['active']:
                         
-                        fmodel  = f'{args["modeldir"]}/imputer.pkl'
+                        fmodel  = os.path.join(args["modeldir"], 'imputer.pkl')
                         imputer = pickle.load(open(fmodel, 'rb'))
                         data['data'], _  = process.impute_datasets(data=data['data'], features=None, args=args['imputation_param'], imputer=imputer)
                     

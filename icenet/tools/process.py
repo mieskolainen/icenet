@@ -857,9 +857,9 @@ def process_data(args, data, func_factor, mvavars, runmode):
         if args['reweight']:
             
             if args["reweight_file"] is None:
-                fmodel = f'{args["datadir"]}/reweighter__{args["__hash_post_genesis__"]}.pkl' 
+                fmodel = os.path.join(args["datadir"], f'reweighter__{args["__hash_genesis__"]}.pkl') 
             else:
-                fmodel = f'{args["datadir"]}/{args["reweight_file"]}'
+                fmodel = os.path.join(args["datadir"], args["reweight_file"])
             
             if 'load' in args['reweight_mode']:
                 print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
@@ -898,7 +898,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
             output['trn']['data'], imputer = impute_datasets(data=output['trn']['data'], features=impute_vars, args=args['imputation_param'], imputer=None)
             output['val']['data'], imputer = impute_datasets(data=output['val']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
             
-            fmodel = os.path.join(args["modeldir"], f'imputer__{args["__hash_post_genesis__"]}.pkl')
+            fmodel = os.path.join(args["modeldir"], 'imputer.pkl')
             
             print(f'Saving imputer to: {fmodel}', 'green')
             pickle.dump(imputer, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
@@ -909,7 +909,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
         if args['reweight']:
             
             if args["reweight_file"] is None:
-                fmodel = os.path.join(args["datadir"], f'reweighter__{args["__hash_post_genesis__"]}.pkl') 
+                fmodel = os.path.join(args["datadir"], f'reweighter__{args["__hash_genesis__"]}.pkl') 
             else:    
                 fmodel = os.path.join(args["datadir"], args["reweight_file"]) 
             
@@ -941,7 +941,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
         ## Imputate
         if args['imputation_param']['active']:
             
-            fmodel = os.path.join(args["modeldir"], f'imputer__{args["__hash_post_genesis__"]}.pkl')
+            fmodel = os.path.join(args["modeldir"], f'imputer.pkl')
             
             print(f'Loading imputer from: {fmodel}', 'green')
             imputer = pickle.load(open(fmodel, 'rb'))
