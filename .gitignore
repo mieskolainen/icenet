@@ -19,6 +19,7 @@ core.*
 !docs/pdf/*.pdf
 
 travis-stash/
+actions-stash/
 dataset/
 tensorboard/
 data/

@@ -6,6 +6,7 @@ import numpy as np
 import copy
 from importlib import import_module
 import pandas as pd
+import os
 
 from icenet.tools import io
 from icenet.tools import aux
@@ -29,10 +30,6 @@ def truncate(X,Y,W,maxevents):
     return X,Y,W   
 
 def load_helper(mcfiles, datafiles, maxevents, args):
-
-    print(__name__ + '.load_helper:')
-    print(f'{mcfiles}')
-    print(f'{datafiles}')
     
     inputvars = import_module("configs." + args["rootname"] + "." + args["inputvars"])
     LOAD_VARS = inputvars.LOAD_VARS
@@ -195,8 +192,16 @@ def load_root_file(root_path, ids=None, entry_start=0, entry_stop=None, maxevent
     
     for mode in ['trn', 'val', 'tst']:
         
+        # Glob expansion type (be careful not to have "label noise" under the folder or subfolders)
         mc_files  = io.glob_expand_files(datasets=args["mcfile"][mode],   datapath=root_path)
         da_files  = io.glob_expand_files(datasets=args["datafile"][mode], datapath=root_path)
+        
+        # Simple fixed one file
+        #mc_files = [os.path.join(root_path, args['mcfile'][mode][0])]
+        #da_files = [os.path.join(root_path, args['mcfile'][mode][0])]
+        
+        print(f'Found mcfiles:   {mc_files}')
+        print(f'Found datafiles: {da_files}')
         
         X[mode],Y[mode],W[mode],ids = load_helper(mcfiles=mc_files, datafiles=da_files, maxevents=maxevents, args=args)
         running_split[mode] = np.arange(N_prev, len(X[mode]) + N_prev)
