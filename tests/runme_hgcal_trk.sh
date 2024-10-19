@@ -6,8 +6,8 @@
 
 CONFIG="tune0_trk.yml"
 
-#DATAPATH="./travis-stash/input/hgcal/close_by_double_pion"
-DATAPATH="/home/user/travis-stash/input/icehgcal/close_by_double_pion"
+#DATAPATH="./actions-stash/input/hgcal/close_by_double_pion"
+DATAPATH="/home/user/actions-stash/input/icehgcal/close_by_double_pion"
 TAG='close_by_double_pion'
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi

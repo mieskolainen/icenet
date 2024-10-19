@@ -5,7 +5,7 @@
 # Run with: maxevents=10000; source tests/runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="./travis-stash/input/icehnl"
+DATAPATH="./actions-stash/input/icehnl"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 

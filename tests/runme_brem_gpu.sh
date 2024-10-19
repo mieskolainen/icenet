@@ -14,7 +14,7 @@ source $ICEPATH/setenv.sh
 
 CONFIG="tune0.yml"
 DATAPATH="/vols/cms/bainbrid/ntuples/icenet/"
-#MCMAP="map_mc_test.yml" # uses travis-stash/input/icebrem
+#MCMAP="map_mc_test.yml" # uses actions-stash/input/icebrem
 #MCMAP="map_mc.yml" # local-stash
 MCMAP="map_mc_large.yml" # large-stash
 #DATASETS="output_*.root"

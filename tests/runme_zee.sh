@@ -5,7 +5,7 @@
 # Run with: maxevents=10000; source tests/runme.sh
 
 #DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
-DATAPATH="./travis-stash/input/icezee"
+DATAPATH="./actions-stash/input/icezee"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 

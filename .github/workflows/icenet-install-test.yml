@@ -79,8 +79,8 @@ jobs:
       ## Integration tests
       - name: Deep Learning system integration test (clone stash)
         run: |
-          git clone https://github.com/mieskolainen/travis-stash.git
-
+          git clone https://github.com/mieskolainen/actions-stash.git
+      
       #
       - name: Peakfit (single)
         run: |

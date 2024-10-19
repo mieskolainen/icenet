@@ -5,7 +5,7 @@
 # Run with: maxevents=10000; source tests/runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="./travis-stash/input/icetrg"
+DATAPATH="./actions-stash/input/icetrg"
 #DATAPATH="/vols/cms/mmieskol/HLT_electron_data/22112021"
 #DATAPATH="/home/user/HLT_electron_data/22112021"
 

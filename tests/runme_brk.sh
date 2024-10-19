@@ -5,7 +5,7 @@
 # Run with: maxevents=10000; source tests/runme.sh
 
 CONFIG="tune0.yml"
-DATAPATH="travis-stash/input/icebrk"
+DATAPATH="./actions-stash/input/icebrk"
 
 mkdir "figs/brk/config__$CONFIG" -p # for output ascii dump
 

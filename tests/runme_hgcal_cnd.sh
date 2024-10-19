@@ -6,8 +6,8 @@
 
 CONFIG="tune0_cnd.yml"
 
-#DATAPATH="./travis-stash/input/hgcal"
-DATAPATH="/home/user/travis-stash/input/icehgcal"
+#DATAPATH="./actions-stash/input/hgcal"
+DATAPATH="/home/user/actions-stash/input/icehgcal"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
 
