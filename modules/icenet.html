@@ -3070,8 +3070,11 @@ returns the loss. Optional for most optimizers.</p>
 <dt class="sig sig-object py" id="icenet.tools.aux.create_model_filename">
 <span class="sig-name descname"><span class="pre">create_model_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filetype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/aux.html#create_model_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.aux.create_model_filename" title="Link to this definition">¶</a></dt>
 <dd><p>Create model filename</p>
-<p>This function automatically takes the minimum validation loss epoch / iteration,
-if epoch == - 1, by first reading the last epoch / iteration file.</p>
+<p>This function automatically takes the minimum validation loss epoch / iteration</p>
+<dl class="simple">
+<dt>if epoch == - 1, we try to find the best loss model</dt><dd><p>epoch == - 2, we take the latest epoch</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
