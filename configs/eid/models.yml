@@ -1,3 +1,17 @@
+# ** Model save and load parameters **
+EVAL_PARAM: &EVAL_PARAM
+  
+  tensorboard: true
+
+  # Training and validation
+  savemode: 1                  # Save and validate every n-th epoch (integer)
+  eval_batch_size: 1024
+  
+  # Post-training evaluation
+  readmode: -1                 # -1 finds the best loss model, -2 takes the last epoch model
+  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ...
+  readmode_operator: 'argmin'  # 
+
 # - Keep the minibatch size small enough, otherwise weak convergence to optima with some models
 
 # Reference BDT (pre-computed in ROOT files)
@@ -73,14 +87,10 @@ gxgb0:
     
     device: 'auto'               # alternative 'cpu:0', 'cuda:0'
     num_workers: 4
-    tensorboard: true
     
-    # Read/Write of epochs
-    evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-    readmode: -1                 # -1 is the last saved epoch
-
-    eval_batch_size: 512
+    <<: *EVAL_PARAM
   
+
   # ** XGBOOST **
   xgb:
     train:   'xgb'
@@ -116,11 +126,8 @@ gxgb0:
       eval_metric: ['logloss']       # for evaluation, 'mlogloss'
 
     plot_trees: false
-    tensorboard: true
-
-    # Read/Write of epochs
-    evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-    readmode: -1                     # -1 is the last saved epoch
+    
+    <<: *EVAL_PARAM
 
 
 # Graph net
@@ -179,13 +186,8 @@ gnet0:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-  eval_batch_size: 512
+  
+  <<: *EVAL_PARAM
 
 
 # Graph net
@@ -244,13 +246,8 @@ gnet1:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-  eval_batch_size: 512
+  
+  <<: *EVAL_PARAM
 
 
 # Graph net
@@ -309,13 +306,8 @@ gnet2:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-  eval_batch_size: 512
+  
+  <<: *EVAL_PARAM
 
 
 # Graph net
@@ -374,13 +366,8 @@ gnet3:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-  eval_batch_size: 512
+  
+  <<: *EVAL_PARAM
 
 
 # Factorized Likelihood Ratio
@@ -431,11 +418,8 @@ xgb0:
     eval_metric: ['logloss']      # for evaluation, 'logloss', 'mlogloss'
 
   plot_trees: false
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
+  
+  <<: *EVAL_PARAM
 
 # -----------------------------------------------------------------------------
 # Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
@@ -479,13 +463,8 @@ dmlp:
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
-
-  eval_batch_size: 4096
+  
+  <<: *EVAL_PARAM
 
 
 # Logistic Regression (convex model = global optimum guarantee)
@@ -523,13 +502,8 @@ lgr0:
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
-
-  eval_batch_size: 4096
+  
+  <<: *EVAL_PARAM
 
 
 # Convolutional Neural Net + MAXOUT MLP
@@ -573,13 +547,8 @@ cnn0:
       
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
-
-  eval_batch_size: 4096
+  
+  <<: *EVAL_PARAM
 
 
 # Deep MAXOUT network
@@ -618,13 +587,8 @@ dmx0:
 
   device: 'auto'            # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
-
-  eval_batch_size: 4096
+  
+  <<: *EVAL_PARAM
 
 
 # Deep Normalizing Flow
@@ -666,10 +630,5 @@ dbnf0:
   
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
   
-  eval_batch_size: 4096
+  <<: *EVAL_PARAM

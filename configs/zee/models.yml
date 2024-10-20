@@ -1,3 +1,18 @@
+# ** Model save and load parameters **
+EVAL_PARAM: &EVAL_PARAM
+  
+  tensorboard: true
+
+  # Training and validation
+  savemode: 5                  # Save and validate every n-th epoch (integer)
+  eval_batch_size: 4096
+
+  # Post-training evaluation
+  readmode: -1                 # -1 finds the best loss model, -2 takes the last epoch model
+  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ...
+  readmode_operator: 'argmin'  # 
+
+
 ## MVA models
 
 # "Stage 1" model
@@ -60,13 +75,9 @@ iceboost3D:
   #  var: ['.*']           # Use all variables in SWD
   #  norm_weights: False   # Normalization enforced (if False, model should learn to keep the normalization)
   
-  tensorboard: true
   plot_trees: false
   
-  # Read/Write of epochs
-  evalmode: 5             # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1            # -1 takes the minimum loss model
-
+  <<: *EVAL_PARAM
 
 # ------------------------------------------------
 # "Stage 2" models
@@ -113,12 +124,9 @@ xgb0:
   opt_param:
     noise_reg: 0.1                # Scheduled noise regularization
   
-  tensorboard: true
   plot_trees: false
-
-  # Read/Write of epochs
-  evalmode: 5                     # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1                    # -1 takes the minimum loss model
+  
+  <<: *EVAL_PARAM
 
 
 # ICEBOOST with custom loss [BCE]
@@ -172,12 +180,9 @@ iceboost0: &ICEBOOST0
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
   #    label_eps: 0.05           # label smoothing epsilon (regularization)
   
-  tensorboard: true
   plot_trees: false
-
-  # Read/Write of epochs
-  evalmode: 5            # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1           # -1 takes the minimum loss model
+  
+  <<: *EVAL_PARAM
 
 
 # ICEBOOST with custom loss [BCE + Sliced Wasserstein]
@@ -280,13 +285,8 @@ lzmlp0: &LZMLP
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
   
-  # Read/Write of epochs
-  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1                 # -1 takes the minimum loss model
-  
-  eval_batch_size: 4096
+  <<: *EVAL_PARAM
 
 
 ## Lipschitz MLP
@@ -365,18 +365,13 @@ fastkan0: &FASTKAN
     #period: 30
     
     type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
-    step_size: 80             # Number of epochs for drop
+    step_size: 80              # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1                 # -1 takes the minimum loss model
-  
-  eval_batch_size: 4096
+      
+  <<: *EVAL_PARAM
 
   # Deploy (or test) mode device
   deploy_device: 'cpu'         # 'auto', 'cpu', 'cuda'
@@ -464,13 +459,8 @@ dmlp0: &DMLP
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-  
-  # Read/Write of epochs
-  evalmode: 5                  # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1                 # -1 takes the minimum loss model
-  
-  eval_batch_size: 4096
+    
+  <<: *EVAL_PARAM
 
 
 ## Deep MLP
@@ -526,11 +516,5 @@ dbnf0:
   
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
   
-  # Read/Write of epochs
-  evalmode: 1                 # Evaluation and saving of the model every n-th epoch (int) during training
-  readmode: -1                # -1 takes the minimum loss model
-
-  eval_batch_size: 4096
-
+  <<: *EVAL_PARAM

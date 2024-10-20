@@ -236,7 +236,7 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
     
     SWD_loss = torch.tensor(0.0).to(device)
     
-    if SWD_param is not None:
+    if (SWD_param is not None) and (abs(SWD_param["beta"]) > 1E-15):
         
         # Total maximum is limited, pick random subsample
         if SWD_param['max_N'] is not None and targets.shape[0] > SWD_param['max_N']:
@@ -574,7 +574,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     
     if 'opt_param' in param:
         
-        if 'noise_reg' in param['opt_param'] and param['opt_param']['noise_reg'] > 0.0:
+        if ('noise_reg' in param['opt_param']) and (abs(param['opt_param']['noise_reg']) > 1E-15):
             X_trn_orig = copy.deepcopy(X_trn)
             noise_reg  = param['opt_param']['noise_reg']
     # -------------------------------------------
@@ -594,7 +594,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         # ---------------------------------------
         
         ## What to evaluate
-        if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or ((epoch+1) % param['savemode']) == 0 or args['__raytune_running__']:
             evallist = [(dtrain, 'train'), (deval, 'eval')]
         else:
             evallist = [(dtrain, 'train')]
@@ -667,7 +667,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         # ==============================================
         ## Validate
-        if epoch == 0 or ((epoch+1) % param['evalmode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or ((epoch+1) % param['savemode']) == 0 or args['__raytune_running__']:
             
             # ------- AUC values ------
             if len(args['primary_classes']) >= 2:

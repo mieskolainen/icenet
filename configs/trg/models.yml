@@ -1,3 +1,18 @@
+# ** Model save and load parameters **
+EVAL_PARAM: &EVAL_PARAM
+  
+  tensorboard: true
+
+  # Training and validation
+  savemode: 1                  # Save and validate every n-th epoch (integer)
+  eval_batch_size: 1024
+  
+  # Post-training evaluation
+  readmode: -1                 # -1 finds the best loss model, -2 takes the last epoch model
+  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ...
+  readmode_operator: 'argmin'  # 
+
+
 ## MVA models
 
 cutset0:
@@ -152,11 +167,8 @@ xgb0:
     eval_metric: ['logloss']              # for evaluation, 'logloss', 'mlogloss'
   
   plot_trees: false
-  tensorboard: true
 
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
+  <<: *EVAL_PARAM
 
 
 # XGBoost
@@ -194,11 +206,8 @@ xgb1:
     eval_metric: ['logloss']     # for evaluation, 'mlogloss'
   
   plot_trees: true
-  tensorboard: true
 
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
+  <<: *EVAL_PARAM
 
 
 # Logistic Regression (convex model = global optimum guarantee)
@@ -235,13 +244,8 @@ lgr0:
   
   device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
 
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                  # -1 is the last saved epoch
-  
-  eval_batch_size: 4096
+  <<: *EVAL_PARAM
 
 # -----------------------------------------------------------------------------
 # Remember to use 'zscore-weighted' (or 'zscore') typically with Neural Networks,
@@ -285,10 +289,5 @@ dmlp0:
 
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-  
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                 # -1 is the last saved epoch
 
-  eval_batch_size: 4096
+  <<: *EVAL_PARAM

@@ -1,3 +1,18 @@
+# ** Model save and load parameters **
+EVAL_PARAM: &EVAL_PARAM
+  
+  tensorboard: true
+
+  # Training and validation
+  savemode: 1                  # Save and validate every n-th epoch (integer)
+  eval_batch_size: 1024
+
+  # Post-training evaluation
+  readmode: -1                 # -1 finds the best loss model, -2 takes the last epoch model
+  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ...
+  readmode_operator: 'argmin'  # 
+
+
 # Graph net
 gnet0:
   train:    'torch_graph'
@@ -56,13 +71,8 @@ gnet0:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
   
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-  eval_batch_size: 512
+  <<: *EVAL_PARAM
 
 
 # Graph net
@@ -123,13 +133,8 @@ gnet1:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-  eval_batch_size: 512
+ 
+  <<: *EVAL_PARAM
 
 
 # Graph net
@@ -190,10 +195,5 @@ gnet2:
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-  tensorboard: true
-
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
-
-  eval_batch_size: 512
+  
+  <<: *EVAL_PARAM

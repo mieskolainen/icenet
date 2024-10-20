@@ -1,3 +1,17 @@
+# ** Model save and load parameters **
+EVAL_PARAM: &EVAL_PARAM
+  
+  tensorboard: true
+
+  # Training and validation
+  savemode: 1                  # Save and validate every n-th epoch (integer)
+  eval_batch_size: 1024
+
+  # Post-training evaluation
+  readmode: -1                 # -1 finds the best loss model, -2 takes the last epoch model
+  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ...
+  readmode_operator: 'argmin'  # 
+
 
 # Graph net
 gnet0:
@@ -35,9 +49,9 @@ gnet0:
 
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
+    lossfunc: 'cross_entropy'   # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                    # focal_entropy exponent
+    temperature: 1              # logit norm temperature
 
     optimizer: 'AdamW'
     clip_norm: 1.0
@@ -49,16 +63,14 @@ gnet0:
 
   # Scheduler
   scheduler_param:
-    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
+    type: 'step'                # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+  <<: *EVAL_PARAM
 
 
 # Graph net
@@ -72,9 +84,9 @@ gnet1:
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    task: 'graph'               # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 64                 # Convolution output dimension
+    z_dim: 64                   # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -97,9 +109,9 @@ gnet1:
 
   # Optimization
   opt_param:  
-    lossfunc: 'cross_entropy' # cross_entropy, focal_entropy, logit_norm_cross_entropy
-    gamma: 2                  # focal_entropy exponent
-    temperature: 1            # logit norm temperature
+    lossfunc: 'cross_entropy'   # cross_entropy, focal_entropy, logit_norm_cross_entropy
+    gamma: 2                    # focal_entropy exponent
+    temperature: 1              # logit norm temperature
 
     optimizer: 'AdamW'
     clip_norm: 1.0
@@ -111,16 +123,14 @@ gnet1:
 
   # Scheduler
   scheduler_param:
-    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
+    type: 'step'                # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
-  device: 'auto'              # alternative 'cpu:0', 'cuda:0'
+  device: 'auto'                # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+  <<: *EVAL_PARAM
 
 
 # Graph net
@@ -130,13 +140,13 @@ gnet2:
   label:    'DynamicEdgeConv'
   raytune:  'gnn_setup'
 
-  conv_type: 'DynamicEdgeConv'       # See models under icenet/deep/graph.py
+  conv_type: 'DynamicEdgeConv'  # See models under icenet/deep/graph.py
   
   # Model
   model_param:
-    task: 'graph'             # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
+    task: 'graph'               # 'graph', 'node', 'edge_directed', 'edge_undirected' (level of inference)
     global_pool: 'mean'
-    z_dim: 64                # Convolution output dimension
+    z_dim: 64                   # Convolution output dimension
     
     # Message passing parameters
     conv_MLP_act: 'relu'
@@ -169,17 +179,16 @@ gnet2:
     epochs: 80
     batch_size: 64
     lr: 3.0e-4
-    weight_decay:  0.00005      # L2-regularization
+    weight_decay:  0.00005    # L2-regularization
 
   # Scheduler
   scheduler_param:
-    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
+    type: 'step'              # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
     step_size: 200
     gamma: 0.1
 
   device: 'auto'              # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
 
-  # Read/Write of epochs
-  evalmode: 1                  # Every n-th epoch (integer), evaluation done also for every n-th
-  readmode: -1                # 'name', epoch number, or -1 uses the last saved epoch
+  <<: *EVAL_PARAM
+
