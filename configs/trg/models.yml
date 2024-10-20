@@ -8,8 +8,8 @@ EVAL_PARAM: &EVAL_PARAM
   eval_batch_size: 1024
   
   # Post-training evaluation
-  readmode: -1                 # -1 finds the best loss model, -2 takes the last epoch model
-  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ...
+  readmode: -1                 # specific epoch (int), -1 finds the best loss model, -2 takes the last epoch model
+  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ... [currently only 'loss']
   readmode_operator: 'argmin'  # 
 
 
