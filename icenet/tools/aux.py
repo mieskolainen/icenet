@@ -1030,13 +1030,17 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
     """
     Create model filename
     
-    This function automatically takes the minimum validation loss epoch / iteration,
-    if epoch == - 1, by first reading the last epoch / iteration file.
+    This function automatically takes the minimum validation loss epoch / iteration
+    
+    if epoch == - 1, we try to find the best loss model
+       epoch == - 2, we take the latest epoch
+    
     """
     def createfilename(i):
         return f'{path}/{label}_{i}{filetype}'
     
-    if epoch is None or epoch == -1:
+    if epoch is None or epoch < 0:
+        
         print(f'Loading the latest model by timestamp', 'yellow')
 
         list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
@@ -1046,37 +1050,41 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
             txt += f" under path {path}"
             raise Exception(txt)
         
-        # Latest model
+        # The latest model
         filename = max(list_of_files, key=os.path.getctime)
         
         # ----------------------------------------------------
         # Try to find the best model
-        succeeded = False
-        try:
-            # Try with pickle load
-            with open(filename, 'rb') as file:
-                data  = pickle.load(file)
-            succeeded = True
-            
-        except:
-            # Try with torch load
-            try:
-                data = torch.load(filename, map_location = 'cpu')
-                succeeded = True
-            
-            except Exception as e:
-                print(e)
-                print(f'Problem in finding the model [{label}] with the minimum validation loss', 'red')
         
-        if succeeded:
-            # Take the minimum validation loss epoch index
-            losses = np.array(data['losses']['val_losses'])
-            idx    = np.argmin(losses)
+        if epoch == -1:
             
-            str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
-            print(f'{str}', 'magenta')
+            succeeded = False
+                
+            try:
+                # Try with pickle load
+                with open(filename, 'rb') as file:
+                    data  = pickle.load(file)
+                succeeded = True
+                
+            except:
+                # Try with torch load
+                try:
+                    data = torch.load(filename, map_location = 'cpu')
+                    succeeded = True
+                
+                except Exception as e:
+                    print(e)
+                    print(f'Problem in finding the model [{label}] with the minimum validation loss', 'red')
             
-            filename = createfilename(idx)
+            if succeeded:
+                # Take the minimum validation loss epoch index
+                losses = np.array(data['losses']['val_losses'])
+                idx    = np.argmin(losses)
+                
+                str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+                print(f'{str}', 'magenta')
+                
+                filename = createfilename(idx)
         # ----------------------------------------------------
         
     else:
