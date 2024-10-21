@@ -101,9 +101,10 @@ jobs:
         run: |
           source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --test_mode --fit_type dual-unitary-II --output_name dual-unitary-II
       
-      #
+      # (This is run twice to test cache files)
       - name: Deep Learning system integration test (brem 1)
         run: |
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem.sh
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem.sh
           echo "yes" | source superclean.sh
       
@@ -112,16 +113,23 @@ jobs:
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem_reweight.sh
           echo "yes" | source superclean.sh
-            
+      
       #
       - name: Deep Learning system integration test (zee 1)
         run: |
           source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
+          echo "yes" | source superclean.sh
       
       #
       - name: Deep Learning system integration test (zee 2)
         run: |
           source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
+          echo "yes" | source superclean.sh
+      
+      #
+      - name: Deep Learning system integration test (zee 3)
+        run: |
+          source setenv-github-actions.sh && maxevents=100; source tests/runme_zee_gridtune.sh
           echo "yes" | source superclean.sh
       
       #

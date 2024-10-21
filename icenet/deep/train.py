@@ -338,7 +338,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         # Train
         loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
         
-        if epoch == 0 or ((epoch+1) % param['savemode']) == 0 or args['__raytune_running__']:
+        if epoch == 0 or ((epoch+1) % param['savemode']) == 0 or epoch == opt_param['epochs']-1 or args['__raytune_running__']:
             _, train_acc, train_auc                   = optimize.test(model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
             validate_loss, validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
             
@@ -378,7 +378,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
         
-        if not args['__raytune_running__'] and (epoch == 0 or ((epoch+1) % param['savemode']) == 0):
+        if not args['__raytune_running__'] and (epoch == 0 or ((epoch+1) % param['savemode']) == 0 or epoch == opt_param['epochs']-1):
             
             ## Save the model
             filename = savedir + f'/{param["label"]}_{epoch}.pth'
