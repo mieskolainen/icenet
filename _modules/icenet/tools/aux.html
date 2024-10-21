@@ -1688,16 +1688,81 @@
 
 
 
-<div class="viewcode-block" id="create_model_filename">
-<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.create_model_filename">[docs]</a>
-<span class="k">def</span> <span class="nf">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.dat&#39;</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="create_model_filename_xgb">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.create_model_filename_xgb">[docs]</a>
+<span class="k">def</span> <span class="nf">create_model_filename_xgb</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.dat&#39;</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create model filename</span>
+<span class="sd">    Create model filename with xgboost where we have saved only the last epoch boost</span>
+<span class="sd">    which contains all the epochs.</span>
 <span class="sd">    </span>
 <span class="sd">    This function automatically takes the minimum validation loss epoch / iteration</span>
 <span class="sd">    </span>
-<span class="sd">    if epoch == - 1, we try to find the best loss model</span>
-<span class="sd">       epoch == - 2, we take the latest epoch</span>
+<span class="sd">    if  epoch == - 1, we try to find the best validation loss model</span>
+<span class="sd">        epoch == - 2, we take the latest epoch</span>
+<span class="sd">        epoch == N,   we take the specific epoch</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading the latest model by timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+
+    <span class="n">list_of_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">_*</span><span class="si">{</span><span class="n">filetype</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">txt</span>  <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Could not find any files for model &quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; under path </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+    
+    <span class="c1"># The latest model</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">list_of_files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">epoch</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        
+        <span class="c1">## Try to find the best model</span>
+
+        <span class="c1"># Try with pickle load</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            
+            <span class="c1"># Take the minimum validation loss epoch index</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;losses&#39;</span><span class="p">][</span><span class="s1">&#39;val_losses&#39;</span><span class="p">])</span>
+            <span class="n">idx</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+            
+            <span class="nb">str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Found the best model at boost epoch [</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s1">] with validation loss = </span><span class="si">{</span><span class="n">losses</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+            
+            <span class="n">N_trees</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1">#! indexing from 0</span>
+
+        <span class="k">elif</span> <span class="n">epoch</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+            
+            <span class="nb">str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Taking the model at the last boost epoch [</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+            
+            <span class="n">N_trees</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1">#! indexing from 0</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using the model with the provided boost epoch = </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">N_trees</span> <span class="o">=</span> <span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1">#! indexing from 0</span>
+    
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found a model file:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (modified </span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">filename</span><span class="p">,</span> <span class="n">N_trees</span></div>
+
+
+
+<div class="viewcode-block" id="create_model_filename">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux.create_model_filename">[docs]</a>
+<span class="k">def</span> <span class="nf">create_model_filename</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;.dat&#39;</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create model filename based on a set of epoch files in a path.</span>
+<span class="sd">    </span>
+<span class="sd">    This function automatically takes the minimum validation loss epoch / iteration</span>
+<span class="sd">    </span>
+<span class="sd">    if  epoch == - 1, we try to find the best validation loss model</span>
+<span class="sd">        epoch == - 2, we take the latest epoch</span>
+<span class="sd">        epoch == N,   we take the specific epoch</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">createfilename</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
@@ -1723,13 +1788,13 @@
         <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             
             <span class="n">succeeded</span> <span class="o">=</span> <span class="kc">False</span>
-                
+            
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Try with pickle load</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
                     <span class="n">data</span>  <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
                 <span class="n">succeeded</span> <span class="o">=</span> <span class="kc">True</span>
-                
+            
             <span class="k">except</span><span class="p">:</span>
                 <span class="c1"># Try with torch load</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -1756,7 +1821,8 @@
         <span class="n">filename</span> <span class="o">=</span> <span class="n">createfilename</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
     
     <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found a model file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (modified </span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found a model file:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1"> (modified </span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">filename</span></div>
 
