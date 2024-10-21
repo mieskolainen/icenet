@@ -22,6 +22,7 @@ from importlib import import_module
 import os
 import pickle
 import xgboost
+import pandas as pd
 
 from yamlinclude import YamlIncludeConstructor
 
@@ -1737,16 +1738,40 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         filename = dir + "/stats_chi2_summary.log"
         open(filename, 'w').close() # Clear content
         
+        df_per_tau = []
+        
         for tau in args['plot_param']['OBS_reweight']['tau_values']:
             
-            chi2_table = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
-                                         pick_ind=pick_ind, label=label, sublabel=sublabel,
-                                         param=args['plot_param']['OBS_reweight'], tau=tau,
-                                         targetdir=targetdir + '/OBS_reweight', num_cpus=args['num_cpus'])
+            chi2_table, df = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
+                                pick_ind=pick_ind, label=label, sublabel=sublabel,
+                                param=args['plot_param']['OBS_reweight'], tau=tau,
+                                targetdir=targetdir + '/OBS_reweight', num_cpus=args['num_cpus'])
             
+            df_per_tau.append(df)
             plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
 
             gc.collect() #!
+        
+        # Save to a parquet file
+        if args['plot_param']['OBS_reweight']['save_parquet']:
+            
+            # Create DataFrame
+            df_X         = pd.DataFrame(X_RAW,   columns=ids_RAW)
+            df_y         = pd.DataFrame(y,       columns=['y'])
+            df_y_pred    = pd.DataFrame(y_pred,  columns=['y_pred'])
+            df_w_post_S1 = pd.DataFrame(weights, columns=['w_post_S1'])     # Post stage 1
+            
+            df = pd.concat([df_X, df_y, df_y_pred, df_w_post_S1], axis=1)
+            
+            # Add all Stage 2 predictions with different tau
+            for i in range(len(df_per_tau)):
+                df = pd.concat([df, df_per_tau[i]], axis=1)
+            
+            parquet_file = f'{dir}/dataframe.parquet'
+            df.to_parquet(parquet_file, index=False, compression='gzip')
+            
+            print(f'Saved dataframe to a parquet file with gzip compression: {parquet_file}')
+        
         
         # ** Set filtered **
         if 'set_filter' in args['plot_param']['OBS_reweight']:

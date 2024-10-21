@@ -76,6 +76,7 @@ def pred_graph_xgb(args, param):
     
     device = param['deploy_device'] if 'deploy_device' in param else param['device']
     
+    # torch
     graph_model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['graph']['label']}", \
         label=param['graph']['label'], epoch=param['graph']['readmode'])
     
@@ -83,9 +84,11 @@ def pred_graph_xgb(args, param):
     
     graph_model.eval() # Turn on eval!
     
-    with open(aux.create_model_filename(path=f"{args['modeldir']}/{param['xgb']['label']}", label=param['xgb']['label'], \
-                epoch=param['xgb']['readmode'], filetype='.pkl'), 'rb') as file:
-        
+    # xgboost
+    filename, N_trees = aux.create_model_filename_xgb(path=f"{args['modeldir']}/{param['xgb']['label']}", label=param['xgb']['label'], \
+                            epoch=param['xgb']['readmode'], filetype='.pkl')
+    
+    with open(filename, 'rb') as file:
         xgb_model = pickle.load(file)['model']
     
     def func_predict(x):
@@ -110,7 +113,7 @@ def pred_graph_xgb(args, param):
             x_tot[i,0:dim1] = conv_x[i,:]  # Convoluted features
             x_tot[i,dim1:]  = x_in[i].u    # Global features
 
-        pred = xgb_model.predict(xgboost.DMatrix(data = x_tot))
+        pred = xgb_model.predict(xgboost.DMatrix(data = x_tot), iteration_range=(0,N_trees))
         if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
         return pred
     
@@ -121,7 +124,7 @@ def pred_torch_graph(args, param, batch_size=5000, return_model=False):
     print(f'Evaluate [{param["label"]}] model ...')
     
     model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
-                                            label=param['label'], epoch=param['readmode'])
+                label=param['label'], epoch=param['readmode'])
     
     device = param['deploy_device'] if 'deploy_device' in param else param['device']
     model, device = optimize.model_to_cuda(model, device_type=device)
@@ -161,7 +164,7 @@ def pred_torch_generic(args, param, return_model=False):
     print(f'Evaluate [{param["label"]}] model ...')
     
     model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
-                                            label=param['label'], epoch=param['readmode'])
+                label=param['label'], epoch=param['readmode'])
     
     device = param['deploy_device'] if 'deploy_device' in param else param['device']
     model, device = optimize.model_to_cuda(model, device_type=device)
@@ -193,7 +196,7 @@ def pred_torch_scalar(args, param, return_model=False):
     print(f'Evaluate [{param["label"]}] model ...')
     
     model = aux_torch.load_torch_checkpoint(path=f"{args['modeldir']}/{param['label']}",
-                                            label=param['label'], epoch=param['readmode'])
+                label=param['label'], epoch=param['readmode'])
     
     device = param['deploy_device'] if 'deploy_device' in param else param['device']
     model, device = optimize.model_to_cuda(model, device_type=device)
@@ -233,7 +236,7 @@ def pred_flow(args, param, n_dims, return_model=False):
     
     device = param['deploy_device'] if 'deploy_device' in param else param['device']
     models, device = dbnf.load_models(param=param, modelnames=modelnames,
-                                      modeldir=f"{args['modeldir']}/{param['label']}", device=device)
+                        modeldir=f"{args['modeldir']}/{param['label']}", device=device)
     
     # Turn on eval!
     for i in range(len(models)):
@@ -252,14 +255,16 @@ def pred_xgb(args, param, feature_names=None, return_model=False):
     
     print(f'Evaluate [{param["label"]}] model ...')
     
-    filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
-                                         label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    filename, N_trees = aux.create_model_filename_xgb(path=f"{args['modeldir']}/{param['label']}",
+                            label=param['label'], epoch=param['readmode'], filetype='.pkl')
     
     with open(filename, 'rb') as file:
         model = pickle.load(file)['model']
     
     def func_predict(x):
-        pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
+        pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1), 
+                             iteration_range=(0,N_trees))
+    
         if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
         return pred
 
@@ -273,14 +278,15 @@ def pred_xgb_scalar(args, param, feature_names=None, return_model=False):
     
     print(f'Evaluate [{param["label"]}] model ...')
     
-    filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
-                                         label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    filename, N_trees = aux.create_model_filename_xgb(path=f"{args['modeldir']}/{param['label']}",
+                            label=param['label'], epoch=param['readmode'], filetype='.pkl')
     
     with open(filename, 'rb') as file:
         model = pickle.load(file)['model']
     
     def func_predict(x):
-        pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))
+        pred = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1), 
+                             iteration_range=(0,N_trees))
         return pred
     
     if return_model == False:
@@ -296,13 +302,16 @@ def pred_xgb_logistic(args, param, feature_names=None, return_model=False):
     
     print(f'Evaluate [{param["label"]}] model ...')
     
-    filename = aux.create_model_filename(path=f"{args['modeldir']}/{param['label']}",
-                                         label=param['label'], epoch=param['readmode'], filetype='.pkl')
-    model    = pickle.load(open(filename, 'rb'))['model']
+    filename, N_trees = aux.create_model_filename_xgb(path=f"{args['modeldir']}/{param['label']}",
+                            label=param['label'], epoch=param['readmode'], filetype='.pkl')
+    
+    with open(filename, 'rb') as file:
+        model = pickle.load(file)['model']
     
     def func_predict(x):
         
-        logits = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1))   
+        logits = model.predict(xgboost.DMatrix(data = x, feature_names=feature_names, nthread=-1), 
+                             iteration_range=(0,N_trees))  
         return aux.sigmoid(logits)
     
     if return_model == False:

@@ -15,3 +15,6 @@ do
   python analysis/zee.py --runmode "train"   $MAX --config "${CONFIG}.yml" --datapath $DATAPATH
   python analysis/zee.py --runmode "eval"    $MAX --config "${CONFIG}.yml" --datapath $DATAPATH --evaltag "mytest"
 done
+
+#--supertune "models.iceboost_swd.model_param.objective='custom:binary_cross_entropy:hessian:squared_approx'"
+#--supertune "models.iceboost_swd.readmode=-2"

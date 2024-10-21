@@ -1026,14 +1026,76 @@ def getmtime(filename):
     return os.stat(filename).st_mtime
 
 
-def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None):
+def create_model_filename_xgb(path: str, label: str, filetype='.dat', epoch:int = -1):
     """
-    Create model filename
+    Create model filename with xgboost where we have saved only the last epoch boost
+    which contains all the epochs.
     
     This function automatically takes the minimum validation loss epoch / iteration
     
-    if epoch == - 1, we try to find the best loss model
-       epoch == - 2, we take the latest epoch
+    if  epoch == - 1, we try to find the best validation loss model
+        epoch == - 2, we take the latest epoch
+        epoch == N,   we take the specific epoch
+    
+    """
+    print(f'Loading the latest model by timestamp', 'yellow')
+
+    list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
+    
+    if len(list_of_files) == 0:
+        txt  = f'Could not find any files for model "{label}"'
+        txt += f" under path {path}"
+        raise Exception(txt)
+    
+    # The latest model
+    filename = max(list_of_files, key=os.path.getctime)
+
+    if epoch < 0:
+        
+        ## Try to find the best model
+
+        # Try with pickle load
+        with open(filename, 'rb') as file:
+            data = pickle.load(file)
+
+        if epoch == -1:
+            
+            # Take the minimum validation loss epoch index
+            losses = np.array(data['losses']['val_losses'])
+            idx    = np.argmin(losses)
+            
+            str = f'Found the best model at boost epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+            print(f'{str}', 'magenta')
+            
+            N_trees = idx + 1 #! indexing from 0
+
+        elif epoch == -2:
+            
+            str = f'Taking the model at the last boost epoch [{data["epoch"]}]'
+            print(f'{str}', 'magenta')
+            
+            N_trees = data['epoch'] + 1 #! indexing from 0
+        
+    else:
+        print(f'Using the model with the provided boost epoch = {epoch}', 'yellow')
+        N_trees = epoch + 1 #! indexing from 0
+    
+    dt = datetime.fromtimestamp(getmtime(filename))
+    print(f'Found a model file:')
+    print(f'{filename} (modified {dt})', 'green')
+    
+    return filename, N_trees
+
+
+def create_model_filename(path: str, label: str, filetype='.dat', epoch:int = -1):
+    """
+    Create model filename based on a set of epoch files in a path.
+    
+    This function automatically takes the minimum validation loss epoch / iteration
+    
+    if  epoch == - 1, we try to find the best validation loss model
+        epoch == - 2, we take the latest epoch
+        epoch == N,   we take the specific epoch
     
     """
     def createfilename(i):
@@ -1059,13 +1121,13 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
         if epoch == -1:
             
             succeeded = False
-                
+            
             try:
                 # Try with pickle load
                 with open(filename, 'rb') as file:
                     data  = pickle.load(file)
                 succeeded = True
-                
+            
             except:
                 # Try with torch load
                 try:
@@ -1092,7 +1154,8 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int=None
         filename = createfilename(epoch)
     
     dt = datetime.fromtimestamp(getmtime(filename))
-    print(f'Found a model file: {filename} (modified {dt})', 'green')
+    print(f'Found a model file:')
+    print(f'{filename} (modified {dt})', 'green')
     
     return filename
 

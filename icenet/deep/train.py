@@ -378,7 +378,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
         
-        if not args['__raytune_running__']:
+        if not args['__raytune_running__'] and (epoch == 0 or ((epoch+1) % param['savemode']) == 0):
             
             ## Save the model
             filename = savedir + f'/{param["label"]}_{epoch}.pth'
@@ -392,6 +392,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             
             checkpoint = {'model': model, 'state_dict': model.state_dict(),
                           'ids': ids, 'losses': losses, 'epoch': epoch, 'param': param}
+            
+            print(f'Saving model and statistics to file: {filename}')
             torch.save(checkpoint, filename)
             
         else:
@@ -831,14 +833,20 @@ def train_graph_xgb(config={'params': {}}, data_trn=None, data_val=None, trn_wei
         # Loss
         trn_losses.append(results['train'][model_param['eval_metric'][0]][0])
         val_losses.append(results['eval'][model_param['eval_metric'][0]][0])
-
-        ## Save
+        
+        print(f'Tree {epoch+1:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+    
+    # Save after last epoch
+    filename = os.path.join(savedir, f"{param['xgb']['label']}_{num_epochs-1}.pkl")
+    
+    with open(filename, 'wb') as file:
         losses = {'trn_losses': trn_losses, 'val_losses': val_losses, 'trn_aucs': trn_aucs, 'val_aucs': val_aucs}
         
-        with open(savedir + f"{param['xgb']['label']}_{epoch}.pkl", 'wb') as file:
-            pickle.dump({'model': model, 'ids': ids, 'losses': losses, 'param': param}, file, protocol=pickle.HIGHEST_PROTOCOL)
+        print(f'Saving model and statistics to file: {filename}')
         
-        print(f'Tree {epoch:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+        with open('filename.pkl', 'wb') as file:
+            pickle.dump({'model': model, 'ids': ids, 'losses': losses, 'epoch': num_epochs-1,
+                         'param': param}, file, protocol=pickle.HIGHEST_PROTOCOL)
     
     # -------------------------------------------
     # Plot evolution

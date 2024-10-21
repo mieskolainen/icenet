@@ -1471,27 +1471,13 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     # ===================================================
     # Save data to a parquet file
     
-    if param['save_parquet']:
-        
-        # Create DataFrame
-        df_X         = pd.DataFrame(X,         columns=ids)
-        df_y         = pd.DataFrame(y,         columns=['y'])
-        df_y_pred    = pd.DataFrame(y_pred,    columns=['y_pred'])
-        df_w_post_S1 = pd.DataFrame(weights,   columns=['w_post_S1'])
-        
-        w_post_S2    = copy.deepcopy(weights)
-        w_post_S2[y == C0] = AIw0 # only C0
-        
-        df_w_post_S2 = pd.DataFrame(w_post_S2, columns=['w_post_S2'])
-        
-        # Concatenate all into one DataFrame
-        df = pd.concat([df_X, df_y, df_y_pred, df_w_post_S1, df_w_post_S2], axis=1)
-        
-        # Save to a parquet file
-        parquet_file = f'{local_dir}/dataframe.parquet'
-        df.to_parquet(parquet_file, index=False, compression='gzip')
-        
-        print(f'Saved dataframe to a parquet file with gzip compression: {parquet_file}')
+    tau_str = str(np.round(tau, 3))
+    
+    # Create DataFrame
+    w_post_S2    = copy.deepcopy(weights)
+    w_post_S2[y == C0] = AIw0 # only C0
+    
+    df = pd.DataFrame(w_post_S2, columns=[f'w_post_S2__tau_{tau_str}'])
     
     
     # ===================================================
@@ -1565,7 +1551,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table, print_to_screen=True)
     # -----------------------------------------------
     
-    return chi2_table
+    return chi2_table, df
 
 
 def multiprocess_AIRW_wrapper(p):

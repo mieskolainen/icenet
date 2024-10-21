@@ -727,28 +727,28 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
         
         print(f'[{param["label"]}] Tree {epoch+1:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
+    
+    # Save the model after all the epochs (will contain all the trees)
+    if not args['__raytune_running__']:
         
-        if not args['__raytune_running__']:
-            
-            ## Save the model
-            savedir  = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
-            filename = f'{savedir}/{param["label"]}_{epoch}'
-            
-            model.save_model(filename + '.ubj')
-            model.save_model(filename + '.json')
-            model.dump_model(filename + '.text', dump_format='text')
-            
-            losses = {'trn_losses':         trn_losses,
-                      'val_losses':         val_losses,
-                      'trn_aucs':           trn_aucs,
-                      'val_aucs:':          val_aucs,
-                      'loss_history_train': loss_history_train,
-                      'loss_history_eval':  loss_history_eval}
-            
-            with open(filename + '.pkl', 'wb') as file:
-                data = {'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': epoch, 'param': param}
-                pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+        savedir  = aux.makedir(f'{args["modeldir"]}/{param["label"]}')
+        filename = f'{savedir}/{param["label"]}_{num_epochs-1}'
         
+        model.save_model(filename + '.ubj')
+        model.save_model(filename + '.json')
+        model.dump_model(filename + '.text', dump_format='text')
+        
+        losses = {'trn_losses':         trn_losses,
+                  'val_losses':         val_losses,
+                  'trn_aucs':           trn_aucs,
+                  'val_aucs:':          val_aucs,
+                  'loss_history_train': loss_history_train,
+                  'loss_history_eval':  loss_history_eval}
+        
+        with open(filename + '.pkl', 'wb') as file:
+            data = {'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': num_epochs-1, 'param': param}
+            print(f'Saving model and statistics to file: {filename}')
+            pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
         
         gc.collect() #!
     
