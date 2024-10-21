@@ -10,6 +10,10 @@ from tqdm import tqdm
 
 from typing import Callable, Sequence, List, Tuple
 
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
+
 class XgboostObjective():
     def __init__(self, loss_func: Callable[[Tensor, Tensor], Tensor], mode='train', loss_sign=1, 
                  flatten_grad=False, hessian_mode='constant', hessian_const=1.0, device='cpu'):
@@ -23,9 +27,9 @@ class XgboostObjective():
         self.flatten_grad  = flatten_grad
 
         if self.hessian_mode == 'constant':
-            print(__name__ + f': Using device: {self.device} | hessian_mode = {self.hessian_mode} | hessian_const = {self.hessian_const}')
+            print(f'Using device: {self.device} | hessian_mode = {self.hessian_mode} | hessian_const = {self.hessian_const}')
         else:
-            print(__name__ + f': Using device: {self.device} | hessian_mode = {self.hessian_mode}')
+            print(f'Using device: {self.device} | hessian_mode = {self.hessian_mode}')
         
     def __call__(self, preds: np.ndarray, targets: xgboost.DMatrix):
 
@@ -38,7 +42,7 @@ class XgboostObjective():
             loss = self.loss_sign * self.loss_func(preds=preds_, targets=targets_, weights=weights_)
             return 'custom', loss.detach().cpu().numpy()
         else:
-            raise Exception('XgboostObjective: Unknown mode (set either "train" or "eval")')
+            raise Exception('Unknown mode (set either "train" or "eval")')
 
     def torch_conversion(self, preds: np.ndarray, targets: xgboost.DMatrix):
         """ Conversion from xgboost.Dmatrix object
@@ -74,14 +78,14 @@ class XgboostObjective():
         # Exact autograd
         elif self.hessian_mode == 'exact':
             
-            print(__name__ + f'.derivatives: Computing Hessian diagonal with exact autograd ...')
+            print('Computing Hessian diagonal with exact autograd ...')
             
             for i in tqdm(range(len(preds))): # Can be very slow
                 grad2_i  = torch.autograd.grad(grad1[i], preds, retain_graph=True)[0]
                 grad2[i] = grad2_i[i]
         
         else:
-            raise Exception(__name__ + f'.derivatives: Unknown "hessian_mode" {self.hessian_mode}')
+            raise Exception('Unknown "hessian_mode" {self.hessian_mode}')
         
         grad1, grad2 = grad1.detach().cpu().numpy(), grad2.detach().cpu().numpy()
         

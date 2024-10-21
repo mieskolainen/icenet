@@ -72,7 +72,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     for f in datafiles:
         new_frame = copy.deepcopy(pd.read_parquet(f))
         frames.append(new_frame)
-        print(__name__ + f'.load_helper: {f} | N = {len(new_frame)}', 'yellow')
+        print(f'{f} | N = {len(new_frame)}', 'yellow')
         ids = list(new_frame.keys()); ids.sort()
         print(ids)
     
