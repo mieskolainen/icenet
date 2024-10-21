@@ -221,31 +221,35 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     hash_args = {}
 
-    # Critical Python files content
-    files = {'cuts':      os.path.join(cwd, config_path, 'cuts.py'),
-             'filter':    os.path.join(cwd, config_path, 'filter.py'),
-             'inputvars': os.path.join(cwd, config_path, f'{args["inputvars"]}.py')}
+    # Critical Python file content
+    files = {'inputvars': os.path.join(cwd, config_path,      f'{args["inputvars"]}.py'),
+             'cuts':      os.path.join(cwd, config_path,      f'cuts.py'),
+             'filter':    os.path.join(cwd, config_path,      f'filter.py'),
+             'common':    os.path.join(cwd, args['rootname'], f'common.py')}
     
     for key in files.keys():
         if os.path.exists(files[key]):
+            print(f"Cache introspection for the file: '{files[key]}'")
             hash_args[f'__hash__{key}'] = io.make_hash_sha256_file(files[key])
         else:
-            print(f"Did not find: {files[key]} [may cause crash]", 'red')
-    
+            print(f"Did not find: {files[key]} [may cause crash if your application depends on it]", 'red')
+
     # Genesis parameters as the first one
     hash_args.update(old_args['genesis_runmode'])
     
     # These are universal and need to be hashed
-    hash_args['rngseed']   = args['rngseed']
-    hash_args['maxevents'] = args['maxevents']
-    hash_args['inputvars'] = args['inputvars']
+    include_list = ['rngseed', 'maxevents', 'inputvars']
+    
+    for key in include_list:
+        hash_args[key] = args[key]
+    
     hash_args.update(inputmap)
     
     # Finally create the hash
     args['__hash_genesis__'] = io.make_hash_sha256_object(hash_args)
     
     print(f'Generated config hashes', 'magenta')
-    print(f'[__hash_genesis__]      : {args["__hash_genesis__"]}     ', 'magenta')
+    print(f'[__hash_genesis__]      : {args["__hash_genesis__"]}', 'magenta')
     
     # -------------------------------------------------------------------
     ## 2. Create the second level hash (depends on all previous) + other parameters
@@ -256,29 +260,21 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         hash_args.update(args)
         
         # Then exclude non-input dependent
-        hash_args.pop("plot_param")
-        hash_args.pop("modeltag")
-        hash_args.pop("models")
-        hash_args.pop("active_models")
+        exclude_list = ["plot_param", "modeltag", "models", "active_models"]
         
+        for key in exclude_list:
+            hash_args.pop(key)
+        
+        # Then exclude train specific blocks and non-input dependent
         if runmode == 'train':
-            try:
-                hash_args.pop("outlier_param")
-            except:
-                True
-            try:
-                hash_args.pop("raytune")
-            except:
-                True
-            try:
-                hash_args.pop("distillation")
-            except:
-                True
-            try:
-                hash_args.pop("batch_train_param")
-            except:
-                True
-
+            exclude_list = ["outlier_param", "raytune", "distillation", "batch_train_param"]
+            
+            for key in exclude_list:            
+                try:
+                    hash_args.pop(key)
+                except:
+                    continue
+        
         # Finally create hash
         args['__hash_post_genesis__'] = args['__hash_genesis__'] + '__' + io.make_hash_sha256_object(hash_args)
 
@@ -526,8 +522,10 @@ def process_raw_data(args, func_loader):
     cache_directory = aux.makedir(os.path.join(args["datadir"], f'data__{args["__hash_genesis__"]}'))
 
     # Check do we have already computed pickles ready
-    if (os.path.exists(os.path.join(cache_directory, 'output_0.pkl')) and args['__use_cache__']):
-        print(f'Found existing pickle data under: {cache_directory} and --use_cache 1. [done] ', 'green')
+    check_file = os.path.join(cache_directory, 'output_0.pkl')
+    
+    if (os.path.exists(check_file) and args['__use_cache__']):
+        print(f'Found existing pickle data under: {cache_directory} ({io.get_file_timestamp(check_file)}) and --use_cache 1. [done] ', 'green')
         return
     
     # func_loader does the multifile processing
@@ -601,8 +599,11 @@ def combine_pickle_data(args):
     
     cache_directory = aux.makedir(os.path.join(args["datadir"], f'data__{args["__hash_genesis__"]}'))
     
-    if not os.path.exists(os.path.join(cache_directory, 'output_0.pkl')):
+    check_file = os.path.join(cache_directory, 'output_0.pkl')
+    if not os.path.exists(check_file):
         raise Exception(__name__ + f'.process_pickle_data: No genesis stage pickle data under "{cache_directory}" [execute --runmode genesis and set --maxevents N]')
+    else:
+        print(f'Found genesis stage files ({io.get_file_timestamp(check_file)})')
     
     ## New version
     
@@ -691,12 +692,12 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
 
-        print(f'File "{cache_filename}" for <DATA> does not exist, creating.', 'yellow')
+        print(f'File "{cache_filename}" for <data> does not exist, creating.', 'yellow')
         
         data = combine_pickle_data(args=args) 
         
         with open(cache_filename, 'wb') as handle:
-            print(f'Saving <DATA> to a pickle file: "{cache_filename}"', 'yellow')
+            print(f'Saving <data> to a pickle file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -712,7 +713,7 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
         
     else:
         with open(cache_filename, 'rb') as handle:
-            print(f'Loading <DATA> from a pickle file: "{cache_filename}"', 'yellow')
+            print(f'Loading <data> from a pickle file: "{cache_filename}" ({io.get_file_timestamp(cache_filename)})', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -732,13 +733,13 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
     
     if args['__use_cache__'] == False or (not os.path.exists(cache_filename)):
         
-        print(f'File "{cache_filename}" for <PROCESSED DATA> does not exist, creating.', 'yellow')
+        print(f'File "{cache_filename}" for <processed_data> does not exist, creating.', 'yellow')
         
         # Process it
         processed_data = process_data(args=args, data=data, func_factor=func_factor, mvavars=mvavars, runmode=runmode)
         
         with open(cache_filename, 'wb') as handle:
-            print(f'Saving <PROCESSED DATA> to a pickle file: "{cache_filename}"', 'yellow')
+            print(f'Saving <processed_data> to a pickle file: "{cache_filename}"', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -754,7 +755,7 @@ def train_eval_data_processor(args, func_factor, mvavars, runmode):
         
     else:
         with open(cache_filename, 'rb') as handle:
-            print(f'Loading <PROCESSED DATA> from a pickle file: "{cache_filename}"', 'yellow')
+            print(f'Loading <processed_data> from a pickle file: "{cache_filename}" ({io.get_file_timestamp(cache_filename)})', 'yellow')
             
             # Disable garbage collector for speed
             gc.disable()
@@ -862,7 +863,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
                 fmodel = os.path.join(args["datadir"], args["reweight_file"])
             
             if 'load' in args['reweight_mode']:
-                print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
+                print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}] ({io.get_file_timestamp(fmodel)})', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
@@ -876,7 +877,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
             val.w, _   = reweight.compute_ND_reweights(pdf=pdf, x=val.x, y=val.y, w=val.w, ids=val.ids, args=args, skip_reweights=skip_reweights)
             
             if 'write' in args['reweight_mode']:
-                print(f'Saving reweighting model to: {fmodel} [runmode = {runmode}]', 'green')
+                print(f'Saving reweighting model info to: {fmodel} [runmode = {runmode}]', 'green')
                 pickle.dump(pdf, open(fmodel, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Compute different data representations
@@ -914,7 +915,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
                 fmodel = os.path.join(args["datadir"], args["reweight_file"]) 
             
             if 'load' in args['reweight_mode']:
-                print(f'Loading reweighting model from: {fmodel} [runmode = {runmode}]', 'green')
+                print(f'Loading reweighting model info from: {fmodel} [runmode = {runmode}] ({io.get_file_timestamp(fmodel)})', 'green')
                 pdf = pickle.load(open(fmodel, 'rb'))
             else:
                 pdf = None # Compute it now
@@ -943,7 +944,7 @@ def process_data(args, data, func_factor, mvavars, runmode):
             
             fmodel = os.path.join(args["modeldir"], f'imputer.pkl')
             
-            print(f'Loading imputer from: {fmodel}', 'green')
+            print(f'Loading imputer from: {fmodel} ({io.get_file_timestamp(fmodel)})', 'green')
             imputer = pickle.load(open(fmodel, 'rb'))
             output['tst']['data'], _  = impute_datasets(data=output['tst']['data'], features=impute_vars, args=args['imputation_param'], imputer=imputer)
         
@@ -1043,9 +1044,10 @@ def train_models(data_trn, data_val, args=None):
         data_trn['data_tensor'] = io.apply_zscore_tensor(data_trn['data_tensor'], X_mu_tensor, X_std_tensor)
         data_val['data_tensor'] = io.apply_zscore_tensor(data_val['data_tensor'], X_mu_tensor, X_std_tensor)
         
-        # Save it for the evaluation
-        pickle.dump({'X_mu_tensor': X_mu_tensor, 'X_std_tensor': X_std_tensor},
-                    open(os.path.join(args["modeldir"], 'zscore_tensor.pkl'), 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
+        zscore_tensor_file = os.path.join(args["modeldir"], 'zscore_tensor.pkl')
+        with open(zscore_tensor_file, 'wb') as f:
+            pickle.dump({'X_mu_tensor': X_mu_tensor, 'X_std_tensor': X_std_tensor}, f,
+                        protocol=pickle.HIGHEST_PROTOCOL)
     
     # --------------------------------------------------------------------
     
@@ -1126,10 +1128,11 @@ def train_models(data_trn, data_val, args=None):
         data_trn['data'].x  = io.apply_zscore(data_trn['data'].x, X_mu, X_std)
         data_val['data'].x  = io.apply_zscore(data_val['data'].x, X_mu, X_std)
 
-        # Save it for the evaluation
-        pickle.dump({'X_mu': X_mu, 'X_std': X_std, 'ids': data_trn['data'].ids},
-                    open(os.path.join(args["modeldir"], 'zscore.pkl'), 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
-        
+        zscore_file = os.path.join(args["modeldir"], 'zscore.pkl')
+        with open(zscore_file, 'wb') as f:
+            pickle.dump({'X_mu': X_mu, 'X_std': X_std, 'ids': data_trn['data'].ids}, f,
+                        protocol=pickle.HIGHEST_PROTOCOL)
+
         # Print train
         output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_{args["varnorm"]}.log')
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
@@ -1143,10 +1146,11 @@ def train_models(data_trn, data_val, args=None):
         data_trn['data'].x = io.apply_zscore(data_trn['data'].x, X_m, X_mad)
         data_val['data'].x = io.apply_zscore(data_val['data'].x, X_m, X_mad)
 
-        # Save it for the evaluation
-        pickle.dump({'X_m': X_m, 'X_mad': X_mad, 'ids': data_trn['data'].ids},
-                    open(os.path.join(args["modeldir"], 'madscore.pkl'), 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
-        
+        madscore_file = os.path.join(args["modeldir"], 'madscore.pkl')
+        with open(madscore_file, 'wb') as f:
+            pickle.dump({'X_m': X_m, 'X_mad': X_mad, 'ids': data_trn['data'].ids}, f,
+                        protocol=pickle.HIGHEST_PROTOCOL)
+
         # Print train
         output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_{args["varnorm"]}.log')
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
@@ -1443,18 +1447,26 @@ def evaluate_models(data=None, info=None, args=None):
         ### Tensor variable normalization
         if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
             
-            print('\nZ-score normalizing tensor variables ...', 'magenta')
-            Z_data = pickle.load(open(os.path.join(args["modeldir"], 'zscore_tensor.pkl'), 'rb'))
+            pickle_file = os.path.join(args["modeldir"], 'zscore_tensor.pkl')
+            print(f'Z-score normalizing tensor variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+            
+            with open(pickle_file, 'rb') as f:
+                Z_data = pickle.load(f)
+            
             X_mu_tensor  = Z_data['X_mu_tensor']
             X_std_tensor = Z_data['X_std_tensor']
             
             X_2D = io.apply_zscore_tensor(X_2D, X_mu_tensor, X_std_tensor)
 
-        ### Variable normalization
+        ### Z-score normalization
         if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
             
-            print('\nZ-score normalizing variables ...', 'magenta')
-            Z_data = pickle.load(open(os.path.join(args["modeldir"], 'zscore.pkl'), 'rb'))
+            pickle_file = os.path.join(args["modeldir"], 'zscore.pkl')
+            print(f'Z-score normalizing variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+            
+            with open(pickle_file, 'rb') as f:
+                Z_data = pickle.load(f)
+            
             X_mu   = Z_data['X_mu']
             X_std  = Z_data['X_std']
             
@@ -1465,8 +1477,12 @@ def evaluate_models(data=None, info=None, args=None):
 
         elif args['varnorm'] == 'madscore':
             
-            print('\nMAD-score normalizing variables ...', 'magenta')
-            Z_data = pickle.load(open(os.path.join(args["modeldir"], 'madscore.pkl'), 'rb'))
+            pickle_file = os.path.join(args["modeldir"], 'madscore.pkl')
+            print(f'MAD-score normalizing variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+            
+            with open(pickle_file, 'rb') as f:
+                Z_data = pickle.load(f)
+            
             X_m    = Z_data['X_m']
             X_mad  = Z_data['X_mad']
             

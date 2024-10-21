@@ -12,10 +12,9 @@ import ast
 from icenet import print
 # ------------------------------------------
 
-
 def set_nested_dict_value(d, keys, value, indices=None):
     """
-    Helper function to set a value in a nested dictionary or list
+    Helper function to set a value in a nested dictionary or list and print the old value being replaced.
     """
     for key in keys[:-1]:
         if key not in d:
@@ -26,16 +25,22 @@ def set_nested_dict_value(d, keys, value, indices=None):
         target = d[keys[-1]]
         for idx in indices[:-1]:
             target = target[idx]
+        old_value = target[indices[-1]]
+        if isinstance(old_value, dict):
+            old_value = old_value.get(keys[-1], "Key did not exist")
+        print(f"Old value at '{keys[-1]}[{','.join(map(str, indices))}]' was: {old_value}")
         if isinstance(target[indices[-1]], dict):
             target[indices[-1]][keys[-1]] = value
         else:
             target[indices[-1]] = value
     else:
+        old_value = d.get(keys[-1], "Key did not exist")
+        print(f"Old value at '{keys[-1]}' was: {old_value}")
         d[keys[-1]] = value
 
 def parse_value(value_str: str):
     """
-    Parse the value string and return the appropriate type
+    Parse the value string and return the appropriate type.
     """
     value_str = value_str.strip()
     if value_str.lower() == 'true':
@@ -52,7 +57,8 @@ def parse_value(value_str: str):
 
 def supertune(d, config_string):
     """
-    Parse a replacement string and update the dictionary accordingly
+    Parse a replacement string and update the dictionary accordingly,
+    printing the old values before updating.
     
     Args:
         d:              dictionary to be updated
@@ -80,7 +86,7 @@ def supertune(d, config_string):
         
         value = parse_value(value_str)
         
-        print(f"Replacing {keys_str} with value {value}")
+        print(f"Replacing '{keys_str}' with a value = {value}")
         set_nested_dict_value(d, keys, value, indices)
     
     return d

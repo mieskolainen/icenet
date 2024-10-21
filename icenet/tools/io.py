@@ -25,6 +25,7 @@ from sklearn.impute import IterativeImputer
 from glob import glob
 from braceexpand import braceexpand
 import copy
+from time import time
 
 import hashlib
 import base64
@@ -35,6 +36,19 @@ from icenet.tools import stx
 # ------------------------------------------
 from icenet import print
 # ------------------------------------------
+
+def get_file_timestamp(file_path: str):
+    """
+    Return file timestamp as a string
+    """
+    if os.path.exists(file_path):
+        # Get the file last modification time
+        timestamp = os.path.getmtime(file_path)
+        # Convert it to a readable format
+        readable_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
+        return readable_time
+    else:
+        return f"File '{file_path}' does not exist."
 
 def rootsafe(txt):
     """
