@@ -4,9 +4,9 @@ EVAL_PARAM: &EVAL_PARAM
   tensorboard: true
 
   # Training and validation
-  savemode: 5                  # Save and validate every n-th epoch (integer)
+  savemode: 3                  # Save and validate every n-th epoch (integer)
   eval_batch_size: 4096
-
+  
   # Post-training evaluation
   readmode: -1                 # specific epoch (int), -1 finds the best loss model, -2 takes the last epoch model
   readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ... [currently only 'loss']
@@ -203,7 +203,7 @@ iceboost_swd:
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
-    beta: 5.0e-2
+    beta: 2.0e-2
     p: 1                   # p-norm (1,2, ...)
     num_slices: 500        # Number of MC projections (Higher the better) 
     mode: 'SWD'            # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
