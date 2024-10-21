@@ -53,7 +53,7 @@ iceboost3D:
     # learning task parameters
     objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
     eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
-
+  
   # Special optimization
   opt_param:
     noise_reg: 0.1                # Scheduled noise regularization

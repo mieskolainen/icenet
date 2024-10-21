@@ -12,17 +12,20 @@ from typing import Callable, Sequence, List, Tuple
 
 class XgboostObjective():
     def __init__(self, loss_func: Callable[[Tensor, Tensor], Tensor], mode='train', loss_sign=1, 
-                 flatten_grad=False, skip_hessian=False, hessian_const=1.0, device='cpu'):
+                 flatten_grad=False, hessian_mode='constant', hessian_const=1.0, device='cpu'):
 
         self.mode          = mode
         self.loss_func     = loss_func
         self.loss_sign     = loss_sign
         self.device        = device
-        self.skip_hessian  = skip_hessian
+        self.hessian_mode  = hessian_mode
         self.hessian_const = hessian_const
         self.flatten_grad  = flatten_grad
 
-        print(__name__ + f'.__init__: Using device: {self.device} | skip_hessian = {self.skip_hessian} | hessian_const = {self.hessian_const}')
+        if self.hessian_mode == 'constant':
+            print(__name__ + f': Using device: {self.device} | hessian_mode = {self.hessian_mode} | hessian_const = {self.hessian_const}')
+        else:
+            print(__name__ + f': Using device: {self.device} | hessian_mode = {self.hessian_mode}')
         
     def __call__(self, preds: np.ndarray, targets: xgboost.DMatrix):
 
@@ -52,18 +55,33 @@ class XgboostObjective():
         return preds, targets, weights
 
     def derivatives(self, loss: Tensor, preds: Tensor):
-
-        # Gradient
+        """ Gradient and Hessian diagonal
+        """
+        
+        ## Gradient
         grad1 = torch.autograd.grad(loss, preds, create_graph=True)[0]
         
-        # Diagonal elements of the Hessian matrix
-        grad2 = self.hessian_const * torch.ones_like(grad1)
+        ## Diagonal elements of the Hessian matrix
         
-        if not self.skip_hessian:
-            print('Computing Hessian ...')
+        # Constant
+        if   self.hessian_mode == 'constant':
+            grad2 = self.hessian_const * torch.ones_like(grad1)
+        
+        # Squared derivative based approximation
+        elif self.hessian_mode == 'squared_approx':
+            grad2 = grad1 * grad1
+        
+        # Exact autograd
+        elif self.hessian_mode == 'exact':
+            
+            print(__name__ + f'.derivatives: Computing Hessian diagonal with exact autograd ...')
+            
             for i in tqdm(range(len(preds))): # Can be very slow
                 grad2_i  = torch.autograd.grad(grad1[i], preds, retain_graph=True)[0]
                 grad2[i] = grad2_i[i]
+        
+        else:
+            raise Exception(__name__ + f'.derivatives: Unknown "hessian_mode" {self.hessian_mode}')
         
         grad1, grad2 = grad1.detach().cpu().numpy(), grad2.detach().cpu().numpy()
         
@@ -71,4 +89,3 @@ class XgboostObjective():
             grad1, grad2 = grad1.flatten("F"), grad2.flatten("F")
         
         return grad1, grad2
-        

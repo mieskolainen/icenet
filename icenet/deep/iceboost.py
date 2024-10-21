@@ -622,30 +622,30 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             x         = copy.deepcopy(data_trn.x)
             MI_x      = copy.deepcopy(data_trn_MI)
             
+            # Custom loss string of type 'custom_loss:loss_name:hessian:hessian_mode'
+            
             if strs[1] == 'binary_cross_entropy':
                 
-                if len(strs) == 3 and 'hessian' in strs[2]:
-                    print('Using Hessian with custom loss')
-                    skip_hessian = False
+                if 'hessian' in strs:
+                    hessian_mode = strs[strs.index('hessian')+1]
                 else:
-                    skip_hessian = True
+                    hessian_mode = 'constant'
                 
-                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, skip_hessian=skip_hessian, device=device)
+                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, hessian_mode=hessian_mode, device=device)
                 a['params']['disable_default_eval_metric'] = 1
             
             elif strs[1] == 'sliced_wasserstein':
                 
-                if len(strs) == 3 and 'hessian' in strs[2]:
-                    print('Using Hessian with custom loss')
-                    skip_hessian = False
+                if 'hessian' in strs:
+                    hessian_mode = strs[strs.index('hessian')+1]
                 else:
-                    skip_hessian = True
+                    hessian_mode = 'constant'
                 
-                a['obj'] = autogradxgb.XgboostObjective(loss_func=_sliced_wasserstein, skip_hessian=skip_hessian, device=device)
+                a['obj'] = autogradxgb.XgboostObjective(loss_func=_sliced_wasserstein, hessian_mode=hessian_mode, device=device)
                 a['params']['disable_default_eval_metric'] = 1
             
             else:
-                raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]}')
+                raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]} (check syntax)')
             
             #!
             del a['params']['eval_metric']
