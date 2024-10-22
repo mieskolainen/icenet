@@ -34,11 +34,13 @@
 # 
 # !/bin/sh
 # 
-# source setconda.sh
+# source <full_path_to_your_conda_init_script>/setconda.sh
 # conda activate icenet
-# cd /vols/cms/mmieskol/icenet
-# source setenv.sh
-# maxevents=300000; source tests/runme_zee_gridtune.sh
+# 
+# cd <full_path>/icenet
+# source <full_path>/icenet/setenv.sh
+# maxevents=300000
+# source <full_path>/icenet/tests/runme_zee_gridtune.sh
 # 
 # -----------------------------------------------------------------------
 # 
