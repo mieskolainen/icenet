@@ -105,7 +105,7 @@ assign_combinations() {
 # Run setup
 
 # Define arrays for N variables
-BETA_ARRAY=(0.0 0.0025 0.005 0.01 0.02)
+BETA_ARRAY=(0.0 0.0025 0.005 0.01 0.02 0.04)
 SIGMA_ARRAY=(0.0 0.025 0.05 0.1 0.2)
 
 ARRAY_LIST=(BETA_ARRAY SIGMA_ARRAY)
@@ -132,24 +132,28 @@ for (( i = START_INDEX; i < END_INDEX; i++ )); do
 
 COMBINATION="${COMBINATIONS[$i]}"
 
-# Extract individual variable values from the combination string
+# 1. Extract individual variable values from the combination string
 IFS=',' read -r BETA SIGMA <<< "$COMBINATION"
 
+# 2. Label the run
 RUN_ID="point_${i}__beta_${BETA}__sigma_${SIGMA}"
 
-SUPERTUNE="\" \
-        models.iceboost_swd.model_param.SWD_param.beta=${BETA} \
-        models.iceboost_swd.model_param.opt_param.noise_reg=${SIGMA} \
-        \" "
+# 3. Define tune command
+SUPERTUNE="\
+models.iceboost_swd.model_param.SWD_param.beta=${BETA} \
+models.iceboost_swd.model_param.opt_param.noise_reg=${SIGMA} \
+models.iceboost_swd.SWD_param.var=['fixedGridRhoAll', 'probe_eta', 'probe_pt'] \
+"
 
 # Print out
 echo $RUN_ID
 echo $SUPERTUNE
 echo ""
 
-# Run
+# 4. Run
 python analysis/zee.py --runmode genesis $MAX --config ${CONFIG}.yml --datapath $DATAPATH 
-python analysis/zee.py --runmode train   $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID --supertune $SUPERTUNE
-python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID
+python analysis/zee.py --runmode train   $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID --supertune "${SUPERTUNE}" # Note " "
+python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "minloss" --supertune "models.iceboost_swd.readmode=-1" 
+python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "last"    --supertune "models.iceboost_swd.readmode=-2" 
 
 done

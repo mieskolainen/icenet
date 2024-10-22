@@ -113,23 +113,23 @@ jobs:
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem_reweight.sh
           echo "yes" | source superclean.sh
-      
+        
       #
       - name: Deep Learning system integration test (zee 1)
+        run: |
+          source setenv-github-actions.sh && maxevents=100; source tests/runme_zee_gridtune.sh
+          echo "yes" | source superclean.sh
+
+      #
+      - name: Deep Learning system integration test (zee 2)
         run: |
           source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
           echo "yes" | source superclean.sh
       
       #
-      - name: Deep Learning system integration test (zee 2)
-        run: |
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
-          echo "yes" | source superclean.sh
-      
-      #
       - name: Deep Learning system integration test (zee 3)
         run: |
-          source setenv-github-actions.sh && maxevents=100; source tests/runme_zee_gridtune.sh
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
           echo "yes" | source superclean.sh
       
       #

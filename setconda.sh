@@ -1,3 +1,5 @@
+# Example conda init
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/home/hep/rjb3/work/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"

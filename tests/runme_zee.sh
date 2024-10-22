@@ -17,4 +17,5 @@ do
 done
 
 #--supertune "models.iceboost_swd.model_param.objective='custom:binary_cross_entropy:hessian:squared_approx'"
+#--supertune "models.iceboost_swd.SWD_param.var=['fixedGridRhoAll', 'probe_eta', 'probe_pt']"
 #--supertune "models.iceboost_swd.readmode=-2"
