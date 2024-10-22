@@ -43,7 +43,11 @@
 # 
 # cd <full_path>/icenet
 # source <full_path>/icenet/setenv.sh
+#
 # maxevents=300000
+# DATAPATH=<full_path_to_your_data>
+# CONFIG="tune0_EEm"
+# 
 # source <full_path>/icenet/tests/runme_zee_gridtune.sh
 # 
 # -----------------------------------------------------------------------
@@ -56,10 +60,33 @@
 # m.mieskolainen@imperial.ac.uk, 2024
 # -----------------------------------------------------------------------
 
-#DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
-DATAPATH="./actions-stash/input/icezee"
+# Set default values
 
-if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi
+#DEFAULT_DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
+DEFAULT_DATAPATH="./actions-stash/input/icezee"
+DEFAULT_CONFIG="tune0_EB"
+
+
+# Check if DATAPATH is set, otherwise use the default
+if [ -z "${DATAPATH+x}" ]; then
+    DATAPATH="$DEFAULT_DATAPATH"
+fi
+
+# Check if CONFIG is set, otherwise use the default
+if [ -z "${CONFIG+x}" ]; then
+    CONFIG="$DEFAULT_CONFIG"
+fi
+
+# Handle maxevents as before
+if [ ${maxevents+x} ]; then 
+    MAX="--maxevents $maxevents"
+else 
+    MAX=""
+fi
+
+# Now DATAPATH and CONFIG are guaranteed to have values
+echo "DATAPATH is set to $DATAPATH"
+echo "CONFIG is set to $CONFIG"
 
 # -----------------------------------------------------------------------
 # Generic functions
@@ -115,9 +142,6 @@ BETA_ARRAY=(0.0 0.0025 0.005 0.01 0.02 0.04)
 SIGMA_ARRAY=(0.0 0.025 0.05 0.1 0.2)
 
 ARRAY_LIST=(BETA_ARRAY SIGMA_ARRAY)
-
-# Set steering file
-CONFIG="tune0_EEm"
 
 # -----------------------------------------------------------------------
 # Combinatorics and indices

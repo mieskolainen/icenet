@@ -422,7 +422,7 @@ def generic_flow(rootname, func_loader, func_factor):
         
         if runmode == 'genesis':
             
-            icelogger.set_global_log_file(f'{args["datadir"]}/genesis_{args["__hash_genesis__"]}.log')
+            icelogger.set_global_log_file(f'{args["datadir"]}/genesis__{args["__hash_genesis__"]}.log')
             print(cli) # for output log
             process_raw_data(args=args, func_loader=func_loader) 
             
