@@ -43,7 +43,7 @@ else
     # variables.
     
     # ----------------------------------------------
-    # Example HTCondor 'array.job' file
+    # Example HTCondor 'array.job' file with 10 jobs
     # ----------------------------------------------
     # 
     # executable  = my_script.sh
