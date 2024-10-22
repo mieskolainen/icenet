@@ -142,8 +142,8 @@ RUN_ID="point_${i}__beta_${BETA}__sigma_${SIGMA}"
 
 # 3. Define tune command
 SUPERTUNE="\
-models.iceboost_swd.model_param.SWD_param.beta=${BETA} \
-models.iceboost_swd.model_param.opt_param.noise_reg=${SIGMA} \
+models.iceboost_swd.SWD_param.beta=${BETA} \
+models.iceboost_swd.opt_param.noise_reg=${SIGMA} \
 models.iceboost_swd.SWD_param.var=['fixedGridRhoAll', 'probe_eta', 'probe_pt'] \
 "
 
