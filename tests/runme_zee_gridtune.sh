@@ -34,6 +34,10 @@
 # 
 # !/bin/sh
 # 
+# ** icenet/setenv.sh uses these **
+# export HTC_PROCESS_ID=$1 
+# export HTC_QUEUE_SIZE=$2
+# 
 # source <full_path_to_your_conda_init_script>/setconda.sh
 # conda activate icenet
 # 
