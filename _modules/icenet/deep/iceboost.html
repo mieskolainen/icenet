@@ -1256,10 +1256,12 @@
         
         <span class="n">savedir</span>  <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">savedir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">num_epochs</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
-        
-        <span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.ubj&#39;</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">dump_model</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.text&#39;</span><span class="p">,</span> <span class="n">dump_format</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        model.save_model(filename + &#39;.ubj&#39;)</span>
+<span class="sd">        model.save_model(filename + &#39;.json&#39;)</span>
+<span class="sd">        model.dump_model(filename + &#39;.text&#39;, dump_format=&#39;text&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">losses</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;trn_losses&#39;</span><span class="p">:</span>         <span class="n">trn_losses</span><span class="p">,</span>
                   <span class="s1">&#39;val_losses&#39;</span><span class="p">:</span>         <span class="n">val_losses</span><span class="p">,</span>

@@ -1932,7 +1932,7 @@
 
     <span class="n">targetdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">)</span>
 
-    <span class="n">subdirs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="s1">&#39;MVA&#39;</span><span class="p">,</span> <span class="s1">&#39;COR&#39;</span><span class="p">]</span>
+    <span class="n">subdirs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">sd</span><span class="p">),</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -2261,7 +2261,16 @@
 <span class="sd">    Arbitrary plot steering function.</span>
 <span class="sd">    Add new plot types here, steered from plots.yml</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># -----------------------------</span>
+    <span class="c1"># Prepare output folders</span>
 
+    <span class="n">targetdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">)</span>
+
+    <span class="n">subdirs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="s1">&#39;MVA&#39;</span><span class="p">,</span> <span class="s1">&#39;COR&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">sd</span><span class="p">),</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># -----------------------------</span>
+    
     <span class="k">global</span> <span class="n">roc_mstats</span>
     <span class="k">global</span> <span class="n">roc_labels</span>
     <span class="k">global</span> <span class="n">roc_paths</span>
