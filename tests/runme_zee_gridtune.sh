@@ -89,6 +89,25 @@ echo "DATAPATH is set to $DATAPATH"
 echo "CONFIG is set to $CONFIG"
 
 # -----------------------------------------------------------------------
+# Initialization
+
+# Ensure that GRID_ID and GRID_NODES are set to special values
+
+if [[ $GRID_ID == -1 && $GRID_NODES == 1 ]]; then
+
+  python analysis/zee.py --runmode genesis $MAX --config ${CONFIG}.yml --datapath $DATAPATH
+  
+  python analysis/zee.py --runmode train $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+    --modeltag GRIDTUNE --run_id "INIT" --compute 0
+  
+  python analysis/zee.py --runmode eval $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+    --modeltag GRIDTUNE --run_id "INIT" --compute 0
+  
+  return 0 # do not use exit
+fi
+
+
+# -----------------------------------------------------------------------
 # Generic functions
 
 # Function to generate all combinations of N arrays
@@ -182,8 +201,14 @@ echo ""
 
 # 4. Run
 python analysis/zee.py --runmode genesis $MAX --config ${CONFIG}.yml --datapath $DATAPATH 
-python analysis/zee.py --runmode train   $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID --supertune "${SUPERTUNE}" # Note " "
-python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "minloss" --supertune "models.iceboost_swd.readmode=-1" 
-python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "last"    --supertune "models.iceboost_swd.readmode=-2" 
+
+python analysis/zee.py --runmode train   $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+  --modeltag GRIDTUNE --run_id $RUN_ID --supertune "${SUPERTUNE}" # Note " "
+
+python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+  --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "minloss" --supertune "models.iceboost_swd.readmode=-1" 
+
+python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+  --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "last"    --supertune "models.iceboost_swd.readmode=-2" 
 
 done

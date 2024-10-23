@@ -224,18 +224,18 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     hash_args = {}
 
     # Critical Python file content
-    files = {'inputvars': os.path.join(cwd, config_path,      f'{args["inputvars"]}.py'),
-             'cuts':      os.path.join(cwd, config_path,      f'cuts.py'),
-             'filter':    os.path.join(cwd, config_path,      f'filter.py'),
-             'common':    os.path.join(cwd, args['rootname'], f'common.py')}
-    
+    files = {'inputvars': os.path.join(cwd, config_path,              f'{args["inputvars"]}.py'),
+             'cuts':      os.path.join(cwd, config_path,              f'cuts.py'),
+             'filter':    os.path.join(cwd, config_path,              f'filter.py'),
+             'common':    os.path.join(cwd, 'ice' + args['rootname'], f'common.py')}
+
     for key in files.keys():
         if os.path.exists(files[key]):
-            print(f"Cache introspection for the file: '{files[key]}'")
             hash_args[f'__hash__{key}'] = io.make_hash_sha256_file(files[key])
+            print(f"Cache introspection for the file: '{files[key]}' [done]", 'green')
         else:
-            print(f"Did not find: {files[key]} [may cause crash if your application depends on it]", 'red')
-
+            print(f"Cache introspection did not find: {files[key]} [may cause crash if your application depends on it]", 'red')
+    
     # Genesis parameters as the first one
     hash_args.update(old_args['genesis_runmode'])
     

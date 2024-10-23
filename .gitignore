@@ -11,6 +11,8 @@
 *.zip
 *.text
 *.log
+*.out
+*.output
 #*.json
 #*.txt
 

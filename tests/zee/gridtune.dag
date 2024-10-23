@@ -1,0 +1,13 @@
+#!/bin/bash
+# 
+# Grid tuning job with init structure using Condor DAGMan
+# 
+# Submit with:
+# condor_submit_dag gridtune.dag
+
+# Filename: job_dependency.dag
+JOB A gridtune_init.job   # First init job
+JOB B gridtune_array.job  # Array job
+
+# Make B depend on A finishing successfully
+PARENT A CHILD B

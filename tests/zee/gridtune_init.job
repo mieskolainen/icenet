@@ -1,0 +1,13 @@
+# Initialization job
+
+executable     = gridtune_task.sh
+arguments      = "-1 1 $(ClusterId)"
+error          = gridtune_init.$(CLUSTER).out
+output         = gridtune_init.$(CLUSTER).output
+log            = gridtune_init.$(CLUSTER).log
+request_gpus   = 1
+request_memory = 80G
+#requirements  = TARGET.GPUs_DeviceName =?= "Tesla V100-PCIE-32GB"
+requirements   = TARGET.GPUs_DeviceName =?= "Tesla P100-PCIE-12GB"
++MaxRuntime    = 86000
+queue
