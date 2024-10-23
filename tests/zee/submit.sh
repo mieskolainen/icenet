@@ -5,9 +5,11 @@
 #
 # Emulating DAGMan without using it.
 #
-# Run with: source submit.sh
+# Run with: source submit.sh (execute the command in the same folder)
 #
 # m.mieskolainen@imperial.ac.uk, 2024
+
+mkdir logs -p
 
 ICEPATH="/vols/cms/mmieskol/icenet"
 
@@ -62,12 +64,12 @@ while true; do
     elapsed_seconds=$((elapsed_time % 60))
 
     # Otherwise, job is still in the queue, and we can wait
-    echo "Job is still running (status: $job_status). Checking again in ${PERIOD} seconds..."
-    echo "Cumulative waiting time: ${elapsed_minutes} minute(s) and ${elapsed_seconds} second(s)"
+    echo "First job is still running (status: $job_status) | Elapsed: ${elapsed_minutes} min and ${elapsed_seconds} sec"
     sleep $PERIOD
 done
 
 # Submit the array job
+echo ""
 echo "Submitting array job"
 condor_submit $ARRAY_JOB
 echo " "

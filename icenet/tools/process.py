@@ -1382,7 +1382,7 @@ def evaluate_models(data=None, info=None, args=None):
 
     targetdir = os.path.join(f'{args["plotdir"]}', 'eval')
 
-    subdirs = ['', 'ROC', 'MVA', 'COR']
+    subdirs = ['']
     for sd in subdirs:
         os.makedirs(os.path.join(targetdir, sd), exist_ok = True)
 
@@ -1705,7 +1705,16 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     Arbitrary plot steering function.
     Add new plot types here, steered from plots.yml
     """
+    # -----------------------------
+    # Prepare output folders
 
+    targetdir = os.path.join(f'{args["plotdir"]}', 'eval')
+
+    subdirs = ['ROC', 'MVA', 'COR']
+    for sd in subdirs:
+        os.makedirs(os.path.join(targetdir, sd), exist_ok = True)
+    # -----------------------------
+    
     global roc_mstats
     global roc_labels
     global roc_paths

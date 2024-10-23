@@ -2,9 +2,9 @@
 
 executable     = gridtune_task.sh
 arguments      = "-1 1 $(ClusterId)"
-error          = gridtune_init.$(CLUSTER).out
-output         = gridtune_init.$(CLUSTER).output
-log            = gridtune_init.$(CLUSTER).log
+error          = logs/gridtune_init.$(CLUSTER).out
+output         = logs/gridtune_init.$(CLUSTER).output
+log            = logs/gridtune_init.$(CLUSTER).log
 request_gpus   = 1
 request_memory = 80G
 #requirements  = TARGET.GPUs_DeviceName =?= "Tesla V100-PCIE-32GB"
