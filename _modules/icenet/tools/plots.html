@@ -522,6 +522,8 @@
 <span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">prettytable</span> <span class="kn">import</span> <span class="n">PrettyTable</span>
@@ -1975,11 +1977,9 @@
     
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;label = </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | sublabel = </span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1"> | tau = </span><span class="si">{</span><span class="n">tau</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     
-    <span class="nb">dir</span>       <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">local_dir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="nb">dir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;/tau_</span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    
     <span class="c1">## Print stats</span>
-    <span class="n">output_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">local_dir</span><span class="si">}</span><span class="s1">/stats_AIRW_weight_flow.log&#39;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="s1">&#39;stats_AIRW_weight_flow.log&#39;</span><span class="p">)</span>
+    
     <span class="n">prints</span><span class="o">.</span><span class="n">print_weights</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
         <span class="n">header</span><span class="o">=</span><span class="s1">&#39;Step 1. Input event weights&#39;</span><span class="p">,</span> <span class="n">write_mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
     
@@ -2070,9 +2070,6 @@
     <span class="c1"># Visualization</span>
     <span class="c1"># ---------------------------------------------------</span>
     
-    <span class="n">total_ndf</span>     <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">total_chi2</span>    <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">total_chi2_AI</span> <span class="o">=</span> <span class="mf">0.0</span>
     
     <span class="n">chi2_table</span>    <span class="o">=</span> <span class="n">PrettyTable</span><span class="p">([</span><span class="s2">&quot;observable&quot;</span><span class="p">,</span> <span class="s2">&quot;ndf&quot;</span><span class="p">,</span> <span class="s2">&quot;chi2 / ndf&quot;</span><span class="p">,</span> <span class="s2">&quot;(AI) chi2 / ndf&quot;</span><span class="p">])</span> 
     
@@ -2091,7 +2088,7 @@
         
         <span class="s1">&#39;label&#39;</span><span class="p">:</span>     <span class="n">label</span><span class="p">,</span>
         <span class="s1">&#39;param&#39;</span><span class="p">:</span>     <span class="n">param</span><span class="p">,</span>
-        <span class="s1">&#39;local_dir&#39;</span><span class="p">:</span> <span class="n">local_dir</span>
+        <span class="s1">&#39;local_dir&#39;</span><span class="p">:</span> <span class="n">targetdir</span>
     <span class="p">}</span>
     
     <span class="c1"># Loop over each observable (specific column of X)</span>
@@ -2114,7 +2111,7 @@
 
     <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">num_workers</span><span class="p">)</span>
     <span class="n">tic</span>  <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">r</span>    <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">multiprocess_AIRW_wrapper</span><span class="p">,</span> <span class="n">paramlist</span><span class="p">)</span>
+    <span class="n">chi2</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">multiprocess_AIRW_wrapper</span><span class="p">,</span> <span class="n">paramlist</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># no more tasks</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># wrap up current tasks</span>
     
@@ -2122,22 +2119,36 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Took </span><span class="si">{</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> sec&#39;</span><span class="p">)</span>
     
     <span class="c1"># Collect summary statistics from the pool</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)):</span>
-        <span class="n">total_ndf</span>     <span class="o">+=</span> <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0&#39;</span><span class="p">]</span>
-        <span class="n">total_chi2</span>    <span class="o">+=</span> <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0&#39;</span><span class="p">]</span>
-        <span class="n">total_chi2_AI</span> <span class="o">+=</span> <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">]</span>
-
-        <span class="n">chi2_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_row&#39;</span><span class="p">],</span> <span class="n">divider</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">total_ndf</span>     <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total_ndf_AI</span>  <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total_chi2</span>    <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">total_chi2_AI</span> <span class="o">=</span> <span class="mf">0.0</span>
     
-    <span class="n">chi2_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_ndf</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_chi2</span><span class="o">/</span><span class="n">total_ndf</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_chi2_AI</span><span class="o">/</span><span class="n">total_ndf</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;chi2 after pool.map: &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">chi2</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chi2</span><span class="p">)):</span>
+
+        <span class="c1"># Add table row</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0&#39;</span><span class="p">],</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0&#39;</span><span class="p">],</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0_AI&#39;</span><span class="p">]]</span>
+        <span class="n">chi2_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">divider</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">chi2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+        
+        <span class="n">total_ndf</span>     <span class="o">+=</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0&#39;</span><span class="p">]</span>
+        <span class="n">total_ndf_AI</span>  <span class="o">+=</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0_AI&#39;</span><span class="p">]</span>
+        <span class="n">total_chi2</span>    <span class="o">+=</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0&#39;</span><span class="p">]</span>
+        <span class="n">total_chi2_AI</span> <span class="o">+=</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># Add rows</span>
+    <span class="n">chi2_table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_ndf</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_chi2</span><span class="o">/</span><span class="n">total_ndf</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">total_chi2_AI</span><span class="o">/</span><span class="n">total_ndf_AI</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+    <span class="n">chi2</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="s1">&#39;ndf_0&#39;</span><span class="p">:</span> <span class="n">total_ndf</span><span class="p">,</span> <span class="s1">&#39;ndf_0_AI&#39;</span><span class="p">:</span> <span class="n">total_ndf_AI</span><span class="p">,</span> <span class="s1">&#39;chi2_0&#39;</span><span class="p">:</span> <span class="n">total_chi2</span><span class="p">,</span> <span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">:</span> <span class="n">total_chi2_AI</span><span class="p">})</span>
     
     <span class="c1"># -----------------------------------------------</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">local_dir</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/stats_chi2.log&quot;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;stats_chi2.log&quot;</span><span class="p">)</span>
     <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># Clear content</span>
     <span class="n">table_writer</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">chi2_table</span><span class="o">=</span><span class="n">chi2_table</span><span class="p">,</span> <span class="n">print_to_screen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># -----------------------------------------------</span>
     
-    <span class="k">return</span> <span class="n">chi2_table</span><span class="p">,</span> <span class="n">df</span></div>
+    <span class="k">return</span> <span class="n">chi2_table</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">chi2</span></div>
 
 
 
@@ -2256,9 +2267,7 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig0</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig1</span><span class="p">)</span>
 
-    <span class="n">chi2_row</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ndf_0</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">chi2_0</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">chi2_0_AI</span><span class="o">/</span><span class="n">ndf_0</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
-    
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;ndf_0&#39;</span><span class="p">:</span> <span class="n">ndf_0</span><span class="p">,</span> <span class="s1">&#39;ndf_0_AI&#39;</span><span class="p">:</span> <span class="n">ndf_0_AI</span><span class="p">,</span> <span class="s1">&#39;chi2_0&#39;</span><span class="p">:</span> <span class="n">chi2_0</span><span class="p">,</span> <span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">:</span> <span class="n">chi2_0_AI</span><span class="p">,</span> <span class="s1">&#39;chi2_row&#39;</span><span class="p">:</span> <span class="n">chi2_row</span><span class="p">}</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;ndf_0&#39;</span><span class="p">:</span> <span class="n">ndf_0</span><span class="p">,</span> <span class="s1">&#39;ndf_0_AI&#39;</span><span class="p">:</span> <span class="n">ndf_0_AI</span><span class="p">,</span> <span class="s1">&#39;chi2_0&#39;</span><span class="p">:</span> <span class="n">chi2_0</span><span class="p">,</span> <span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">:</span> <span class="n">chi2_0_AI</span><span class="p">}</span></div>
 
 </pre></div>
 
