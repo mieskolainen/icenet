@@ -1768,19 +1768,10 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             with open(os.path.join(local_dir, "stats_chi2.pkl"), "wb") as f:
                 pickle.dump(chi2, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-            # -----------------------------------------------------------
             # Add Tensorboard values
-            sum_ndf, sum_chi2 = 0, 0
-            
             for i in range(len(chi2)):
-                
-                # Individual observables
                 writer.add_scalar(f"chi2__{chi2[i]['id']}", chi2[i]['chi2_0_AI'] / chi2[i]['ndf_0_AI'])
-                
-                sum_ndf  += chi2[i]['ndf_0_AI'] 
-                sum_chi2 += chi2[i]['chi2_0_AI']
             
-            writer.add_scalar(f'chi2__total', sum_chi2 / sum_ndf)
             # -----------------------------------------------------------
             
             df_per_tau.append(df)
