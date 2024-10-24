@@ -24,7 +24,7 @@ source $ICEPATH/setenv.sh
 # Execute
 DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
 CONFIG="tune0_EB"
-maxevents=150000
+maxevents=100000
 source /vols/cms/mmieskol/icenet/tests/runme_zee_gridtune.sh
 
 # Create the done file when the job completes

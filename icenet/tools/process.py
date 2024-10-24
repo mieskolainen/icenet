@@ -12,10 +12,10 @@ from importlib import import_module
 import os
 import pickle
 import sys
-
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import tensorboardX
 import torch
 import torch_geometric
 import numpy as np
@@ -1729,6 +1729,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     y_pred = func_predict(x_input)
     y_preds.append(copy.deepcopy(y_pred))
     
+    
     # --------------------------------------
     ### Output score re-weighted observables
     
@@ -1752,15 +1753,41 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         
         for tau in args['plot_param']['OBS_reweight']['tau_values']:
             
-            chi2_table, df = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
-                                pick_ind=pick_ind, label=label, sublabel=sublabel,
-                                param=args['plot_param']['OBS_reweight'], tau=tau,
-                                targetdir=targetdir + '/OBS_reweight', num_cpus=args['num_cpus'])
+            local_dir = aux.makedir(os.path.join(dir, f'tau_{tau:0.3f}'))
+            
+            # Tensorboard
+            writer = tensorboardX.SummaryWriter(local_dir)
+            
+            # AIRW plots
+            chi2_table, df, chi2 = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
+                pick_ind=pick_ind, label=label, sublabel=sublabel,
+                param=args['plot_param']['OBS_reweight'], tau=tau,
+                targetdir=local_dir, num_cpus=args['num_cpus'])
+            
+            # Dump into pickle
+            with open(os.path.join(local_dir, "stats_chi2.pkl"), "wb") as f:
+                pickle.dump(chi2, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+            # -----------------------------------------------------------
+            # Add Tensorboard values
+            sum_ndf, sum_chi2 = 0, 0
+            
+            for i in range(len(chi2)):
+                
+                # Individual observables
+                writer.add_scalar(f"chi2__{chi2[i]['id']}", chi2[i]['chi2_0_AI'] / chi2[i]['ndf_0_AI'])
+                
+                sum_ndf  += chi2[i]['ndf_0_AI'] 
+                sum_chi2 += chi2[i]['chi2_0_AI']
+            
+            writer.add_scalar(f'chi2__total', sum_chi2 / sum_ndf)
+            # -----------------------------------------------------------
             
             df_per_tau.append(df)
             plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
 
             gc.collect() #!
+        
         
         # Save to a parquet file
         if args['plot_param']['OBS_reweight']['save_parquet']:

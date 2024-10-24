@@ -32,6 +32,7 @@ fi
 
 sleep 5
 
+echo ""
 echo "First job with ID = ${FIRST_JOB_ID}"
 echo "Waiting for the first job to finish"
 

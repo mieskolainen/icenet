@@ -7,6 +7,8 @@ import numpy as np
 import awkward as ak
 import torch
 import gc
+import os
+
 from pprint import pprint
 import copy
 from prettytable import PrettyTable
@@ -1389,11 +1391,9 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     
     print(f'label = {label} | sublabel = {sublabel} | tau = {tau}', 'green')
     
-    dir       = aux.makedir(f'{targetdir}/{label}/{sublabel}')
-    local_dir = aux.makedir(dir + f'/tau_{tau:0.2f}')
-    
     ## Print stats
-    output_file = f'{local_dir}/stats_AIRW_weight_flow.log'
+    output_file = os.path.join(targetdir, 'stats_AIRW_weight_flow.log')
+    
     prints.print_weights(weights=weights, y=y, output_file=output_file,
         header='Step 1. Input event weights', write_mode='w')
     
@@ -1484,9 +1484,6 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     # Visualization
     # ---------------------------------------------------
     
-    total_ndf     = 0.0
-    total_chi2    = 0.0
-    total_chi2_AI = 0.0
     
     chi2_table    = PrettyTable(["observable", "ndf", "chi2 / ndf", "(AI) chi2 / ndf"]) 
     
@@ -1505,7 +1502,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         
         'label':     label,
         'param':     param,
-        'local_dir': local_dir
+        'local_dir': targetdir
     }
     
     # Loop over each observable (specific column of X)
@@ -1528,7 +1525,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
 
     pool = multiprocessing.Pool(processes=num_workers)
     tic  = time.time()
-    r    = pool.map(multiprocess_AIRW_wrapper, paramlist)
+    chi2 = pool.map(multiprocess_AIRW_wrapper, paramlist)
     pool.close() # no more tasks
     pool.join()  # wrap up current tasks
     
@@ -1536,22 +1533,36 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     print(f'Took {toc-tic:0.2f} sec')
     
     # Collect summary statistics from the pool
-    for i in range(len(r)):
-        total_ndf     += r[i]['ndf_0']
-        total_chi2    += r[i]['chi2_0']
-        total_chi2_AI += r[i]['chi2_0_AI']
-
-        chi2_table.add_row(r[i]['chi2_row'], divider=True if i == len(r)-1 else False)
+    total_ndf     = 0
+    total_ndf_AI  = 0
+    total_chi2    = 0.0
+    total_chi2_AI = 0.0
     
-    chi2_table.add_row(['total', f'{total_ndf}', f'{total_chi2/total_ndf:0.1f}', f'{total_chi2_AI/total_ndf:0.1f}'])
+    print('chi2 after pool.map: ')
+    print(chi2)
+    
+    for i in range(len(chi2)):
+
+        # Add table row
+        row = [chi2[i]['id'], chi2[i]['ndf_0'], chi2[i]['chi2_0'] / chi2[i]['ndf_0'], chi2[i]['chi2_0_AI'] / chi2[i]['ndf_0_AI']]
+        chi2_table.add_row(row, divider=True if i == len(chi2)-1 else False)
+        
+        total_ndf     += chi2[i]['ndf_0']
+        total_ndf_AI  += chi2[i]['ndf_0_AI']
+        total_chi2    += chi2[i]['chi2_0']
+        total_chi2_AI += chi2[i]['chi2_0_AI']
+    
+    # Add rows
+    chi2_table.add_row(['total', f'{total_ndf}', f'{total_chi2/total_ndf:0.1f}', f'{total_chi2_AI/total_ndf_AI:0.1f}'])
+    chi2.append({'id': 'total', 'ndf_0': total_ndf, 'ndf_0_AI': total_ndf_AI, 'chi2_0': total_chi2, 'chi2_0_AI': total_chi2_AI})
     
     # -----------------------------------------------
-    filename = local_dir + f"/stats_chi2.log"
+    filename = os.path.join(targetdir, f"stats_chi2.log")
     open(filename, 'w').close() # Clear content
     table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table, print_to_screen=True)
     # -----------------------------------------------
     
-    return chi2_table, df
+    return chi2_table, df, chi2
 
 
 def multiprocess_AIRW_wrapper(p):
@@ -1667,6 +1678,4 @@ def multiprocess_AIRW_wrapper(p):
     plt.close(fig0)
     plt.close(fig1)
 
-    chi2_row = [ids[i], f'{ndf_0}', f'{chi2_0/ndf_0:0.1f}', f'{chi2_0_AI/ndf_0:0.1f}']
-    
-    return {'ndf_0': ndf_0, 'ndf_0_AI': ndf_0_AI, 'chi2_0': chi2_0, 'chi2_0_AI': chi2_0_AI, 'chi2_row': chi2_row}
+    return {'id': ids[i], 'ndf_0': ndf_0, 'ndf_0_AI': ndf_0_AI, 'chi2_0': chi2_0, 'chi2_0_AI': chi2_0_AI}
