@@ -1873,16 +1873,16 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;CTRL+C catched -- continue with the next model&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
             <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured, check the model definition! -- continue&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured: </span><span class="se">\n</span><span class="s1"> </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Check the model &#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">&#39; definition: training failed -- continue!&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
             <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
             <span class="n">exceptions</span> <span class="o">+=</span> <span class="mi">1</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[done]&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">exceptions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Number of fatal exceptions = </span><span class="si">{</span><span class="n">exceptions</span><span class="si">}</span><span class="s1"> [check your data / model definitions -- some model did not train]&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_models: Fatal exceptions = </span><span class="si">{</span><span class="n">exceptions</span><span class="si">}</span><span class="s1"> [check your data, models.yml and --supertune]&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -2180,11 +2180,12 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.Unknown param[&quot;predict&quot;] = </span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;predict&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> for ID = </span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured, check your steering cards! -- continue&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured, check your steering cards and training phase! -- exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
-        <span class="n">exceptions</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span> <span class="kc">False</span>
     
     <span class="c1">## Multiple model comparisons</span>
     <span class="n">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
@@ -2209,9 +2210,6 @@
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">resdict</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[done]&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">exceptions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.evaluate_models: Number of fatal exceptions = </span><span class="si">{</span><span class="n">exceptions</span><span class="si">}</span><span class="s1"> [check your input -- results or labelling may be corrupted now]&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="kc">True</span></div>
 
