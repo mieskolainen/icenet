@@ -5,9 +5,7 @@
 # Step 1
 # python icefit/iceboard.py \
 #    --rootpath figs/zee/config__tune0_EB.yml \
-#    --variables evaltag beta sigma tau \
-#    --max_files 20 \
-#    --tag mytest
+#    --variables evaltag beta sigma tau --tag mytest
 # 
 # Step 2
 # tensorboard --logdir ./tmp/iceboard/mytest/hparam_logs
