@@ -117,7 +117,15 @@ jobs:
       #
       - name: Deep Learning system (runme_zee_gridtune)
         run: |
-          source setenv-github-actions.sh && maxevents=100; source tests/runme_zee_gridtune.sh
+          source setenv-github-actions.sh
+          maxevents=100
+          
+          GRID_ID=-1; GRID_NODES=1 
+          source tests/runme_zee_gridtune.sh
+          
+          GRID_ID=1; GRID_NODES=1
+          source tests/runme_zee_gridtune.sh
+          
           echo "yes" | source superclean.sh
 
       #
