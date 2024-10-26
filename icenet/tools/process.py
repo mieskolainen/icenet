@@ -1776,7 +1776,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             
             df_per_tau.append(df)
             plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
-
+            
             gc.collect() #!
         
         

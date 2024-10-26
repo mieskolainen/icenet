@@ -7,81 +7,62 @@
 # so each job has only a few points to process.
 # 
 # This script expects environment variables GRID_ID and GRID_NODES
-# from `setenv.sh`, which are set automatically, when one follows the
+# from `icenet/setenv.sh`, which are set automatically, when one follows the
 # instructions below.
 # 
-#
-# Step 1. Create the following files in the homefolder
 # 
-# -----------------------------------------------------------------------
-# `gpu_gridtune_task.job` condor array job steering file with 4 jobs
-# -----------------------------------------------------------------------
+# Step 1. See files under tests/zee and modify relevant variables there (do not modify here)
 # 
-# executable = gpu_gridtune_task.sh
-# arguments  = "$(PROCESS) 4"
-# error      = gpu.$(CLUSTER).$(PROCESS).out
-# output     = gpu.$(CLUSTER).$(PROCESS).output
-# log        = gpu.$(CLUSTER).$(PROCESS).log
-# request_gpus   = 1
-# request_memory = 80G
-# requirements   = TARGET.GPUs_DeviceName =?= "Tesla V100-PCIE-32GB"
-# +MaxRuntime    = 86000
-# queue 4
+# Step 2. Add executable rights to all relevant .sh files with: chmod +x *.sh
 # 
-# -----------------------------------------------------------------------
-# `gpu_gridtune_task.sh` main executable file
-# -----------------------------------------------------------------------
-# 
-# !/bin/sh
-# 
-# ** icenet/setenv.sh uses these **
-# export HTC_PROCESS_ID=$1 
-# export HTC_QUEUE_SIZE=$2
-# 
-# source <full_path_to_your_conda_init_script>/setconda.sh
-# conda activate icenet
-# 
-# cd <full_path>/icenet
-# source <full_path>/icenet/setenv.sh
-#
-# maxevents=300000
-# DATAPATH=<full_path_to_your_data>
-# CONFIG="tune0_EEm"
-# 
-# source <full_path>/icenet/tests/runme_zee_gridtune.sh
-# 
-# -----------------------------------------------------------------------
-# 
-# Step 2. Add executable rights with: chmod +x *.sh
-# 
-# Step 3. Submit with: condor_submit gpu_gridtune_task.job
-# 
+# Step 3. Submit Condor jobs with:
+#         cd tests/zee
+#         source submit.sh
 # 
 # m.mieskolainen@imperial.ac.uk, 2024
 # -----------------------------------------------------------------------
 
-# Set default values
+# -----------------------------------------------------------------------
+# Set default values (do not modify these, but set outside this script)
 
-#DEFAULT_DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
 DEFAULT_DATAPATH="./actions-stash/input/icezee"
-DEFAULT_CONFIG="tune0_EB"
+DEFAULT_CONFIG="tune0_EEm"
 
+DEFAULT_BETA_ARRAY=(0.0 0.1)
+DEFAULT_SIGMA_ARRAY=(0.0 0.2)
+DEFAULT_SWD_VAR="[.*]"
+# -----------------------------------------------------------------------
+
+# Check if BETA_ARRAY is set, otherwise use the default
+if [ -z "${BETA_ARRAY+x}" ]; then
+  BETA_ARRAY="$DEFAULT_BETA_ARRAY"
+fi
+
+# Check if SIGMA_ARRAY is set, otherwise use the default
+if [ -z "${SIGMA_ARRAY+x}" ]; then
+  SIGMA_ARRAY="$DEFAULT_SIGMA_ARRAY"
+fi
+
+# Check if SWD_VAR is set, otherwise use the default
+if [ -z "${SWD_VAR+x}" ]; then
+  SWD_VAR="$DEFAULT_SWD_VAR"
+fi
 
 # Check if DATAPATH is set, otherwise use the default
 if [ -z "${DATAPATH+x}" ]; then
-    DATAPATH="$DEFAULT_DATAPATH"
+  DATAPATH="$DEFAULT_DATAPATH"
 fi
 
 # Check if CONFIG is set, otherwise use the default
 if [ -z "${CONFIG+x}" ]; then
-    CONFIG="$DEFAULT_CONFIG"
+  CONFIG="$DEFAULT_CONFIG"
 fi
 
 # Handle maxevents as before
 if [ ${maxevents+x} ]; then 
-    MAX="--maxevents $maxevents"
+  MAX="--maxevents $maxevents"
 else 
-    MAX=""
+  MAX=""
 fi
 
 # Now DATAPATH and CONFIG are guaranteed to have values
@@ -89,7 +70,7 @@ echo "DATAPATH is set to $DATAPATH"
 echo "CONFIG is set to $CONFIG"
 
 # -----------------------------------------------------------------------
-# Initialization
+# Initialization (Stage 1 training and pickle file creation)
 
 # Ensure that GRID_ID and GRID_NODES are set to special values
 
@@ -154,15 +135,6 @@ assign_combinations() {
 }
 
 # -----------------------------------------------------------------------
-# Run setup
-
-# Define arrays for N variables
-BETA_ARRAY=(0.0 0.0025 0.005 0.01 0.02 0.04)
-SIGMA_ARRAY=(0.0 0.025 0.05 0.1 0.2)
-
-ARRAY_LIST=(BETA_ARRAY SIGMA_ARRAY)
-
-# -----------------------------------------------------------------------
 # Combinatorics and indices
 
 # Generate combinations
@@ -191,7 +163,7 @@ RUN_ID="point_${i}__beta_${BETA}__sigma_${SIGMA}"
 SUPERTUNE="\
 models.iceboost_swd.SWD_param.beta=${BETA} \
 models.iceboost_swd.opt_param.noise_reg=${SIGMA} \
-models.iceboost_swd.SWD_param.var=['fixedGridRhoAll', 'probe_eta', 'probe_pt'] \
+models.iceboost_swd.SWD_param.var=${SWD_VAR} \
 "
 
 # Print out

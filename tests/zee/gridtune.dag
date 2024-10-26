@@ -4,6 +4,8 @@
 # 
 # Submit with:
 # condor_submit_dag gridtune.dag
+#
+# m.mieskolainen@imperial.ac.uk
 
 # Filename: job_dependency.dag
 JOB A gridtune_init.job   # First init job

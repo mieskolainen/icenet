@@ -1,17 +1,17 @@
 #!/bin/bash
-
+#
+# (do not modify this file)
+# 
 # Condor submission with first init job and then
 # an array job once that is finished
-#
+# 
 # Emulating DAGMan without using it.
-#
+# 
 # Run with: source submit.sh (execute the command in the same folder)
-#
+# 
 # m.mieskolainen@imperial.ac.uk, 2024
 
 mkdir logs -p
-
-ICEPATH="/vols/cms/mmieskol/icenet"
 
 TASK_SCRIPT="gridtune_task.sh"
 INIT_JOB="gridtune_init.job"
@@ -30,7 +30,7 @@ if [[ -z "$FIRST_JOB_ID" ]]; then
     exit 1
 fi
 
-sleep 5
+sleep 3
 
 echo ""
 echo "First job with ID = ${FIRST_JOB_ID}"
