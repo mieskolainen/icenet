@@ -123,7 +123,7 @@ jobs:
           GRID_ID=-1; GRID_NODES=1 
           source tests/runme_zee_gridtune.sh
           
-          GRID_ID=1; GRID_NODES=1
+          GRID_ID=0; GRID_NODES=1
           source tests/runme_zee_gridtune.sh
           
           echo "yes" | source superclean.sh

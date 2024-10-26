@@ -1050,6 +1050,10 @@ def create_model_filename_xgb(path: str, label: str, filetype='.dat', epoch:int 
     # The latest model
     filename = max(list_of_files, key=os.path.getctime)
 
+    dt = datetime.fromtimestamp(getmtime(filename))
+    print(f'Found a model file:')
+    print(f'{filename} (modified {dt})', 'green')
+    
     if epoch < 0:
         
         ## Try to find the best model
@@ -1064,14 +1068,14 @@ def create_model_filename_xgb(path: str, label: str, filetype='.dat', epoch:int 
             losses = np.array(data['losses']['val_losses'])
             idx    = np.argmin(losses)
             
-            str = f'Found the best model at boost epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+            str = f'Using the best model at boost epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
             print(f'{str}', 'magenta')
             
             N_trees = idx + 1 #! indexing from 0
 
         elif epoch == -2:
             
-            str = f'Taking the model at the last boost epoch [{data["epoch"]}]'
+            str = f'Using the model at the last boost epoch [{data["epoch"]}]'
             print(f'{str}', 'magenta')
             
             N_trees = data['epoch'] + 1 #! indexing from 0
@@ -1079,10 +1083,6 @@ def create_model_filename_xgb(path: str, label: str, filetype='.dat', epoch:int 
     else:
         print(f'Using the model with the provided boost epoch = {epoch}', 'yellow')
         N_trees = epoch + 1 #! indexing from 0
-    
-    dt = datetime.fromtimestamp(getmtime(filename))
-    print(f'Found a model file:')
-    print(f'{filename} (modified {dt})', 'green')
     
     return filename, N_trees
 
@@ -1143,18 +1143,20 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int = -1
                 losses = np.array(data['losses']['val_losses'])
                 idx    = np.argmin(losses)
                 
-                str = f'Found the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+                str = f'Using the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
                 print(f'{str}', 'magenta')
                 
                 filename = createfilename(idx)
-        # ----------------------------------------------------
+        
+        else:
+            print(f'Using the last saved epoch model', 'magenta')
         
     else:
-        print(f'Loading the model with the provided epoch = {epoch}', 'yellow')
+        print(f'Using the model with the provided epoch = {epoch}', 'yellow')
         filename = createfilename(epoch)
     
     dt = datetime.fromtimestamp(getmtime(filename))
-    print(f'Found a model file:')
+    print(f'Loaded a model file:')
     print(f'{filename} (modified {dt})', 'green')
     
     return filename
