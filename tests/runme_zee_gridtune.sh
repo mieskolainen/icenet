@@ -32,7 +32,7 @@ DEFAULT_CONFIG="tune0_EEm"
 
 DEFAULT_BETA_ARRAY=(0.0 0.1)
 DEFAULT_SIGMA_ARRAY=(0.0 0.2)
-DEFAULT_SWD_VAR="[.*]"
+DEFAULT_SWD_VAR="['.*']"
 # -----------------------------------------------------------------------
 
 # Check if DATAPATH is set, otherwise use the default

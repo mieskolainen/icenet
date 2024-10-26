@@ -1326,16 +1326,16 @@ def train_models(data_trn, data_val, args=None):
             print(f'CTRL+C catched -- continue with the next model', 'red')
         
         except Exception as e:
-            print(e)
             prints.printbar('*')
-            print(f'Exception occured, check the model definition! -- continue', 'red')
+            print(f'Exception occured: \n {e} \n', 'red')
+            print(f"Check the model '{ID}' definition: training failed -- continue!", 'red')
             prints.printbar('*')
             exceptions += 1
     
     print(f'[done]', 'yellow')
     
     if exceptions > 0:
-        raise Exception(__name__ + f'.train_models: Number of fatal exceptions = {exceptions} [check your data / model definitions -- some model did not train]')
+        raise Exception(__name__ + f'.train_models: Fatal exceptions = {exceptions} [check your data, models.yml and --supertune]')
 
     return True
 
@@ -1630,11 +1630,12 @@ def evaluate_models(data=None, info=None, args=None):
                 raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
     
     except Exception as e:
-        print(e)
         prints.printbar('*')
-        print(f'Exception occured, check your steering cards! -- continue', 'red')
+        print(e, 'red')
+        print(f'Exception occured, check your steering cards and training phase! -- exit', 'red')
         prints.printbar('*')
-        exceptions += 1
+        
+        return False
     
     ## Multiple model comparisons
     plot_XYZ_multiple_models(targetdir=targetdir, args=args)
@@ -1659,9 +1660,6 @@ def evaluate_models(data=None, info=None, args=None):
         pickle.dump(resdict, file, protocol=pickle.HIGHEST_PROTOCOL)
     
     print(f'[done]', 'yellow')
-    
-    if exceptions > 0:
-        raise Exception(__name__ + f'.evaluate_models: Number of fatal exceptions = {exceptions} [check your input -- results or labelling may be corrupted now]')
     
     return True
 
