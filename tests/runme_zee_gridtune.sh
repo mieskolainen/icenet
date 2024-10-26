@@ -33,29 +33,29 @@ DEFAULT_SIGMA_ARRAY=(0.0 0.2)
 DEFAULT_SWD_VAR="[.*]"
 # -----------------------------------------------------------------------
 
-# Check if BETA_ARRAY is set, otherwise use the default
-if [ -z "${BETA_ARRAY+x}" ]; then
-  BETA_ARRAY="$DEFAULT_BETA_ARRAY"
-fi
-
-# Check if SIGMA_ARRAY is set, otherwise use the default
-if [ -z "${SIGMA_ARRAY+x}" ]; then
-  SIGMA_ARRAY="$DEFAULT_SIGMA_ARRAY"
-fi
-
-# Check if SWD_VAR is set, otherwise use the default
-if [ -z "${SWD_VAR+x}" ]; then
-  SWD_VAR="$DEFAULT_SWD_VAR"
-fi
-
 # Check if DATAPATH is set, otherwise use the default
 if [ -z "${DATAPATH+x}" ]; then
-  DATAPATH="$DEFAULT_DATAPATH"
+  DATAPATH=${DEFAULT_DATAPATH}
 fi
 
 # Check if CONFIG is set, otherwise use the default
 if [ -z "${CONFIG+x}" ]; then
-  CONFIG="$DEFAULT_CONFIG"
+  CONFIG=${DEFAULT_CONFIG}
+fi
+
+# Check if BETA_ARRAY is set, otherwise use the default
+if [ -z "${BETA_ARRAY+x}" ]; then
+  BETA_ARRAY=${DEFAULT_BETA_ARRAY}
+fi
+
+# Check if SIGMA_ARRAY is set, otherwise use the default
+if [ -z "${SIGMA_ARRAY+x}" ]; then
+  SIGMA_ARRAY=${DEFAULT_SIGMA_ARRAY}
+fi
+
+# Check if SWD_VAR is set, otherwise use the default
+if [ -z "${SWD_VAR+x}" ]; then
+  SWD_VAR=${DEFAULT_SWD_VAR}
 fi
 
 # Handle maxevents as before
@@ -65,9 +65,6 @@ else
   MAX=""
 fi
 
-# Now DATAPATH and CONFIG are guaranteed to have values
-echo "DATAPATH is set to $DATAPATH"
-echo "CONFIG is set to $CONFIG"
 
 # -----------------------------------------------------------------------
 # Initialization (Stage 1 training and pickle file creation)
