@@ -10,6 +10,8 @@
 # from `icenet/setenv.sh`, which are set automatically, when one follows the
 # instructions below.
 # 
+# A. When GRID_ID=-1 and GRID_NODES=1 --> Stage 1 training and cache file production.
+# B. When GRID_ID=0(1,2,...) and GRID_NODES=N --> Training with different parameters.
 # 
 # Step 1. See files under tests/zee and modify relevant variables there (do not modify here)
 # 
