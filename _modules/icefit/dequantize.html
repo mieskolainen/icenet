@@ -515,13 +515,17 @@
   <h1>Source code for icefit.dequantize</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Inverse CDF based dequantizer of integer valued (countably finite) amplitudes</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="c1"># ------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="U">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.dequantize.U">[docs]</a>
@@ -605,6 +609,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dequantized x values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;n_interp: </span><span class="si">{</span><span class="n">n_interp</span><span class="si">}</span><span class="s1"> | kind = </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>   <span class="c1"># PDF not given, construct empirical PDF</span>
         <span class="n">theta</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
