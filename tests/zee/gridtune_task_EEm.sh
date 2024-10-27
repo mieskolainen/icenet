@@ -18,4 +18,11 @@ SIGMA_ARRAY=(0.0 0.025 0.05 0.1 0.2)
 #SWD_VAR="['.*']" # all
 SWD_VAR="['fixedGridRhoAll', 'probe_eta', 'probe_pt']"
 
+# ---------------------------------------
+
+# ** icenet/setenv.sh uses these **
+export HTC_PROCESS_ID=$1
+export HTC_QUEUE_SIZE=$2
+export HTC_CLUSTER_ID=$3
+
 source $ICEPATH/tests/zee/helper.sh

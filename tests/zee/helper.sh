@@ -7,11 +7,6 @@
 echo "Grid tuning job started"
 pwd
 
-# ** icenet/setenv.sh uses these **
-export HTC_PROCESS_ID=$1
-export HTC_QUEUE_SIZE=$2
-export HTC_CLUSTER_ID=$3
-
 # Init conda
 source $SETCONDA
 conda activate icenet
