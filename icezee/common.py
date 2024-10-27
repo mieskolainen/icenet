@@ -11,6 +11,8 @@ import os
 from icenet.tools import io
 from icenet.tools import aux
 
+from icefit import dequantize
+
 # ------------------------------------------
 from icenet import print
 # ------------------------------------------

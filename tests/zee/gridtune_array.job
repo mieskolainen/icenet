@@ -1,6 +1,6 @@
 # Array job
 
-executable     = gridtune_task.sh
+executable     = task.sh
 arguments      = "$(PROCESS) 4 $(ClusterId)"
 error          = logs/gridtune_array.$(CLUSTER).$(PROCESS).out
 output         = logs/gridtune_array.$(CLUSTER).$(PROCESS).output

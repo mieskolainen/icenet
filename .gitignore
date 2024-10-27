@@ -6,6 +6,7 @@
 *.profile
 *.exe
 *.hd5
+*.parquet
 *.pkl
 *.pt
 *.zip

@@ -66,7 +66,7 @@ train_runmode:
 
   tech: &TECH
     concat_max_pickle: 32           # (technical) [Recursive] concatenation max size, adjust this if encounter problems e.g. with awkward ("127 limit")
-
+  
   pre_transform: &PRE_TRANSFORM       # Done inside common.py
 
     active: False

@@ -29,38 +29,39 @@
 
 DEFAULT_DATAPATH="./actions-stash/input/icezee"
 DEFAULT_CONFIG="tune0_EEm"
+DEFAULT_MODELTAG="none"
 
 DEFAULT_BETA_ARRAY=(0.0 0.1)
 DEFAULT_SIGMA_ARRAY=(0.0 0.2)
 DEFAULT_SWD_VAR="['.*']"
 # -----------------------------------------------------------------------
 
-# Check if DATAPATH is set, otherwise use the default
+# Check if is set, otherwise use the default
+
 if [ -z "${DATAPATH+x}" ]; then
   DATAPATH=${DEFAULT_DATAPATH}
 fi
 
-# Check if CONFIG is set, otherwise use the default
 if [ -z "${CONFIG+x}" ]; then
   CONFIG=${DEFAULT_CONFIG}
 fi
 
-# Check if BETA_ARRAY is set, otherwise use the default
+if [ -z "${MODELTAG+x}" ]; then
+  MODELTAG=${DEFAULT_MODELTAG}
+fi
+
 if [ -z "${BETA_ARRAY+x}" ]; then
   BETA_ARRAY=${DEFAULT_BETA_ARRAY}
 fi
 
-# Check if SIGMA_ARRAY is set, otherwise use the default
 if [ -z "${SIGMA_ARRAY+x}" ]; then
   SIGMA_ARRAY=${DEFAULT_SIGMA_ARRAY}
 fi
 
-# Check if SWD_VAR is set, otherwise use the default
 if [ -z "${SWD_VAR+x}" ]; then
   SWD_VAR=${DEFAULT_SWD_VAR}
 fi
 
-# Handle maxevents as before
 if [ ${maxevents+x} ]; then 
   MAX="--maxevents $maxevents"
 else 
@@ -75,12 +76,12 @@ fi
 
 if [[ $GRID_ID == -1 && $GRID_NODES == 1 ]]; then
 
-  python analysis/zee.py --runmode genesis $MAX --config ${CONFIG}.yml --datapath $DATAPATH
+  python analysis/zee.py --runmode genesis $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH
   
-  python analysis/zee.py --runmode train $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+  python analysis/zee.py --runmode train $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
     --modeltag GRIDTUNE --run_id "INIT" --compute 0
   
-  python analysis/zee.py --runmode eval $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+  python analysis/zee.py --runmode eval $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
     --modeltag GRIDTUNE --run_id "INIT" --compute 0
   
   return 0 # do not use exit
@@ -171,15 +172,15 @@ echo $SUPERTUNE
 echo ""
 
 # 4. Run
-python analysis/zee.py --runmode genesis $MAX --config ${CONFIG}.yml --datapath $DATAPATH 
+python analysis/zee.py --runmode genesis $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH 
 
-python analysis/zee.py --runmode train   $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+python analysis/zee.py --runmode train   $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
   --modeltag GRIDTUNE --run_id $RUN_ID --supertune "${SUPERTUNE}" # Note " "
 
-python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
   --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "minloss" --supertune "models.iceboost_swd.readmode=-1" 
 
-python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH \
+python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
   --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "last"    --supertune "models.iceboost_swd.readmode=-2" 
 
 done

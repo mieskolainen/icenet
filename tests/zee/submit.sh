@@ -1,28 +1,31 @@
 #!/bin/bash
 #
-# (do not modify this file)
+# (Do not modify this file)
 # 
 # Condor submission with first init job and then
-# an array job once that is finished
-# 
-# Emulating DAGMan without using it.
-# 
-# Run with: source submit.sh (execute the command in the same folder)
+# an array job once that is finished. Emulating DAGMan without using it.
+#
+# This file expects variable `TASK_SCRIPT` set externally. See README.md.
 # 
 # m.mieskolainen@imperial.ac.uk, 2024
 
 mkdir logs -p
 
-TASK_SCRIPT="gridtune_task.sh"
+# Fixed
 INIT_JOB="gridtune_init.job"
 ARRAY_JOB="gridtune_array.job"
 PERIOD=15
 
+# Replace the line and save to the temporary file
+TEMP_FILE="temp_$(basename "${INIT_JOB}")"
+sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" $INIT_JOB > $TEMP_FILE
+
 # Submit the first job
 echo "Submitting init job"
-FIRST_JOB_ID=$(condor_submit $INIT_JOB | awk '/submitted to cluster/ {print int($6)}')
+FIRST_JOB_ID=$(condor_submit $TEMP_FILE | awk '/submitted to cluster/ {print int($6)}')
 echo " "
-cat $INIT_JOB
+cat $TEMP_FILE
+rm $TEMP_FILE
 
 # Check if job submission was successful
 if [[ -z "$FIRST_JOB_ID" ]]; then
@@ -72,6 +75,12 @@ done
 # Submit the array job
 echo ""
 echo "Submitting array job"
-condor_submit $ARRAY_JOB
+
+# Create temp file
+TEMP_FILE="temp_$(basename "${ARRAY_JOB}")"
+sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" $ARRAY_JOB > $TEMP_FILE
+
+condor_submit $TEMP_FILE
 echo " "
-cat $ARRAY_JOB
+cat $TEMP_FILE
+rm $TEMP_FILE

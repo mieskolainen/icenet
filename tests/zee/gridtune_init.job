@@ -1,6 +1,6 @@
 # Initialization job
 
-executable     = gridtune_task.sh
+executable     = task.sh
 arguments      = "-1 1 $(ClusterId)"
 error          = logs/gridtune_init.$(CLUSTER).out
 output         = logs/gridtune_init.$(CLUSTER).output

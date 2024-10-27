@@ -1,12 +1,16 @@
 # Inverse CDF based dequantizer of integer valued (countably finite) amplitudes
 #
-# m.mieskolainen@imperial.ac.uk, 2023
+# m.mieskolainen@imperial.ac.uk, 2024
 
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy
 import numba
 from tqdm import tqdm
+
+# ------------------------------------------
+from icenet import print
+# ------------------------------------------
 
 def U(n, a, b):
     """
@@ -76,6 +80,8 @@ def iDQF(x, theta=None, pvals=None, N_buffer=int(1e4), n_interp=int(1e4), kind='
     Returns:
         dequantized x values
     """
+    
+    print(f'n_interp: {n_interp} | kind = {kind}')
     
     if theta is None:   # PDF not given, construct empirical PDF
         theta, counts = np.unique(x, return_counts=True)
