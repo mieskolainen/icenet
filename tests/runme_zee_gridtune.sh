@@ -33,6 +33,12 @@ DEFAULT_MODELTAG="none"
 
 DEFAULT_BETA_ARRAY=(0.0 0.1)
 DEFAULT_SIGMA_ARRAY=(0.0 0.2)
+DEFAULT_LR_ARRAY=(0.1)
+DEFAULT_GAMMA_ARRAY=(1.5)
+DEFAULT_MAXDEPTH_ARRAY=(13)
+DEFAULT_LAMBDA_ARRAY=(2.0)
+DEFAULT_ALPHA_ARRAY=(0.05)
+
 DEFAULT_SWD_VAR="['.*']"
 # -----------------------------------------------------------------------
 
@@ -50,13 +56,29 @@ if [ -z "${MODELTAG+x}" ]; then
   MODELTAG=${DEFAULT_MODELTAG}
 fi
 
+
 if [ -z "${BETA_ARRAY+x}" ]; then
   BETA_ARRAY=${DEFAULT_BETA_ARRAY}
 fi
-
 if [ -z "${SIGMA_ARRAY+x}" ]; then
   SIGMA_ARRAY=${DEFAULT_SIGMA_ARRAY}
 fi
+if [ -z "${LR_ARRAY+x}" ]; then
+  LR_ARRAY=${DEFAULT_LR_ARRAY}
+fi
+if [ -z "${GAMMA_ARRAY+x}" ]; then
+  GAMMA_ARRAY=${DEFAULT_GAMMA_ARRAY}
+fi
+if [ -z "${MAXDEPTH_ARRAY+x}" ]; then
+  MAXDEPTH_ARRAY=${DEFAULT_MAXDEPTH_ARRAY}
+fi
+if [ -z "${LAMBDA_ARRAY+x}" ]; then
+  LAMBDA_ARRAY=${DEFAULT_LAMBDA_ARRAY}
+fi
+if [ -z "${ALPHA_ARRAY+x}" ]; then
+  ALPHA_ARRAY=${DEFAULT_ALPHA_ARRAY}
+fi
+
 
 if [ -z "${SWD_VAR+x}" ]; then
   SWD_VAR=${DEFAULT_SWD_VAR}
@@ -138,7 +160,7 @@ assign_combinations() {
 # Combinatorics and indices
 
 # Generate combinations
-COMBINATIONS=($(generate_combinations BETA_ARRAY[@] SIGMA_ARRAY[@]))
+COMBINATIONS=($(generate_combinations BETA_ARRAY[@] SIGMA_ARRAY[@] LR_ARRAY[@] GAMMA_ARRAY[@] MAXDEPTH_ARRAY[@] LAMBDA_ARRAY[@] ALPHA_ARRAY[@]))
 
 # Assign combinations and store result in an array
 assign_combinations "${#COMBINATIONS[@]}" $GRID_ID $GRID_NODES indices
@@ -154,15 +176,20 @@ for (( i = START_INDEX; i < END_INDEX; i++ )); do
 COMBINATION="${COMBINATIONS[$i]}"
 
 # 1. Extract individual variable values from the combination string
-IFS=',' read -r BETA SIGMA <<< "$COMBINATION"
+IFS=',' read -r BETA SIGMA LR GAMMA MAXDEPTH LAMBDA ALPHA <<< "$COMBINATION"
 
 # 2. Label the run
-RUN_ID="point_${i}__beta_${BETA}__sigma_${SIGMA}"
+RUN_ID="beta_${BETA}__sigma_${SIGMA}__lr_${LR}__gamma_${GAMMA}__maxdepth_${MAXDEPTH}__lambda_${LAMBDA}__alpha_${ALPHA}"
 
 # 3. Define tune command
 SUPERTUNE="\
 models.iceboost_swd.SWD_param.beta=${BETA} \
 models.iceboost_swd.opt_param.noise_reg=${SIGMA} \
+models.iceboost_swd.model_param.learning_rate=${LR} \
+models.iceboost_swd.model_param.gamma=${GAMMA} \
+models.iceboost_swd.model_param.max_depth=${MAXDEPTH} \
+models.iceboost_swd.model_param.reg_lambda=${LAMBDA} \
+models.iceboost_swd.model_param.reg_alpha=${ALPHA} \
 models.iceboost_swd.SWD_param.var=${SWD_VAR} \
 "
 
