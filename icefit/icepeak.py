@@ -824,8 +824,12 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     ## Create fit functions
     
     # Samples on x-axis between [first_edge, ..., last_edge]
-    index = np.where(range_mask)[0]
-    x = np.linspace(np.min(bin_edges[index]), np.max(bin_edges[index+1]), int(nsamples))
+    #index = np.where(range_mask)[0]
+    #x = np.linspace(np.min(bin_edges[index]), np.max(bin_edges[index+1]), int(nsamples))
+    
+    # Samples on x-axis between [fit central value, ..., last central value]
+    # ** This should be consistent with fitfunc trapz normalization **
+    x = np.linspace(np.min(cbins[fitbin_mask]), np.max(cbins[fitbin_mask]), int(nsamples))
     
     # Loop over function components
     y = {}
@@ -902,7 +906,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
 
     for key in N.keys():
         print(f"N_{key}: {N[key]:0.1f} +- {N_err[key]:0.1f}")
-
+    
     # --------------------------------------------------------------------
     # Plot it
 
@@ -947,7 +951,10 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     
     # Plot total fit
     ytot = fitfunc(x=x, par=par, par_fixed=par_fixed)
-    ftot = interpolate.interp1d(x=x, y=ytot, kind='quadratic')
+    
+    # Check for duplicates (quadratic cannot handle)
+    kind = 'linear' if len(x) != len(np.unique(x)) else 'quadratic'
+    ftot = interpolate.interp1d(x=x, y=ytot, kind=kind)
     
     plt.plot(x, ytot, label="Total fit", color=(0.5,0.5,0.5))
     
