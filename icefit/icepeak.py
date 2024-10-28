@@ -814,7 +814,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
 
     counts      = d['counts']
     errors      = d['errors']
-    bin_edges   = d['bin_edges']
+    #bin_edges   = d['bin_edges']
     cbins       = d['bin_center']
     range_mask  = d['range_mask']
     fitbin_mask = d['fitbin_mask']
@@ -829,7 +829,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     
     # Samples on x-axis between [fit central value, ..., last central value]
     # ** This should be consistent with fitfunc trapz normalization **
-    x = np.linspace(np.min(cbins[fitbin_mask]), np.max(cbins[fitbin_mask]), int(nsamples))
+    x = np.linspace(np.min(cbins[range_mask]), np.max(cbins[range_mask]), int(nsamples))
     
     # Loop over function components
     y = {}
