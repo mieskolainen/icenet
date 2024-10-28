@@ -521,6 +521,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             mask = fitbin_mask[key]
             if np.sum(mask) == 0: return 1e9
             
+            # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
             y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
             
             residual = (y_pred - counts[key][mask]) / errors[key][mask]
@@ -541,6 +542,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             mask = fitbin_mask[key]
             if np.sum(mask) == 0: return 1e9
             
+            # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
             y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
             
             T = huber_lossfunc(y_true=counts[key][mask], y_pred=y_pred,
@@ -561,6 +563,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             mask = fitbin_mask[key]
             if np.sum(mask) == 0: return 1e9
 
+            # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
             y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
             
             valid  = (y_pred > 0)
@@ -633,7 +636,8 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     # --------------------------------------------------------------------
     # This is 'joint' chi2 for 'dual' type fits
     
-    print(f"[{param['fit_type']}] chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f}")
+    str = 'joint metric' if 'dual' in param['fit_type'] else 'single metric'
+    print(f"[{param['fit_type']}] chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f} [{str}]")
 
     return par, cov, var2pos
 
@@ -931,18 +935,19 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     ## ------------------------------------------------
     # Compute chi2 and ndf
     
-    yf   = fitfunc(x=cbins, par=par, par_fixed=par_fixed)
-    chi2 = np.sum( (yf[fitbin_mask] - counts[fitbin_mask])**2 / (errors[fitbin_mask])**2 )
+    # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
+    yf   = fitfunc(x=cbins[fitbin_mask], par=par, par_fixed=par_fixed)
+    chi2 = np.sum(((yf - counts[fitbin_mask]) / errors[fitbin_mask])**2)
     ndof = get_ndf(fitbin_mask=fitbin_mask, par=par, fit_type=param['fit_type'])
     
     # --------------------------------------------------
     # Fit plots
 
     plt.sca(ax[0])
-
+    
     # Plot total fit
     ytot = fitfunc(x=x, par=par, par_fixed=par_fixed)
-    ftot = interpolate.interp1d(x=x, y=ytot)
+    ftot = interpolate.interp1d(x=x, y=ytot, kind='quadratic')
     
     plt.plot(x, ytot, label="Total fit", color=(0.5,0.5,0.5))
     
@@ -967,6 +972,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     # chi2 / ndf
     chi2_ndf = chi2 / ndof if ndof > 0 else -999
     title = f"$\\chi^2 / n_\\mathrm{{dof}} = {chi2:.2f} / {ndof:0.0f} = {chi2_ndf:.2f}$"
+    print(f'plot title: {title}')
     plt.title(title)
     
     # ---------------------------------------------------------------
