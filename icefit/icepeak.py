@@ -979,7 +979,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
 
         plt.plot(x, y[key], label=f"{key}: $N_{key} = {N[key]:.1f} \\pm {N_err[key]:.1f}$", color=color, linestyle=linestyle)
         i += 1
-
+    
     plt.ylim(bottom=0)
     plt.legend(fontsize=7)
 
