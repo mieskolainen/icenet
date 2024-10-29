@@ -373,15 +373,14 @@ def hist_decompose(h, param, techno):
     # Limit the fit range
     range_mask = (param['fitrange'][0] <= cbins) & (cbins <= param['fitrange'][1])
     
-    # Fitbins mask, i.e. which are within 'fitrange' and are positive definite
-    posdef = (errors > techno['zerobin']) & (counts > techno['zerobin'])
-    fitbin_mask = range_mask & posdef
-
+    # Check positive definiteness within the range-limited errors and counts
+    fitbin_mask = (errors[range_mask] > techno['zerobin']) & (counts[range_mask] > techno['zerobin'])
+    
     # Counts in the fit
-    num_counts_in_fit = np.sum(counts[fitbin_mask])
+    num_counts_in_fit = np.sum(counts[range_mask][fitbin_mask])
     
     # For differential normalization
-    index   = np.where(fitbin_mask)[0]
+    index   = np.where(range_mask)[0]
     mean_dx = np.mean(edges[index + 1] - edges[index])
     
     out = {'fitbin_mask': fitbin_mask, 'range_mask': range_mask,
@@ -486,6 +485,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     Returns:
         par, cov, var2pos
     """
+    print(__name__ + f'.binned_1D_fit:')
     
     h = {}
     for key in hist.keys():
@@ -495,6 +495,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     errors            = copy.deepcopy(h)
     cbins             = copy.deepcopy(h)
     fitbin_mask       = copy.deepcopy(h)
+    range_mask        = copy.deepcopy(h)
     num_counts_in_fit = 0
     
     # Pick single or two histograms (when 'dual' modes)
@@ -507,6 +508,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         errors[key]        = d['errors']
         cbins[key]         = d['bin_center']
         fitbin_mask[key]   = d['fitbin_mask']
+        range_mask[key]    = d['range_mask']
         num_counts_in_fit += d['num_counts_in_fit'] 
     
 
@@ -518,13 +520,14 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         # Over histograms
         for key in counts.keys():
             
-            mask = fitbin_mask[key]
-            if np.sum(mask) == 0: return 1e9
+            rmask = range_mask[key]
+            fmask = fitbin_mask[key]
+            if np.sum(fmask) == 0: return 1e9
             
-            # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed)
             
-            residual = (y_pred - counts[key][mask]) / errors[key][mask]
+            residual = (y_pred[fmask] - counts[key][rmask][fmask]) / errors[key][rmask][fmask]
 
             total += np.sum(residual**2)
 
@@ -539,14 +542,15 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         # Over histograms
         for key in counts.keys():
             
-            mask = fitbin_mask[key]
-            if np.sum(mask) == 0: return 1e9
+            rmask = range_mask[key]
+            fmask = fitbin_mask[key]
+            if np.sum(fmask) == 0: return 1e9
             
-            # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed)
             
-            T = huber_lossfunc(y_true=counts[key][mask], y_pred=y_pred,
-                               sigma=errors[key][mask], delta=delta)
+            T = huber_lossfunc(y_true=counts[key][rmask][fmask], y_pred=y_pred[fmask],
+                               sigma=errors[key][rmask][fmask], delta=delta)
             
             total += T
 
@@ -560,16 +564,17 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         # Over histograms
         for key in counts.keys():
             
-            mask = fitbin_mask[key]
-            if np.sum(mask) == 0: return 1e9
-
-            # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][mask], par, par_fixed)
+            rmask = range_mask[key]
+            fmask = fitbin_mask[key]
+            if np.sum(fmask) == 0: return 1e9
             
-            valid  = (y_pred > 0)
+            # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed)
+            
+            valid  = (y_pred > 0) & fmask
             if np.sum(valid) == 0: return 1e9
             
-            T1 = counts[key][mask][valid] * np.log(y_pred[valid])
+            T1 = counts[key][rmask][valid] * np.log(y_pred[valid])
             T2 = y_pred[valid]
 
             total += (-1)*(np.sum(T1) - np.sum(T2))
@@ -608,7 +613,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         ndof = 0
         for key in fitbin_mask.keys():
             ndof += np.sum(fitbin_mask[key])
-        ndof -= len(par) # data - param
+        ndof -= len(par) # num_data - num_param
         
         trials += 1
         
@@ -637,8 +642,9 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     # This is 'joint' chi2 for 'dual' type fits
     
     str = 'joint metric' if 'dual' in param['fit_type'] else 'single metric'
-    print(f"[{param['fit_type']}] chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f} [{str}]")
-
+    cprint(f"[{param['fit_type']}] chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f} [{str}]", 'yellow')
+    print('')
+    
     return par, cov, var2pos
 
 def edge_cases(par, cov, techno, num_counts_in_fit, chi2, ndof):
@@ -647,27 +653,27 @@ def edge_cases(par, cov, techno, num_counts_in_fit, chi2, ndof):
     """
     
     if cov is None:
-        print('Uncertainty estimation failed (Minuit cov = None), return cov = -1', 'red')
+        cprint('Uncertainty estimation failed (Minuit cov = None), return cov = -1', 'red')
         cov = -1 * np.ones((len(par), len(par)))
     
     if  num_counts_in_fit < techno['min_count']:
-        print(f'Input histogram count < min_count = {techno["min_count"]} ==> fit not reliable', 'red')
+        cprint(f'Input histogram count < min_count = {techno["min_count"]} ==> fit not reliable', 'red')
         if techno['set_to_nan']:
-            print('--> Setting parameters to NaN', 'red')
+            cprint('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
     if ndof < techno['min_ndof']:
-        print(f'Fit ndf = {ndof} < {techno["min_ndof"]} ==> fit not reliable', 'red')
+        cprint(f'Fit ndf = {ndof} < {techno["min_ndof"]} ==> fit not reliable', 'red')
         if techno['set_to_nan']:
-            print('--> Setting parameters to NaN', 'red')
+            cprint('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
     elif (chi2 / ndof) > techno['max_chi2']:
-        print(f'Fit chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesfull', 'red')
+        cprint(f'Fit chi2/ndf = {chi2/ndof} > {techno["max_chi2"]} ==> fit not succesfull', 'red')
         if techno['set_to_nan']:
-            print('--> Setting parameters to NaN', 'red')
+            cprint('--> Setting parameters to NaN', 'red')
             par = np.nan*np.ones(len(par))
             cov = -1 * np.ones((len(par), len(par)))
 
@@ -808,7 +814,8 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     Returns:
         output dictionary
     """
-
+    print(__name__ + f'.analyze_1D_fit:')
+    
     h = TH1_to_numpy(hist)
     d = hist_decompose(h, param=param, techno=techno)
 
@@ -843,7 +850,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
             y[key][~np.isfinite(y[key])] = 0.0
     
     print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
-    print(f'Input bin count sum: {np.sum(counts[fitbin_mask]):0.1f} (in fit)')    
+    print(f'Input bin count sum: {np.sum(counts[range_mask][fitbin_mask]):0.1f} (in fit)')    
     
     # --------------------------------------------------------------------
     # Compute count value integrals inside fitrange
@@ -897,9 +904,9 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
         else:
             print('Missing covariance matrix, using Poisson (or weighted count) error as a proxy')
             
-            N_sum = np.sum(counts[fitbin_mask])
+            N_sum = np.sum(counts[range_mask][fitbin_mask])
             if N_sum > 0:
-                N_err[key] = (N[key] / N_sum) * np.sqrt(np.sum(errors[fitbin_mask]**2))
+                N_err[key] = (N[key] / N_sum) * np.sqrt(np.sum(errors[range_mask][fitbin_mask]**2))
     
     # --------------------------------------------------------------------
     # Print out
@@ -932,16 +939,16 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     fig, ax = iceplot.create_axes(**obs_M, ratio_plot=True)
     
     ax[0].errorbar(x=cbins, y=counts, yerr=errors, color=(0,0,0), 
-                   label=f'Data, $N = {np.sum(counts[fitbin_mask]):0.1f}$ (in fit)', **iceplot.errorbar_style)
+                   label=f'Data, $N = {np.sum(counts[range_mask][fitbin_mask]):0.1f}$ (in fit)', **iceplot.errorbar_style)
     ax[0].legend(frameon=False)
     ax[0].set_ylabel('Counts / bin')
 
     ## ------------------------------------------------
     # Compute chi2 and ndf
     
-    # ** Note use x=cbins[mask] here, due to trapz integral in fitfunc ! **
-    yf   = fitfunc(x=cbins[fitbin_mask], par=par, par_fixed=par_fixed)
-    chi2 = np.sum(((yf - counts[fitbin_mask]) / errors[fitbin_mask])**2)
+    # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
+    yf   = fitfunc(x=cbins[range_mask], par=par, par_fixed=par_fixed)
+    chi2 = np.sum(((yf[fitbin_mask] - counts[range_mask][fitbin_mask]) / errors[range_mask][fitbin_mask])**2)
     ndof = get_ndf(fitbin_mask=fitbin_mask, par=par, fit_type=param['fit_type'])
     
     # --------------------------------------------------
@@ -989,11 +996,11 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     iceplot.plot_horizontal_line(ax[1], ypos=0.0)
 
     # Compute pulls
-    pulls = (ftot(cbins[fitbin_mask]) - counts[fitbin_mask]) / errors[fitbin_mask]
+    pulls = (ftot(cbins[range_mask][fitbin_mask]) - counts[range_mask][fitbin_mask]) / errors[range_mask][fitbin_mask]
     pulls[~np.isfinite(pulls)] = 0.0
     
     # Plot pulls
-    ax[1].bar(x=cbins[fitbin_mask], height=pulls,
+    ax[1].bar(x=cbins[range_mask][fitbin_mask], height=pulls,
               width=cbins[1]-cbins[0], align='center', color=(0.7,0.7,0.7), label=f'Fit')
     
     label = f'(fit - count) / $\\sigma$'

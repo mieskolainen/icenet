@@ -34,7 +34,7 @@ from icefit import icepeak
 
 import ray
 
-__VERSION__ = 0.01
+__VERSION__ = 0.02
 __AUTHOR__  = 'm.mieskolainen@imperial.ac.uk'
 
 # ========================================================================
@@ -520,7 +520,7 @@ def run_jpsi_tagprobe(inputparam, savepath):
                 scale     = np.nan
                 scale_err = np.nan
             
-            print(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n')
+            cprint(f'Data / MC:  {scale:0.3f} +- {scale_err:0.3f} (scale factor) \n', 'yellow')
             # --------------------------------------- 
             
             ### Save results
