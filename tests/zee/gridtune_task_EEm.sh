@@ -9,7 +9,7 @@ ICEPATH="/vols/cms/mmieskol/icenet"
 
 DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
 CONFIG="tune0_EEm"
-MODELTAG="none"
+MODELTAG="GRIDTUNE"
 maxevents=500000
 
 BETA_ARRAY=(0.0 0.0025 0.005 0.01 0.02 0.04)

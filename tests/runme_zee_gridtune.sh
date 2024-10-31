@@ -29,7 +29,7 @@
 
 DEFAULT_DATAPATH="./actions-stash/input/icezee"
 DEFAULT_CONFIG="tune0_EEm"
-DEFAULT_MODELTAG="none"
+DEFAULT_MODELTAG="GRIDTUNE"
 
 DEFAULT_BETA_ARRAY=(0.0 0.1)
 DEFAULT_SIGMA_ARRAY=(0.0 0.2)
@@ -100,11 +100,11 @@ if [[ $GRID_ID == -1 && $GRID_NODES == 1 ]]; then
 
   python analysis/zee.py --runmode genesis $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH
   
-  python analysis/zee.py --runmode train $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-    --modeltag GRIDTUNE --run_id "INIT" --compute 0
+  python analysis/zee.py --runmode train   $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
+    --run_id "INIT" --compute 0
   
-  python analysis/zee.py --runmode eval $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-    --modeltag GRIDTUNE --run_id "INIT" --compute 0
+  python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
+    --run_id "INIT" --compute 0
   
   return 0 # do not use exit
 fi
@@ -202,12 +202,12 @@ echo ""
 python analysis/zee.py --runmode genesis $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH 
 
 python analysis/zee.py --runmode train   $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-  --modeltag GRIDTUNE --run_id $RUN_ID --supertune "${SUPERTUNE}" # Note " "
+  --run_id $RUN_ID --supertune "${SUPERTUNE}" # Note " "
 
 python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-  --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "minloss" --supertune "models.iceboost_swd.readmode=-1" 
+  --run_id $RUN_ID --evaltag "minloss" --supertune "models.iceboost_swd.readmode=-1" 
 
 python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-  --modeltag GRIDTUNE --run_id $RUN_ID --evaltag "last"    --supertune "models.iceboost_swd.readmode=-2" 
+  --run_id $RUN_ID --evaltag "last"    --supertune "models.iceboost_swd.readmode=-2" 
 
 done
