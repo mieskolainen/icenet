@@ -283,6 +283,15 @@ def highres_x(x: np.ndarray, xfactor: float=0.2, Nmin: int=256):
     e = xfactor * (x[0] + x[-1])/2
     return np.linspace(x[0]-e, x[-1]+e, max(len(x), Nmin))
 
+def logzero(x: np.ndarray):
+    """
+    log(x) for x > 0 and 0 otherwise elementwise
+    """
+    r    = np.zeros_like(x)
+    mask = (x > 0)
+    r[mask] = np.log(x[mask])
+    return r
+
 def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
                      par_index: List[int], norm: bool=True, xfactor: float=0.2, Nmin: int=256):
     """
@@ -413,14 +422,15 @@ def make_positive_semi_definite(cov_matrix: np.ndarray, epsilon=1e-6):
         Adjusted covariance matrix
     """
     
-    new_cov        = np.array(cov_matrix)
-    min_eigenvalue = np.min(np.linalg.eigvalsh(new_cov))
+    # Check eigenvalues of the matrix
+    min_eigenvalue = np.min(np.linalg.eigvalsh(cov_matrix))
     
-    if min_eigenvalue < 0:
-        new_cov -= min_eigenvalue * np.eye(new_cov.shape[0])
-    new_cov += epsilon * np.eye(new_cov.shape[0])
+    # Only adjust if the matrix has negative eigenvalues or if we need to add epsilon
+    if min_eigenvalue < 0 or epsilon > 0:
+        adjustment = max(0, -min_eigenvalue + epsilon)
+        cov_matrix = cov_matrix + adjustment * np.eye(cov_matrix.shape[0])
     
-    return new_cov
+    return cov_matrix
 
 def get_ndf(fitbin_mask: np.ndarray, par: np.ndarray, fit_type: str):
     """
@@ -469,7 +479,6 @@ def huber_lossfunc(y_true: np.ndarray, y_pred: np.ndarray, sigma: np.ndarray, de
 
     return np.sum(loss)
 
-
 def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixed: dict):
     """
     Main fitting function for a binned fit of multiple histograms
@@ -485,7 +494,6 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     Returns:
         par, cov, var2pos
     """
-    print(__name__ + f'.binned_1D_fit:')
     
     h = {}
     for key in hist.keys():
@@ -496,7 +504,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     cbins             = copy.deepcopy(h)
     fitbin_mask       = copy.deepcopy(h)
     range_mask        = copy.deepcopy(h)
-    num_counts_in_fit = 0
+    num_counts_in_fit = []
     
     # Pick single or two histograms (when 'dual' modes)
     for key in h.keys():
@@ -509,13 +517,13 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         cbins[key]         = d['bin_center']
         fitbin_mask[key]   = d['fitbin_mask']
         range_mask[key]    = d['range_mask']
-        num_counts_in_fit += d['num_counts_in_fit'] 
+        num_counts_in_fit.append( d['num_counts_in_fit'] )
     
 
     ### [Chi2 loss function]
     def chi2_loss(par):
 
-        total = 0
+        tot = 0
         
         # Over histograms
         for key in counts.keys():
@@ -529,14 +537,14 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             
             residual = (y_pred[fmask] - counts[key][rmask][fmask]) / errors[key][rmask][fmask]
 
-            total += np.sum(residual**2)
+            tot += np.sum(residual**2)
 
-        return total
+        return tot
 
     ### [Huber loss function]
     def huber_loss(par):
 
-        total = 0
+        tot = 0
         delta = techno['huber_delta']
         
         # Over histograms
@@ -552,14 +560,14 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             T = huber_lossfunc(y_true=counts[key][rmask][fmask], y_pred=y_pred[fmask],
                                sigma=errors[key][rmask][fmask], delta=delta)
             
-            total += T
+            tot += T
 
-        return total
+        return tot
 
-    ### [Poissonian negative log-likelihood loss function]
+    ### [Poissonian negative delta log-likelihood loss function]
     def poiss_nll_loss(par):
         
-        total = 0
+        nll = 0
         
         # Over histograms
         for key in counts.keys():
@@ -571,69 +579,106 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
             y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed)
             
-            valid  = (y_pred > 0) & fmask
-            if np.sum(valid) == 0: return 1e9
+            # Bohm-Zech scale transform for weighted events (https://arxiv.org/abs/1309.1287)
+            # https://scikit-hep.org/iminuit/notebooks/weighted_histograms.html
+            s  = counts[key][rmask][fmask] / (errors[key][rmask][fmask]**2) # Per bin
             
-            T1 = counts[key][rmask][valid] * np.log(y_pred[valid])
-            T2 = y_pred[valid]
-
-            total += (-1)*(np.sum(T1) - np.sum(T2))
-
-        return total
-
+            n  = counts[key][rmask][fmask] # Observed
+            mu = y_pred[fmask]             # Predicted
+            
+            # Factor 2 x taken into account by setting `errordef = iminuit.Minuit.LIKELIHOOD`
+            
+            # Negative Delta log-likelihood with Bohm-Zech scale
+            nll += np.sum( s * (n * (logzero(n) - logzero(mu)) + mu - n) )
+            
+            # Simple Negative log-likelihood
+            #nll += np.sum(-n * logzero(mu) + mu)
+        
+        return nll
     
     # --------------------------------------------------------------------
+    
     loss_type = techno['loss_type']
 
     cprint(__name__ + f".binned_1D_fit: Executing fit with loss_type: '{loss_type}'", 'magenta')
     
     if   loss_type == 'chi2':
-        loss = chi2_loss
+        lossfunc = chi2_loss
     elif loss_type == 'huber':
-        loss = huber_loss
+        lossfunc = huber_loss
     elif loss_type == 'nll':
-        loss = poiss_nll_loss
+        lossfunc = poiss_nll_loss
     else:
         raise Exception(f'Unknown loss_type chosen <{loss_type}>')
-    # --------------------------------------------------------------------
     
-    trials = 0
-
-    while True:
-
+    # --------------------------------------------------------------------
+    # Optimization loop
+    
+    best_loss  = 1e20
+    best_trial = None
+    m1         = []
+    
+    trial = 0
+    
+    while trial < techno['trials']:
+        
+        start_values = generate_start_values(trial=trial, param=param, techno=techno)
+        
         # Execute optimizers
-        m1 = optimizer_execute(trials=trials, loss=loss, param=param, techno=techno)
+        m1.append(optimizer_execute(start_values, lossfunc=lossfunc, param=param, techno=techno))
+
+        if (m1[-1].fval < best_loss) or (trial == 0):
+            best_loss  = m1[-1].fval
+            best_trial = trial
         
-        ### Collect output
-        par     = m1.values
-        cov     = m1.covariance
-        var2pos = m1.var2pos
-        chi2    = chi2_loss(par)
-        
-        ndof = 0
-        for key in fitbin_mask.keys():
-            ndof += np.sum(fitbin_mask[key])
-        ndof -= len(par) # num_data - num_param
-        
-        trials += 1
-        
-        if (chi2 / ndof < techno['max_chi2']):
-            break
-        
-        # Could improve this logic (save the best trial if all are ~ weak, recover that)
-        elif trials == techno['max_trials']:
-            break
+        trial += 1
     
-    print(f'Parameters: {par}')
-    print(f'Covariance: {cov}')
+    # Pick the best
+    best_m1 = m1[best_trial]
+    
+    # --------------------------------------------------------------------    
+    # Finalize with stat. uncertainty analysis [migrad << hesse << minos (best)]
+    if techno['minos']:
+        try:
+            print(f'Computing MINOS stat. uncertainties')
+            best_m1.minos()
+        except Exception as e:
+            print(e)
+            cprint(f'Error occured with MINOS stat. uncertainty estimation, trying HESSE', 'red')
+            best_m1.hesse()
+    else:
+        print('Computing HESSE stat. uncertainties')
+        best_m1.hesse()
+    # --------------------------------------------------------------------    
+    
+    # --------------------------------------------------------------------
+    # Collect values
+    
+    var2pos = best_m1.var2pos
+    par     = best_m1.values
+    cov     = best_m1.covariance
+    chi2    = chi2_loss(par)
+    
+    # Calculate total DOF over each histogram (handles both single and dual fits)
+    ndof    = sum(np.sum(mask) for mask in fitbin_mask.values()) - best_m1.nfit
+    # -------------------------------
+    
+    print('')
+    cprint(f'Best trial number: {best_trial} | Loss: {best_loss:0.3E}')
+    cprint(f'Valid minimum: {best_m1.valid} | Accurate covariance: {best_m1.accurate}', 'magenta')
+    print('')
+    print(best_m1.params)
+    print(f'Covariance:')
+    print(cov)
 
     # --------------------------------------------------------------------
-    # Improve numerical stability
+    # Improve numerical stability of the covariance matrix
+    
     if cov is not None and techno['cov_eps'] > 0:
         cov = make_positive_semi_definite(cov, epsilon=techno['cov_eps'])
     
     # --------------------------------------------------------------------
-    ## Inspect special edge cases
+    # Inspect special edge cases
     
     par, cov = edge_cases(par=par, cov=cov, techno=techno,
                 num_counts_in_fit=num_counts_in_fit, chi2=chi2, ndof=ndof)
@@ -647,6 +692,46 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     
     return par, cov, var2pos
 
+def generate_start_values(trial, param, techno):
+    """
+    Get optimization starting values
+    
+    1. First the default starting values.
+    2. Then Gaussian local perturbations within limits.
+    3. Then global uniform random sample within limits.
+    """
+    
+    print('')
+    
+    if trial == 0:
+        
+        start_values = np.array(param['start_values'])
+        cprint(f"Trial = {trial} (Using default start values)", 'magenta')
+
+    elif trial < techno['trials'] // 2:
+        
+        start_values = np.zeros(len(param['start_values']))
+        cprint(f"Trial = {trial} (Gaussian perturbation around default start values within limits)", 'magenta')
+        for i in range(len(start_values)):
+            start_values[i] = np.clip(start_values[i] + techno['rand_sigma'] * np.random.randn(),
+                                    param['limits'][i][0], param['limits'][i][1])
+    else:
+        
+        start_values = np.zeros(len(param['start_values']))
+        cprint(f"Trial = {trial} (Uniform sampling of start values within hypercube limits)", 'magenta')
+        for i in range(len(param['start_values'])):
+            lower, upper = param['limits'][i]
+            start_values[i] = np.random.uniform(lower, upper)
+    
+    # --------------------------------------------------------------------
+    # Re-Set fixed parameter values, if True
+    for k in range(len(param['fixed'])):
+        if param['fixed'][k]:
+            start_values[k] = param['start_values'][k]
+    # --------------------------------------------------------------------
+    
+    return start_values
+
 def edge_cases(par, cov, techno, num_counts_in_fit, chi2, ndof):
     """
     Check edge cases after the fit
@@ -656,12 +741,13 @@ def edge_cases(par, cov, techno, num_counts_in_fit, chi2, ndof):
         cprint('Uncertainty estimation failed (Minuit cov = None), return cov = -1', 'red')
         cov = -1 * np.ones((len(par), len(par)))
     
-    if  num_counts_in_fit < techno['min_count']:
-        cprint(f'Input histogram count < min_count = {techno["min_count"]} ==> fit not reliable', 'red')
-        if techno['set_to_nan']:
-            cprint('--> Setting parameters to NaN', 'red')
-            par = np.nan*np.ones(len(par))
-            cov = -1 * np.ones((len(par), len(par)))
+    for i in range(len(num_counts_in_fit)):
+        if  num_counts_in_fit[i] < techno['min_count']:
+            cprint(f'Input histogram[{i}] count < min_count = {techno["min_count"]} ==> fit not reliable', 'red')
+            if techno['set_to_nan']:
+                cprint('--> Setting parameters to NaN', 'red')
+                par = np.nan*np.ones(len(par))
+                cov = -1 * np.ones((len(par), len(par)))
 
     if ndof < techno['min_ndof']:
         cprint(f'Fit ndf = {ndof} < {techno["min_ndof"]} ==> fit not reliable', 'red')
@@ -679,18 +765,10 @@ def edge_cases(par, cov, techno, num_counts_in_fit, chi2, ndof):
 
     return par, cov
 
-def optimizer_execute(trials, loss, param, techno):
+def optimizer_execute(start_values, lossfunc, param, techno):
     """
     Optimizer execution wrapper
     """
-    
-    if trials == 0:
-        start_values = param['start_values']
-    else:
-        # Randomly perturb around the default starting point and clip
-        start_values = param['start_values']
-        for i in range(len(start_values)):
-            start_values[i] = np.clip(start_values[i] + 0.2 * start_values[i] * np.random.randn(), param['limits'][i][0], param['limits'][i][1])
     
     # ------------------------------------------------------------
     # Nelder-Mead search from scipy
@@ -698,56 +776,73 @@ def optimizer_execute(trials, loss, param, techno):
         
         options = {'maxiter': techno['ncall_scipy_simplex'], 'disp': True}
 
-        res = minimize(loss, x0=start_values, method='nelder-mead', \
-            bounds=param['limits'] if techno['use_limits'] else None, options=options)
-        start_values = res.x
+        for _ in range(techno['ncall_scipy_simplex']): # Recursive calls
+            res = minimize(lossfunc, x0=start_values, method='nelder-mead', \
+                bounds=param['limits'] if techno['use_limits'] else None, options=options)
+            start_values = res.x
 
     # ------------------------------------------------------------
     # Mystic solver
     
     # Set search range limits
-    bounds = []
-    for i in range(len(param['limits'])):
-        bounds.append(param['limits'][i])
-
+    if techno['use_limits']:
+        bounds = []
+        for i in range(len(param['limits'])):
+            bounds.append(param['limits'][i])
+    else:
+        bounds = None
+    
     # Differential evolution 2 solver
     if techno['ncall_mystic_diffev2'] > 0:
         
-        x0 = start_values
-        start_values = diffev2(loss, x0=x0, bounds=bounds)
-        cprint(f'Mystic diffev2 solution: {start_values}', 'green')
-
+        for _ in range(techno['ncall_mystic_diffev2']): # Recursive calls
+            start_values = diffev2(lossfunc, x0=start_values, bounds=bounds)
+            cprint(f'Mystic diffev2 solution: {start_values}', 'green')
+    
     # Fmin-Powell solver
     if techno['ncall_mystic_fmin_powell'] > 0:
         
-        x0 = start_values
-        start_values = fmin_powell(loss, x0=x0, bounds=bounds)
-        cprint(f'Mystic fmin_powell solution: {start_values}', 'green')
+        for _ in range(techno['ncall_mystic_fmin_powell']): # Recursive calls       
+            start_values = fmin_powell(lossfunc, x0=start_values, bounds=bounds)
+            cprint(f'Mystic fmin_powell solution: {start_values}', 'green')
 
     # --------------------------------------------------------------------
-    # Set fixed parameter values, if True
+    # Make sure parameters are within bounds
+    # (optimizer might not exactly always enforce it)
+    if techno['use_limits']:
+        for k in range(len(start_values)):
+            start_values[k] = np.clip(start_values[k], param['limits'][k][0], param['limits'][k][1])
+        
+    # --------------------------------------------------------------------
+    # Re-set fixed parameter values, if True
     for k in range(len(param['fixed'])):
         if param['fixed'][k]:
             start_values[k] = param['start_values'][k]
 
     # --------------------------------------------------------------------
     ## Initialize Minuit
-    m1 = iminuit.Minuit(loss, start_values, name=param['name'])
+    m1 = iminuit.Minuit(lossfunc, start_values, name=param['name'])
 
     # Fix parameters (minuit allows parameter fixing)
     for k in range(len(param['fixed'])):
         m1.fixed[k] = param['fixed'][k]
     # --------------------------------------------------------------------
     
-    if   techno['loss_type'] == 'nll':
+    if   'nll' in techno['loss_type']:
+        cprint('Setting errordef "LIKELIHOOD" ', 'yellow')
         m1.errordef = iminuit.Minuit.LIKELIHOOD
     else:
+        cprint('Setting errordef "LEAST_SQUARES" ', 'yellow')
         m1.errordef = iminuit.Minuit.LEAST_SQUARES
     
-    # Set parameter bounds
+    ## Set parameter bounds
     if techno['use_limits']:
-        m1.limits   = param['limits']
+        m1.limits = param['limits']
 
+    ## Set initial step size (of the first gradient step)
+    if techno['migrad_first_step'] is not None:
+        m1.errors = techno['migrad_first_step'] * np.abs(start_values)
+    
     # Optimizer parameters
     m1.strategy = techno['strategy']
     m1.tol      = techno['tol']
@@ -762,34 +857,9 @@ def optimizer_execute(trials, loss, param, techno):
         m1.simplex(ncall=techno['ncall_minuit_simplex'])
         print(m1.fmin)
     
-    # --------------------------------------------------------------------
-    # Raytune
-    """
-    values = m1.values
-    param_new = copy.deepcopy(param)
-
-    for i in range(len(param_new['start_values'])):
-        param_new['limits'][i] = [values[i]-1, values[i]+1]
-
-    out = raytune_main(param=param_new, loss_func=loss)
-    """
-    # --------------------------------------------------------------------
-
     # Minuit Gradient search
     m1.migrad(ncall=techno['ncall_minuit_gradient'])
     print(m1.fmin)
-
-    # Finalize with stat. uncertainty analysis [migrad << hesse << minos (best)]
-    if techno['minos']:
-        try:
-            print(f'Computing MINOS stat. uncertainties')
-            m1.minos()
-        except:
-            print(f'Error occured with MINOS stat. uncertainty estimation, trying HESSE', 'red')
-            m1.hesse()
-    else:
-        print('Computing HESSE stat. uncertainties')
-        m1.hesse()
 
     return m1
 
@@ -829,10 +899,6 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     
     # --------------------------------------------------------------------
     ## Create fit functions
-    
-    # Samples on x-axis between [first_edge, ..., last_edge]
-    #index = np.where(range_mask)[0]
-    #x = np.linspace(np.min(bin_edges[index]), np.max(bin_edges[index+1]), int(nsamples))
     
     # Samples on x-axis between [fit central value, ..., last central value]
     # ** This should be consistent with fitfunc trapz normalization **
@@ -1218,9 +1284,9 @@ def read_yaml_input(inputfile, fit_type=None):
                 i += 1
                 
                 # Parameter starting values and limits
-                start_values.append(0.5)
-                limits.append([0.0, 1.0])
-                fixed.append(False)
+                start_values.append(arg['eps_start'])
+                limits.append(arg['eps_limit'])
+                fixed.append(arg['eps_fixed'])
 
             elif (fit_type == 'dual-unitary-II') and (ckey == 'S'):
                 
@@ -1230,9 +1296,9 @@ def read_yaml_input(inputfile, fit_type=None):
                 i += 1
                 
                 # Parameter starting values and limits
-                start_values.append(0.5)
-                limits.append([0.0, 1.0])
-                fixed.append(False)
+                start_values.append(arg['eps_start'])
+                limits.append(arg['eps_limit'])
+                fixed.append(arg['eps_fixed'])
                 
                 # Signal fraction parameter
                 name.append(f'f__{ckey}')
@@ -1240,9 +1306,9 @@ def read_yaml_input(inputfile, fit_type=None):
                 i += 1
                 
                 # Parameter starting values and limits
-                start_values.append(0.5)
-                limits.append([0.0, 1.0])
-                fixed.append(False)
+                start_values.append(arg['f_start'])
+                limits.append(arg['f_limit'])
+                fixed.append(arg['f_fixed'])
             
             # -------------------------------------------
             
@@ -1466,94 +1532,3 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     
     else:
         raise Exception('get_fit_functions: Unknown fit_type chosen')
-
-
-"""
-# Raytune
-from ray import tune
-from ray.tune.suggest.hyperopt import HyperOptSearch
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler
-from functools import partial
-import multiprocessing
-import torch
-"""
-
-"""
-def raytune_main(param, loss_func=None, inputs={}, num_samples=20, max_num_epochs=20):
-    #
-    # Raytune mainloop
-    #
-    def raytune_loss(p, **args):
-        #
-        # Loss Wrapper
-        #
-        par_arr = np.zeros(len(param['name']))
-        i = 0
-        for key in param['name']:
-            par_arr[i] = p[key]
-            i += 1
-
-        loss = loss_func(par_arr)
-        
-        yield {'loss': loss}
-
-
-    ### Construct hyperparameter config (setup) from yaml
-    config = {}
-    i = 0
-    for key in param['name']:
-        config[key] = tune.uniform(param['limits'][i][0], param['limits'][i][1])
-        i += 1
-
-
-    # Raytune basic metrics
-    reporter = CLIReporter(metric_columns = ["loss", "training_iteration"])
-
-    # Raytune search algorithm
-    metric   = 'loss'
-    mode     = 'min'
-
-    # Hyperopt Bayesian / 
-    search_alg = HyperOptSearch(metric=metric, mode=mode)
-
-    # Raytune scheduler
-    scheduler = ASHAScheduler(
-        metric = metric,
-        mode   = mode,
-        max_t  = max_num_epochs,
-        grace_period     = 1,
-        reduction_factor = 2)
-
-    # Raytune main setup
-    analysis = tune.run(
-        partial(raytune_loss, **inputs),
-        search_alg          = search_alg,
-        resources_per_trial = {"cpu": multiprocessing.cpu_count(), "gpu": 1 if torch.cuda.is_available() else 0},
-        config              = config,
-        num_samples         = num_samples,
-        scheduler           = scheduler,
-        progress_reporter   = reporter)
-    
-    # Get the best config
-    best_trial = analysis.get_best_trial(metric=metric, mode=mode, scope="last")
-
-    print(f'raytune: Best trial config:                {best_trial.config}', 'green')
-    print(f'raytune: Best trial final validation loss: {best_trial.last_result["loss"]}', 'green')
-    #cprint(f'raytune: Best trial final validation chi2:  {best_trial.last_result["chi2"]}', 'green')
-
-    # Get the best config
-    config = best_trial.config
-
-    # Load the optimal values for the given hyperparameters
-    optimal_param = np.zeros(len(param['name']))
-    i = 0
-    for key in param['name']:
-        optimal_param[i] = config[key]
-        i += 1
-    
-    print('Best parameters:')
-    print(optimal_param)
-
-    return optimal_param
-"""
