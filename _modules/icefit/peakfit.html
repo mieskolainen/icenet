@@ -521,8 +521,12 @@
 <span class="c1"># - Keep all pdf functions normalized in the steering yml (norm: True),</span>
 <span class="c1">#   otherwise fit stability problems and uncertainty estimation is not consistent.</span>
 <span class="c1">#</span>
-<span class="c1"># - Use &#39;chi2&#39; loss if using weighted event histograms (either MC or data)</span>
-<span class="c1">#   Use &#39;nll&#39; for unweighted Poisson count histograms (both MC and data)</span>
+<span class="c1"># - Use &#39;chi2&#39; or &#39;huber&#39; loss if using weighted event histograms (either MC or data)</span>
+<span class="c1">#   Use &#39;nll&#39; for unweighted Poisson count histograms</span>
+<span class="c1">#             and a weighted count histograms via a scale transform (experimental)</span>
+<span class="c1"># </span>
+<span class="c1"># - For different fit types see: /docs/pdf/peakfit.pdf </span>
+<span class="c1"># </span>
 <span class="c1"># </span>
 <span class="c1"># Run with: python icefit/peakfit.py --analyze --group (--test_mode)</span>
 <span class="c1"># </span>
@@ -549,7 +553,7 @@
 
 <span class="kn">import</span> <span class="nn">ray</span>
 
-<span class="n">__VERSION__</span> <span class="o">=</span> <span class="mf">0.02</span>
+<span class="n">__VERSION__</span> <span class="o">=</span> <span class="mf">0.03</span>
 <span class="n">__AUTHOR__</span>  <span class="o">=</span> <span class="s1">&#39;m.mieskolainen@imperial.ac.uk&#39;</span>
 
 <span class="c1"># ========================================================================</span>
