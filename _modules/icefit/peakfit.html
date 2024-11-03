@@ -518,9 +518,9 @@
 <span class="c1">#</span>
 <span class="c1"># Notes:</span>
 <span class="c1">#   </span>
-<span class="c1"># - Keep all pdf functions normalized in the steering yml (norm: True),</span>
-<span class="c1">#   otherwise fit stability problems and uncertainty estimation is not consistent.</span>
-<span class="c1">#</span>
+<span class="c1"># - Keep all pdf functions normalized in the steering yml normalized,</span>
+<span class="c1">#   otherwise not consistent (norm: True)</span>
+<span class="c1"># </span>
 <span class="c1"># - Use &#39;chi2&#39; or &#39;huber&#39; loss if using weighted event histograms (either MC or data)</span>
 <span class="c1">#   Use &#39;nll&#39; for unweighted Poisson count histograms</span>
 <span class="c1">#             and a weighted count histograms via a scale transform (experimental)</span>
@@ -553,7 +553,7 @@
 
 <span class="kn">import</span> <span class="nn">ray</span>
 
-<span class="n">__VERSION__</span> <span class="o">=</span> <span class="mf">0.04</span>
+<span class="n">__VERSION__</span> <span class="o">=</span> <span class="mf">0.05</span>
 <span class="n">__AUTHOR__</span>  <span class="o">=</span> <span class="s1">&#39;m.mieskolainen@imperial.ac.uk&#39;</span>
 
 <span class="c1"># ========================================================================</span>
@@ -797,8 +797,8 @@
     <span class="n">d_pass</span> <span class="o">=</span> <span class="n">icepeak</span><span class="o">.</span><span class="n">hist_decompose</span><span class="p">(</span><span class="n">icepeak</span><span class="o">.</span><span class="n">TH1_to_numpy</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;Pass&#39;</span><span class="p">]),</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">techno</span><span class="o">=</span><span class="n">techno</span><span class="p">)</span>
     <span class="n">d_fail</span> <span class="o">=</span> <span class="n">icepeak</span><span class="o">.</span><span class="n">hist_decompose</span><span class="p">(</span><span class="n">icepeak</span><span class="o">.</span><span class="n">TH1_to_numpy</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;Fail&#39;</span><span class="p">]),</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">techno</span><span class="o">=</span><span class="n">techno</span><span class="p">)</span>
     
-    <span class="n">par_fixed</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C_pass&#39;</span><span class="p">:</span> <span class="n">d_pass</span><span class="p">[</span><span class="s1">&#39;num_counts_in_fit&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">d_pass</span><span class="p">[</span><span class="s1">&#39;mean_dx&#39;</span><span class="p">],</span>
-                 <span class="s1">&#39;C_fail&#39;</span><span class="p">:</span> <span class="n">d_fail</span><span class="p">[</span><span class="s1">&#39;num_counts_in_fit&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">d_fail</span><span class="p">[</span><span class="s1">&#39;mean_dx&#39;</span><span class="p">]}</span>
+    <span class="n">par_fixed</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C_pass&#39;</span><span class="p">:</span> <span class="n">d_pass</span><span class="p">[</span><span class="s1">&#39;num_counts_in_fit&#39;</span><span class="p">],</span>
+                 <span class="s1">&#39;C_fail&#39;</span><span class="p">:</span> <span class="n">d_fail</span><span class="p">[</span><span class="s1">&#39;num_counts_in_fit&#39;</span><span class="p">]}</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     
