@@ -109,15 +109,17 @@ techno:
   minos: True                  # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
   migrad_first_step: 0.001     # First step size (relative percentage), set None for migrad heuristic
   
-  min_ndof: 1      # Minimum number of d.o.f required
-  max_chi2: 1200   # Maximum chi2/ndf for a succesful fit
-  min_count: 5     # Minimum number of total entries (sum of bin content) in the histogram
-  trials: 10       # Number of random restarts (all are executed and inspected, the best is kept)
-  rand_sigma: 0.5  # Random perturbation scale for initial values per trial
+  min_ndof: 1           # Minimum number of d.o.f required
+  max_chi2: 1200        # Maximum chi2/ndf for a succesful fit
+  min_count: 5          # Minimum number of total entries (sum of bin content) in the histogram
+  trials: 10            # Number of random restarts (all are executed and inspected, the best is kept)
+  rand_sigma: 0.5       # Random perturbation scale for initial values per trial
   
-  set_to_nan: True # Set parameters after the fit to NaN if not passing max_chi2 or min_count
+  set_to_nan: True      # Set parameters after the fit to NaN if not passing max_chi2 or min_count
 
-  strategy: 2      # Default 1 (0 ~ fast, 1 ~ balanced, 2 ~ accurate)
-  tol: 0.1         # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
+  strategy: 2           # Default 1 (0 ~ fast, 1 ~ balanced, 2 ~ accurate)
+  tol: 0.1              # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
   
-  cov_eps: 0.0     # Covariance matrix post-regularization (added to diagonal) (set to 0 for none, can bias!)
+  cov_eps: 0.0          # Covariance matrix post-regularization (added to diagonal) (set to 0 for none, can bias!)
+
+  draw_mnmatrix: False  # Draw MINOS profile likelihood scan 2D contours (very slow)

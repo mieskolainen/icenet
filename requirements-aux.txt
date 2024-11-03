@@ -13,7 +13,7 @@ jax==0.4.28
 jaxlib==0.4.28
 
 # IMINUIT
-iminuit==2.25.2
+iminuit==2.30.1
 
 # MYSTIC
 mystic==0.4.2

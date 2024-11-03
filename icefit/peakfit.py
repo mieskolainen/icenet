@@ -205,11 +205,11 @@ def fit_task(f, inputparam, savepath, YEAR, GENTYPE):
         fitfunc_ = {f'{key}': fitfunc}
         
         # Fit and analyze
-        par,cov,var2pos = icepeak.binned_1D_fit(hist=hist_, param=param, fitfunc=fitfunc_, 
+        par,cov,var2pos,m1 = icepeak.binned_1D_fit(hist=hist_, param=param, fitfunc=fitfunc_, 
                                 techno=techno, par_fixed=None)
         output = icepeak.analyze_1D_fit(hist=hist, param=param, fitfunc=fitfunc,
                                             techno=techno, par=par, cov=cov, par_fixed=None)
-
+        
         # Create savepath
         total_savepath = f'{savepath}/Run{YEAR}/{GENTYPE}/{SYST}'
         if not os.path.exists(total_savepath):
@@ -222,8 +222,23 @@ def fit_task(f, inputparam, savepath, YEAR, GENTYPE):
         
         # Save the pull histogram
         plt.figure(output['fig_pulls'])
-        plt.savefig(f'{total_savepath}/{tree}_pulls.pdf', bbox_inches='tight')
-        plt.savefig(f'{total_savepath}/{tree}_pulls.png', bbox_inches='tight', dpi=300)
+        plt.savefig(f'{total_savepath}/{tree}__pulls.pdf', bbox_inches='tight')
+        plt.savefig(f'{total_savepath}/{tree}__pulls.png', bbox_inches='tight', dpi=300)
+        
+        # Save parameter outputs
+        with open(f'{total_savepath}/{tree}.log', "w") as file:
+            print(par, file=file)
+            print(m1.params, file=file)
+            print(cov, file=file)
+        
+        # Draw MINOS contours
+        if techno['draw_mnmatrix']:  
+            cprint('Draw MINOS profile likelihood scan 2D contours', 'yellow')
+
+            m1.draw_mnmatrix(figsize=(2.5*len(par), 2.5*len(par)))
+            plt.figure(plt.gcf())
+            plt.savefig(f'{total_savepath}/{tree}__mnmatrix.pdf', bbox_inches='tight')
+            plt.savefig(f'{total_savepath}/{tree}__mnmatrix.png', bbox_inches='tight', dpi=300)
         
         # Save the fit numerical data
         par_dict, cov_arr = icepeak.iminuit2python(par=par, cov=cov, var2pos=var2pos)
@@ -280,11 +295,11 @@ def fit_task_multi(f, inputparam, savepath, YEAR, GENTYPE):
     # --------------------------------------------------------------------
     
     # Simultaneous fit of both    
-    par,cov,var2pos = icepeak.binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc,
+    par,cov,var2pos,m1 = icepeak.binned_1D_fit(hist=hist, param=param, fitfunc=fitfunc,
                                             techno=techno, par_fixed=par_fixed)
 
     # Analyze and plot Pass, Fail seperately
-    for key in f.keys():
+    for idx, key in enumerate(f.keys()):
         
         output = icepeak.analyze_1D_fit(hist=hist[key], param=param, fitfunc=fitfunc[key],
                     techno=techno, par=par, cov=cov, par_fixed=par_fixed)
@@ -297,15 +312,31 @@ def fit_task_multi(f, inputparam, savepath, YEAR, GENTYPE):
         if not os.path.exists(total_savepath):
             os.makedirs(total_savepath)
 
-         # Save the fit plot
+        # Save the fit plot
         plt.figure(output['fig'])
         plt.savefig(f'{total_savepath}/{tree}.pdf', bbox_inches='tight')
         plt.savefig(f'{total_savepath}/{tree}.png', bbox_inches='tight', dpi=300)
         
         # Save the pull histogram
         plt.figure(output['fig_pulls'])
-        plt.savefig(f'{total_savepath}/{tree}_pulls.pdf', bbox_inches='tight')
-        plt.savefig(f'{total_savepath}/{tree}_pulls.png', bbox_inches='tight', dpi=300)
+        plt.savefig(f'{total_savepath}/{tree}__pulls.pdf', bbox_inches='tight')
+        plt.savefig(f'{total_savepath}/{tree}__pulls.png', bbox_inches='tight', dpi=300)
+        
+        # Save parameter outputs
+        if (idx == 0):
+            with open(f'{total_savepath}/{tree}.log', "w") as file:
+                print(par, file=file)
+                print(m1.params, file=file)
+                print(cov, file=file)
+        
+        # Draw MINOS contours
+        if techno['draw_mnmatrix'] and (idx == 0):  
+            cprint('Draw MINOS profile likelihood scan 2D contours', 'yellow')
+            
+            m1.draw_mnmatrix(figsize=(2.5*len(par), 2.5*len(par)))
+            plt.figure(plt.gcf())
+            plt.savefig(f'{total_savepath}/{tree}__mnmatrix.pdf', bbox_inches='tight')
+            plt.savefig(f'{total_savepath}/{tree}__mnmatrix.png', bbox_inches='tight', dpi=300)
         
         # Save the fit numerical data
         par_dict, cov_arr = icepeak.iminuit2python(par=par, cov=cov, var2pos=var2pos)

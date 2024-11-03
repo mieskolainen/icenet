@@ -704,7 +704,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     cprint(f"[{param['fit_type']}] chi2 / ndf = {chi2:.2f} / {ndof} = {chi2/ndof:.2f} [{str}]", 'yellow')
     print('')
     
-    return par, cov, var2pos
+    return par, cov, var2pos, best_m1
 
 def generate_start_values(trial, param, techno):
     """
@@ -898,7 +898,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     Returns:
         output dictionary
     """
-    print(__name__ + f'.analyze_1D_fit:')
+    cprint(__name__ + f'.analyze_1D_fit:', 'magenta')
     
     h = TH1_to_numpy(hist)
     d = hist_decompose(h, param=param, techno=techno)
@@ -1071,7 +1071,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     # chi2 / ndf
     chi2_ndf = chi2 / ndof if ndof > 0 else -999
     title = f"$\\chi^2 / n_\\mathrm{{dof}} = {chi2:.2f} / {ndof:0.0f} = {chi2_ndf:.2f}$"
-    print(f'plot title: {title}')
+    print(f"plot: {title.replace('$', '')} \n")
     plt.title(title)
     
     # ---------------------------------------------------------------
