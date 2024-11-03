@@ -17,7 +17,7 @@ fitrange: [2.91, 3.29] # Nominal fit window (GeV)
 systematics: ['Nominal'] # ['Nominal', 'nVertices_Up', 'nVertices_Down']
 
 # List of systematic variations active
-variations: ['DEFAULT', 'SYMMETRIC-SIGNAL_CB_asym_RBW', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
+variations: ['DEFAULT'] #, 'SYMMETRIC-SIGNAL_CB_asym_RBW', 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
 num_cpus: 0 # put 0 for automatic, set manually to 1 if problems (ray not used with 1)
 
@@ -39,9 +39,9 @@ fit:
     # -----------------------------------------------
     # See /docs/pdf/peakfit.pdf
     
-    # `single`, `dual` and `dual-unitary-I` [signal weight]
+    # `single`, `dual` and `dual-unitary-I` [signal yield ~ count units]
     theta_start:  100.0
-    theta_limit:  [1.0e-4, 1.0e+9]
+    theta_limit:  [1.0e-3, 1.0e+9]
     theta_fixed:  False
     
     # `dual`, `dual-unitary-I` and `dual-unitary-II` [efficiency]
@@ -73,9 +73,9 @@ fit:
     # -----------------------------------------------
     # See /docs/pdf/peakfit.pdf
     
-    # `single` and `dual` [background weight]
-    theta_start:  0.1
-    theta_limit:  [1.0e-4, 1.0e+9]
+    # `single` and `dual` [background yield ~ count units]
+    theta_start:  10.0
+    theta_limit:  [1.0e-3, 1.0e+9]
     theta_fixed:  False
     
     # `dual`, `dual-unitary-I` and `dual-unitary-II` [efficiency]

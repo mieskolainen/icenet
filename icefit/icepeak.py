@@ -1,5 +1,5 @@
 # Binned histogram chi2, Huber, Poisson likelihood fit tools with
-# mystic + iminuit (minuit from python)
+# mystic + iminuit (minuit with python)
 #
 # m.mieskolainen@imperial.ac.uk, 2024
 
@@ -73,7 +73,7 @@ def voigt_FWHM(gamma: float, sigma: float):
 
 
 @numba.njit
-def exp_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def exp_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Exponential density
     
@@ -82,13 +82,13 @@ def exp_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     """
     y = par[0] * np.exp(-par[0] * x)
     y[x < 0] = 0
-
+    
     if norm:
         y = y / np.trapz(y=y, x=x)
     return y
 
 @numba.njit
-def poly_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def poly_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Polynomial density y = p0 + p1*x + p2*x**2 + ...
     
@@ -98,13 +98,13 @@ def poly_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     y   = np.zeros(len(x))
     for i in range(len(par)):
         y = y + par[i]*(x**i)
-
+        
     if norm:
         y = y / np.trapz(y=y, x=x)
     return y
 
 @numba.njit
-def gauss_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def gauss_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Normal (Gaussian) density
     
@@ -119,12 +119,11 @@ def gauss_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     return y
 
 @numba.njit
-def cauchy_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def cauchy_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Cauchy (Lorentzian) pdf (non-relativistic fixed width Breit-Wigner)
     """
     M0, W0 = par
-
     y = 1 / (np.pi*W0) * (W0**2 / ((x - M0)**2 + W0**2))
 
     if norm:
@@ -132,12 +131,11 @@ def cauchy_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     return y
 
 #@numba.njit # (voig_profile not Numba compatible)
-def voigt_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def voigt_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Voigtian pdf (Breit-Wigner convoluted with Gaussian)
     """
     M0, sigma, gamma = par
-    
     y = special.voigt_profile(x - M0, sigma, gamma)
 
     if norm:
@@ -145,14 +143,13 @@ def voigt_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     return y
 
 @numba.njit
-def RBW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def RBW_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Relativistic Breit-Wigner pdf
     https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
     """
     M0, W0 = par
 
-    # Normalization
     gamma = np.sqrt(M0**2 * (M0**2 + W0**2))
     k     = (2*np.sqrt(2)*M0*W0*gamma) / (np.pi * np.sqrt(M0**2 + gamma))
     y = k / ((x**2 - M0**2)**2 + M0**2 * W0**2)
@@ -162,7 +159,7 @@ def RBW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     return y
 
 @numba.njit
-def asym_RBW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def asym_RBW_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Asymmetric Relativistic Breit-Wigner pdf
     https://en.wikipedia.org/wiki/Relativistic_Breit%E2%80%93Wigner_distribution
@@ -182,7 +179,7 @@ def asym_RBW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     return y
 
 @numba.njit
-def asym_BW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
+def asym_BW_pdf(x: np.ndarray, par: np.ndarray, norm=False):
     """
     Breit-Wigner with asymmetric tail shape
 
@@ -199,31 +196,27 @@ def asym_BW_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True):
     return y
 
 @numba.njit
-def CB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
+def CB_pdf(x: np.ndarray, par: np.ndarray, EPS: float=1E-12, norm=False):
     """
     https://en.wikipedia.org/wiki/Crystal_Ball_function
 
     Consists of a Gaussian core portion and a power-law low-end tail,
     below a certain threshold.
     
+    [floating normalization]
+    
     Args:
         par: mu > 0, sigma > 0, n > 1, alpha > 0
     """
 
     mu, sigma, n, alpha = par
-
+    
     # Protect float
     abs_a = np.abs(alpha)
 
     A = (n / abs_a)**n * np.exp(-0.5 * abs_a**2)
     B =  n / abs_a - abs_a
 
-    # Normalization (Wikipedia)
-    #C = (n / abs_a) * (1 / max(n-1, EPS)) * np.exp(-0.5 * abs_a**2)
-    #D = np.sqrt(np.pi/2) * (1 + special.erf(abs_a / np.sqrt(2)))
-    #N = 1 / (sigma * (C + D))
-    N = 1 # Simply use this and do numerical normalization
-    
     # Piece wise definition
     y = np.zeros(len(x))
     t = (x - mu) / max(sigma, EPS)
@@ -231,19 +224,21 @@ def CB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
     ind_0 = t > -alpha
     ind_1 = ~ind_0
     
-    y[ind_0] = N * np.exp( - 0.5 * t[ind_0]**2)
-    y[ind_1] = N * A * (B - t[ind_1])**(-n)
+    y[ind_0] = np.exp( - 0.5 * t[ind_0]**2)
+    y[ind_1] = A * (B - t[ind_1])**(-n)
 
     if norm:
         y = y / np.trapz(y=y, x=x)
     return y
 
 @numba.njit
-def DSCB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
+def DSCB_pdf(x: np.ndarray, par: np.ndarray, EPS: float=1E-12, norm=False):
     """
     Double sided Crystal-Ball
     
     https://arxiv.org/abs/1606.03833
+    
+    [floating normalization]
     
     Args:
         par: mu > 0, sigma > 0, n_low > 1, alpha_low > 0, n_high > 1, alpha_high > 0
@@ -251,9 +246,6 @@ def DSCB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
     
     mu, sigma, n_low, alpha_low, n_high, alpha_high = par
 
-    # Normalization
-    N = 1 # Simply use this and do numerical normalization
-    
     # Piece wise definition
     y = np.zeros(len(x))
     t = (x - mu) / max(sigma, EPS)
@@ -262,38 +254,16 @@ def DSCB_pdf(x: np.ndarray, par: np.ndarray, norm: bool=True, EPS: float=1E-12):
     ind_1 = t < -alpha_low
     ind_2 = t >  alpha_high
 
-    y[ind_0] = N * np.exp(- 0.5 * t[ind_0]**2)
-    y[ind_1] = N * np.exp(- 0.5 * alpha_low**2)  * (alpha_low / n_low   * (n_low / alpha_low   - alpha_low  - t[ind_1]))**(-n_low)
-    y[ind_2] = N * np.exp(- 0.5 * alpha_high**2) * (alpha_high / n_high * (n_high / alpha_high - alpha_high + t[ind_2]))**(-n_high)
+    y[ind_0] = np.exp(- 0.5 * t[ind_0]**2)
+    y[ind_1] = np.exp(- 0.5 * alpha_low**2)  * (alpha_low / n_low   * (n_low / alpha_low   - alpha_low  - t[ind_1]))**(-n_low)
+    y[ind_2] = np.exp(- 0.5 * alpha_high**2) * (alpha_high / n_high * (n_high / alpha_high - alpha_high + t[ind_2]))**(-n_high)
     
     if norm:
         y = y / np.trapz(y=y, x=x)
     return y
 
-@numba.njit
-def highres_x(x: np.ndarray, xfactor: float=0.2, Nmin: int=256):
-    """
-    Extend range and sampling of x
-        
-    Args:
-        x:       array of values
-        factor:  domain extension factor
-        Nmin:    minimum number of samples
-    """
-    e = xfactor * (x[0] + x[-1])/2
-    return np.linspace(x[0]-e, x[-1]+e, max(len(x), Nmin))
-
-def logzero(x: np.ndarray):
-    """
-    log(x) for x > 0 and 0 otherwise elementwise
-    """
-    r    = np.zeros_like(x)
-    mask = (x > 0)
-    r[mask] = np.log(x[mask])
-    return r
-
 def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
-                     par_index: List[int], norm: bool=True, xfactor: float=0.2, Nmin: int=256):
+                     par_index: List[int], xfactor: float=0.2, Nmin: int=256, norm=False):
     """
     Convolution between two functions.
     
@@ -322,7 +292,34 @@ def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
     
     if norm:
         y = y / np.trapz(y=y, x=x)
+    
     return y
+
+@numba.njit
+def highres_x(x: np.ndarray, xfactor: float=0.2, Nmin: int=256):
+    """
+    Extend range and sampling of x.
+    
+    Args:
+        x:       Array of values.
+        xfactor: Domain extension factor (default is 0.2).
+        Nmin:    Minimum number of samples (default is 256).
+    
+    Returns:
+        np.ndarray: Extended high-resolution array.
+    """
+    e = xfactor * (x[-1] - x[0]) / 2  # Extend based on the range of x
+    return np.linspace(x[0] - e, x[-1] + e, max(len(x), Nmin))
+
+@numba.njit
+def logzero(x: np.ndarray):
+    """
+    log(x) for x > 0 and 0 otherwise elementwise
+    """
+    r    = np.zeros_like(x)
+    mask = (x > 0)
+    r[mask] = np.log(x[mask])
+    return r
 
 def iminuit2python(par, cov, var2pos):
     """
@@ -347,6 +344,14 @@ def iminuit2python(par, cov, var2pos):
 
     return par_dict, cov_arr
 
+def edges2centerbins(edges):
+    """ Bin edges to center bins"""
+    return (edges[1:] + edges[:-1]) / 2
+
+def edges2binwidth(edges):
+    """ Bin edges to binwidths """
+    return edges[1:] - edges[:-1]
+
 def TH1_to_numpy(hist):
     """
     Convert TH1 (ROOT) histogram to numpy array
@@ -363,8 +368,8 @@ def TH1_to_numpy(hist):
     errors     = np.array(hist.errors())
 
     bin_edges  = np.array(hh[1])
-    bin_center = np.array((bin_edges[1:] + bin_edges[:-1]) / 2)
-    bin_width  = bin_edges[1:] - bin_edges[:-1]
+    bin_center = edges2centerbins(bin_edges)
+    bin_width  = edges2binwidth(bin_edges)
     
     return {'counts': counts, 'errors': errors, 'bin_width': bin_width,
             'bin_edges': bin_edges, 'bin_center': bin_center}
@@ -388,12 +393,15 @@ def hist_decompose(h, param, techno):
     # Counts in the fit
     num_counts_in_fit = np.sum(counts[range_mask][fitbin_mask])
     
-    # For differential normalization
-    index   = np.where(range_mask)[0]
-    mean_dx = np.mean(edges[index + 1] - edges[index])
+    # Set True for both the start and end of each bin based on range mask
+    edges_range_mask       = np.zeros_like(edges, dtype=bool)
+    edges_range_mask[:-1] |= range_mask   # Start of each bin
+    edges_range_mask[1:]  |= range_mask   # End of each bin
     
-    out = {'fitbin_mask': fitbin_mask, 'range_mask': range_mask,
-           'num_counts_in_fit': num_counts_in_fit, 'mean_dx': mean_dx}
+    out = {'fitbin_mask':       fitbin_mask,
+           'range_mask' :       range_mask,
+           'edges_range_mask':  edges_range_mask,
+           'num_counts_in_fit': num_counts_in_fit}
 
     return h | out # combine
 
@@ -448,7 +456,6 @@ def get_ndf(fitbin_mask: np.ndarray, par: np.ndarray, fit_type: str):
     else:
         raise Exception(__name__ + f'.get_ndf: Unknown fit_type')
 
-
 def huber_lossfunc(y_true: np.ndarray, y_pred: np.ndarray, sigma: np.ndarray, delta: float=1.0):
     """
     Compute the Huber loss (robust statistics) with uncertainties
@@ -502,8 +509,10 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
     counts            = copy.deepcopy(h)
     errors            = copy.deepcopy(h)
     cbins             = copy.deepcopy(h)
+    bin_edges         = copy.deepcopy(h)
     fitbin_mask       = copy.deepcopy(h)
     range_mask        = copy.deepcopy(h)
+    edges_range_mask  = copy.deepcopy(h)
     num_counts_in_fit = []
     
     # Pick single or two histograms (when 'dual' modes)
@@ -512,11 +521,13 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         h[key] = TH1_to_numpy(hist[key])
         d      = hist_decompose(h[key], param=param, techno=techno)
 
-        counts[key]        = d['counts']
-        errors[key]        = d['errors']
-        cbins[key]         = d['bin_center']
-        fitbin_mask[key]   = d['fitbin_mask']
-        range_mask[key]    = d['range_mask']
+        counts[key]           = d['counts']
+        errors[key]           = d['errors']
+        cbins[key]            = d['bin_center']
+        bin_edges[key]        = d['bin_edges']
+        fitbin_mask[key]      = d['fitbin_mask']
+        range_mask[key]       = d['range_mask']
+        edges_range_mask[key] = d['edges_range_mask']
         num_counts_in_fit.append( d['num_counts_in_fit'] )
     
 
@@ -528,12 +539,13 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         # Over histograms
         for key in counts.keys():
             
-            rmask = range_mask[key]
-            fmask = fitbin_mask[key]
-            if np.sum(fmask) == 0: return 1e9
+            edgermask = edges_range_mask[key]
+            rmask     = range_mask[key]
+            fmask     = fitbin_mask[key]
+            if np.sum(fmask) == 0: return 1e9 # Empty input
             
-            # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed)
+            # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed, bin_edges[key][edgermask])
             
             residual = (y_pred[fmask] - counts[key][rmask][fmask]) / errors[key][rmask][fmask]
 
@@ -550,12 +562,13 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         # Over histograms
         for key in counts.keys():
             
-            rmask = range_mask[key]
-            fmask = fitbin_mask[key]
-            if np.sum(fmask) == 0: return 1e9
+            edgermask = edges_range_mask[key]
+            rmask     = range_mask[key]
+            fmask     = fitbin_mask[key]
+            if np.sum(fmask) == 0: return 1e9 # Empty input
             
-            # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed)
+            # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed, bin_edges[key][edgermask])
             
             T = huber_lossfunc(y_true=counts[key][rmask][fmask], y_pred=y_pred[fmask],
                                sigma=errors[key][rmask][fmask], delta=delta)
@@ -572,12 +585,13 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
         # Over histograms
         for key in counts.keys():
             
-            rmask = range_mask[key]
-            fmask = fitbin_mask[key]
-            if np.sum(fmask) == 0: return 1e9
+            edgermask = edges_range_mask[key]
+            rmask     = range_mask[key]
+            fmask     = fitbin_mask[key]
+            if np.sum(fmask) == 0: return 1e9 # Empty input
             
-            # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed)
+            # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed, bin_edges[key][edgermask])
             
             # Bohm-Zech scale transform for weighted events (https://arxiv.org/abs/1309.1287)
             # https://scikit-hep.org/iminuit/notebooks/weighted_histograms.html
@@ -864,7 +878,7 @@ def optimizer_execute(start_values, lossfunc, param, techno):
     return m1
 
 def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
-                   par, cov, par_fixed=None, nsamples=1000, num_MC=500):
+                   par, cov, par_fixed=None, num_visual=1000, num_MC=500):
     """
     Analyze and visualize fit results
     
@@ -878,8 +892,8 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
         cov:       Covariance matrix obtained from the fit
         par_fixed: 
         
-        nsamples:  Number of samples of the function (on x-axis)
-        num_MC:    Number of MC samples for uncertainty estimation
+        num_visual:  Number of visualization samples of the function (on x-axis)
+        num_MC:      Number of MC samples for uncertainty estimation
     
     Returns:
         output dictionary
@@ -889,47 +903,35 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     h = TH1_to_numpy(hist)
     d = hist_decompose(h, param=param, techno=techno)
 
-    counts      = d['counts']
-    errors      = d['errors']
-    #bin_edges   = d['bin_edges']
-    cbins       = d['bin_center']
-    range_mask  = d['range_mask']
-    fitbin_mask = d['fitbin_mask']
-    mean_dx     = d['mean_dx']
+    counts           = d['counts']
+    errors           = d['errors']
+    bin_edges        = d['bin_edges']
+    cbins            = d['bin_center']
+    range_mask       = d['range_mask']
+    edges_range_mask = d['edges_range_mask']
+    fitbin_mask      = d['fitbin_mask']
+
+    print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
+    print(f'Input bin count sum: {np.sum(counts[range_mask][fitbin_mask]):0.1f} (in fit)')    
     
     # --------------------------------------------------------------------
-    ## Create fit functions
-    
-    # Samples on x-axis between [fit central value, ..., last central value]
-    # ** This should be consistent with fitfunc trapz normalization **
-    x = np.linspace(np.min(cbins[range_mask]), np.max(cbins[range_mask]), int(nsamples))
+    ## Compute event count yields
     
     # Loop over function components
-    y = {}
+    y     = {}
+    N     = {}
+    N_err = {}
     for key in param['components']:
         
-        y[key] = fitfunc(x, par, par_fixed, components=[key])
+        y[key] = fitfunc(cbins[range_mask], par, par_fixed, components=[key], edges=bin_edges[edges_range_mask])
         
         # Protect for nan/inf
         if np.sum(~np.isfinite(y[key])) > 0:
             print(f'Evaluated function [{key}] contain nan/inf values (set to 0.0)')
             y[key][~np.isfinite(y[key])] = 0.0
-    
-    print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
-    print(f'Input bin count sum: {np.sum(counts[range_mask][fitbin_mask]):0.1f} (in fit)')    
-    
-    # --------------------------------------------------------------------
-    # Compute count value integrals inside fitrange
 
-    N     = {}
-    N_err = {}
-
-    # Normalize integral measures to event counts
-    # [normalization given by the data histogram binning because we fitted against it]
-    
-    for key in param['components']:
-        N[key]     = integrate.simpson(y=y[key], x=x) / mean_dx
-        N_err[key] = 0.0
+        # Compute total count as a bin-wise sum
+        N[key] = np.sum(y[key])
     
     # --------------------------------------------------------------------
     # Estimate the yield uncertainty via Monte Carlo
@@ -946,7 +948,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
             for j in range(len(param['limits'])):
                 PAR[:,j] = np.clip(PAR[:,j], param['limits'][j][0], param['limits'][j][1])
             
-            # Evaluate integrals
+            # Evaluate event counts
             N_hat = np.zeros(num_MC)
             
             # ** Possible extension **
@@ -954,10 +956,11 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
             
             for i in range(num_MC):
                 
-                yy = fitfunc(x, PAR[i,:], par_fixed, components=[key])
+                yy = fitfunc(cbins[range_mask], PAR[i,:], par_fixed, components=[key], edges=bin_edges[edges_range_mask])
                 yy[~np.isfinite(yy)] = 0.0 # Protect for nan/inf
                 
-                N_hat[i] = integrate.simpson(y=yy, x=x) / mean_dx
+                # Compute total count as a bin-wise sum
+                N_hat[i] = np.sum(yy)
             
             # Compute percentiles
             N_high = np.percentile(N_hat, 84)
@@ -981,8 +984,6 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
         print(f"N_{key}: {N[key]:0.1f} +- {N_err[key]:0.1f}")
     
     # --------------------------------------------------------------------
-    # Plot it
-
     obs_M = {
 
         # Axis limits
@@ -1012,24 +1013,42 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     ## ------------------------------------------------
     # Compute chi2 and ndf
     
-    # ** Note use x=cbins[range_mask] here, due to trapz integral in fitfunc ! **
-    yf   = fitfunc(x=cbins[range_mask], par=par, par_fixed=par_fixed)
+    # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
+    yf   = fitfunc(x=cbins[range_mask], par=par, par_fixed=par_fixed, edges=bin_edges[edges_range_mask])
     chi2 = np.sum(((yf[fitbin_mask] - counts[range_mask][fitbin_mask]) / errors[range_mask][fitbin_mask])**2)
     ndof = get_ndf(fitbin_mask=fitbin_mask, par=par, fit_type=param['fit_type'])
     
     # --------------------------------------------------
-    # Fit plots
+    ## Compute fit functions for the plots
 
+    # Loop over function components
+    y = {}
+    xfine = np.linspace(np.min(cbins[range_mask]), np.max(cbins[range_mask]), num_visual)
+    
+    for key in param['components']:
+        
+        y[key] = fitfunc(cbins[range_mask], par, par_fixed, components=[key], edges=bin_edges[edges_range_mask])
+
+        # Protect for nan/inf
+        if np.sum(~np.isfinite(y[key])) > 0:
+            print(f'Evaluated function [{key}] contain nan/inf values (set to 0.0)')
+            y[key][~np.isfinite(y[key])] = 0.0
+
+        # Interpolate for visualization
+        kind   = 'linear' if len(cbins[range_mask]) != len(np.unique(cbins[range_mask])) else 'quadratic'
+        ff = interpolate.interp1d(x=cbins[range_mask], y=y[key], kind=kind)
+        y[key] = ff(xfine)
+    
+    # Total fit
+    y_tot = sum(y[key] for key in y)
+    
+    # --------------------------------------------------
+    ## Plot them
+    
     plt.sca(ax[0])
     
-    # Plot total fit
-    ytot = fitfunc(x=x, par=par, par_fixed=par_fixed)
-    
-    # Check for duplicates (quadratic cannot handle)
-    kind = 'linear' if len(x) != len(np.unique(x)) else 'quadratic'
-    ftot = interpolate.interp1d(x=x, y=ytot, kind=kind)
-    
-    plt.plot(x, ytot, label="Total fit", color=(0.5,0.5,0.5))
+    # Plot total
+    plt.plot(xfine, y_tot, label="Total fit", color=(0.5,0.5,0.5))
     
     # Plot components
     colors     = [(0.7, 0.2, 0.2), (0.2, 0.2, 0.7)]
@@ -1043,7 +1062,7 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
             color     = np.random.rand(3)
             linestyle = '--'
 
-        plt.plot(x, y[key], label=f"{key}: $N_{key} = {N[key]:.1f} \\pm {N_err[key]:.1f}$", color=color, linestyle=linestyle)
+        plt.plot(xfine, y[key], label=f"{key}: $N_{key} = {N[key]:.1f} \\pm {N_err[key]:.1f}$", color=color, linestyle=linestyle)
         i += 1
     
     plt.ylim(bottom=0)
@@ -1061,8 +1080,11 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     plt.sca(ax[1])
     iceplot.plot_horizontal_line(ax[1], ypos=0.0)
 
-    # Compute pulls
-    pulls = (ftot(cbins[range_mask][fitbin_mask]) - counts[range_mask][fitbin_mask]) / errors[range_mask][fitbin_mask]
+    ## Compute pulls at the bin centers
+    
+    # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
+    ftot  = fitfunc(cbins[range_mask], par, par_fixed, edges=bin_edges[edges_range_mask])
+    pulls = (ftot[fitbin_mask] - counts[range_mask][fitbin_mask]) / errors[range_mask][fitbin_mask]
     pulls[~np.isfinite(pulls)] = 0.0
     
     # Plot pulls
@@ -1356,25 +1378,48 @@ def read_yaml_input(inputfile, fit_type=None):
     
     return param, fitfunc, cfunc, steer['techno']
 
+def integral_wrapper(lambdafunc, x, edges, norm=False, N_int: int=128, EPS=1E-12, **args):
+    """
+    Wrapper function for integral normalization
+    
+    Do not put too high N_int, otherwise numerical problems may arrise
+    e.g. with numerical convolution pdfs.
+    """
+    
+    # Evaluate
+    f = lambdafunc(x)
+    
+    if norm:
+        # Normalization based on a numerical integral over edge bounds
+        x_fine = np.linspace(edges[0], edges[-1], N_int)
+        I = max(np.trapz(y=lambdafunc(x_fine), x=x_fine), EPS)
+        
+        return f / I * edges2binwidth(edges)
+    else:
+        return f
+
 def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     
     # Single fit of 1 histogram with one scale W_i per fit component (S,B,...)
     if   (fit_type == 'single'):   
         
         # Total fit function as a linear (incoherent) superposition
-        def fitfunc(x, par, par_fixed=None, components=None):
-            y   = 0
-            par = np.array(par) # Make sure it is numpy array
+        def fitfunc(x, par, par_fixed=None, edges=None, components=None):
+            ytot = 0
+            par  = np.array(par) # Make sure it is numpy array
             
             components = p_pind.keys() if components is None else components
 
             for key in components:
                 
                 W = par[w_pind[key]]
-                y += W * cfunc[key](x=x, par=par[p_pind[key]], **args[key])
+                
+                args_ = copy.deepcopy(args[key]); args_.pop('norm') # remove norm
+                lambdafunc = lambda x_val: cfunc[key](x_val, par[p_pind[key]], **args_)
+                ytot += W * integral_wrapper(lambdafunc, x=x, edges=edges, norm=args[key]['norm'])
             
-            return y
-
+            return ytot
+        
         return fitfunc
 
     # Joint fit of 2 histograms (pass, fail) with 4 free scale param (eps_S, eps_B, theta_S, theta_B)
@@ -1382,9 +1427,9 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     elif (fit_type == 'dual'):
         
         # Total fit function as a linear (incoherent) superposition
-        def fitfunc_pass(x, par, par_fixed=None, components=['S', 'B']):
-            y   = 0
-            par = np.array(par) # Make sure it is numpy array
+        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+            ytot = 0
+            par  = np.array(par) # Make sure it is numpy array
             
             # Collect parameters    
             theta_S = par[w_pind['theta_S']]
@@ -1399,12 +1444,15 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
                 else:
                     W = eps_B * theta_B
                 
-                y += W * cfunc[key](x=x, par=par[p_pind['Pass'][key]], **args[key])
-            return y
+                args_ = copy.deepcopy(args[key]); args_.pop('norm') # remove norm
+                lambdafunc = lambda x_val: cfunc[key](x_val, par[p_pind['Pass'][key]], **args_)
+                ytot += W * integral_wrapper(lambdafunc, x=x, edges=edges, norm=args[key]['norm'])
+            
+            return ytot
 
-        def fitfunc_fail(x, par, par_fixed=None, components=['S', 'B']):
-            y   = 0
-            par = np.array(par) # Make sure it is numpy array
+        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+            ytot = 0
+            par  = np.array(par) # Make sure it is numpy array
             
             # Collect parameters    
             theta_S = par[w_pind['theta_S']]
@@ -1419,8 +1467,11 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
                 else:
                     W = (1 - eps_B) * theta_B
                 
-                y += W * cfunc[key](x=x, par=par[p_pind['Fail'][key]], **args[key])
-            return y
+                args_ = copy.deepcopy(args[key]); args_.pop('norm') # remove norm
+                lambdafunc = lambda x_val: cfunc[key](x_val, par[p_pind['Fail'][key]], **args_)
+                ytot += W * integral_wrapper(lambdafunc, x=x, edges=edges, norm=args[key]['norm'])
+            
+            return ytot
         
         return {'Pass': fitfunc_pass, 'Fail': fitfunc_fail}
     
@@ -1429,13 +1480,13 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     elif (fit_type == 'dual-unitary-I'):
         
         # Total fit function as a linear (incoherent) superposition
-        def fitfunc_pass(x, par, par_fixed=None, components=['S', 'B']):
+        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=['S', 'B']):
             
             # External data
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']
             
-            y   = 0
-            par = np.array(par) # Make sure it is numpy array
+            ytot = 0
+            par  = np.array(par) # Make sure it is numpy array
             
             # Collect parameters
             theta_S = par[w_pind['theta_S']]
@@ -1449,16 +1500,19 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
                 else:
                     W = eps_B * max(1E-9, C_tot - theta_S)
                 
-                y += W * cfunc[key](x=x, par=par[p_pind['Pass'][key]], **args[key])
-            return y
+                args_ = copy.deepcopy(args[key]); args_.pop('norm') # remove norm
+                lambdafunc = lambda x_val: cfunc[key](x_val, par[p_pind['Pass'][key]], **args_)
+                ytot += W * integral_wrapper(lambdafunc, x=x, edges=edges, norm=args[key]['norm'])
+            
+            return ytot
 
-        def fitfunc_fail(x, par, par_fixed=None, components=['S', 'B']):
+        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=['S', 'B']):
             
             # External data
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']
             
-            y   = 0
-            par = np.array(par) # Make sure it is numpy array
+            ytot = 0
+            par  = np.array(par) # Make sure it is numpy array
             
             # Collect parameters
             theta_S = par[w_pind['theta_S']] 
@@ -1472,8 +1526,11 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
                 else:
                     W = (1 - eps_B) * max(1E-9, C_tot - theta_S)
                 
-                y += W * cfunc[key](x=x, par=par[p_pind['Fail'][key]], **args[key])
-            return y
+                args_ = copy.deepcopy(args[key]); args_.pop('norm') # remove norm
+                lambdafunc = lambda x_val: cfunc[key](x_val, par[p_pind['Fail'][key]], **args_)
+                ytot += W * integral_wrapper(lambdafunc, x=x, edges=edges, norm=args[key]['norm'])
+            
+            return ytot
 
         return {'Pass': fitfunc_pass, 'Fail': fitfunc_fail}
     
@@ -1482,14 +1539,14 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     elif (fit_type == 'dual-unitary-II'):
         
         # Total fit function as a linear (incoherent) superposition
-        def fitfunc_pass(x, par, par_fixed=None, components=['S', 'B']):
+        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=['S', 'B']):
             
             # External data    
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']
             Omega = par_fixed['C_pass'] / C_tot
             
-            y   = 0
-            par = np.array(par) # Make sure it is numpy array
+            ytot = 0
+            par  = np.array(par) # Make sure it is numpy array
             
             # Collect parameters
             eps_S = par[w_pind['eps_S']]
@@ -1502,17 +1559,20 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
                 else:
                     W = max(1E-9, Omega - eps_S * f_S) * C_tot
                 
-                y += W * cfunc[key](x=x, par=par[p_pind['Pass'][key]], **args[key])
-            return y
+                args_ = copy.deepcopy(args[key]); args_.pop('norm') # remove norm
+                lambdafunc = lambda x_val: cfunc[key](x_val, par[p_pind['Pass'][key]], **args_)
+                ytot += W * integral_wrapper(lambdafunc, x=x, edges=edges, norm=args[key]['norm'])
+            
+            return ytot
 
-        def fitfunc_fail(x, par, par_fixed=None, components=['S', 'B']):
+        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=['S', 'B']):
             
             # External data    
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']
             Omega = par_fixed['C_pass'] / C_tot
             
-            y   = 0
-            par = np.array(par) # Make sure it is numpy array
+            ytot = 0
+            par  = np.array(par) # Make sure it is numpy array
             
             # Collect parameters    
             eps_S = par[w_pind['eps_S']]
@@ -1525,8 +1585,11 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
                 else:
                     W = max(1E-9, 1 - f_S - Omega + eps_S * f_S) * C_tot
                 
-                y += W * cfunc[key](x=x, par=par[p_pind['Fail'][key]], **args[key])
-            return y
+                args_ = copy.deepcopy(args[key]); args_.pop('norm') # remove norm
+                lambdafunc = lambda x_val: cfunc[key](x_val, par[p_pind['Fail'][key]], **args_)
+                ytot += W * integral_wrapper(lambdafunc, x=x, edges=edges, norm=args[key]['norm'])
+            
+            return ytot
         
         return {'Pass': fitfunc_pass, 'Fail': fitfunc_fail}
     

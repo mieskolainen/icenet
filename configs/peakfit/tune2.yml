@@ -34,9 +34,9 @@ fit:
     # -----------------------------------------------
     # See /docs/pdf/peakfit.pdf
     
-    # `single`, `dual` and `dual-unitary-I` [signal weight]
+    # `single`, `dual` and `dual-unitary-I` [signal yield ~ count units]
     theta_start:  100.0
-    theta_limit:  [1.0e-4, 1.0e+9]
+    theta_limit:  [1.0e-3, 1.0e+9]
     theta_fixed:  False
     
     # `dual`, `dual-unitary-I` and `dual-unitary-II` [efficiency]
@@ -64,9 +64,9 @@ fit:
     # -----------------------------------------------
     # See /docs/pdf/peakfit.pdf
     
-    # `single` and `dual` [background weight]
-    theta_start:  0.1
-    theta_limit:  [1.0e-4, 1.0e+9]
+    # `single` and `dual` [background yield ~ count units]
+    theta_start:  10.0
+    theta_limit:  [1.0e-3, 1.0e+9]
     theta_fixed:  False
     
     # `dual`, `dual-unitary-I` and `dual-unitary-II` [efficiency]
@@ -106,8 +106,8 @@ techno:
   ncall_minuit_simplex:  0         # Number of Nelder-Mead simplex search calls (0 or 1)
   ncall_minuit_gradient: 10000     # Number of Minuit gradient search calls
   
-  minos: True                # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
-  migrad_first_step: 0.001   # First step size (relative percentage), set None for migrad heuristic
+  minos: True                  # If True, Minuit MINOS uncertainties (slower but best), otherwise HESSE
+  migrad_first_step: 0.001     # First step size (relative percentage), set None for migrad heuristic
   
   min_ndof: 1      # Minimum number of d.o.f required
   max_chi2: 1200   # Maximum chi2/ndf for a succesful fit

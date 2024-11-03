@@ -3,9 +3,9 @@
 #
 # Notes:
 #   
-# - Keep all pdf functions normalized in the steering yml (norm: True),
-#   otherwise fit stability problems and uncertainty estimation is not consistent.
-#
+# - Keep all pdf functions normalized in the steering yml normalized,
+#   otherwise not consistent (norm: True)
+# 
 # - Use 'chi2' or 'huber' loss if using weighted event histograms (either MC or data)
 #   Use 'nll' for unweighted Poisson count histograms
 #             and a weighted count histograms via a scale transform (experimental)
@@ -38,7 +38,7 @@ from icefit import icepeak
 
 import ray
 
-__VERSION__ = 0.04
+__VERSION__ = 0.05
 __AUTHOR__  = 'm.mieskolainen@imperial.ac.uk'
 
 # ========================================================================
@@ -274,8 +274,8 @@ def fit_task_multi(f, inputparam, savepath, YEAR, GENTYPE):
     d_pass = icepeak.hist_decompose(icepeak.TH1_to_numpy(hist['Pass']), param=param, techno=techno)
     d_fail = icepeak.hist_decompose(icepeak.TH1_to_numpy(hist['Fail']), param=param, techno=techno)
     
-    par_fixed = {'C_pass': d_pass['num_counts_in_fit'] * d_pass['mean_dx'],
-                 'C_fail': d_fail['num_counts_in_fit'] * d_fail['mean_dx']}
+    par_fixed = {'C_pass': d_pass['num_counts_in_fit'],
+                 'C_fail': d_fail['num_counts_in_fit']}
     
     # --------------------------------------------------------------------
     
