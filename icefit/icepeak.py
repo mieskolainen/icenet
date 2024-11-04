@@ -545,7 +545,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             if np.sum(fmask) == 0: return 1e9 # Empty input
             
             # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed, bin_edges[key][edgermask])
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed=par_fixed, edges=bin_edges[key][edgermask])
             
             residual = (y_pred[fmask] - counts[key][rmask][fmask]) / errors[key][rmask][fmask]
 
@@ -568,7 +568,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             if np.sum(fmask) == 0: return 1e9 # Empty input
             
             # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed, bin_edges[key][edgermask])
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed=par_fixed, edges=bin_edges[key][edgermask])
             
             T = huber_lossfunc(y_true=counts[key][rmask][fmask], y_pred=y_pred[fmask],
                                sigma=errors[key][rmask][fmask], delta=delta)
@@ -591,7 +591,7 @@ def binned_1D_fit(hist: dict, param: dict, fitfunc: dict, techno: dict, par_fixe
             if np.sum(fmask) == 0: return 1e9 # Empty input
             
             # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
-            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed, bin_edges[key][edgermask])
+            y_pred = fitfunc[key](cbins[key][rmask], par, par_fixed=par_fixed, edges=bin_edges[key][edgermask])
             
             # Bohm-Zech scale transform for weighted events (https://arxiv.org/abs/1309.1287)
             # https://scikit-hep.org/iminuit/notebooks/weighted_histograms.html
@@ -878,26 +878,28 @@ def optimizer_execute(start_values, lossfunc, param, techno):
     return m1
 
 def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
-                   par, cov, par_fixed=None, num_visual=1000, num_MC=500):
+                   par, cov, par_fixed=None, num_visual: int=1000, num_MC: int=500, alpha: float=0.2):
     """
     Analyze and visualize fit results
     
     Args:
-        hist:      TH1 histogram object (from uproot)
-        param:     Input parameters of the fit
-        techno:    Tech parameters
-        fitfunc:   Total fit function
+        hist:        TH1 histogram object (from uproot)
+        param:       Input parameters of the fit
+        techno:      Tech parameters
+        fitfunc:     Total fit function
         
-        par:       Parameters obtained from the fit
-        cov:       Covariance matrix obtained from the fit
-        par_fixed: 
+        par:         Parameters obtained from the fit
+        cov:         Covariance matrix obtained from the fit
+        par_fixed:   External fixed parameters ('dual' fits)
         
         num_visual:  Number of visualization samples of the function (on x-axis)
         num_MC:      Number of MC samples for uncertainty estimation
+        alpha:       Uncertainty band transparency
     
     Returns:
-        output dictionary
+        output dictionary fit data and figures
     """
+    
     cprint(__name__ + f'.analyze_1D_fit:', 'magenta')
     
     h = TH1_to_numpy(hist)
@@ -913,22 +915,28 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
 
     print(f'Input bin count sum: {np.sum(counts):0.1f} (full range)')
     print(f'Input bin count sum: {np.sum(counts[range_mask][fitbin_mask]):0.1f} (in fit)')    
+    print('')
     
     # --------------------------------------------------------------------
     ## Compute event count yields
     
+    components = ['tot']
+    for key in param['components']:
+        components.append(key)
+    
     # Loop over function components
     y     = {}
+    y_up  = {}
+    y_lo  = {}
     N     = {}
     N_err = {}
-    for key in param['components']:
+    
+    for key in components:
         
-        y[key] = fitfunc(cbins[range_mask], par, par_fixed, components=[key], edges=bin_edges[edges_range_mask])
+        y[key] = fitfunc(cbins[range_mask], par, par_fixed,
+                         components=None if key == 'tot' else [key], edges=bin_edges[edges_range_mask])
         
-        # Protect for nan/inf
-        if np.sum(~np.isfinite(y[key])) > 0:
-            print(f'Evaluated function [{key}] contain nan/inf values (set to 0.0)')
-            y[key][~np.isfinite(y[key])] = 0.0
+        y[key][~np.isfinite(y[key])] = 0.0 # Protect for nan/inf
 
         # Compute total count as a bin-wise sum
         N[key] = np.sum(y[key])
@@ -937,51 +945,63 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     # Estimate the yield uncertainty via Monte Carlo
     # (takes correlations taken into account via the covariance matrix)
     
-    for key in param['components']:
-        
-        # Check that it is positive (semi)-definite (we did tag it -1 if not)
-        if cov[0][0] > 0:
+    # Check that it is positive (semi)-definite (we did tag it -1 if not)
+    if cov[0][0] > 0:
+
+        PAR = np.random.multivariate_normal(par, cov, num_MC)
+
+        # ** Possible extension **
+        # we assume external par_fixed to be 'exact', i.e. do not fluctuate them
             
-            PAR = np.random.multivariate_normal(par, cov, num_MC)
-            
-            # Apply parameter space boundaries
-            for j in range(len(param['limits'])):
-                PAR[:,j] = np.clip(PAR[:,j], param['limits'][j][0], param['limits'][j][1])
+        # Apply parameter space boundaries
+        for j in range(len(param['limits'])):
+            PAR[:,j] = np.clip(PAR[:,j], param['limits'][j][0], param['limits'][j][1])
+
+        for key in components:
             
             # Evaluate event counts
             N_hat = np.zeros(num_MC)
-            
-            # ** Possible extension **
-            # we assume external par_fixed to be 'exact', i.e. do not fluctuate them
+            Y     = np.zeros( (num_MC, len(y[key])) )
             
             for i in range(num_MC):
+
+                yy = fitfunc(cbins[range_mask], PAR[i,:], par_fixed,
+                             components=None if key == 'tot' else [key], edges=bin_edges[edges_range_mask])
                 
-                yy = fitfunc(cbins[range_mask], PAR[i,:], par_fixed, components=[key], edges=bin_edges[edges_range_mask])
                 yy[~np.isfinite(yy)] = 0.0 # Protect for nan/inf
+                Y[i,:]   = yy
                 
                 # Compute total count as a bin-wise sum
                 N_hat[i] = np.sum(yy)
             
-            # Compute percentiles
-            N_high = np.percentile(N_hat, 84)
-            N_med  = np.percentile(N_hat, 50)
-            N_low  = np.percentile(N_hat, 16)
-            
             # Take symmetric +-1 sigma error (use abs for protection)
-            N_err[key] = np.mean([np.abs(N_med - N_low), np.abs(N_med - N_high)])
+            N_med      = np.percentile(N_hat, 50)
+            N_err[key] = np.mean([np.abs(N_med - np.percentile(N_hat, 16)),
+                                  np.abs(N_med - np.percentile(N_hat, 84))])
             
-        else:
-            print('Missing covariance matrix, using Poisson (or weighted count) error as a proxy')
+            # Confidence band
+            y_lo[key] = np.percentile(Y, 16, axis=0)
+            y_up[key] = np.percentile(Y, 84, axis=0)
             
-            N_sum = np.sum(counts[range_mask][fitbin_mask])
-            if N_sum > 0:
+    else:
+        cprint('Missing covariance matrix, using Poisson (or weighted count) error as a proxy', 'red')
+        
+        N_sum = np.sum(counts[range_mask][fitbin_mask])
+        if N_sum > 0:
+            for key in components:
+                
                 N_err[key] = (N[key] / N_sum) * np.sqrt(np.sum(errors[range_mask][fitbin_mask]**2))
+                
+                y_up[key] = y[key] + np.sqrt(y[key] + 1E-12)
+                y_lo[key] = y[key] - np.sqrt(y[key] + 1E-12)
     
     # --------------------------------------------------------------------
     # Print out
 
+    cprint('Fit results:', 'yellow')
     for key in N.keys():
-        print(f"N_{key}: {N[key]:0.1f} +- {N_err[key]:0.1f}")
+        print(f"N_{key}: \t {N[key]:0.1f} +- {N_err[key]:0.1f}")
+    print('')
     
     # --------------------------------------------------------------------
     obs_M = {
@@ -1007,40 +1027,41 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     
     ax[0].errorbar(x=cbins, y=counts, yerr=errors, color=(0,0,0), 
                    label=f'Data, $N = {np.sum(counts[range_mask][fitbin_mask]):0.1f}$ (in fit)', **iceplot.errorbar_style)
-    ax[0].legend(frameon=False)
     ax[0].set_ylabel('Counts / bin')
 
     ## ------------------------------------------------
     # Compute chi2 and ndf
     
-    # ** Note use proper range_masks here due to trapz integral in fitfunc ! **
-    yf   = fitfunc(x=cbins[range_mask], par=par, par_fixed=par_fixed, edges=bin_edges[edges_range_mask])
-    chi2 = np.sum(((yf[fitbin_mask] - counts[range_mask][fitbin_mask]) / errors[range_mask][fitbin_mask])**2)
+    r    = (y['tot'][fitbin_mask] - counts[range_mask][fitbin_mask]) / errors[range_mask][fitbin_mask]
+    chi2 = np.sum(r**2)
     ndof = get_ndf(fitbin_mask=fitbin_mask, par=par, fit_type=param['fit_type'])
     
     # --------------------------------------------------
     ## Compute fit functions for the plots
 
     # Loop over function components
-    y = {}
-    xfine = np.linspace(np.min(cbins[range_mask]), np.max(cbins[range_mask]), num_visual)
+    yfine    = {}
+    yfine_up = {}
+    yfine_lo = {}
+    xfine    = np.linspace(np.min(cbins[range_mask]), np.max(cbins[range_mask]), num_visual)
     
-    for key in param['components']:
+    for key in components:
         
-        y[key] = fitfunc(cbins[range_mask], par, par_fixed, components=[key], edges=bin_edges[edges_range_mask])
+        x    = cbins[range_mask]
+        
+        kind = 'linear' if len(x) != len(np.unique(x)) else 'quadratic'
+        
+        # Central value
+        ff            = interpolate.interp1d(x=x, y=y[key],    kind=kind)
+        yfine[key]    = ff(xfine)
 
-        # Protect for nan/inf
-        if np.sum(~np.isfinite(y[key])) > 0:
-            print(f'Evaluated function [{key}] contain nan/inf values (set to 0.0)')
-            y[key][~np.isfinite(y[key])] = 0.0
+        # +1 sigma
+        ff            = interpolate.interp1d(x=x, y=y_up[key], kind=kind)
+        yfine_up[key] = ff(xfine)
 
-        # Interpolate for visualization
-        kind   = 'linear' if len(cbins[range_mask]) != len(np.unique(cbins[range_mask])) else 'quadratic'
-        ff = interpolate.interp1d(x=cbins[range_mask], y=y[key], kind=kind)
-        y[key] = ff(xfine)
-    
-    # Total fit
-    y_tot = sum(y[key] for key in y)
+        # -1 sigma
+        ff            = interpolate.interp1d(x=x, y=y_lo[key], kind=kind)
+        yfine_lo[key] = ff(xfine)
     
     # --------------------------------------------------
     ## Plot them
@@ -1048,13 +1069,19 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     plt.sca(ax[0])
     
     # Plot total
-    plt.plot(xfine, y_tot, label="Total fit", color=(0.5,0.5,0.5))
+    color = (0.5,0.5,0.5)
+    plt.plot(xfine, yfine['tot'], label="Total fit", color=color, zorder=1)
+    plt.fill_between(xfine, yfine_lo['tot'], yfine_up['tot'], color=color, alpha=alpha, edgecolor="none", zorder=0.5)
     
     # Plot components
     colors     = [(0.7, 0.2, 0.2), (0.2, 0.2, 0.7)]
     linestyles = ['-', '--']
-    i = 0
-    for key in y.keys():
+    i          = 0
+    
+    for key in yfine.keys():
+        if key == 'tot':
+            continue
+        
         if i < 2:
             color     = colors[i]
             linestyle = linestyles[i]
@@ -1062,18 +1089,24 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
             color     = np.random.rand(3)
             linestyle = '--'
 
-        plt.plot(xfine, y[key], label=f"{key}: $N_{key} = {N[key]:.1f} \\pm {N_err[key]:.1f}$", color=color, linestyle=linestyle)
+        plt.plot(xfine, yfine[key], label=f"{key}: $N_{key} = {N[key]:.1f} \\pm {N_err[key]:.1f}$", color=color, linestyle=linestyle, zorder=i+2)
+        plt.fill_between(xfine, yfine_lo[key], yfine_up[key], color=color, alpha=alpha, edgecolor="none", zorder=0.5)
+        
         i += 1
     
     plt.ylim(bottom=0)
-    plt.legend(fontsize=7)
-
+    plt.legend(frameon=True, fontsize=6.5)
+    
     # chi2 / ndf
     chi2_ndf = chi2 / ndof if ndof > 0 else -999
-    title = f"$\\chi^2 / n_\\mathrm{{dof}} = {chi2:.2f} / {ndof:0.0f} = {chi2_ndf:.2f}$"
+    title    = f"$\\chi^2 / n_\\mathrm{{dof}} = {chi2:.2f} / {ndof:0.0f} = {chi2_ndf:.2f}$"
     print(f"plot: {title.replace('$', '')} \n")
     plt.title(title)
     
+    # Remove the lowest tick mark from the upper axis (because it overlaps with the lower plot)
+    ticks = ax[0].get_yticks()
+    ax[0].set_yticks(ticks[1:])
+
     # ---------------------------------------------------------------
     ## LOWER PULL PLOT
     
@@ -1096,7 +1129,8 @@ def analyze_1D_fit(hist, param: dict, techno: dict, fitfunc,
     ticks = iceplot.tick_calc([-3,3], 1.0, N=6)
     iceplot.set_axis_ticks(ax=ax[1], ticks=ticks, dim='y')
     
-    # Get pull histogram
+    # ---------------------------------------------------------------
+    ## Get pull histogram
     fig_pulls, ax_pulls = plot_pulls(pulls=pulls, xlabel=label)
     
     return {'fig': fig, 'ax': ax, 'h': h, 'N': N,
@@ -1427,7 +1461,10 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     elif (fit_type == 'dual'):
         
         # Total fit function as a linear (incoherent) superposition
-        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=None):
+            
+            components = ['S', 'B'] if components is None else components
+            
             ytot = 0
             par  = np.array(par) # Make sure it is numpy array
             
@@ -1450,7 +1487,10 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
             
             return ytot
 
-        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=None):
+            
+            components = ['S', 'B'] if components is None else components
+            
             ytot = 0
             par  = np.array(par) # Make sure it is numpy array
             
@@ -1480,7 +1520,9 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     elif (fit_type == 'dual-unitary-I'):
         
         # Total fit function as a linear (incoherent) superposition
-        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=None):
+            
+            components = ['S', 'B'] if components is None else components
             
             # External data
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']
@@ -1506,7 +1548,9 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
             
             return ytot
 
-        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=None):
+            
+            components = ['S', 'B'] if components is None else components
             
             # External data
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']
@@ -1539,7 +1583,9 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
     elif (fit_type == 'dual-unitary-II'):
         
         # Total fit function as a linear (incoherent) superposition
-        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+        def fitfunc_pass(x, par, par_fixed=None, edges=None, components=None):
+            
+            components = ['S', 'B'] if components is None else components
             
             # External data    
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']
@@ -1565,7 +1611,9 @@ def get_total_fit_functions(fit_type, cfunc, w_pind, p_pind, args):
             
             return ytot
 
-        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=['S', 'B']):
+        def fitfunc_fail(x, par, par_fixed=None, edges=None, components=None):
+            
+            components = ['S', 'B'] if components is None else components
             
             # External data    
             C_tot = par_fixed['C_pass'] + par_fixed['C_fail']

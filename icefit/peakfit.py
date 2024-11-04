@@ -1,8 +1,8 @@
 # Tag & Probe efficiency (and scale factor) estimation.
 # Multiprocessing via Ray.
-#
+# 
 # Notes:
-#   
+# 
 # - Keep all pdf functions normalized in the steering yml normalized,
 #   otherwise not consistent (norm: True)
 # 
@@ -38,8 +38,9 @@ from icefit import icepeak
 
 import ray
 
-__VERSION__ = 0.05
+__VERSION__ = 0.06
 __AUTHOR__  = 'm.mieskolainen@imperial.ac.uk'
+
 
 # ========================================================================
 # Input processing
@@ -677,12 +678,15 @@ if __name__ == "__main__":
     parser.add_argument('--inputfile',   type=str, default='configs/peakfit/tune2.yml', help="Steering input YAML file", nargs='?')
     
     # Override (optional)
-    parser.add_argument('--input_path',  type=str, default=None, help="Input path", nargs='?')
-    parser.add_argument('--output_name', type=str, default=None, help="Output name", nargs='?')
-    parser.add_argument('--fit_type',    type=str, default=None, help="Fit type", nargs='?')
-    parser.add_argument('--num_cpus',    type=int, default=None, help="Number of CPUs", nargs='?')
-    parser.add_argument('--rng_seed',    type=int, default=None, help="Random seed", nargs='?')
-    parser.add_argument('--loss_type',    type=str, default=None, help="Loss type", nargs='?')
+    parser.add_argument('--input_path',    type=str, default=None, help="Input path", nargs='?')
+    parser.add_argument('--output_name',   type=str, default=None, help="Output name", nargs='?')
+    parser.add_argument('--fit_type',      type=str, default=None, help="Fit type", nargs='?')
+    parser.add_argument('--num_cpus',      type=int, default=None, help="Number of CPUs (0 for automatic)", nargs='?')
+    parser.add_argument('--rng_seed',      type=int, default=None, help="Random seed", nargs='?')
+    parser.add_argument('--loss_type',     type=str, default=None, help="Loss type", nargs='?')
+    parser.add_argument('--trials',        type=int, default=None, help="Trials", nargs='?')
+    
+    parser.add_argument('--draw_mnmatrix', help="Draw 2D MINOS profiles", action="store_true")
     
     args = parser.parse_args()
     print(args)
@@ -714,8 +718,14 @@ if __name__ == "__main__":
     
     if args.loss_type is not None:
         p['techno']['loss_type'] = args.loss_type
-    # -------------------------------------------------
     
+    if args.trials is not None:
+        p['techno']['trials'] = args.trials
+    
+    if args.draw_mnmatrix:
+        p['techno']['draw_mnmatrix'] = True
+    # -------------------------------------------------
+
     print('-----------------------------')
     cprint(f'peakfit {__VERSION__} ({__AUTHOR__})', 'magenta')
     print('')
