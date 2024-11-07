@@ -263,18 +263,20 @@ def DSCB_pdf(x: np.ndarray, par: np.ndarray, EPS: float=1E-12, norm=False):
     return y
 
 def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
-                     par_index: List[int], xfactor: float=0.2, Nmin: int=256, norm=False):
+                     par_index: List[int], xfactor: float=0.2, Nmin: int=256,
+                     kind='linear', norm=False):
     """
-    Convolution between two functions.
+    Convolution between two functions
     
     Args:
         x:         function argument
         par:       function parameters from the (fit) routine
         pdf_pair:  names of two functions, e.g. ['CBW_pdf', 'G_pdf']
         par_index: indices of the parameter per pair, e.g. [[0,1,2], [3,4]]
-        norm:      normalize the integral
         xfactor:   domain extension factor
         Nmin:      minimum number of function sample points
+        kind:      final sampling interpolation type ('linear', 'quadratic', ...)
+        norm:      normalize the integral
     """
 
     func0 = eval(f'{pdf_pair[0]}')
@@ -287,8 +289,10 @@ def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
     xp = highres_x(x=x, xfactor=xfactor, Nmin=Nmin)
     f0 = func0(x=xp, par=f0_param, norm=False)
     f1 = func1(x=xp, par=f1_param, norm=False)
-    yp = np.convolve(a=f0, v=f1, mode='same')
-    y  = interpolate.interp1d(xp, yp)(x)
+    
+    dx = xp[1] - xp[0]
+    yp = np.convolve(a=f0, v=f1, mode='same') * dx
+    y  = interpolate.interp1d(x=xp, y=yp, kind=kind)(x)
     
     if norm:
         y = y / np.trapz(y=y, x=x)
@@ -296,14 +300,14 @@ def generic_conv_pdf(x: np.ndarray, par: np.ndarray, pdf_pair: List[str],
     return y
 
 @numba.njit
-def highres_x(x: np.ndarray, xfactor: float=0.2, Nmin: int=256):
+def highres_x(x: np.ndarray, xfactor: float=0.5, Nmin: int=256):
     """
     Extend range and sampling of x.
     
     Args:
-        x:       Array of values.
-        xfactor: Domain extension factor (default is 0.2).
-        Nmin:    Minimum number of samples (default is 256).
+        x:       Array of values
+        xfactor: Domain extension factor (e.g. 0.2 gives +- 20%)
+        Nmin:    Minimum number of samples
     
     Returns:
         np.ndarray: Extended high-resolution array.
@@ -352,7 +356,7 @@ def edges2binwidth(edges):
     """ Bin edges to binwidths """
     return edges[1:] - edges[:-1]
 
-def TH1_to_numpy(hist):
+def TH1_to_numpy(hist, dtype=np.float64):
     """
     Convert TH1 (ROOT) histogram to numpy array
     
@@ -362,12 +366,12 @@ def TH1_to_numpy(hist):
 
     #for n, v in hist.__dict__.items(): # class generated on the fly
     #   print(f'{n} {v}')
-
+    
     hh         = hist.to_numpy()
-    counts     = np.array(hist.values())
-    errors     = np.array(hist.errors())
+    counts     = np.array(hist.values(), dtype=dtype)
+    errors     = np.array(hist.errors(), dtype=dtype)
 
-    bin_edges  = np.array(hh[1])
+    bin_edges  = np.array(hh[1], dtype=dtype)
     bin_center = edges2centerbins(bin_edges)
     bin_width  = edges2binwidth(bin_edges)
     
@@ -1412,7 +1416,7 @@ def read_yaml_input(inputfile, fit_type=None):
     
     return param, fitfunc, cfunc, steer['techno']
 
-def integral_wrapper(lambdafunc, x, edges, norm=False, N_int: int=128, EPS=1E-12, **args):
+def integral_wrapper(lambdafunc, x, edges, norm=False, N_int: int=128, EPS=1E-8, **args):
     """
     Wrapper function for integral normalization
     

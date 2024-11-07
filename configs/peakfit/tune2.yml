@@ -12,12 +12,12 @@
 input_path:   './actions-stash/input/icefit/dqcd_2018_test/flat/muon/generalTracks/JPsi'
 output_name:  'tune2'
 
-years:    [2018] #[2016, 2017, 2018]
-fitrange: [2.91, 3.29] # Nominal fit window (GeV)
+years:    [2018]         # [2016, 2017, 2018]
+fitrange: [2.91, 3.29]   # Nominal fit window (GeV)
 systematics: ['Nominal'] # ['Nominal', 'nVertices_Up', 'nVertices_Down']
 
 # List of systematic variations active
-variations: ['DEFAULT'] #, 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
+variations: ['DEFAULT']  #, 'MASS-WINDOW-DOWN', 'MASS-WINDOW-UP']
 
 num_cpus: 0 # put 0 for automatic, set manually to 1 if problems (ray not used with 1)
 
@@ -121,5 +121,5 @@ techno:
   tol: 0.1              # Default 0.1, https://iminuit.readthedocs.io/en/stable/reference.html#iminuit.Minuit.tol
   
   cov_eps: 0.0          # Covariance matrix post-regularization (added to diagonal) (set to 0 for none, can bias!)
-
+  
   draw_mnmatrix: False  # Draw MINOS profile likelihood scan 2D contours (very slow)

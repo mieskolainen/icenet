@@ -38,7 +38,7 @@ from icefit import icepeak
 
 import ray
 
-__VERSION__ = 0.06
+__VERSION__ = 0.07
 __AUTHOR__  = 'm.mieskolainen@imperial.ac.uk'
 
 
