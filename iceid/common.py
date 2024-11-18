@@ -151,6 +151,10 @@ def splitfactor(x, y, w, ids, args):
         data_kin.x = data_kin.x.astype(np.float32)
     
     # -------------------------------------------------------------------------
+    ### MI variables
+    data_MI = None
+    
+    # -------------------------------------------------------------------------
     ### DeepSets representation
     data_deps = None
     
@@ -213,4 +217,9 @@ def splitfactor(x, y, w, ids, args):
     data   = data[vars]
     data.x = data.x.astype(np.float32)
     
-    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
+    return {'data':        data,
+            'data_MI':     data_MI,
+            'data_kin':    data_kin,
+            'data_deps':   data_deps,
+            'data_tensor': data_tensor,
+            'data_graph':  data_graph}

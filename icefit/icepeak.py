@@ -366,7 +366,7 @@ def TH1_to_numpy(hist, dtype=np.float64):
 
     #for n, v in hist.__dict__.items(): # class generated on the fly
     #   print(f'{n} {v}')
-    
+
     hh         = hist.to_numpy()
     counts     = np.array(hist.values(), dtype=dtype)
     errors     = np.array(hist.errors(), dtype=dtype)
@@ -1430,7 +1430,8 @@ def integral_wrapper(lambdafunc, x, edges, norm=False, N_int: int=128, EPS=1E-8,
     if norm:
         # Normalization based on a numerical integral over edge bounds
         x_fine = np.linspace(edges[0], edges[-1], N_int)
-        I = max(np.trapz(y=lambdafunc(x_fine), x=x_fine), EPS)
+        y_fine = lambdafunc(x_fine)
+        I = max(np.trapz(x=x_fine, y=y_fine), EPS)
         
         return f / I * edges2binwidth(edges)
     else:

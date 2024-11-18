@@ -391,7 +391,11 @@ class IceXYW:
             return IceXYW(x=self.x[..., col], y=self.y, w=self.w, ids=ids)
         else:
             return IceXYW(x=self.x[col], y=self.y, w=self.w, ids=ids)
-        
+    
+    # length operator
+    def __len__(self):
+        return len(self.x)
+    
     # + operator
     def __add__(self, other):
 

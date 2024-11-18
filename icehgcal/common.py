@@ -243,22 +243,28 @@ def splitfactor(x, y, w, ids, args):
     data_deps   = None
     
     # -------------------------------------------------------------------------
+    ### Mutual Information
+    data_MI     = None
+    
+    # -------------------------------------------------------------------------
     ### Tensor representation
     data_tensor = None
 
     # -------------------------------------------------------------------------
     ## Graph representation
-    data_graph = None
+    data_graph  = None
     
-    data_graph = graphio.parse_graph_data_candidate(X=data.x, Y=data.y, weights=data.w, ids=data.ids,
+    data_graph  = graphio.parse_graph_data_candidate(X=data.x, Y=data.y, weights=data.w, ids=data.ids,
         features=scalar_vars, graph_param=args['graph_param'])
     
     # --------------------------------------------------------------------
     ### Finally pick active scalar variables out
-
+    
     data.x = None # To protect other routines (TBD see global impact --> comment this line)
     
-    return {'data': data, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
-
-# ========================================================================
-# ========================================================================
+    return {'data':        data,
+            'data_MI':     data_MI,
+            'data_kin':    data_kin,
+            'data_deps':   data_deps,
+            'data_tensor': data_tensor,
+            'data_graph':  data_graph}

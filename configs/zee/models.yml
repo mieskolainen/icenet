@@ -193,6 +193,8 @@ iceboost_swd:
   <<: *ICEBOOST0
   
   label: 'ICEBOOST-SWD'
+  
+  bootstrap: 3
 
   # BCE loss domains [use with custom:binary_cross_entropy]
   BCE_param:

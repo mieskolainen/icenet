@@ -353,10 +353,10 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
 
             data_graph += sum(ray.get(graph_futures), []) # Join split array results
             ray.shutdown()
-
+        
         print(f'ray_results: {time.time() - start_time:0.1f} sec')
         io.showmem()
-
+    
     # -------------------------------------------------------------------------
     ## Tensor representation
     data_tensor = None
@@ -392,5 +392,9 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     """
     # --------------------------------------------------------------------------
     
-    
-    return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
+    return {'data':        data,
+            'data_MI':     data_MI,
+            'data_kin':    data_kin,
+            'data_deps':   data_deps,
+            'data_tensor': data_tensor,
+            'data_graph':  data_graph}

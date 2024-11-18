@@ -1158,18 +1158,18 @@ def train_models(data_trn, data_val, args=None):
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
 
     # -------------------------------------------------------------
-
-    def set_distillation_drain(ID, param, inputs, dtype='torch'):
+    
+    def set_distillation_drain(ID, param, inputs, idx, dtype='torch'):
         if 'distillation' in args and args['distillation']['drains'] is not None:
             if ID in args['distillation']['drains']:
                 print(f'Creating soft distillation drain for the model <{ID}>', 'yellow')
                 
                 # By default to torch
-                inputs['y_soft'] = torch.tensor(y_soft, dtype=torch.float)
+                inputs['y_soft'] = torch.tensor(y_soft, dtype=torch.float)[idx]
                 
                 if dtype == 'numpy':
-                    inputs['y_soft'] = inputs['y_soft'].detach().cpu().numpy()
-    
+                    inputs['y_soft'] = inputs['y_soft'].detach().cpu().numpy()[idx]
+
     # -------------------------------------------------------------
 
     print(f'Training models:', 'magenta')
@@ -1179,158 +1179,201 @@ def train_models(data_trn, data_val, args=None):
     # Loop over active models
     exceptions = 0
     
-    for i in range(len(args['active_models'])):
+    for k in range(len(args['active_models'])):
 
         # Collect garbage
         gc.collect()
         io.showmem()
         
-        ID    = args['active_models'][i]
+        ID    = args['active_models'][k]
         param = args['models'][ID]
         print(f'Training <{ID}> | {param} \n')
-
-        try:
+        
+        if 'bootstrap' not in param:
+            num_bootstrap = 1
+        elif param['bootstrap'] is None:
+            num_bootstrap = 1
+        else:
+            num_bootstrap = param['bootstrap'] + 1
+        
+        ORIG_LABEL = copy.deepcopy(param['label'])
+        
+        for b in range(num_bootstrap):
             
-            ## Different model
-            if   param['train'] == 'torch_graph':
+            # Bootstrap sample
+            
+            if b > 0:
+                param['label'] = f'{ORIG_LABEL}__bs_{b}'
                 
-                inputs = {'data_trn': data_trn['data_graph'],
-                        'data_val': data_val['data_graph'],
+                idx_trn = np.random.choice(len(data_trn['data']), size=len(data_trn['data']), replace=True)
+                idx_val = np.arange(len(data_val['data'])) # Orig
+                
+                print(f'Bootstrap training sample: {b} / {num_bootstrap}', 'green')
+
+            else:
+                idx_trn = np.arange(len(data_trn['data'])) # Orig
+                idx_val = np.arange(len(data_val['data'])) # Orig
+
+                print(f'Original training sample', 'green')
+            
+            try:
+                
+                ## Different model
+                if   param['train'] == 'torch_graph':
+                    
+                    inputs = {
+                        'data_trn': [data_trn['data_graph'][i] for i in idx_trn],
+                        'data_val': [data_val['data_graph'][i] for i in idx_val],
                         'args':     args,
                         'param':    param}
+                    
+                    set_distillation_drain(ID=ID, param=param, inputs=inputs, idx=idx_trn)
+
+                    if ID in args['raytune']['param']['active']:
+                        model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
+                    else:
+                        model = train.train_torch_graph(**inputs)
                 
-                set_distillation_drain(ID=ID, param=param, inputs=inputs)
-
-                if ID in args['raytune']['param']['active']:
-                    model = train.raytune_main(inputs=inputs, train_func=train.train_torch_graph)
-                else:
-                    model = train.train_torch_graph(**inputs)
-            
-            elif param['train'] == 'xgb':
-
-                inputs = {'data_trn':    data_trn['data'],
-                        'data_val':    data_val['data'],
+                elif param['train'] == 'xgb':
+                    
+                    inputs = {
+                        'data_trn':    data_trn['data'][idx_trn],
+                        'data_val':    data_val['data'][idx_val],
                         'args':        args,
-                        'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                        'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
+                        'data_trn_MI': data_trn['data_MI'][idx_trn] if ('data_MI' in data_trn and data_trn['data_MI'] is not None) else None,
+                        'data_val_MI': data_val['data_MI'][idx_val] if ('data_MI' in data_val and data_val['data_MI'] is not None) else None,
                         'param':       param}
-                
-                set_distillation_drain(ID=ID, param=param, inputs=inputs, dtype='numpy')
-                
-                if ID in args['raytune']['param']['active']:
-                    model = train.raytune_main(inputs=inputs, train_func=iceboost.train_xgb)
-                else:
-                    model = iceboost.train_xgb(**inputs)
+                    
+                    set_distillation_drain(ID=ID, param=param, inputs=inputs, idx=idx_trn, dtype='numpy')
+                    
+                    if ID in args['raytune']['param']['active']:
+                        model = train.raytune_main(inputs=inputs, train_func=iceboost.train_xgb)
+                    else:
+                        model = iceboost.train_xgb(**inputs)
 
-            elif param['train'] == 'torch_deps':
-                
-                inputs = {'X_trn':       torch.tensor(data_trn['data_deps'].x, dtype=torch.float),
-                        'Y_trn':       torch.tensor(data_trn['data'].y,      dtype=torch.long),
-                        'X_val':       torch.tensor(data_val['data_deps'].x, dtype=torch.float),
-                        'Y_val':       torch.tensor(data_val['data'].y,      dtype=torch.long),
+                elif param['train'] == 'torch_deps':
+                    
+                    inputs = {
+                        'X_trn':       torch.tensor(data_trn['data_deps'].x[idx_trn], dtype=torch.float),
+                        'Y_trn':       torch.tensor(data_trn['data'].y[idx_trn],      dtype=torch.long),
+                        'X_val':       torch.tensor(data_val['data_deps'].x[idx_val], dtype=torch.float),
+                        'Y_val':       torch.tensor(data_val['data'].y[idx_val],      dtype=torch.long),
                         'X_trn_2D':    None,
                         'X_val_2D':    None,
-                        'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
-                        'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
-                        'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                        'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
+                        'trn_weights': torch.tensor(data_trn['data'].w[idx_trn], dtype=torch.float),
+                        'val_weights': torch.tensor(data_val['data'].w[idx_val], dtype=torch.float),
+                        'data_trn_MI': data_trn['data_MI'][idx_trn] if ('data_MI' in data_trn and data_trn['data_MI'] is not None) else None,
+                        'data_val_MI': data_val['data_MI'][idx_val] if ('data_MI' in data_val and data_val['data_MI'] is not None) else None,
                         'args':        args,
                         'param':       param,
                         'ids':         data_trn['data_deps'].ids}
-                
-                set_distillation_drain(ID=ID, param=param, inputs=inputs)
+                    
+                    set_distillation_drain(ID=ID, param=param, idx=idx_trn, inputs=inputs)
 
-                if ID in args['raytune']['param']['active']:
-                    model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
-                else:
-                    model = train.train_torch_generic(**inputs)        
+                    if ID in args['raytune']['param']['active']:
+                        model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
+                    else:
+                        model = train.train_torch_generic(**inputs)        
 
-            elif param['train'] == 'torch_generic':
-                
-                inputs = {'X_trn':       torch.tensor(aux.red(data_trn['data'].x, data_trn['data'].ids, param, 'X'), dtype=torch.float),
-                        'Y_trn':       torch.tensor(data_trn['data'].y, dtype=torch.long),
-                        'X_val':       torch.tensor(aux.red(data_val['data'].x, data_val['data'].ids, param, 'X'), dtype=torch.float),
-                        'Y_val':       torch.tensor(data_val['data'].y, dtype=torch.long),
-                        'X_trn_2D':    None if data_trn['data_tensor'] is None else torch.tensor(data_trn['data_tensor'], dtype=torch.float),
-                        'X_val_2D':    None if data_val['data_tensor'] is None else torch.tensor(data_val['data_tensor'], dtype=torch.float),
-                        'trn_weights': torch.tensor(data_trn['data'].w, dtype=torch.float),
-                        'val_weights': torch.tensor(data_val['data'].w, dtype=torch.float),
-                        'data_trn_MI': data_trn['data_MI'] if 'data_MI' in data_trn else None,
-                        'data_val_MI': data_val['data_MI'] if 'data_MI' in data_val else None,
+                elif param['train'] == 'torch_generic':
+                    
+                    inputs = {
+                        'X_trn':       torch.tensor(aux.red(data_trn['data'].x[idx_trn], data_trn['data'].ids, param, 'X'), dtype=torch.float),
+                        'Y_trn':       torch.tensor(data_trn['data'].y[idx_trn], dtype=torch.long),
+                        'X_val':       torch.tensor(aux.red(data_val['data'].x[idx_val], data_val['data'].ids, param, 'X'), dtype=torch.float),
+                        'Y_val':       torch.tensor(data_val['data'].y[idx_val], dtype=torch.long),
+                        'X_trn_2D':    None if data_trn['data_tensor'] is None else torch.tensor(data_trn['data_tensor'][idx_trn], dtype=torch.float),
+                        'X_val_2D':    None if data_val['data_tensor'] is None else torch.tensor(data_val['data_tensor'][idx_val], dtype=torch.float),
+                        'trn_weights': torch.tensor(data_trn['data'].w[idx_trn], dtype=torch.float),
+                        'val_weights': torch.tensor(data_val['data'].w[idx_val], dtype=torch.float),
+                        'data_trn_MI': data_trn['data_MI'][idx_trn] if ('data_MI' in data_trn and data_trn['data_MI'] is not None) else None,
+                        'data_val_MI': data_val['data_MI'][idx_val] if ('data_MI' in data_val and data_val['data_MI'] is not None) else None,
                         'args':        args,
                         'param':       param,
                         'ids':         data_trn['data'].ids}
+                    
+                    set_distillation_drain(ID=ID, param=param, idx=idx_trn, inputs=inputs)
 
-                set_distillation_drain(ID=ID, param=param, inputs=inputs)
-
-                if ID in args['raytune']['param']['active']:
-                    model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
-                else:
-                    model = train.train_torch_generic(**inputs)
-            
-            elif param['train'] == 'graph_xgb':
-
-                inputs = {'y_soft': None}
-                set_distillation_drain(ID=ID, param=param, inputs=inputs)
+                    if ID in args['raytune']['param']['active']:
+                        model = train.raytune_main(inputs=inputs, train_func=train.train_torch_generic)
+                    else:
+                        model = train.train_torch_generic(**inputs)
                 
-                train.train_graph_xgb(data_trn=data_trn['data_graph'], data_val=data_val['data_graph'], 
-                    trn_weights=data_trn['data'].w, val_weights=data_val['data'].w, args=args, param=param, y_soft=inputs['y_soft'],
-                    feature_names=data_trn['data'].ids)  
-            
-            elif param['train'] == 'flr':
-                train.train_flr(data_trn=data_trn['data'], args=args, param=param)
+                elif param['train'] == 'graph_xgb':
 
-            elif param['train'] == 'flow':
-                train.train_flow(data_trn=data_trn['data'], data_val=data_val['data'], args=args, param=param)
+                    inputs = {'y_soft': None}
+                    set_distillation_drain(ID=ID, param=param, idx=idx_trn, inputs=inputs)
+                    
+                    train.train_graph_xgb(
+                        data_trn      = [data_trn['data_graph'][i] for i in idx_trn],
+                        data_val      = [data_val['data_graph'][i] for i in idx_val], 
+                        trn_weights   = data_trn['data'].w[idx_trn],
+                        val_weights   = data_val['data'].w[idx_val],
+                        args          = args,
+                        param         = param,
+                        y_soft        = inputs['y_soft'][idx_trn],
+                        feature_names = data_trn['data'].ids)  
+                
+                elif param['train'] == 'flr':
+                    train.train_flr(data_trn=data_trn['data'][idx_trn], args=args, param=param)
 
-            elif param['train'] == 'cut':
-                None
-            
-            elif param['train'] == 'cutset':
+                elif param['train'] == 'flow':
+                    train.train_flow(data_trn = data_trn['data'][idx_trn],
+                                     data_val = data_val['data'][idx_val],
+                                     args     = args,
+                                     param    = param)
 
-                inputs = {'data_trn':    data_trn['data'],
-                        'data_val':    data_val['data'],
+                elif param['train'] == 'cut':
+                    None
+                
+                elif param['train'] == 'cutset':
+                    
+                    inputs = {
+                        'data_trn':    data_trn['data'][idx_trn],
+                        'data_val':    data_val['data'][idx_val],
                         'args':        args,
                         'param':       param}
-                
-                if ID in args['raytune']['param']['active']:
-                    model = train.raytune_main(inputs=inputs, train_func=train.train_cutset)
+                    
+                    if ID in args['raytune']['param']['active']:
+                        model = train.raytune_main(inputs=inputs, train_func=train.train_cutset)
+                    else:
+                        model = train.train_cutset(**inputs)
+
                 else:
-                    model = train.train_cutset(**inputs)
+                    raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
 
-            else:
-                raise Exception(__name__ + f'.Unknown param["train"] = {param["train"]} for ID = {ID}')
+                # --------------------------------------------------------
+                # If distillation
+                if 'distillation' in args and ID == args['distillation']['source']:
+                    
+                    if len(args['primary_classes']) != 2:
+                        raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
+                    
+                    print(f'Computing distillation soft targets from the source <{ID}> ', 'yellow')
 
-            # --------------------------------------------------------
-            # If distillation
-            if 'distillation' in args and ID == args['distillation']['source']:
-                
-                if len(args['primary_classes']) != 2:
-                    raise Exception(__name__ + f'.train_models: Distillation supported now only for 2-class classification')
-                
-                print(f'Computing distillation soft targets from the source <{ID}> ', 'yellow')
-
-                if   param['train'] == 'xgb':
-                    XX, XX_ids = aux.red(data_trn['data'].x, data_trn['data'].ids, param)
-                    y_soft = model.predict(xgboost.DMatrix(data=XX, feature_names=XX_ids))
-                    if len(y_soft.shape) > 1:
-                        y_soft = y_soft[:, args['signalclass']]
-                
-                elif param['train'] == 'torch_graph':
-                    y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
-                else:
-                    raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
-            # --------------------------------------------------------
-        
-        except KeyboardInterrupt:
-            print(f'CTRL+C catched -- continue with the next model', 'red')
-        
-        except Exception as e:
-            prints.printbar('*')
-            print(f'Exception occured: \n {e} \n', 'red')
-            print(f"Check the model '{ID}' definition: training failed -- continue!", 'red')
-            prints.printbar('*')
-            exceptions += 1
+                    if   param['train'] == 'xgb':
+                        
+                        XX, XX_ids = aux.red(data_trn['data'].x, data_trn['data'].ids, param)
+                        y_soft     = model.predict(xgboost.DMatrix(data=XX, feature_names=XX_ids))
+                        
+                        if len(y_soft.shape) > 1:
+                            y_soft = y_soft[:, args['signalclass']]
+                    
+                    elif param['train'] == 'torch_graph':
+                        y_soft = model.softpredict(data_trn['data_graph'])[:, args['signalclass']]
+                    else:
+                        raise Exception(__name__ + f".train_models: Unsupported distillation source <{param['train']}>")
+                # --------------------------------------------------------
+            
+            except KeyboardInterrupt:
+                print(f'CTRL+C catched -- continue with the next model', 'red')
+            
+            except Exception as e:
+                prints.printbar('*')
+                print(f'Exception occured: \n {e} \n', 'red')
+                print(f"Check the model '{ID}' definition: training failed -- continue!", 'red')
+                prints.printbar('*')
+                exceptions += 1
     
     print(f'[done]', 'yellow')
     
@@ -1521,9 +1564,9 @@ def evaluate_models(data=None, info=None, args=None):
     
     try:
         
-        for i in range(len(args['active_models'])):
+        for k in range(len(args['active_models'])):
             
-            ID    = args['active_models'][i]
+            ID    = args['active_models'][k]
             param = args['models'][ID]
             print(f'Evaluating <{ID}> | {param} \n')
             

@@ -293,4 +293,9 @@ def splitfactor(x, y, w, ids, args):
             # Change the variable name [+ have the same original variables in data_kin]
             data.ids[ind] = f'TRF__{v}'
     
-    return {'data': data, 'data_MI': data_MI, 'data_kin': data_kin, 'data_deps': data_deps, 'data_tensor': data_tensor, 'data_graph': data_graph}
+    return {'data':        data,
+            'data_MI':     data_MI,
+            'data_kin':    data_kin,
+            'data_deps':   data_deps,
+            'data_tensor': data_tensor,
+            'data_graph':  data_graph}

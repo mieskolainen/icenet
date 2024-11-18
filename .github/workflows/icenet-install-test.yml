@@ -101,6 +101,21 @@ jobs:
         run: |
           source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --test_mode --fit_type dual-unitary-II --output_name dual-unitary-II
       
+      #
+      - name: Deep Learning system (runme_eid)
+        run: |
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
+      
+      #
+      - name: Deep Learning system (runme_eid_deep)
+        run: |
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_deep.sh
+      
+      #
+      - name: Deep Learning system (runme_eid_visual)
+        run: |
+          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_visual.sh
+      
       # (This is run twice to test cache files)
       - name: Deep Learning system (runme_brem)
         run: |
@@ -127,7 +142,7 @@ jobs:
           source tests/runme_zee_gridtune.sh
           
           echo "yes" | source superclean.sh
-
+      
       #
       - name: Deep Learning system (runme_zee)
         run: |
@@ -151,21 +166,6 @@ jobs:
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_trg.sh
           echo "yes" | source superclean.sh
-
-      #
-      - name: Deep Learning system (runme_eid)
-        run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
-      
-      #
-      - name: Deep Learning system (runme_eid_deep)
-        run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_deep.sh
-      
-      #
-      - name: Deep Learning system (runme_eid_visual)
-        run: |
-          source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid_visual.sh
         
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_brk.sh
         ## source setenv-github-actions.sh && maxevents=10000; source tests/runme_dqcd_vector_train.sh
