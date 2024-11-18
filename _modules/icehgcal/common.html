@@ -772,24 +772,29 @@
     <span class="n">data_deps</span>   <span class="o">=</span> <span class="kc">None</span>
     
     <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1">### Mutual Information</span>
+    <span class="n">data_MI</span>     <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">### Tensor representation</span>
     <span class="n">data_tensor</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># -------------------------------------------------------------------------</span>
     <span class="c1">## Graph representation</span>
-    <span class="n">data_graph</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data_graph</span>  <span class="o">=</span> <span class="kc">None</span>
     
-    <span class="n">data_graph</span> <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data_candidate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+    <span class="n">data_graph</span>  <span class="o">=</span> <span class="n">graphio</span><span class="o">.</span><span class="n">parse_graph_data_candidate</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
         <span class="n">features</span><span class="o">=</span><span class="n">scalar_vars</span><span class="p">,</span> <span class="n">graph_param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;graph_param&#39;</span><span class="p">])</span>
     
-    <span class="n">data_graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_graph</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">data_graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_graph</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> <span class="c1"># !</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1">### Finally pick active scalar variables out</span>
-
+    
     <span class="n">data</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># To protect other routines (TBD see global impact --&gt; comment this line)</span>
     
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span>        <span class="n">data</span><span class="p">,</span>
+            <span class="s1">&#39;data_MI&#39;</span><span class="p">:</span>     <span class="n">data_MI</span><span class="p">,</span>
             <span class="s1">&#39;data_kin&#39;</span><span class="p">:</span>    <span class="n">data_kin</span><span class="p">,</span>
             <span class="s1">&#39;data_deps&#39;</span><span class="p">:</span>   <span class="n">data_deps</span><span class="p">,</span>
             <span class="s1">&#39;data_tensor&#39;</span><span class="p">:</span> <span class="n">data_tensor</span><span class="p">,</span>
