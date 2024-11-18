@@ -1726,13 +1726,13 @@
     <span class="c1"># Loop over active models</span>
     <span class="n">exceptions</span> <span class="o">=</span> <span class="mi">0</span>
     
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
 
         <span class="c1"># Collect garbage</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
         <span class="n">io</span><span class="o">.</span><span class="n">showmem</span><span class="p">()</span>
         
-        <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
         <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Training &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt; | </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         
@@ -1869,7 +1869,7 @@
                                      <span class="n">data_val</span> <span class="o">=</span> <span class="n">data_val</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">idx_val</span><span class="p">],</span>
                                      <span class="n">args</span>     <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
                                      <span class="n">param</span>    <span class="o">=</span> <span class="n">param</span><span class="p">)</span>
-                
+
                 <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cut&#39;</span><span class="p">:</span>
                     <span class="kc">None</span>
                 
@@ -2114,9 +2114,9 @@
     
     <span class="k">try</span><span class="p">:</span>
         
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
             
-            <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">ID</span>    <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
             <span class="n">param</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Evaluating &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt; | </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
             
