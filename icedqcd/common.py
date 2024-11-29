@@ -278,7 +278,15 @@ def splitfactor(x, y, w, ids, args, skip_graph=True, use_dequantize=True):
     
     jagged_vars.append('muonSV_mass')
     muonsv_vars.append('muonSV_mass')
-    
+
+    ## DeltaR between each muon SV and the leading muon SV
+    ## (for the leading muon SV, it is computed w.r.t the origin)
+    data.x['muonSV', 'SVdeltaR'] = \
+        analytic.muonSV_deltaR(X=data.x['muonSV'], x='x', y='y', z='z')
+
+    jagged_vars.append('muonSV_SVdeltaR')
+    muonsv_vars.append('muonSV_SVdeltaR')
+
     print(f"muonSV.fields = {data.x['muonSV'].fields}", 'yellow')
     
     # -------------------------------------------------------------------------
