@@ -66,6 +66,10 @@ def main():
     # Parse the command line arguments
     args = parser.parse_args()
 
+    # Get the input file size
+    input_size = os.path.getsize(args.input_file)
+    print(f"Input File Size: {input_size / (1024 ** 2):.2f} MB")
+    
     # Read the Parquet file into a pandas DataFrame
     df = pd.read_parquet(args.input_file)
     
