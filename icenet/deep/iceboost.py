@@ -586,7 +586,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         if noise_reg is not None:
             sigma2 = noise_reg * deeptools.sigmoid_schedule(t=epoch, N_max=num_epochs)
-            X_trn  = np.sqrt(1-sigma2) * X_trn_orig + np.sqrt(sigma2) * np.random.normal(size=X_trn.shape)
+            X_trn  = np.sqrt(max(0, 1-sigma2)) * X_trn_orig + np.sqrt(sigma2) * np.random.normal(size=X_trn.shape)
             
             dtrain = xgboost.DMatrix(data=X_trn, label = data_trn.y if y_soft is None else y_soft, weight = w_trn if not out_weights_on else None, feature_names=ids_trn)    
 

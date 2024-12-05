@@ -7,7 +7,7 @@
 SETCONDA="/home/hep/mmieskol/setconda.sh"
 ICEPATH="/vols/cms/mmieskol/icenet"
 
-DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
+DATAPATH="/vols/cms/pfk18/icenet_files/processed_29_nov_24"
 CONFIG="tune0_EB"
 MODELTAG="GRIDTUNE"
 maxevents=500000
@@ -20,8 +20,8 @@ MAXDEPTH_ARRAY=(13)
 LAMBDA_ARRAY=(2.0)
 ALPHA_ARRAY=(0.05)
 
-#SWD_VAR="['.*']" # all
-SWD_VAR="['fixedGridRhoAll', 'probe_eta', 'probe_pt']"
+SWD_VAR="['.*']" # all
+#SWD_VAR="['fixedGridRhoAll', 'probe_eta', 'probe_pt']"
 
 # ---------------------------------------
 

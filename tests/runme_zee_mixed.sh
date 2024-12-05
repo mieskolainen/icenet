@@ -4,7 +4,7 @@
 #
 # Run with: maxevents=10000; source tests/runme.sh
 
-#DATAPATH="/vols/cms/pfk18/phd/hgg/Jul23/NN21July/N/validations/outputs/Csplit_Jsamp/files"
+#DATAPATH="/vols/cms/pfk18/icenet_files/processed_29_nov_24"
 DATAPATH="./actions-stash/input/icezee"
 
 if [ ${maxevents+x} ]; then MAX="--maxevents $maxevents"; else MAX=""; fi

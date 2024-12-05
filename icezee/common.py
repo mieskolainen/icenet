@@ -82,16 +82,7 @@ def load_helper(mcfiles, datafiles, maxevents, args):
     
     print(f'Total number of events: {len(frame_data):0.1E}')
     
-    # -------------------------------------------------------------------------
-    # ** Special treatment -- different naming in data **
-    NEW_LOAD_VARS = copy.deepcopy(LOAD_VARS)
-    for i in range(len(LOAD_VARS)):
-        if LOAD_VARS[i] == 'probe_pfChargedIso':
-            print(f'Changing variable {LOAD_VARS[i]} name in data', 'red')
-            NEW_LOAD_VARS[i] = 'probe_pfChargedIsoPFPV'
-    # -------------------------------------------------------------------------
-    
-    X_data = frame_data[NEW_LOAD_VARS].to_numpy()
+    X_data = frame_data[LOAD_VARS].to_numpy()
     W_data = np.ones(len(X_data))
     
     # Label = 1
