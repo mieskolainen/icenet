@@ -1,49 +1,81 @@
-# Recompress Pandas parquet file
+# Recompress and split Pandas parquet file
 #
-# Example: python icefit/rezip.py input.parquet output.parquet
+# Example:
+#   python icefit/rezip.py input_data.parquet output_file \
+#       --max_rows_per_file 500000 --compression brotli --compression_level 9
 #
 # m.mieskolainen@imperial.ac.uk, 2024
 
 import pandas as pd
-import argparse
 import os
+import argparse
 
-def compress_parquet(input_file, output_file, compression, compression_level):
+def split_parquet(df, max_rows_per_file):
     
-    print(f'Compressing "{input_file}" to "{output_file}"')
+    # Split the DataFrame into chunks based on the maximum number of rows
+    num_chunks = len(df) // max_rows_per_file + (1 if len(df) % max_rows_per_file != 0 else 0)
+    
+    # Yield chunks of DataFrame
+    for i in range(num_chunks):
+        start_idx = i * max_rows_per_file
+        end_idx = start_idx + max_rows_per_file
+        yield df.iloc[start_idx:end_idx]
+
+def compress_parquet(df, output_file, compression, compression_level):
+    print(f'Compressing data to "{output_file}"')
     print(f'Using compression "{compression}" at level {compression_level}')
     
-    # Read the existing parquet file and compress
-    df = pd.read_parquet(input_file)
+    # Write the DataFrame directly to a compressed Parquet file
     df.to_parquet(output_file, compression=compression, compression_level=compression_level)
     
     # Get the file sizes
-    input_size  = os.path.getsize(input_file)
     output_size = os.path.getsize(output_file)
-    reduction_percentage = ((input_size - output_size) / input_size) * 100
-    
-    # Print file sizes and reduction
-    print(f"Input File Size:  {input_size / (1024 ** 2):.2f} MB")
     print(f"Output File Size: {output_size / (1024 ** 2):.2f} MB")
-    print(f"Size Reduction:   {reduction_percentage:.2f}%")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Compress a Parquet file with specified compression algorithm.")
-    parser.add_argument("input_file",  type=str, help="Path to the input Parquet file.")
-    parser.add_argument("output_file", type=str, help="Path to save the compressed Parquet file.")
+def main():
+    # Set up the argument parser
+    parser = argparse.ArgumentParser(description="Split and/or compress a Parquet file.")
+    
+    # Required arguments
+    parser.add_argument("input_file", type=str, help="Path to the input Parquet file")
+    parser.add_argument("output_file", type=str, help="Base name for output files")
+    
+    # Argument for maximum rows per file
     parser.add_argument(
-        "--compression",
-        type=str,
-        choices=["gzip", "brotli"],
-        default="brotli",
+        "--max_rows_per_file", 
+        type=int, 
+        required=True, 
+        help="Maximum number of rows per output file"
+    )
+    
+    # Arguments for compression
+    parser.add_argument(
+        "--compression", 
+        type=str, 
+        choices=["gzip", "brotli"], 
+        default="brotli", 
         help="Compression algorithm to use (gzip or brotli). Default is brotli."
     )
     parser.add_argument(
-        "--compression_level",
-        type=int,
-        default=11,
+        "--compression_level", 
+        type=int, 
+        default=11, 
         help="Compression level. Default is 11 (max for brotli). Max 9 for gzip."
     )
-    args = parser.parse_args()
     
-    compress_parquet(args.input_file, args.output_file, args.compression, args.compression_level)
+    # Parse the command line arguments
+    args = parser.parse_args()
+
+    # Read the Parquet file into a pandas DataFrame
+    df = pd.read_parquet(args.input_file)
+    
+    # Split the DataFrame into chunks
+    chunk_number = 0
+    for chunk_df in split_parquet(df, args.max_rows_per_file):
+        # Automatically create output file names by appending the chunk number
+        output_file = f"{args.output_file}_{chunk_number}.parquet"
+        compress_parquet(chunk_df, output_file, args.compression, args.compression_level)
+        chunk_number += 1
+
+if __name__ == "__main__":
+    main()
