@@ -602,16 +602,7 @@
     
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frame_data</span><span class="p">)</span><span class="si">:</span><span class="s1">0.1E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    <span class="c1"># ** Special treatment -- different naming in data **</span>
-    <span class="n">NEW_LOAD_VARS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">LOAD_VARS</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">LOAD_VARS</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">LOAD_VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;probe_pfChargedIso&#39;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Changing variable </span><span class="si">{</span><span class="n">LOAD_VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> name in data&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-            <span class="n">NEW_LOAD_VARS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;probe_pfChargedIsoPFPV&#39;</span>
-    <span class="c1"># -------------------------------------------------------------------------</span>
-    
-    <span class="n">X_data</span> <span class="o">=</span> <span class="n">frame_data</span><span class="p">[</span><span class="n">NEW_LOAD_VARS</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">X_data</span> <span class="o">=</span> <span class="n">frame_data</span><span class="p">[</span><span class="n">LOAD_VARS</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">W_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_data</span><span class="p">))</span>
     
     <span class="c1"># Label = 1</span>
