@@ -15,12 +15,11 @@ from icenet import print
 # ------------------------------------------
 
 class XgboostObjective():
-    def __init__(self, loss_func: Callable[[Tensor, Tensor], Tensor], mode='train', loss_sign=1, 
+    def __init__(self, loss_func: Callable[[Tensor, Tensor], Tensor], mode='train', 
                  flatten_grad=False, hessian_mode='constant', hessian_const=1.0, device='cpu'):
 
         self.mode          = mode
         self.loss_func     = loss_func
-        self.loss_sign     = loss_sign
         self.device        = device
         self.hessian_mode  = hessian_mode
         self.hessian_const = hessian_const
@@ -36,10 +35,10 @@ class XgboostObjective():
         preds_, targets_, weights_ = self.torch_conversion(preds=preds, targets=targets)
 
         if   self.mode == 'train':
-            loss = self.loss_sign * self.loss_func(preds=preds_, targets=targets_, weights=weights_)
+            loss = self.loss_func(preds=preds_, targets=targets_, weights=weights_)
             return self.derivatives(loss=loss, preds=preds_)
         elif self.mode == 'eval':
-            loss = self.loss_sign * self.loss_func(preds=preds_, targets=targets_, weights=weights_)
+            loss = self.loss_func(preds=preds_, targets=targets_, weights=weights_)
             return 'custom', loss.detach().cpu().numpy()
         else:
             raise Exception('Unknown mode (set either "train" or "eval")')
@@ -67,11 +66,11 @@ class XgboostObjective():
         
         ## Diagonal elements of the Hessian matrix
         
-        # Constant
+        # Constant curvature
         if   self.hessian_mode == 'constant':
             grad2 = self.hessian_const * torch.ones_like(grad1)
         
-        # Squared derivative based approximation
+        # Squared derivative based [uncontrolled] approximation (always positive curvature)
         elif self.hessian_mode == 'squared_approx':
             grad2 = grad1 * grad1
         
@@ -80,12 +79,25 @@ class XgboostObjective():
             
             print('Computing Hessian diagonal with exact autograd ...')
             
-            for i in tqdm(range(len(preds))): # Can be very slow
+            """
+            for i in tqdm(range(len(preds))):
                 grad2_i  = torch.autograd.grad(grad1[i], preds, retain_graph=True)[0]
                 grad2[i] = grad2_i[i]
-        
+            """
+            
+            grad2 = torch.zeros_like(preds)
+            
+            for i in tqdm(range(len(preds))):
+                
+                # A basis vector
+                e_i = torch.zeros_like(preds)
+                e_i[i] = 1.0
+                
+                # Compute the Hessian-vector product H e_i
+                grad2[i] = torch.autograd.grad(grad1, preds, grad_outputs=e_i, retain_graph=True)[0][i]
+            
         else:
-            raise Exception('Unknown "hessian_mode" {self.hessian_mode}')
+            raise Exception(f'Unknown "hessian_mode" {self.hessian_mode}')
         
         grad1, grad2 = grad1.detach().cpu().numpy(), grad2.detach().cpu().numpy()
         

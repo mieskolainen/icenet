@@ -622,31 +622,37 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             x         = copy.deepcopy(data_trn.x)
             MI_x      = copy.deepcopy(data_trn_MI)
             
-            # Custom loss string of type 'custom_loss:loss_name:hessian:hessian_mode'
+            ## Custom loss string of type 'custom_loss:loss_name:hessian:hessian_mode(:parameter)'
             
-            if strs[1] == 'binary_cross_entropy':
-                
-                if 'hessian' in strs:
-                    hessian_mode = strs[strs.index('hessian')+1]
-                else:
-                    hessian_mode = 'constant'
-                
-                a['obj'] = autogradxgb.XgboostObjective(loss_func=_binary_cross_entropy, hessian_mode=hessian_mode, device=device)
-                a['params']['disable_default_eval_metric'] = 1
-            
+            if   strs[1] == 'binary_cross_entropy':
+                loss_func = _binary_cross_entropy
             elif strs[1] == 'sliced_wasserstein':
-                
-                if 'hessian' in strs:
-                    hessian_mode = strs[strs.index('hessian')+1]
-                else:
-                    hessian_mode = 'constant'
-                
-                a['obj'] = autogradxgb.XgboostObjective(loss_func=_sliced_wasserstein, hessian_mode=hessian_mode, device=device)
-                a['params']['disable_default_eval_metric'] = 1
-            
+                loss_func = _sliced_wasserstein
             else:
                 raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]} (check syntax)')
             
+            ## Hessian treatment
+            
+            # For example: 'hessian:constant:1.0' or 'hessian:exact'
+            if 'hessian' in strs:
+                hessian_mode = strs[strs.index('hessian')+1]
+                if hessian_mode == 'constant':
+                    hessian_const = float(strs[strs.index('hessian')+2])
+            
+            # Default
+            else:
+                hessian_mode  = 'constant'
+                hessian_const = 1.0
+            
+            ## Set objective
+            a['obj'] = autogradxgb.XgboostObjective(
+                loss_func     = loss_func,
+                hessian_mode  = hessian_mode,
+                hessian_const = hessian_const,
+                device        = device
+            )
+            a['params']['disable_default_eval_metric'] = 1
+
             #!
             del a['params']['eval_metric']
             del a['params']['objective']
