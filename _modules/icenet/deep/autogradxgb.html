@@ -533,7 +533,8 @@
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.autogradxgb.XgboostObjective">[docs]</a>
 <span class="k">class</span> <span class="nc">XgboostObjective</span><span class="p">():</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">],</span> <span class="n">Tensor</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> 
-                 <span class="n">flatten_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hessian_mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">hessian_const</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
+                 <span class="n">flatten_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hessian_mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">hessian_const</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                 <span class="n">smoothing</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>          <span class="o">=</span> <span class="n">mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span>     <span class="o">=</span> <span class="n">loss_func</span>
@@ -541,6 +542,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hessian_mode</span>  <span class="o">=</span> <span class="n">hessian_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hessian_const</span> <span class="o">=</span> <span class="n">hessian_const</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flatten_grad</span>  <span class="o">=</span> <span class="n">flatten_grad</span>
+
+        <span class="c1"># For the iterative Hessian estimation algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hess_diag</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grad_prev</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preds_prev</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">=</span> <span class="n">smoothing</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian_mode</span> <span class="o">==</span> <span class="s1">&#39;constant&#39;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using device: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="si">}</span><span class="s1"> | hessian_mode = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hessian_mode</span><span class="si">}</span><span class="s1"> | hessian_const = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hessian_const</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -563,7 +570,8 @@
 <div class="viewcode-block" id="XgboostObjective.torch_conversion">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.autogradxgb.XgboostObjective.torch_conversion">[docs]</a>
     <span class="k">def</span> <span class="nf">torch_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Conversion from xgboost.Dmatrix object</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Conversion from xgboost.Dmatrix object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">weights</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">get_weight</span><span class="p">()</span>
@@ -577,10 +585,48 @@
         <span class="k">return</span> <span class="n">preds</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">weights</span></div>
 
 
+<div class="viewcode-block" id="XgboostObjective.iterative_hessian_update">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.autogradxgb.XgboostObjective.iterative_hessian_update">[docs]</a>
+    <span class="k">def</span> <span class="nf">iterative_hessian_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">preds</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">absMax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterative Hessian (diagonal) approximation update using finite differences</span>
+<span class="sd">        </span>
+<span class="sd">        [experimental]</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            grad:  Current gradient vector</span>
+<span class="sd">            preds: Current prediction vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hess_diag</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hess_diag</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+            <span class="n">hess_diag_new</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        
+        <span class="c1"># H_ii ~ difference in gradients / difference in predictions</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dg</span> <span class="o">=</span> <span class="n">grad</span>  <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_prev</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">preds</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">preds_prev</span>
+            
+            <span class="n">hess_diag_new</span> <span class="o">=</span> <span class="n">dg</span> <span class="o">/</span> <span class="p">(</span><span class="n">ds</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+            <span class="n">hess_diag_new</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">hess_diag_new</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">absMax</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">absMax</span><span class="p">)</span>
+        
+        <span class="c1"># Running smoothing update to stabilize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hess_diag</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hess_diag</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">*</span> <span class="n">hess_diag_new</span>
+        
+        <span class="c1"># Save the gradient vector and predictions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grad_prev</span>  <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preds_prev</span> <span class="o">=</span> <span class="n">preds</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span></div>
+
+    
 <div class="viewcode-block" id="XgboostObjective.derivatives">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.autogradxgb.XgboostObjective.derivatives">[docs]</a>
     <span class="k">def</span> <span class="nf">derivatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">preds</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Gradient and Hessian diagonal</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gradient and Hessian diagonal</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            loss:  loss function values</span>
+<span class="sd">            preds: model predictions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="c1">## Gradient</span>
@@ -595,6 +641,12 @@
         <span class="c1"># Squared derivative based [uncontrolled] approximation (always positive curvature)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian_mode</span> <span class="o">==</span> <span class="s1">&#39;squared_approx&#39;</span><span class="p">:</span>
             <span class="n">grad2</span> <span class="o">=</span> <span class="n">grad1</span> <span class="o">*</span> <span class="n">grad1</span>
+        
+        <span class="c1"># BFGS style iterative updates</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian_mode</span> <span class="o">==</span> <span class="s1">&#39;iterative&#39;</span><span class="p">:</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">iterative_hessian_update</span><span class="p">(</span><span class="n">grad</span><span class="o">=</span><span class="n">grad1</span><span class="p">,</span> <span class="n">preds</span><span class="o">=</span><span class="n">preds</span><span class="p">)</span>
+            <span class="n">grad2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hess_diag</span>
         
         <span class="c1"># Exact autograd</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian_mode</span> <span class="o">==</span> <span class="s1">&#39;exact&#39;</span><span class="p">:</span>
@@ -617,7 +669,7 @@
                 
                 <span class="c1"># Compute the Hessian-vector product H e_i</span>
                 <span class="n">grad2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">grad1</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">grad_outputs</span><span class="o">=</span><span class="n">e_i</span><span class="p">,</span> <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-            
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown &quot;hessian_mode&quot; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hessian_mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         
