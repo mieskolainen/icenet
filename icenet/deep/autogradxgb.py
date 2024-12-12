@@ -16,7 +16,8 @@ from icenet import print
 
 class XgboostObjective():
     def __init__(self, loss_func: Callable[[Tensor, Tensor], Tensor], mode='train', 
-                 flatten_grad=False, hessian_mode='constant', hessian_const=1.0, device='cpu'):
+                 flatten_grad=False, hessian_mode='constant', hessian_const=1.0,
+                 smoothing = 0.1, device='cpu'):
 
         self.mode          = mode
         self.loss_func     = loss_func
@@ -24,6 +25,12 @@ class XgboostObjective():
         self.hessian_mode  = hessian_mode
         self.hessian_const = hessian_const
         self.flatten_grad  = flatten_grad
+
+        # For the iterative Hessian estimation algorithm
+        self.hess_diag  = None
+        self.grad_prev  = None
+        self.preds_prev = None
+        self.smoothing = smoothing
 
         if self.hessian_mode == 'constant':
             print(f'Using device: {self.device} | hessian_mode = {self.hessian_mode} | hessian_const = {self.hessian_const}')
@@ -44,7 +51,8 @@ class XgboostObjective():
             raise Exception('Unknown mode (set either "train" or "eval")')
 
     def torch_conversion(self, preds: np.ndarray, targets: xgboost.DMatrix):
-        """ Conversion from xgboost.Dmatrix object
+        """
+        Conversion from xgboost.Dmatrix object
         """
         try:
             weights = targets.get_weight()
@@ -57,8 +65,43 @@ class XgboostObjective():
 
         return preds, targets, weights
 
+    def iterative_hessian_update(self, grad: Tensor, preds: Tensor, absMax=10, EPS=1e-8):
+        """
+        Iterative Hessian (diagonal) approximation update using finite differences
+        
+        [experimental]
+        
+        Args:
+            grad:  Current gradient vector
+            preds: Current prediction vector
+        """
+        
+        if self.hess_diag == None:
+            self.hess_diag = torch.ones_like(grad)
+            hess_diag_new  = torch.ones_like(grad)
+        
+        # H_ii ~ difference in gradients / difference in predictions
+        else:
+            dg = grad  - self.grad_prev
+            ds = preds - self.preds_prev
+            
+            hess_diag_new = dg / (ds + EPS)
+            hess_diag_new = torch.clamp(hess_diag_new, min=-absMax, max=absMax)
+        
+        # Running smoothing update to stabilize
+        self.hess_diag = (1 - self.smoothing) * self.hess_diag + self.smoothing * hess_diag_new
+        
+        # Save the gradient vector and predictions
+        self.grad_prev  = grad.clone()
+        self.preds_prev = preds.clone()
+    
     def derivatives(self, loss: Tensor, preds: Tensor):
-        """ Gradient and Hessian diagonal
+        """
+        Gradient and Hessian diagonal
+        
+        Args:
+            loss:  loss function values
+            preds: model predictions
         """
         
         ## Gradient
@@ -73,6 +116,12 @@ class XgboostObjective():
         # Squared derivative based [uncontrolled] approximation (always positive curvature)
         elif self.hessian_mode == 'squared_approx':
             grad2 = grad1 * grad1
+        
+        # BFGS style iterative updates
+        elif self.hessian_mode == 'iterative':
+            
+            self.iterative_hessian_update(grad=grad1, preds=preds)
+            grad2 = self.hess_diag
         
         # Exact autograd
         elif self.hessian_mode == 'exact':
@@ -95,7 +144,7 @@ class XgboostObjective():
                 
                 # Compute the Hessian-vector product H e_i
                 grad2[i] = torch.autograd.grad(grad1, preds, grad_outputs=e_i, retain_graph=True)[0][i]
-            
+
         else:
             raise Exception(f'Unknown "hessian_mode" {self.hessian_mode}')
         

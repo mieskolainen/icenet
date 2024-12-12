@@ -579,6 +579,46 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             noise_reg  = param['opt_param']['noise_reg']
     # -------------------------------------------
     
+    # Custom loss object init
+    
+    if use_custom:
+        
+        ## Custom loss string of type 'custom_loss:loss_name:hessian:hessian_mode(:parameter)'
+        strs = model_param['objective'].split(':')
+        
+        if   strs[1] == 'binary_cross_entropy':
+            loss_func = _binary_cross_entropy
+        elif strs[1] == 'sliced_wasserstein':
+            loss_func = _sliced_wasserstein
+        else:
+            raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]} (check syntax)')
+        
+        ## Hessian treatment
+        
+        # Default values
+        smoothing     = 0.1
+        hessian_const = 1.0
+        hessian_mode  = 'constant'
+        
+        # For example: 'hessian:constant:1.0' or 'hessian:exact'
+        if 'hessian' in strs:
+            hessian_mode = strs[strs.index('hessian')+1]
+            
+            # Pick parameters
+            if   hessian_mode == 'constant':
+                hessian_const = float(strs[strs.index('hessian')+2])
+            
+            elif hessian_mode == 'iterative':
+                smoothing = float(strs[strs.index('hessian')+2])
+        
+        autogradObj = autogradxgb.XgboostObjective(
+            loss_func     = loss_func,
+            hessian_mode  = hessian_mode,
+            hessian_const = hessian_const,
+            smoothing     = smoothing,
+            device        = device
+        )
+    
     for epoch in range(0, num_epochs):
         
         # ---------------------------------------
@@ -614,7 +654,6 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         if use_custom:
             
-            strs   = model_param['objective'].split(':')
             device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
 
             # !
@@ -622,35 +661,8 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             x         = copy.deepcopy(data_trn.x)
             MI_x      = copy.deepcopy(data_trn_MI)
             
-            ## Custom loss string of type 'custom_loss:loss_name:hessian:hessian_mode(:parameter)'
-            
-            if   strs[1] == 'binary_cross_entropy':
-                loss_func = _binary_cross_entropy
-            elif strs[1] == 'sliced_wasserstein':
-                loss_func = _sliced_wasserstein
-            else:
-                raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]} (check syntax)')
-            
-            ## Hessian treatment
-            
-            # For example: 'hessian:constant:1.0' or 'hessian:exact'
-            if 'hessian' in strs:
-                hessian_mode = strs[strs.index('hessian')+1]
-                if hessian_mode == 'constant':
-                    hessian_const = float(strs[strs.index('hessian')+2])
-            
-            # Default
-            else:
-                hessian_mode  = 'constant'
-                hessian_const = 1.0
-            
             ## Set objective
-            a['obj'] = autogradxgb.XgboostObjective(
-                loss_func     = loss_func,
-                hessian_mode  = hessian_mode,
-                hessian_const = hessian_const,
-                device        = device
-            )
+            a['obj'] = autogradObj
             a['params']['disable_default_eval_metric'] = 1
 
             #!

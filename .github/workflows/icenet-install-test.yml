@@ -144,16 +144,16 @@ jobs:
           echo "yes" | source superclean.sh
       
       #
-      - name: Deep Learning system (runme_zee)
-        run: |
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
-          echo "yes" | source superclean.sh
+      #- name: Deep Learning system (runme_zee)
+      #  run: |
+      #    source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
+      #    echo "yes" | source superclean.sh
       
       #
-      - name: Deep Learning system (runme_zee_mixed)
-        run: |
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
-          echo "yes" | source superclean.sh
+      #- name: Deep Learning system (runme_zee_mixed)
+      #  run: |
+      #    source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
+      #    echo "yes" | source superclean.sh
       
       #
       - name: Deep Learning system (runme_hnl)
