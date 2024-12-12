@@ -207,35 +207,40 @@ def test_1D(EPS=1e-3):
     
     p = 1
     
-    res = wasserstein_distance_1D(torch.tensor([0, 1, 3]), torch.tensor([5, 6, 8]), p=p).item()
-    res_scikit = wasserstein_distance(np.array([0, 1, 3]),     np.array([5, 6, 8]))
+    u = torch.tensor([0.0, 1.0, 3.0], requires_grad=True)
+    v = torch.tensor([5.0, 6.0, 8.0], requires_grad=True)
     
-    print(f'1D case 1: p = 1 | {res} {res_scikit}')
-    assert res == pytest.approx(res_scikit, abs=EPS)
+    res = wasserstein_distance_1D(u, v, p=p)
+    res_scikit = wasserstein_distance(u.detach().numpy(), v.detach().numpy())
+    
+    print(f'1D case 1: p = 1 | {res.item()} {res_scikit}')
+    assert res.item() == pytest.approx(res_scikit, abs=EPS)
     
     res = wasserstein_distance_1D(torch.tensor([0, 1]), torch.tensor([0, 1]),
-                                  torch.tensor([3, 1]), torch.tensor([2, 2]), p=p).item()
-    res_scikit = wasserstein_distance(np.array([0, 1]),     np.array([0, 1]),
-                                      np.array([3, 1]),     np.array([2, 2]))
+                                  torch.tensor([3, 1]), torch.tensor([2, 2]), p=p)
     
-    print(f'1D case 2: p = 1 | {res} {res_scikit}')
-    assert res == pytest.approx(res_scikit, abs=EPS)
+    res_scikit = wasserstein_distance(np.array([0, 1]), np.array([0, 1]),
+                                      np.array([3, 1]), np.array([2, 2]))
+    
+    print(f'1D case 2: p = 1 | {res.item()} {res_scikit}')
+    assert res.item() == pytest.approx(res_scikit, abs=EPS)
     
     res = wasserstein_distance_1D(torch.tensor([3.4, 3.9, 7.5, 7.8]), torch.tensor([4.5, 1.4]),
-                                  torch.tensor([1.4, 0.9, 3.1, 7.2]), torch.tensor([3.2, 3.5])).item()
+                                  torch.tensor([1.4, 0.9, 3.1, 7.2]), torch.tensor([3.2, 3.5]))
+    
     res_scikit = wasserstein_distance(np.array([3.4, 3.9, 7.5, 7.8]),     np.array([4.5, 1.4]),
                                       np.array([1.4, 0.9, 3.1, 7.2]),     np.array([3.2, 3.5]))
     
-    print(f'1D case 3: p = 1 | res = {res} res_scikit = {res_scikit}')
-    assert res == pytest.approx(res_scikit, abs=EPS)
+    print(f'1D case 3: p = 1 | res = {res.item()} res_scikit = {res_scikit}')
+    assert res.item() == pytest.approx(res_scikit, abs=EPS)
     
     # -----------------------------------------------
     ## p = 1,2 against POT
     
     import ot    
     
-    u_values = torch.tensor([1.0, 2.0])
-    v_values = torch.tensor([3.0, 4.0])
+    u_values  = torch.tensor([1.0, 2.0], requires_grad=True)
+    v_values  = torch.tensor([3.0, 4.0], requires_grad=True)
     
     u_weights = torch.tensor([0.3, 1.0])
     v_weights = torch.tensor([1.0, 0.5])
@@ -246,12 +251,20 @@ def test_1D(EPS=1e-3):
     
     for p in [1,2]:
         
-        res = wasserstein_distance_1D(u_values, v_values, u_weights, v_weights, p=p).item()
+        res = wasserstein_distance_1D(u_values, v_values, u_weights, v_weights, p=p)
         pot = ot.wasserstein_1d(u_values, v_values, u_weights, v_weights, p=p)
         
-        print(f'1D case 3: p = {p} | res = {res} pot = {pot}')
-        assert res == pytest.approx(pot, abs=EPS)
-
+        print(f'1D case 3: p = {p} | res = {res.item()} pot = {pot}')
+        
+        res_grad = torch.autograd.grad(res, u_values)
+        pot_grad = torch.autograd.grad(pot, u_values)
+        
+        print(f'gradient dW/du:       {res_grad}')
+        print(f'gradient dW/du (POT): {pot_grad}')
+        
+        assert res.detach() == pytest.approx(pot.detach(), abs=EPS)
+        assert torch.allclose(res.detach(), pot.detach(), atol=EPS)
+    
     # -----------------------------------------------
     ## p = 2 case checked against pre-computed
     
@@ -290,7 +303,7 @@ def test_swd():
     # ---------------------------------------------------------
     # 2D test
     
-    n = 200  # number of samples
+    n = 20  # number of samples
     
     # Mean vectors
     mu_u = torch.tensor([0, 0], dtype=torch.float32)
@@ -310,8 +323,8 @@ def test_swd():
     
     # Generate random vectors for both distributions
     set_seed(seed)
-    u_values = generate_random_vectors(mu_u, cov_u, n)
-    v_values = generate_random_vectors(mu_v, cov_v, n)
+    u_values = generate_random_vectors(mu_u, cov_u, n).requires_grad_(True)
+    v_values = generate_random_vectors(mu_v, cov_v, n).requires_grad_(True)
     
     print(u_values.shape)
     print(v_values.shape)
@@ -332,14 +345,18 @@ def test_swd():
                                              a=torch.ones(n)/n, b=torch.ones(n)/n,
                                              n_projections=num_slices, p=p)
         
+        print(f'gradient dW/du (POT): {torch.autograd.grad(pot, u_values)}')
+        
         for vectorized in [False, True]:
             
             # 'SWD'
             set_seed(seed)
             res = sliced_wasserstein_distance(u_values=u_values, v_values=v_values, p=p,
-                                num_slices=num_slices, mode='SWD', vectorized=vectorized).item()
-            print(f'p = {p}: case 2 SWD | res = {res} pot = {pot} (vectorized = {vectorized})')
-            assert res == pytest.approx(pot, abs=0.3)
+                                num_slices=num_slices, mode='SWD', vectorized=vectorized)
+            print(f'p = {p}: case 2 SWD | res = {res.item()} pot = {pot} (vectorized = {vectorized})')
+            print(f'gradient dW/du: {torch.autograd.grad(res, u_values)}')
+
+            assert res.detach() == pytest.approx(pot.detach(), abs=0.3)
     
     # ---------------------------------------------------------
     # Fixed values 1D test
