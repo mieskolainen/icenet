@@ -600,7 +600,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         hessian_const = 1.0
         hessian_mode  = 'constant'
         
-        # For example: 'hessian:constant:1.0' or 'hessian:exact'
+        # For example: 'hessian:constant:1.0', 'hessian:iterative:0.1' or 'hessian:exact'
         if 'hessian' in strs:
             hessian_mode = strs[strs.index('hessian')+1]
             
