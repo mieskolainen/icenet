@@ -34,9 +34,11 @@ class XgboostObjective():
 
         if self.hessian_mode == 'constant':
             print(f'Using device: {self.device} | hessian_mode = {self.hessian_mode} | hessian_const = {self.hessian_const}')
+        elif self.hessian_mode == 'iterative':
+            print(f'Using device: {self.device} | hessian_mode = {self.hessian_mode} | smoothing = {self.smoothing}')
         else:
             print(f'Using device: {self.device} | hessian_mode = {self.hessian_mode}')
-        
+    
     def __call__(self, preds: np.ndarray, targets: xgboost.DMatrix):
 
         preds_, targets_, weights_ = self.torch_conversion(preds=preds, targets=targets)
