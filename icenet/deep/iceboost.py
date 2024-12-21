@@ -596,27 +596,35 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         ## Hessian treatment
         
         # Default values
-        smoothing     = 0.1
-        hessian_const = 1.0
-        hessian_mode  = 'constant'
+        hessian_mode   = 'constant'
+        hessian_const  = 1.0
+        hessian_gamma  = 0.9
+        hessian_slices = 10
         
-        # For example: 'hessian:constant:1.0', 'hessian:iterative:0.1' or 'hessian:exact'
+        # E.g. 'hessian:constant:1.0', 'hessian:iterative:0.9', 'hessian:hutchinson:10' or 'hessian:exact'
         if 'hessian' in strs:
             hessian_mode = strs[strs.index('hessian')+1]
             
-            # Pick parameters
-            if   hessian_mode == 'constant':
-                hessian_const = float(strs[strs.index('hessian')+2])
+            # Pick additional parameters
+            try:
+                if   hessian_mode == 'constant':
+                    hessian_const = float(strs[strs.index('hessian')+2])
+                
+                elif hessian_mode == 'iterative':
+                    hessian_gamma = float(strs[strs.index('hessian')+2])
             
-            elif hessian_mode == 'iterative':
-                smoothing = float(strs[strs.index('hessian')+2])
+                elif hessian_mode == 'hutchinson':
+                    hessian_slices = float(strs[strs.index('hessian')+2])
+            except:
+                print('Using default Hessian estimator parameters')
         
         autogradObj = autogradxgb.XgboostObjective(
-            loss_func     = loss_func,
-            hessian_mode  = hessian_mode,
-            hessian_const = hessian_const,
-            smoothing     = smoothing,
-            device        = device
+            loss_func      = loss_func,
+            hessian_mode   = hessian_mode,
+            hessian_const  = hessian_const,
+            hessian_gamma  = hessian_gamma,
+            hessian_slices = hessian_slices,
+            device         = device
         )
     
     for epoch in range(0, num_epochs):
