@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icebrk.tools &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -524,25 +524,25 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">uproot</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">networkx</span> 
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uproot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span> 
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
 
-<span class="kn">import</span> <span class="nn">vector</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">vector</span>
 
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">colored</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icebrk.PDG</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">import</span> <span class="nn">icebrk.features</span> <span class="k">as</span> <span class="nn">features</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icebrk.PDG</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.features</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">features</span>
 
 
 <div class="viewcode-block" id="construct_kinematics">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_kinematics">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_kinematics</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_kinematics</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct kinematics of the triplet @[JAGGED].</span>
 
 <span class="sd">    Args:</span>
@@ -576,7 +576,7 @@
 
 <div class="viewcode-block" id="construct_MC_tree">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_MC_tree">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_MC_tree</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_MC_tree</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct decay tree branches @[JAGGED].</span>
 
 <span class="sd">    Args:</span>
@@ -603,7 +603,7 @@
 
 <div class="viewcode-block" id="construct_MC_truth">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_MC_truth">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_MC_truth</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_MC_truth</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Set MC signal truth into a new branch @[JAGGED].</span>
 
 <span class="sd">    Args:</span>
@@ -632,7 +632,7 @@
 <div class="viewcode-block" id="deltar_3">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.deltar_3">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">deltar_3</span><span class="p">(</span><span class="n">eta1</span><span class="p">,</span><span class="n">eta2</span><span class="p">,</span><span class="n">eta3</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span><span class="n">phi2</span><span class="p">,</span><span class="n">phi3</span><span class="p">,</span> <span class="n">dR_MATCH</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">deltar_3</span><span class="p">(</span><span class="n">eta1</span><span class="p">,</span><span class="n">eta2</span><span class="p">,</span><span class="n">eta3</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span><span class="n">phi2</span><span class="p">,</span><span class="n">phi3</span><span class="p">,</span> <span class="n">dR_MATCH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Match vector triplets by their DeltaR.</span>
 
 <span class="sd">    Args:</span>
@@ -661,7 +661,7 @@
 
 <div class="viewcode-block" id="find_connected_triplets">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.find_connected_triplets">[docs]</a>
-<span class="k">def</span> <span class="nf">find_connected_triplets</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">dR_MATCH</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_connected_triplets</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">dR_MATCH</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Find all qsets of triplets connected together via DeltaR matching of their vectors.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -685,7 +685,7 @@
 
 <div class="viewcode-block" id="get_first_indices">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.get_first_indices">[docs]</a>
-<span class="k">def</span> <span class="nf">get_first_indices</span><span class="p">(</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_first_indices</span><span class="p">(</span><span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;  Get the first evt_index from a list of list, where sublists</span>
 <span class="sd">    encode e.g. different reconstruction chains of triplets.</span>
 
@@ -705,7 +705,7 @@
 
 <div class="viewcode-block" id="construct_input_vec">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_input_vec">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_input_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_input_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct MVA input vector x.</span>
 
 <span class="sd">    feature 1 for all triplets 0 &lt;possible zeros&gt; .. 0 0,</span>
@@ -749,7 +749,7 @@
 
 <div class="viewcode-block" id="index_of_first_signal">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.index_of_first_signal">[docs]</a>
-<span class="k">def</span> <span class="nf">index_of_first_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index_of_first_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Check the evt_index of the last signal triplet (MC truth).</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -772,7 +772,7 @@
 
 <div class="viewcode-block" id="index_of_last_signal">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.index_of_last_signal">[docs]</a>
-<span class="k">def</span> <span class="nf">index_of_last_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index_of_last_signal</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Check the evt_index of the last signal triplet (MC truth).</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -794,7 +794,7 @@
 
 <div class="viewcode-block" id="construct_output_vec">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.construct_output_vec">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_output_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_output_vec</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct MVA output vector y (binary with multilabel).</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -816,7 +816,7 @@
 
 <div class="viewcode-block" id="print_MC_event">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.tools.print_MC_event">[docs]</a>
-<span class="k">def</span> <span class="nf">print_MC_event</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">PRINTMAX</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_MC_event</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">PRINTMAX</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Print MC event info.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -826,7 +826,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;PDG ID: e (11), gamma (22), pi0 (111), pi (211), K(321), B (521)&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;notation: (pt,eta,phi) &lt;low-pt electron | PF electron || overlap | conVeto&gt; [G: generator PDG id (mother PDG id) ...]&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="n">is_signal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">message</span><span class="p">(</span><span class="n">is_signal</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">is_signal</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">colored</span><span class="p">(</span><span class="s1">&#39;S: TRUE&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -866,7 +866,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

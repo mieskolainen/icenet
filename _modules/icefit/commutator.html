@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icefit.commutator &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -520,12 +520,12 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
                 
 <div class="viewcode-block" id="selection_A">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.commutator.selection_A">[docs]</a>
-<span class="k">def</span> <span class="nf">selection_A</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Y_CUT</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">selection_A</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Y_CUT</span><span class="p">):</span>
     <span class="s2">&quot;Per event: Cut on Y and then get the min(X) object&quot;</span>
     <span class="s2">&quot;Returns: Selected object Y value&quot;</span>
     <span class="n">passing</span> <span class="o">=</span> <span class="n">X</span> <span class="o">*</span> <span class="p">(</span><span class="n">Y</span> <span class="o">&gt;</span> <span class="n">Y_CUT</span><span class="p">)</span>
@@ -537,7 +537,7 @@
 
 <div class="viewcode-block" id="selection_B">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.commutator.selection_B">[docs]</a>
-<span class="k">def</span> <span class="nf">selection_B</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Y_CUT</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">selection_B</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Y_CUT</span><span class="p">):</span>
     <span class="s2">&quot;Per event: Get the min(X) object and then cut on Y&quot;</span>
     <span class="s2">&quot;Returns: Selected object Y value&quot;</span>
     <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
@@ -549,13 +549,13 @@
 
 <div class="viewcode-block" id="crv">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.commutator.crv">[docs]</a>
-<span class="k">def</span> <span class="nf">crv</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">upper_L</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">crv</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">upper_L</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span> <span class="o">@</span> <span class="n">upper_L</span></div>
 
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.commutator.main">[docs]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     
     <span class="n">Y_CUT</span>  <span class="o">=</span> <span class="mf">0.0</span>      <span class="c1"># 0 puts the cut at the median because of 0-centered Gaussian RVs</span>
     <span class="n">N</span>      <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)</span> <span class="c1"># Number of events</span>
@@ -609,7 +609,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

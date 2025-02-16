@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.tools.process &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,44 +517,44 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">gc</span>
-<span class="kn">import</span> <span class="nn">socket</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span><span class="p">,</span> <span class="n">as_completed</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span><span class="p">,</span> <span class="n">as_completed</span>
 
-<span class="kn">import</span> <span class="nn">tensorboardX</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch_geometric</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">xgboost</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorboardX</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch_geometric</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">yamlinclude</span> <span class="kn">import</span> <span class="n">YamlIncludeConstructor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">yamlinclude</span><span class="w"> </span><span class="kn">import</span> <span class="n">YamlIncludeConstructor</span>
 
-<span class="kn">import</span> <span class="nn">icenet.deep.iceboost</span> <span class="k">as</span> <span class="nn">iceboost</span>
-<span class="kn">import</span> <span class="nn">icenet.deep.train</span> <span class="k">as</span> <span class="nn">train</span>
-<span class="kn">import</span> <span class="nn">icenet.deep.predict</span> <span class="k">as</span> <span class="nn">predict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icenet.deep.iceboost</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">iceboost</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icenet.deep.train</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">train</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icenet.deep.predict</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">predict</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceprint</span><span class="p">,</span> <span class="n">stx</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">prints</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">reweight</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">supertune</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">iceprint</span><span class="p">,</span> <span class="n">stx</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">prints</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">reweight</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">supertune</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 
 <span class="c1"># ******** GLOBALS *********</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="n">LOGGER</span><span class="p">,</span> <span class="n">icelogger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="n">LOGGER</span><span class="p">,</span> <span class="n">icelogger</span>
 
 <span class="n">roc_mstats</span>        <span class="o">=</span> <span class="p">[]</span>
 <span class="n">roc_labels</span>        <span class="o">=</span> <span class="p">[]</span>
@@ -566,7 +566,7 @@
 
 <div class="viewcode-block" id="read_cli">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_cli">[docs]</a>
-<span class="k">def</span> <span class="nf">read_cli</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_cli</span><span class="p">():</span>
     
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
     
@@ -607,7 +607,7 @@
 
 <div class="viewcode-block" id="read_config">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.read_config">[docs]</a>
-<span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;configs/xyz/&#39;</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_config</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s1">&#39;configs/xyz/&#39;</span><span class="p">,</span> <span class="n">runmode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Commandline and YAML configuration reader</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -621,7 +621,7 @@
     <span class="c1">## Read yaml configuration</span>
 
     <span class="c1"># This allows to use &quot;!include foo.yaml&quot; syntax</span>
-    <span class="kn">import</span> <span class="nn">yaml</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
     <span class="n">YamlIncludeConstructor</span><span class="o">.</span><span class="n">add_to_loader_class</span><span class="p">(</span><span class="n">loader_class</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
@@ -647,7 +647,7 @@
         <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;genesis_runmode&quot;</span><span class="p">][</span><span class="s2">&quot;inputmap&quot;</span><span class="p">]</span>
 
         <span class="c1">## ** Special YAML loader here **</span>
-        <span class="kn">from</span> <span class="nn">libs.ccorp.ruamel.yaml.include</span> <span class="kn">import</span> <span class="n">YAML</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">libs.ccorp.ruamel.yaml.include</span><span class="w"> </span><span class="kn">import</span> <span class="n">YAML</span>
         <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
         <span class="n">yaml</span><span class="o">.</span><span class="n">allow_duplicate_keys</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -927,7 +927,7 @@
 
 <div class="viewcode-block" id="generic_flow">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.generic_flow">[docs]</a>
-<span class="k">def</span> <span class="nf">generic_flow</span><span class="p">(</span><span class="n">rootname</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generic_flow</span><span class="p">(</span><span class="n">rootname</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic (read data -- train models -- evaluate models) workflow</span>
 <span class="sd">    </span>
@@ -985,7 +985,7 @@
 
 <div class="viewcode-block" id="concatenate_data">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.concatenate_data">[docs]</a>
-<span class="k">def</span> <span class="nf">concatenate_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">concatenate_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to concatenate arrays with a specified maximum batch size</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1029,7 +1029,7 @@
 
 <div class="viewcode-block" id="load_file_wrapper">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.load_file_wrapper">[docs]</a>
-<span class="k">def</span> <span class="nf">load_file_wrapper</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_file_wrapper</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1042,14 +1042,14 @@
 <div class="viewcode-block" id="process_raw_data">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.process_raw_data">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">process_raw_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_raw_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_loader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load raw input from the disk -- this is executed only by &#39;genesis&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">num_cpus</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">]</span>
     
-    <span class="k">def</span> <span class="nf">get_chunk_ind</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_chunk_ind</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
         <span class="n">chunks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">N</span> <span class="o">/</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;pickle_size&#39;</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">aux</span><span class="o">.</span><span class="n">split_start_end</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">chunks</span><span class="p">)</span>
 
@@ -1078,7 +1078,7 @@
 
     <span class="c1">## New code</span>
     
-    <span class="k">def</span> <span class="nf">save_pickle</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_pickle</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_directory</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;output_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">Y</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">W</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">ids</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">args</span><span class="p">],</span> 
                         <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
@@ -1124,7 +1124,7 @@
 <div class="viewcode-block" id="combine_pickle_data">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.combine_pickle_data">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">combine_pickle_data</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_pickle_data</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load splitted pickle data and return full dataset arrays</span>
 <span class="sd">    </span>
@@ -1220,7 +1220,7 @@
 <div class="viewcode-block" id="train_eval_data_processor">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_eval_data_processor">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">train_eval_data_processor</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_eval_data_processor</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read/write (MVA) data and return full processed dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1316,7 +1316,7 @@
 <div class="viewcode-block" id="process_data">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.process_data">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">func_factor</span><span class="p">,</span> <span class="n">mvavars</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process data to high level representations and split to train/eval/test</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1499,7 +1499,7 @@
 <div class="viewcode-block" id="impute_datasets">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.impute_datasets">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">impute_datasets</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">impute_datasets</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">imputer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dataset imputation</span>
 
@@ -1552,7 +1552,7 @@
 <div class="viewcode-block" id="train_models">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.train_models">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">data_val</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_models</span><span class="p">(</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">data_val</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train ML/AI models wrapper with pre-processing.</span>
 <span class="sd">    </span>
@@ -1706,7 +1706,7 @@
 
     <span class="c1"># -------------------------------------------------------------</span>
     
-    <span class="k">def</span> <span class="nf">set_distillation_drain</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;torch&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_distillation_drain</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;torch&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;distillation&#39;</span> <span class="ow">in</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;distillation&#39;</span><span class="p">][</span><span class="s1">&#39;drains&#39;</span><span class="p">]:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Creating soft distillation drain for the model &lt;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
@@ -1933,7 +1933,7 @@
 <div class="viewcode-block" id="evaluate_models">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.evaluate_models">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">evaluate_models</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluate_models</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate ML/AI models.</span>
 
@@ -2260,7 +2260,7 @@
 <div class="viewcode-block" id="make_plots">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.make_plots">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">make_plots</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_plots</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Basic Q/A-plots</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2296,7 +2296,7 @@
 <div class="viewcode-block" id="plot_XYZ_wrap">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.plot_XYZ_wrap">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span>
     <span class="n">X_kin</span><span class="p">,</span> <span class="n">ids_kin</span><span class="p">,</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">ids_RAW</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Arbitrary plot steering function.</span>
@@ -2435,7 +2435,7 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ROC&#39;</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">pathlabel</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">pathlabel</span><span class="p">):</span>
             
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Computing aux.Metric for </span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             
@@ -2523,7 +2523,7 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MVA_output&#39;</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">pathlabel</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">pathlabel</span><span class="p">):</span>
             
             <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y_pred&#39;</span><span class="p">:</span>     <span class="n">y_pred</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
                       <span class="s1">&#39;y&#39;</span><span class="p">:</span>          <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
@@ -2566,7 +2566,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">break</span> <span class="c1"># No more this type of plots</span>
             
-            <span class="k">def</span> <span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">pick_ind</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="s1">&#39;inclusive&#39;</span><span class="p">,</span> <span class="n">pathlabel</span><span class="o">=</span><span class="s1">&#39;inclusive&#39;</span><span class="p">,</span> <span class="n">savestats</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">plot_helper</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">pick_ind</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="s1">&#39;inclusive&#39;</span><span class="p">,</span> <span class="n">pathlabel</span><span class="o">=</span><span class="s1">&#39;inclusive&#39;</span><span class="p">,</span> <span class="n">savestats</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
                 
                 <span class="c1"># Two step</span>
                 <span class="n">XX</span> <span class="o">=</span> <span class="n">X_RAW</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
@@ -2622,7 +2622,7 @@
 <div class="viewcode-block" id="plot_XYZ_multiple_models">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.plot_XYZ_multiple_models">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 
     <span class="k">global</span> <span class="n">roc_mstats</span>
     <span class="k">global</span> <span class="n">roc_labels</span>
@@ -2632,7 +2632,7 @@
     <span class="c1"># ===================================================================</span>
     <span class="c1"># Plot correlation coefficient comparisons</span>
 
-    <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
 
     <span class="c1">### MVA-output 2D correlation plots</span>
     <span class="k">if</span> <span class="s1">&#39;MVA_2D&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;MVA_2D&#39;</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]:</span>
@@ -2744,7 +2744,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

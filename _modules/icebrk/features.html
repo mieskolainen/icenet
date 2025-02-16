@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icebrk.features &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -521,8 +521,8 @@
 <span class="c1"># Mikael Mieskolainen, 2020</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
-<span class="kn">import</span> <span class="nn">uproot</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uproot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 
 <span class="c1"># Top level features available in b-parking nanoAOD trees</span>
@@ -618,7 +618,7 @@
 
 <div class="viewcode-block" id="getdimension">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.features.getdimension">[docs]</a>
-<span class="k">def</span> <span class="nf">getdimension</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getdimension</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Count the number of features per input triplet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">mva_features</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">eid_features</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">e_r_features</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">k_features</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">r_features</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">d_features</span><span class="p">)</span></div>
@@ -627,7 +627,7 @@
 
 <div class="viewcode-block" id="construct_new_branches">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.features.construct_new_branches">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_new_branches</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_new_branches</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct new feature branches.</span>
 
 <span class="sd">    Args:</span>
@@ -669,7 +669,7 @@
 <span class="c1">#</span>
 <div class="viewcode-block" id="generate_feature_names">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.features.generate_feature_names">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_feature_names</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_feature_names</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     
     <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">all_features</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -686,7 +686,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

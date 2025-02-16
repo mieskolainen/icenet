@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.tools.raytools &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,28 +519,28 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
 
-<span class="kn">import</span> <span class="nn">ray</span>
-<span class="kn">from</span> <span class="nn">ray.actor</span> <span class="kn">import</span> <span class="n">ActorHandle</span>
-<span class="kn">from</span> <span class="nn">asyncio</span> <span class="kn">import</span> <span class="n">Event</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.actor</span><span class="w"> </span><span class="kn">import</span> <span class="n">ActorHandle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">asyncio</span><span class="w"> </span><span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 
 <span class="c1"># Back on the local node, once you launch your remote Ray tasks, call</span>
 <span class="c1"># `print_until_done`, which will feed everything back into a `tqdm` counter.</span>
 
 <span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
-<span class="k">class</span> <span class="nc">ProgressBarActor</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProgressBarActor</span><span class="p">:</span>
     <span class="n">counter</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">delta</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">event</span><span class="p">:</span> <span class="n">Event</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_items_completed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_items_completed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the ProgressBar with the incremental</span>
 <span class="sd">        number of items that were just completed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -548,7 +548,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">+=</span> <span class="n">num_items_completed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">wait_for_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Blocking call.</span>
 
 <span class="sd">        Waits until somebody calls `update`, then returns a tuple of</span>
@@ -561,7 +561,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="n">saved_delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">counter</span>
 
-    <span class="k">def</span> <span class="nf">get_counter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_counter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the total number of complete items.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -570,13 +570,13 @@
 
 <div class="viewcode-block" id="ProgressBar">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.raytools.ProgressBar">[docs]</a>
-<span class="k">class</span> <span class="nc">ProgressBar</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProgressBar</span><span class="p">:</span>
     <span class="n">progress_actor</span><span class="p">:</span> <span class="n">ActorHandle</span>
     <span class="n">total</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">pbar</span><span class="p">:</span> <span class="n">tqdm</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="c1"># Ray actors don&#39;t seem to play nice with mypy, generating</span>
         <span class="c1"># a spurious warning for the following line,</span>
         <span class="c1"># which we need to suppress. The code is fine.</span>
@@ -585,7 +585,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">actor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ActorHandle</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">actor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ActorHandle</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a reference to the remote `ProgressBarActor`.</span>
 
 <span class="sd">        When you complete tasks, call `update` on the actor.</span>
@@ -594,7 +594,7 @@
 
 <div class="viewcode-block" id="ProgressBar.print_until_done">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.raytools.ProgressBar.print_until_done">[docs]</a>
-    <span class="k">def</span> <span class="nf">print_until_done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_until_done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Blocking call.</span>
 
 <span class="sd">        Do this after starting a series of remote Ray tasks, to which you&#39;ve</span>
@@ -619,7 +619,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.deep.train &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,62 +517,62 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch_geometric</span>
-<span class="kn">import</span> <span class="nn">xgboost</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch_geometric</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
 
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
 <span class="c1"># icenet</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux_torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux_torch</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">plots</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">deeptools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">plots</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">deeptools</span>
 
-<span class="kn">from</span> <span class="nn">icenet.algo</span>  <span class="kn">import</span> <span class="n">flr</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">deps</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">mlgr</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">maxo</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dmlp</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">lzmlp</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">dbnf</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">vae</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">fastkan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.algo</span><span class="w">  </span><span class="kn">import</span> <span class="n">flr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">deps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">mlgr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">maxo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">dmlp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">lzmlp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">dbnf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">vae</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">fastkan</span>
 
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">cnn</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span>  <span class="kn">import</span> <span class="n">graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">cnn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">graph</span>
 
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">mine</span>
 
-<span class="kn">from</span> <span class="nn">icenet.optim</span> <span class="kn">import</span> <span class="n">adam</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.optim</span><span class="w"> </span><span class="kn">import</span> <span class="n">adam</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># Raytune</span>
-<span class="kn">import</span> <span class="nn">ray</span>
-<span class="kn">from</span> <span class="nn">ray</span> <span class="kn">import</span> <span class="n">tune</span>
-<span class="kn">from</span> <span class="nn">ray.tune.search.basic_variant</span> <span class="kn">import</span> <span class="n">BasicVariantGenerator</span>
-<span class="kn">from</span> <span class="nn">ray.tune.search.hyperopt</span>      <span class="kn">import</span> <span class="n">HyperOptSearch</span>
-<span class="kn">from</span> <span class="nn">ray.tune.search.optuna</span>        <span class="kn">import</span> <span class="n">OptunaSearch</span>
-<span class="kn">from</span> <span class="nn">ray.tune.search.bayesopt</span>      <span class="kn">import</span> <span class="n">BayesOptSearch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">tune</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.search.basic_variant</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicVariantGenerator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.search.hyperopt</span><span class="w">      </span><span class="kn">import</span> <span class="n">HyperOptSearch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.search.optuna</span><span class="w">        </span><span class="kn">import</span> <span class="n">OptunaSearch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.search.bayesopt</span><span class="w">      </span><span class="kn">import</span> <span class="n">BayesOptSearch</span>
 
-<span class="kn">from</span> <span class="nn">ray.air.config</span> <span class="kn">import</span> <span class="n">RunConfig</span><span class="p">,</span> <span class="n">ScalingConfig</span>
-<span class="kn">from</span> <span class="nn">ray.tune.schedulers</span> <span class="kn">import</span> <span class="n">ASHAScheduler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.air.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunConfig</span><span class="p">,</span> <span class="n">ScalingConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.schedulers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ASHAScheduler</span>
 
 
 <div class="viewcode-block" id="getgenericmodel">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgenericmodel">[docs]</a>
-<span class="k">def</span> <span class="nf">getgenericmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getgenericmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper to return different torch models</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -606,7 +606,7 @@
 
 <div class="viewcode-block" id="getgraphmodel">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgraphmodel">[docs]</a>
-<span class="k">def</span> <span class="nf">getgraphmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getgraphmodel</span><span class="p">(</span><span class="n">conv_type</span><span class="p">,</span> <span class="n">netparam</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper to return different graph networks</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -624,7 +624,7 @@
 
 <div class="viewcode-block" id="getgenericparam">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgenericparam">[docs]</a>
-<span class="k">def</span> <span class="nf">getgenericparam</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getgenericparam</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct generic torch network parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -645,7 +645,7 @@
 
 <div class="viewcode-block" id="getgraphparam">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.getgraphparam">[docs]</a>
-<span class="k">def</span> <span class="nf">getgraphparam</span><span class="p">(</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getgraphparam</span><span class="p">(</span><span class="n">data_trn</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct graph network parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -682,7 +682,7 @@
 
 <div class="viewcode-block" id="raytune_main">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.raytune_main">[docs]</a>
-<span class="k">def</span> <span class="nf">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">raytune_main</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">train_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Raytune mainloop</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -776,7 +776,7 @@
 
 <div class="viewcode-block" id="torch_loop">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.torch_loop">[docs]</a>
-<span class="k">def</span> <span class="nf">torch_loop</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">torch_loop</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main training loop for all torch based models</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -844,7 +844,7 @@
     
     <span class="c1"># TensorboardX</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;tensorboard&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
-        <span class="kn">from</span> <span class="nn">tensorboardX</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">tensorboardX</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>
         <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
@@ -876,7 +876,7 @@
             
             <span class="c1"># Temperature calibration</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">tempscale</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w"> </span><span class="kn">import</span> <span class="n">tempscale</span>
                 <span class="n">tt</span> <span class="o">=</span> <span class="n">tempscale</span><span class="o">.</span><span class="n">ModelWithTemperature</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">out_dim</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;binary&#39;</span><span class="p">)</span>
                 <span class="n">tt</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">valid_loader</span><span class="o">=</span><span class="n">test_loader</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -958,7 +958,7 @@
 
 <div class="viewcode-block" id="train_torch_graph">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_graph">[docs]</a>
-<span class="k">def</span> <span class="nf">train_torch_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_torch_graph</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train graph neural networks</span>
 <span class="sd">    </span>
@@ -998,7 +998,7 @@
 
 <div class="viewcode-block" id="train_torch_generic">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_torch_generic">[docs]</a>
-<span class="k">def</span> <span class="nf">train_torch_generic</span><span class="p">(</span><span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_torch_generic</span><span class="p">(</span><span class="n">X_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_trn_2D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_val_2D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
     <span class="n">Y_trn_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
     <span class="n">data_trn_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}}):</span>
@@ -1031,7 +1031,7 @@
 
 <div class="viewcode-block" id="torch_construct">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.torch_construct">[docs]</a>
-<span class="k">def</span> <span class="nf">torch_construct</span><span class="p">(</span><span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span><span class="p">,</span> <span class="n">X_trn_2D</span><span class="p">,</span> <span class="n">X_val_2D</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">val_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">torch_construct</span><span class="p">(</span><span class="n">X_trn</span><span class="p">,</span> <span class="n">Y_trn</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">Y_val</span><span class="p">,</span> <span class="n">X_trn_2D</span><span class="p">,</span> <span class="n">X_val_2D</span><span class="p">,</span> <span class="n">trn_weights</span><span class="p">,</span> <span class="n">val_weights</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> 
     <span class="n">Y_trn_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Y_val_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
     <span class="n">data_trn_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1097,7 +1097,7 @@
 
 <div class="viewcode-block" id="train_cutset">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_cutset">[docs]</a>
-<span class="k">def</span> <span class="nf">train_cutset</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_cutset</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train cutset model</span>
 
@@ -1164,7 +1164,7 @@
 
 <div class="viewcode-block" id="train_flr">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flr">[docs]</a>
-<span class="k">def</span> <span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_flr</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train factorized likelihood model</span>
 
@@ -1190,7 +1190,7 @@
 
 <div class="viewcode-block" id="train_flow">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_flow">[docs]</a>
-<span class="k">def</span> <span class="nf">train_flow</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_flow</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train normalizing flow (BNAF) neural model</span>
 
@@ -1225,7 +1225,7 @@
                 <span class="n">weight_decay</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">])</span>
         
         <span class="c1"># Custom wrapper</span>
-        <span class="kn">from</span> <span class="nn">icenet.optim</span> <span class="kn">import</span> <span class="n">scheduler</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">icenet.optim</span><span class="w"> </span><span class="kn">import</span> <span class="n">scheduler</span>
         <span class="n">sched</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span>
                                       <span class="n">factor</span>   <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;scheduler_param&#39;</span><span class="p">][</span><span class="s1">&#39;factor&#39;</span><span class="p">],</span>
                                       <span class="n">patience</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;scheduler_param&#39;</span><span class="p">][</span><span class="s1">&#39;patience&#39;</span><span class="p">],</span>
@@ -1249,7 +1249,7 @@
 
 <div class="viewcode-block" id="train_graph_xgb">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.train.train_graph_xgb">[docs]</a>
-<span class="k">def</span> <span class="nf">train_graph_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_graph_xgb</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">data_trn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trn_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_soft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train graph model + xgb hybrid model</span>
@@ -1448,7 +1448,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

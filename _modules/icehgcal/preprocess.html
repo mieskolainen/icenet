@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icehgcal.preprocess &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,17 +519,17 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
 
-<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">uproot</span> <span class="k">as</span> <span class="nn">uproot</span>
-<span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uproot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">uproot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 
 <div class="viewcode-block" id="compute_edges">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.preprocess.compute_edges">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span>
-<span class="k">def</span> <span class="nf">compute_edges</span><span class="p">(</span><span class="n">trk_data</span><span class="p">,</span> <span class="n">ass_data</span><span class="p">,</span> <span class="n">gra_data</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_labels</span><span class="p">,</span> <span class="n">edge_qualities</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_edges</span><span class="p">(</span><span class="n">trk_data</span><span class="p">,</span> <span class="n">ass_data</span><span class="p">,</span> <span class="n">gra_data</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_labels</span><span class="p">,</span> <span class="n">edge_qualities</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Logic based on (but refined):</span>
 <span class="sd">    https://github.com/Abhirikshma/HackathonLinking/blob/master/firstModelAndTraining.ipynb</span>
@@ -586,7 +586,7 @@
 
 <div class="viewcode-block" id="create_trackster_data">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.preprocess.create_trackster_data">[docs]</a>
-<span class="k">def</span> <span class="nf">create_trackster_data</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_trackster_data</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
     
     <span class="n">calos</span>        <span class="o">=</span> <span class="p">[]</span>
     <span class="n">tracksters</span>   <span class="o">=</span> <span class="p">[]</span>
@@ -651,7 +651,7 @@
 
 <div class="viewcode-block" id="event_loop">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.preprocess.event_loop">[docs]</a>
-<span class="k">def</span> <span class="nf">event_loop</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1E9</span><span class="p">)):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">event_loop</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1E9</span><span class="p">)):</span>
 
     <span class="c1"># --------------------------------------------</span>
 
@@ -707,7 +707,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

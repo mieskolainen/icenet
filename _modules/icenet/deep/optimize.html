@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.deep.optimize &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,24 +517,24 @@
 <span class="c1"># </span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
 
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">deeptools</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w"> </span><span class="kn">import</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">deeptools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">io</span>
 
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="Dataset">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.Dataset">[docs]</a>
-<span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Dataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
     
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">Y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">Y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialization &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">X</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">Y</span>
@@ -545,11 +545,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">x_MI</span> <span class="o">=</span> <span class="n">X_MI</span>  <span class="c1"># MI reg</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the total number of samples &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Generates one batch of data &quot;&quot;&quot;</span>
 
         <span class="c1"># Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices</span>
@@ -567,9 +567,9 @@
 
 <div class="viewcode-block" id="DualDataset">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.DualDataset">[docs]</a>
-<span class="k">class</span> <span class="nc">DualDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DualDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">Y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">Y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">W_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_MI</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialization &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">X</span>  <span class="c1"># e.g. image tensors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">U</span>  <span class="c1"># e.g. global features </span>
@@ -582,11 +582,11 @@
     
         <span class="bp">self</span><span class="o">.</span><span class="n">x_MI</span> <span class="o">=</span> <span class="n">X_MI</span>  <span class="c1"># MI reg</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the total number of samples &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Generates one sample of data &quot;&quot;&quot;</span>
         <span class="c1"># Use ellipsis ... to index over scalar [,:], vector [,:,:], tensor [,:,:,..,:] indices</span>
 
@@ -605,7 +605,7 @@
 
 <div class="viewcode-block" id="dict_batch_to_cuda">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.dict_batch_to_cuda">[docs]</a>
-<span class="k">def</span> <span class="nf">dict_batch_to_cuda</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dict_batch_to_cuda</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transfer to (GPU) device memory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -618,7 +618,7 @@
 
 <div class="viewcode-block" id="batch2tensor">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.batch2tensor">[docs]</a>
-<span class="k">def</span> <span class="nf">batch2tensor</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">batch2tensor</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform batch objects to a correct device</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -637,7 +637,7 @@
 
 <div class="viewcode-block" id="printloss">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.printloss">[docs]</a>
-<span class="k">def</span> <span class="nf">printloss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">printloss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loss torch string printer</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -656,7 +656,7 @@
 
 <div class="viewcode-block" id="trackloss">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.trackloss">[docs]</a>
-<span class="k">def</span> <span class="nf">trackloss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">trackloss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Track individual loss terms</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -670,7 +670,7 @@
 
 <div class="viewcode-block" id="process_batch">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.process_batch">[docs]</a>
-<span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">DA_active</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">y_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w_DA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">MI</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">DA_active</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="c1"># Torch models</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
@@ -698,7 +698,7 @@
 
 <div class="viewcode-block" id="train">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.train">[docs]</a>
-<span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">MI</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">MI</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pytorch based training routine.</span>
 <span class="sd">    </span>
@@ -848,7 +848,7 @@
 
 <div class="viewcode-block" id="test">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.test">[docs]</a>
-<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">MI</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compute_loss</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">opt_param</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">MI</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compute_loss</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pytorch based testing routine.</span>
 <span class="sd">    </span>
@@ -941,7 +941,7 @@
 
 <div class="viewcode-block" id="model_to_cuda">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.optimize.model_to_cuda">[docs]</a>
-<span class="k">def</span> <span class="nf">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper function to handle CPU/GPU setup</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">GPU_chosen</span> <span class="o">=</span> <span class="kc">False</span>
@@ -988,7 +988,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

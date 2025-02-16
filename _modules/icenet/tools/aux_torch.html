@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.tools.aux_torch &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,19 +517,19 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 
 <div class="viewcode-block" id="weight2onehot">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.weight2onehot">[docs]</a>
-<span class="k">def</span> <span class="nf">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weight2onehot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Weights into one-hot encoding</span>
 
@@ -550,7 +550,7 @@
 
 <div class="viewcode-block" id="count_parameters_torch">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.count_parameters_torch">[docs]</a>
-<span class="k">def</span> <span class="nf">count_parameters_torch</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">count_parameters_torch</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Count the number of trainable pytorch model parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -561,7 +561,7 @@
 
 <div class="viewcode-block" id="load_torch_checkpoint">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.load_torch_checkpoint">[docs]</a>
-<span class="k">def</span> <span class="nf">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;mynet&#39;</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_torch_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;mynet&#39;</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Load pytorch checkpoint</span>
 
 <span class="sd">    Args:</span>
@@ -591,10 +591,10 @@
 
 <div class="viewcode-block" id="save_torch_model">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.save_torch_model">[docs]</a>
-<span class="k">def</span> <span class="nf">save_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">losses</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">losses</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; PyTorch model saver</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">({</span>
             <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
             <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
@@ -607,10 +607,10 @@
 
 <div class="viewcode-block" id="load_torch_model">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.aux_torch.load_torch_model">[docs]</a>
-<span class="k">def</span> <span class="nf">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load_start_epoch</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_torch_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load_start_epoch</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; PyTorch model loader</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading model to &quot;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&quot; memory ...&#39;</span><span class="p">)</span>
         <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">map_location</span> <span class="o">=</span> <span class="n">device</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
@@ -630,7 +630,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

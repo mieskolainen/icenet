@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icefit.cortools &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,19 +519,19 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">special</span>
-<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
-<span class="kn">import</span> <span class="nn">dcor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">special</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">stats</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dcor</span>
 
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">mine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">mine</span>
 
 
 <div class="viewcode-block" id="distance_corr_torch">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.distance_corr_torch">[docs]</a>
-<span class="k">def</span> <span class="nf">distance_corr_torch</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">distance_corr_torch</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance Correlation, complexity O(N^2)</span>
 <span class="sd">    </span>
@@ -552,7 +552,7 @@
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.distance_corr_torch: Warning: weights not supported currently!&#39;</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">double_centering</span><span class="p">(</span><span class="n">D</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">double_centering</span><span class="p">(</span><span class="n">D</span><span class="p">):</span>
         
         <span class="n">row_means</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># [1 x N]</span>
         <span class="n">col_means</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># [N x 1]</span>
@@ -592,7 +592,7 @@
 
 <div class="viewcode-block" id="corrcoeff_weighted_torch">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.corrcoeff_weighted_torch">[docs]</a>
-<span class="k">def</span> <span class="nf">corrcoeff_weighted_torch</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">corrcoeff_weighted_torch</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Per event weighted linear Pearson 2x2 correlation matrix cf. torch.corrcoef()</span>
 <span class="sd">    </span>
@@ -616,7 +616,7 @@
 
 <div class="viewcode-block" id="percentile_per_dim">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.percentile_per_dim">[docs]</a>
-<span class="k">def</span> <span class="nf">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">percentile_per_dim</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute percentiles for each dimension (column) over samples (rows)</span>
 
@@ -632,13 +632,13 @@
 
 <div class="viewcode-block" id="prc_CI">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.prc_CI">[docs]</a>
-<span class="k">def</span> <span class="nf">prc_CI</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prc_CI</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="mi">2</span><span class="p">))])</span></div>
 
 
 <div class="viewcode-block" id="hacine_entropy_bin">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.hacine_entropy_bin">[docs]</a>
-<span class="k">def</span> <span class="nf">hacine_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hacine_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hacine-Gharbi et al. </span>
 <span class="sd">    “Low Bias Histogram-Based Estimation of Mutual Information for Feature Selection.”</span>
@@ -660,7 +660,7 @@
 
 <div class="viewcode-block" id="hacine_joint_entropy_bin">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.hacine_joint_entropy_bin">[docs]</a>
-<span class="k">def</span> <span class="nf">hacine_joint_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hacine_joint_entropy_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hacine-Gharbi, Ravier. &quot;A Binning Formula of Bi-histogram</span>
 <span class="sd">    for Joint Entropy Estimation Using Mean Square Error Minimization.”</span>
@@ -683,7 +683,7 @@
 
 <div class="viewcode-block" id="freedman_diaconis_bin">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.freedman_diaconis_bin">[docs]</a>
-<span class="k">def</span> <span class="nf">freedman_diaconis_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">freedman_diaconis_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Freedman-Diaconis rule for a 1D-histogram bin width</span>
 <span class="sd">    </span>
@@ -711,7 +711,7 @@
 
 <div class="viewcode-block" id="scott_bin">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.scott_bin">[docs]</a>
-<span class="k">def</span> <span class="nf">scott_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scott_bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Scott rule for a 2D-histogram bin widths</span>
@@ -738,7 +738,7 @@
 
 <div class="viewcode-block" id="bw2bins">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.bw2bins">[docs]</a>
-<span class="k">def</span> <span class="nf">bw2bins</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bw</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bw2bins</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bw</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a histogram binwidth to number of bins</span>
 <span class="sd">    </span>
@@ -760,7 +760,7 @@
 
 <div class="viewcode-block" id="H_score">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.H_score">[docs]</a>
-<span class="k">def</span> <span class="nf">H_score</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">EPS</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">H_score</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">EPS</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Shannon Entropy (log_e ~ nats units)</span>
 
@@ -778,7 +778,7 @@
 
 <div class="viewcode-block" id="I_score">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.I_score">[docs]</a>
-<span class="k">def</span> <span class="nf">I_score</span><span class="p">(</span><span class="n">C</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normalized</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">I_score</span><span class="p">(</span><span class="n">C</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normalized</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1E-15</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mutual information score (log_e ~ nats units)</span>
 
@@ -824,7 +824,7 @@
 
 <div class="viewcode-block" id="mutual_information">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.mutual_information">[docs]</a>
-<span class="k">def</span> <span class="nf">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mutual_information</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">bins_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
                        <span class="n">automethod</span><span class="o">=</span><span class="s1">&#39;Scott2D&#39;</span><span class="p">,</span> <span class="n">minbins</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">maxbins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">outlier</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -869,7 +869,7 @@
     <span class="c1"># For autobinning methods</span>
     <span class="n">rho</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">autobinwrap</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">autobinwrap</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">if</span>   <span class="n">automethod</span> <span class="o">==</span> <span class="s1">&#39;Scott2D&#39;</span><span class="p">:</span>
             <span class="n">NB</span> <span class="o">=</span> <span class="n">scott_bin</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">rho</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;nbins&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">outlier</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">automethod</span> <span class="o">==</span> <span class="s1">&#39;Hacine2D&#39;</span><span class="p">:</span>
@@ -912,7 +912,7 @@
 
 <div class="viewcode-block" id="distance_corr">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.distance_corr">[docs]</a>
-<span class="k">def</span> <span class="nf">distance_corr</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">distance_corr</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                   <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance correlation</span>
@@ -971,7 +971,7 @@
 
 <div class="viewcode-block" id="pearson_corr">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.pearson_corr">[docs]</a>
-<span class="k">def</span> <span class="nf">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pearson_corr</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">return_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pearson Correlation Coefficient</span>
@@ -1054,7 +1054,7 @@
 
 <div class="viewcode-block" id="gaussian_mutual_information">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.gaussian_mutual_information">[docs]</a>
-<span class="k">def</span> <span class="nf">gaussian_mutual_information</span><span class="p">(</span><span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gaussian_mutual_information</span><span class="p">(</span><span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analytical 2D-Gaussian mutual information</span>
 <span class="sd">    using a correlation coefficient rho.</span>
@@ -1071,7 +1071,7 @@
 
 <div class="viewcode-block" id="optbins">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.optbins">[docs]</a>
-<span class="k">def</span> <span class="nf">optbins</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">maxM</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">optbins</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">maxM</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    NOTE: Weak performance, study the method !!</span>
@@ -1116,7 +1116,7 @@
 
 <div class="viewcode-block" id="optbins2d">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.optbins2d">[docs]</a>
-<span class="k">def</span> <span class="nf">optbins2d</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">maxM</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">40</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">optbins2d</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">maxM</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">40</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nbins&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    </span>
 <span class="sd">    NOTE: Weak performance, study the method !!</span>
@@ -1171,13 +1171,13 @@
 
 <div class="viewcode-block" id="test_gaussian">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.test_gaussian">[docs]</a>
-<span class="k">def</span> <span class="nf">test_gaussian</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_gaussian</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gaussian unit test of the estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
     
-    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>  <span class="c1"># if you are using multi-GPU.</span>
@@ -1273,14 +1273,14 @@
 
 <div class="viewcode-block" id="test_constant">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.cortools.test_constant">[docs]</a>
-<span class="k">def</span> <span class="nf">test_constant</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_constant</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constant input unit test of the estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
 
-    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>  <span class="c1"># if you are using multi-GPU.</span>
@@ -1397,7 +1397,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

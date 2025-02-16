@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.algo.nmf &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,14 +517,14 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 
 <div class="viewcode-block" id="ML_update_W">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.nmf.ML_update_W">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">ML_update_W</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ML_update_W</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39; Multiplicative (EM-type)</span>
 <span class="sd">    non-negative matrix factorization update for basis components.</span>
 <span class="sd">    </span>
@@ -544,7 +544,7 @@
 <div class="viewcode-block" id="ML_update_H">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.nmf.ML_update_H">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">ML_update_H</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ML_update_H</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39; Multiplicative (EM-type) </span>
 <span class="sd">    non-negative matrix factorization update for the expansion weights.</span>
 <span class="sd">    </span>
@@ -561,7 +561,7 @@
 
 <div class="viewcode-block" id="ML_nmf">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.nmf.ML_nmf">[docs]</a>
-<span class="k">def</span> <span class="nf">ML_nmf</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ML_nmf</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39; Non-negative matrix factorization main function.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
@@ -601,7 +601,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

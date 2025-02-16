@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.algo.analytic &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,14 +517,14 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span> <span class="k">as</span> <span class="n">special</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">special</span> <span class="k">as</span> <span class="n">special</span>
 
 
 <div class="viewcode-block" id="phi_phasewrap">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.phi_phasewrap">[docs]</a>
-<span class="k">def</span> <span class="nf">phi_phasewrap</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">phi_phasewrap</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Used for example when phi is deltaphi = phi1 - phi2</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -534,7 +534,7 @@
 
 <div class="viewcode-block" id="invmass">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.invmass">[docs]</a>
-<span class="k">def</span> <span class="nf">invmass</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pt1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pt2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">m1_const</span><span class="o">=</span><span class="mf">0.1396</span><span class="p">,</span> <span class="n">m2_const</span><span class="o">=</span><span class="mf">0.1396</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">invmass</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pt1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pt2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">m1_const</span><span class="o">=</span><span class="mf">0.1396</span><span class="p">,</span> <span class="n">m2_const</span><span class="o">=</span><span class="mf">0.1396</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    invariant mass (exact)</span>
 <span class="sd">    </span>
@@ -553,7 +553,7 @@
 
 <div class="viewcode-block" id="invmass_massless">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.invmass_massless">[docs]</a>
-<span class="k">def</span> <span class="nf">invmass_massless</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pt1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pt2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi2</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">invmass_massless</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pt1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pt2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi2</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    invariant mass (massless limit)</span>
 <span class="sd">    </span>
@@ -569,7 +569,7 @@
 
 <div class="viewcode-block" id="deltaR">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.deltaR">[docs]</a>
-<span class="k">def</span> <span class="nf">deltaR</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eta1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi2</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">deltaR</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eta1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eta2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phi2</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    dR distance (invariant [massless limit y --&gt; eta] under longitudinal boosts)</span>
 <span class="sd">    </span>
@@ -584,7 +584,7 @@
 
 <div class="viewcode-block" id="fox_wolfram_boost_inv">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.fox_wolfram_boost_inv">[docs]</a>
-<span class="k">def</span> <span class="nf">fox_wolfram_boost_inv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fox_wolfram_boost_inv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    arxiv.org/pdf/1508.03144, (Formula 5.6)</span>
 
@@ -620,7 +620,7 @@
 
 <div class="viewcode-block" id="gram_matrix">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.gram_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">gram_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gram_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gram matrix for 4-vectors.</span>
 
@@ -651,7 +651,7 @@
 <div class="viewcode-block" id="ktmetric">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.ktmetric">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ktmetric</span><span class="p">(</span><span class="n">kt2_i</span><span class="p">,</span> <span class="n">kt2_j</span><span class="p">,</span> <span class="n">dR2_ij</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    kt-algorithm type distance measure.</span>
 <span class="sd">    </span>
@@ -675,7 +675,7 @@
 
 <div class="viewcode-block" id="get_Lorentz_edge_features">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_Lorentz_edge_features">[docs]</a>
-<span class="k">def</span> <span class="nf">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_Lorentz_edge_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
     
     <span class="c1"># Edge features: [num_edges, num_edge_features]</span>
     <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_edges</span><span class="p">,</span> <span class="n">num_edge_features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -728,7 +728,7 @@
 
 <div class="viewcode-block" id="count_simple_edges">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.count_simple_edges">[docs]</a>
-<span class="k">def</span> <span class="nf">count_simple_edges</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">count_simple_edges</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Count number of edges in a (semi)-fully connected adjacency matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -745,7 +745,7 @@
 <div class="viewcode-block" id="get_simple_edge_index">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.algo.analytic.get_simple_edge_index">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">get_simple_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_simple_edge_index</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">,</span> <span class="n">directed</span><span class="p">,</span> <span class="n">self_loops</span><span class="p">):</span>
 
     <span class="c1"># Graph connectivity: (~ sparse adjacency matrix)</span>
     <span class="n">edge_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">))</span>
@@ -775,7 +775,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

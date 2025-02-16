@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icefit.lognormal &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,13 +519,13 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">fsolve</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">fsolve</span>
 
 <div class="viewcode-block" id="lognormal_param">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.lognormal.lognormal_param">[docs]</a>
-<span class="k">def</span> <span class="nf">lognormal_param</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">match_mode</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lognormal_param</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">match_mode</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute log-normal distribution \mu and \sigma parameters from</span>
 <span class="sd">    the target mean (or median) m and variance v</span>
@@ -551,7 +551,7 @@
     <span class="k">elif</span> <span class="n">match_mode</span> <span class="o">==</span> <span class="s1">&#39;mode&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; NUMERICAL SOLUTION &quot;&quot;&quot;</span>
         
-        <span class="k">def</span> <span class="nf">mode_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">mode_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">m</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">v</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
             <span class="k">return</span> <span class="n">d</span>
         
@@ -579,7 +579,7 @@
 
 <div class="viewcode-block" id="rand_lognormal">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.lognormal.rand_lognormal">[docs]</a>
-<span class="k">def</span> <span class="nf">rand_lognormal</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">match_mode</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rand_lognormal</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">match_mode</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate random numbers from log-normal density with</span>
 <span class="sd">    the distribution target mean (or median) m and variance v</span>
@@ -600,7 +600,7 @@
 
 <div class="viewcode-block" id="rand_powexp">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.lognormal.rand_powexp">[docs]</a>
-<span class="k">def</span> <span class="nf">rand_powexp</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rand_powexp</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Power+exp type parametrization for median matching</span>
 <span class="sd">    </span>
@@ -616,7 +616,7 @@
 
 <div class="viewcode-block" id="create_label">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.lognormal.create_label">[docs]</a>
-<span class="k">def</span> <span class="nf">create_label</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_label</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
     <span class="n">mean</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
     <span class="n">med</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
     <span class="n">std</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
@@ -632,9 +632,9 @@
 
 <div class="viewcode-block" id="test_lognormal">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.lognormal.test_lognormal">[docs]</a>
-<span class="k">def</span> <span class="nf">test_lognormal</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_lognormal</span><span class="p">():</span>
 
-    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
 
     <span class="n">N</span>     <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e7</span><span class="p">)</span>
 
@@ -697,11 +697,11 @@
 
 <div class="viewcode-block" id="test_accuracy">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.lognormal.test_accuracy">[docs]</a>
-<span class="k">def</span> <span class="nf">test_accuracy</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_accuracy</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test accuracy made in the power-exp approximation with median = 1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">expanded_s</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expanded_s</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
@@ -720,7 +720,7 @@
 
         <span class="k">return</span> <span class="n">A</span>
     
-    <span class="k">def</span> <span class="nf">exact_s</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exact_s</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">v</span><span class="o">/</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))))</span> <span class="o">-</span> <span class="mi">1</span>
     
     <span class="c1"># Fixed m value</span>
@@ -751,7 +751,7 @@
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.lognormal.main">[docs]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     <span class="n">test_accuracy</span><span class="p">()</span>
     <span class="n">test_lognormal</span><span class="p">()</span></div>
 
@@ -768,7 +768,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.deep.pgraph &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,31 +519,31 @@
 <span class="c1">#</span>
 <span class="c1"># From: https://github.com/YuGuangWang/PAN</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 
-<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Parameter</span>
-<span class="kn">from</span> <span class="nn">torch_scatter</span> <span class="kn">import</span> <span class="n">scatter_add</span><span class="p">,</span> <span class="n">scatter_max</span><span class="p">,</span> <span class="n">scatter_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_scatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">scatter_add</span><span class="p">,</span> <span class="n">scatter_max</span><span class="p">,</span> <span class="n">scatter_mean</span>
 
-<span class="kn">from</span> <span class="nn">torch_geometric.utils</span> <span class="kn">import</span> <span class="n">softmax</span><span class="p">,</span> <span class="n">degree</span>
-<span class="kn">from</span> <span class="nn">torch_geometric.nn</span> <span class="kn">import</span> <span class="n">MessagePassing</span>
-<span class="kn">from</span> <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Data</span>
-<span class="kn">from</span> <span class="nn">torch_geometric.datasets</span> <span class="kn">import</span> <span class="n">TUDataset</span>
-<span class="kn">from</span> <span class="nn">torch_geometric.utils.num_nodes</span> <span class="kn">import</span> <span class="n">maybe_num_nodes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">softmax</span><span class="p">,</span> <span class="n">degree</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">MessagePassing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">TUDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.utils.num_nodes</span><span class="w"> </span><span class="kn">import</span> <span class="n">maybe_num_nodes</span>
 <span class="c1">#from torch_geometric.nn.pool import TopKPooling, SAGPooling</span>
 
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">random_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">random_split</span>
 
-<span class="kn">from</span> <span class="nn">torch_sparse</span> <span class="kn">import</span> <span class="n">spspmm</span>
-<span class="kn">from</span> <span class="nn">torch_sparse</span> <span class="kn">import</span> <span class="n">coalesce</span>
-<span class="kn">from</span> <span class="nn">torch_sparse</span> <span class="kn">import</span> <span class="n">eye</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">spspmm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">coalesce</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">eye</span>
 
 
 
 <div class="viewcode-block" id="PANConv">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANConv">[docs]</a>
-<span class="k">class</span> <span class="nc">PANConv</span><span class="p">(</span><span class="n">MessagePassing</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">panconv_filter_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PANConv</span><span class="p">(</span><span class="n">MessagePassing</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">panconv_filter_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PANConv</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">aggr</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">)</span>  <span class="c1"># &quot;Add&quot; aggregation.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lin</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="kc">None</span>
@@ -553,7 +553,7 @@
 
 <div class="viewcode-block" id="PANConv.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANConv.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edge_mask_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edge_mask_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># x has shape [N, in_channels]</span>
         <span class="k">if</span> <span class="n">edge_mask_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">AFTERDROP</span> <span class="o">=</span> <span class="kc">False</span>
@@ -592,7 +592,7 @@
 
 <div class="viewcode-block" id="PANConv.message">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANConv.message">[docs]</a>
-    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_j</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_j</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
         <span class="c1"># x_j has shape [E, out_channels]</span>
 
         <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_j</span></div>
@@ -600,7 +600,7 @@
 
 <div class="viewcode-block" id="PANConv.update">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANConv.update">[docs]</a>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aggr_out</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aggr_out</span><span class="p">):</span>
         <span class="c1"># aggr_out has shape [N, out_channels]</span>
 
         <span class="c1"># Step 5: Return new node embeddings.</span>
@@ -609,7 +609,7 @@
 
 <div class="viewcode-block" id="PANConv.panentropy">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANConv.panentropy">[docs]</a>
-    <span class="k">def</span> <span class="nf">panentropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">panentropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
 
         <span class="c1"># sparse to dense</span>
         <span class="c1"># adj = to_dense_adj(edge_index)</span>
@@ -633,7 +633,7 @@
 
 <div class="viewcode-block" id="PANConv.panentropy_sparse">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANConv.panentropy_sparse">[docs]</a>
-    <span class="k">def</span> <span class="nf">panentropy_sparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">AFTERDROP</span><span class="p">,</span> <span class="n">edge_mask_list</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">panentropy_sparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">AFTERDROP</span><span class="p">,</span> <span class="n">edge_mask_list</span><span class="p">):</span>
 
         <span class="n">edge_value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">edge_index</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">edge_index</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_value</span> <span class="o">=</span> <span class="n">coalesce</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_value</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">)</span>
@@ -664,10 +664,10 @@
 <span class="c1"># equation 14</span>
 <div class="viewcode-block" id="PANUMPooling">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANUMPooling">[docs]</a>
-<span class="k">class</span> <span class="nc">PANUMPooling</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PANUMPooling</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; Specific Graph pooling layer based on unnormalized M from PAN, which can only work after PANConv.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tanh</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tanh</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PANUMPooling</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span> <span class="o">=</span> <span class="n">in_channels</span>
@@ -678,7 +678,7 @@
 
 <div class="viewcode-block" id="PANUMPooling.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANUMPooling.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">UM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">UM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -708,7 +708,7 @@
 
 <div class="viewcode-block" id="PANUMPooling.topk">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANUMPooling.topk">[docs]</a>
-    <span class="k">def</span> <span class="nf">topk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">topk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">min_score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Make sure that we do not drop all nodes in a graph.</span>
@@ -750,7 +750,7 @@
 
 <div class="viewcode-block" id="PANUMPooling.filter_adj">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANUMPooling.filter_adj">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_adj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_adj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="n">num_nodes</span> <span class="o">=</span> <span class="n">maybe_num_nodes</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">)</span>
 
@@ -774,10 +774,10 @@
 <span class="c1"># equation 15</span>
 <div class="viewcode-block" id="PANXUMPooling">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXUMPooling">[docs]</a>
-<span class="k">class</span> <span class="nc">PANXUMPooling</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PANXUMPooling</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; General Graph pooling layer based on PAN, which can work with all layers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">pan_pool_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">pan_pool_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">nonlinearity</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">panpool_filter_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PANXUMPooling</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -797,7 +797,7 @@
 
 <div class="viewcode-block" id="PANXUMPooling.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXUMPooling.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">UM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">UM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -831,7 +831,7 @@
 
 <div class="viewcode-block" id="PANXUMPooling.topk">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXUMPooling.topk">[docs]</a>
-    <span class="k">def</span> <span class="nf">topk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">topk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">min_score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Make sure that we do not drop all nodes in a graph.</span>
@@ -873,7 +873,7 @@
 
 <div class="viewcode-block" id="PANXUMPooling.filter_adj">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXUMPooling.filter_adj">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_adj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_adj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="n">num_nodes</span> <span class="o">=</span> <span class="n">maybe_num_nodes</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">)</span>
 
@@ -894,7 +894,7 @@
 
 <div class="viewcode-block" id="PANXUMPooling.panentropy_sparse">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXUMPooling.panentropy_sparse">[docs]</a>
-    <span class="k">def</span> <span class="nf">panentropy_sparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">panentropy_sparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
 
         <span class="n">edge_value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">edge_index</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">edge_index</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_value</span> <span class="o">=</span> <span class="n">coalesce</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_value</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">)</span>
@@ -922,10 +922,10 @@
 <span class="c1"># equation 16</span>
 <div class="viewcode-block" id="PANXHMPooling">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXHMPooling">[docs]</a>
-<span class="k">class</span> <span class="nc">PANXHMPooling</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PANXHMPooling</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; General Graph pooling layer based on PAN, which can work with all layers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">pan_pool_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">pan_pool_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">nonlinearity</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">panpool_filter_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PANXHMPooling</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -939,7 +939,7 @@
 
 <div class="viewcode-block" id="PANXHMPooling.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXHMPooling.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">UM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">UM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -973,7 +973,7 @@
 
 <div class="viewcode-block" id="PANXHMPooling.topk">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXHMPooling.topk">[docs]</a>
-    <span class="k">def</span> <span class="nf">topk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">topk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">min_score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">min_score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Make sure that we do not drop all nodes in a graph.</span>
@@ -1015,7 +1015,7 @@
 
 <div class="viewcode-block" id="PANXHMPooling.filter_adj">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXHMPooling.filter_adj">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_adj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_adj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_weight</span><span class="p">,</span> <span class="n">perm</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="n">num_nodes</span> <span class="o">=</span> <span class="n">maybe_num_nodes</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">)</span>
 
@@ -1036,7 +1036,7 @@
 
 <div class="viewcode-block" id="PANXHMPooling.panentropy_sparse">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANXHMPooling.panentropy_sparse">[docs]</a>
-    <span class="k">def</span> <span class="nf">panentropy_sparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">panentropy_sparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">):</span>
 
         <span class="n">edge_value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">edge_index</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">edge_index</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_value</span> <span class="o">=</span> <span class="n">coalesce</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">edge_value</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">)</span>
@@ -1066,15 +1066,15 @@
 
 <div class="viewcode-block" id="PANDropout">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANDropout">[docs]</a>
-<span class="k">class</span> <span class="nc">PANDropout</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PANDropout</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PANDropout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">filter_size</span> <span class="o">=</span><span class="n">filter_size</span>
 
 <div class="viewcode-block" id="PANDropout.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.pgraph.PANDropout.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
         <span class="c1"># p - probability of an element to be zeroed</span>
 
         <span class="c1"># sava all network</span>
@@ -1103,7 +1103,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

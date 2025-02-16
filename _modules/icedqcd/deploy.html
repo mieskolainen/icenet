@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icedqcd.deploy &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,23 +519,23 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">uproot</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">socket</span>
-<span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uproot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
 
-<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
-<span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">common</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">process</span>
-<span class="kn">from</span> <span class="nn">icenet.deep</span> <span class="kn">import</span> <span class="n">predict</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icedqcd</span><span class="w"> </span><span class="kn">import</span> <span class="n">common</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">iceroot</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">process</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="c1"># ------------------------------------------</span>
 <span class="c1">#from icenet import print # (reservation)</span>
@@ -543,7 +543,7 @@
 
 <div class="viewcode-block" id="f2s">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.f2s">[docs]</a>
-<span class="k">def</span> <span class="nf">f2s</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">f2s</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert e.g. floating point &quot;1.5&quot; to &quot;1p5&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -552,7 +552,7 @@
 
 <div class="viewcode-block" id="generate_cartesian_param">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.generate_cartesian_param">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_cartesian_param</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">mc_param</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_cartesian_param</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">mc_param</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate cartesian N-dim array for the theory model parameter conditional sampling</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -571,7 +571,7 @@
 
 <div class="viewcode-block" id="create_ID_label">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.create_ID_label">[docs]</a>
-<span class="k">def</span> <span class="nf">create_ID_label</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">mc_param</span><span class="p">,</span> <span class="n">lattice_values</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_ID_label</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">mc_param</span><span class="p">,</span> <span class="n">lattice_values</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create parameter label for the conditional model parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -585,7 +585,7 @@
 
 <div class="viewcode-block" id="zscore_normalization">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.zscore_normalization">[docs]</a>
-<span class="k">def</span> <span class="nf">zscore_normalization</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">zscore_normalization</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Z-score normalization</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -601,7 +601,7 @@
 
 <div class="viewcode-block" id="process_data">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.process_data">[docs]</a>
-<span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main processing loop</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -612,7 +612,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     
     <span class="c1">## ** Special YAML loader here **</span>
-    <span class="kn">from</span> <span class="nn">libs.ccorp.ruamel.yaml.include</span> <span class="kn">import</span> <span class="n">YAML</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">libs.ccorp.ruamel.yaml.include</span><span class="w"> </span><span class="kn">import</span> <span class="n">YAML</span>
     <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
     <span class="n">yaml</span><span class="o">.</span><span class="n">allow_duplicate_keys</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
@@ -870,7 +870,7 @@
 
 <div class="viewcode-block" id="get_predictor">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.deploy.get_predictor">[docs]</a>
-<span class="k">def</span> <span class="nf">get_predictor</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">get_predictor</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load model predictor function handle</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -902,7 +902,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

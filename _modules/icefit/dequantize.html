@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icefit.dequantize &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,19 +517,19 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">numba</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="U">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.dequantize.U">[docs]</a>
-<span class="k">def</span> <span class="nf">U</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">U</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Uniform random numbers between [a,b]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -539,7 +539,7 @@
 <div class="viewcode-block" id="compute_ind">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.dequantize.compute_ind">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">compute_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Index association helper</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -551,7 +551,7 @@
 
 <div class="viewcode-block" id="construct_icdf">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.dequantize.construct_icdf">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_icdf</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">pvals</span><span class="p">,</span> <span class="n">n_interp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_icdf</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">pvals</span><span class="p">,</span> <span class="n">n_interp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct inverse CDF</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -575,7 +575,7 @@
 <div class="viewcode-block" id="fast_loop">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.dequantize.fast_loop">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">fast_loop</span><span class="p">(</span><span class="n">i</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">N_buffer</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fast_loop</span><span class="p">(</span><span class="n">i</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">N_buffer</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
               <span class="n">deq</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">theta_ind</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fast loop function used by iDQF</span>
@@ -594,7 +594,7 @@
 
 <div class="viewcode-block" id="iDQF">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.dequantize.iDQF">[docs]</a>
-<span class="k">def</span> <span class="nf">iDQF</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N_buffer</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">n_interp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">iDQF</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N_buffer</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">n_interp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dequantization via inverse CDF</span>
 <span class="sd">    </span>
@@ -621,7 +621,7 @@
     
     <span class="n">icdf</span> <span class="o">=</span> <span class="n">construct_icdf</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">pvals</span><span class="o">=</span><span class="n">pvals</span><span class="p">,</span> <span class="n">n_interp</span><span class="o">=</span><span class="n">n_interp</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">generate</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">():</span>
         <span class="n">u</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N_buffer</span><span class="p">)</span> <span class="c1"># Inverse CDF sampling</span>
         <span class="k">return</span> <span class="n">icdf</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="mi">0</span>
     
@@ -646,7 +646,7 @@
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.dequantize.main">[docs]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     
     <span class="c1"># Number of MC samples</span>
     <span class="n">N</span>     <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)</span>
@@ -702,7 +702,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

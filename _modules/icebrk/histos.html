@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icebrk.histos &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -520,11 +520,11 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 
-<span class="kn">import</span> <span class="nn">bz2</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">iceplot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">bz2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">iceplot</span>
 
-<span class="kn">import</span> <span class="nn">icebrk.tools</span> <span class="k">as</span> <span class="nn">tools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tools</span>
 
 
 <span class="n">obs_M</span> <span class="o">=</span> <span class="p">{</span>
@@ -749,7 +749,7 @@
 
 <div class="viewcode-block" id="calc_batch_observables">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.histos.calc_batch_observables">[docs]</a>
-<span class="k">def</span> <span class="nf">calc_batch_observables</span><span class="p">(</span><span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_batch_observables</span><span class="p">(</span><span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;JAGGED + VECTORIZED (operates on event batch) observables.</span>
 
 <span class="sd">    Args:</span>
@@ -782,7 +782,7 @@
 
 <div class="viewcode-block" id="calc_batch_MC_observables">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.histos.calc_batch_MC_observables">[docs]</a>
-<span class="k">def</span> <span class="nf">calc_batch_MC_observables</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_batch_MC_observables</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot; MC ONLY batch observables.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
@@ -802,7 +802,7 @@
 
 <div class="viewcode-block" id="calc_observables">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.histos.calc_observables">[docs]</a>
-<span class="k">def</span> <span class="nf">calc_observables</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">sets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_observables</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">sets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;NON-JAGGED (NORMAL) observables.</span>
 
 <span class="sd">    Args:</span>
@@ -833,7 +833,7 @@
 
 <div class="viewcode-block" id="calc_MC_observables">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.histos.calc_MC_observables">[docs]</a>
-<span class="k">def</span> <span class="nf">calc_MC_observables</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">sets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_MC_observables</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">l1_p4</span><span class="p">,</span> <span class="n">l2_p4</span><span class="p">,</span> <span class="n">k_p4</span><span class="p">,</span> <span class="n">sets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;MC ONLY observables.</span>
 
 <span class="sd">    Args:</span>
@@ -898,7 +898,7 @@
 
 <div class="viewcode-block" id="pickle_files">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.histos.pickle_files">[docs]</a>
-<span class="k">def</span> <span class="nf">pickle_files</span><span class="p">(</span><span class="n">iodir</span><span class="p">,</span> <span class="n">N_algo</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rb&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pickle_files</span><span class="p">(</span><span class="n">iodir</span><span class="p">,</span> <span class="n">N_algo</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rb&#39;</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;Open pickle files.</span>
 
 <span class="sd">    Args:</span>
@@ -933,7 +933,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

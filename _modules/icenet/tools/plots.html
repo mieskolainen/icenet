@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.tools.plots &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,37 +517,37 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">gc</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">prettytable</span> <span class="kn">import</span> <span class="n">PrettyTable</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prettytable</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrettyTable</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">iceplot</span> <span class="kn">import</span> <span class="n">iceplot</span>
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">statstools</span>
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">cortools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iceplot</span><span class="w"> </span><span class="kn">import</span> <span class="n">iceplot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">statstools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">cortools</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">reweight</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reweight</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">prints</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 
 <div class="viewcode-block" id="binengine">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binengine">[docs]</a>
-<span class="k">def</span> <span class="nf">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">binengine</span><span class="p">(</span><span class="n">bindef</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Binning processor function</span>
 <span class="sd">    </span>
@@ -569,7 +569,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Input is zero-array, returning [0,0]&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">mylinspace</span><span class="p">(</span><span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">nbin</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mylinspace</span><span class="p">(</span><span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">nbin</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="s1">&#39;space&#39;</span> <span class="ow">in</span> <span class="n">bindef</span> <span class="ow">and</span> <span class="n">bindef</span><span class="p">[</span><span class="s1">&#39;space&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;log10&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">minval</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -604,7 +604,7 @@
 
 <div class="viewcode-block" id="plot_selection">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_selection">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_selection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">plotdir</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">varlist</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_selection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">plotdir</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">varlist</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;np&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot selection before / after type histograms against all chosen variables</span>
 
@@ -678,7 +678,7 @@
 
 <div class="viewcode-block" id="plot_matrix">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_matrix</span><span class="p">(</span><span class="n">XY</span><span class="p">,</span> <span class="n">x_bins</span><span class="p">,</span> <span class="n">y_bins</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">grid_on</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_matrix</span><span class="p">(</span><span class="n">XY</span><span class="p">,</span> <span class="n">x_bins</span><span class="p">,</span> <span class="n">y_bins</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">grid_on</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -698,7 +698,7 @@
 
 <div class="viewcode-block" id="plot_train_evolution_multi">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_train_evolution_multi">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_train_evolution_multi</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_train_evolution_multi</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">trn_aucs</span><span class="p">,</span> <span class="n">val_aucs</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
                                <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">xscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Training evolution plots.</span>
 
@@ -760,7 +760,7 @@
 
 <div class="viewcode-block" id="binned_2D_AUC">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_2D_AUC">[docs]</a>
-<span class="k">def</span> <span class="nf">binned_2D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">ids_kin</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">VAR</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="s1">&#39;trk_eta&#39;</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">binned_2D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">ids_kin</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">VAR</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="s1">&#39;trk_eta&#39;</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate AUC per 2D-bin.</span>
 <span class="sd">    </span>
@@ -838,7 +838,7 @@
 
 <div class="viewcode-block" id="binned_1D_AUC">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.binned_1D_AUC">[docs]</a>
-<span class="k">def</span> <span class="nf">binned_1D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">ids_kin</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">binned_1D_AUC</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_kin</span><span class="p">,</span> <span class="n">ids_kin</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                   <span class="n">VAR</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;trk_pt&#39;</span><span class="p">,</span> <span class="n">num_bootstrap</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate AUC &amp; ROC per 1D-bin.</span>
@@ -906,7 +906,7 @@
 
 <div class="viewcode-block" id="density_MVA_wclass">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_MVA_wclass">[docs]</a>
-<span class="k">def</span> <span class="nf">density_MVA_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">density_MVA_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate MVA output (1D) density per class.</span>
 <span class="sd">    </span>
@@ -993,7 +993,7 @@
 
 <div class="viewcode-block" id="plot_correlation_comparison">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_correlation_comparison">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_correlation_comparison</span><span class="p">(</span><span class="n">corr_mstats</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_correlation_comparison</span><span class="p">(</span><span class="n">corr_mstats</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot collected correlation metrics from density_COR_wclass()</span>
 <span class="sd">    </span>
@@ -1082,7 +1082,7 @@
 
 <div class="viewcode-block" id="density_COR_wclass">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_COR_wclass">[docs]</a>
-<span class="k">def</span> <span class="nf">density_COR_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> \
+<span class="k">def</span><span class="w"> </span><span class="nf">density_COR_wclass</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> \
     <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="p">[[</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">]],</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Oranges&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span>
@@ -1187,7 +1187,7 @@
                 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
-                        <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+                        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
                         <span class="n">h2</span><span class="p">,</span><span class="n">xedges</span><span class="p">,</span><span class="n">yedges</span><span class="p">,</span><span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">ww</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">h2</span><span class="p">,</span><span class="n">xedges</span><span class="p">,</span><span class="n">yedges</span><span class="p">,</span><span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">ww</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">))</span>
@@ -1219,7 +1219,7 @@
 
 <div class="viewcode-block" id="density_COR">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.density_COR">[docs]</a>
-<span class="k">def</span> <span class="nf">density_COR</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="p">[[</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">]],</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Oranges&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">density_COR</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hist_edges</span><span class="o">=</span><span class="p">[[</span><span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">]],</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Oranges&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate the 2D-density of the MVA algorithm output vs other variables.</span>
 <span class="sd">    </span>
@@ -1274,7 +1274,7 @@
 
 <div class="viewcode-block" id="annotate_heatmap">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.annotate_heatmap">[docs]</a>
-<span class="k">def</span> <span class="nf">annotate_heatmap</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlabels</span><span class="p">,</span> <span class="n">ylabels</span><span class="p">,</span> <span class="n">x_rot</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">y_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decimals</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">annotate_heatmap</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlabels</span><span class="p">,</span> <span class="n">ylabels</span><span class="p">,</span> <span class="n">x_rot</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">y_rot</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decimals</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Add text annotations to a matrix heatmap plot</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1300,7 +1300,7 @@
 
 <div class="viewcode-block" id="plot_AUC_matrix">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_AUC_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_AUC_matrix</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span> <span class="n">edges_A</span><span class="p">,</span> <span class="n">edges_B</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_AUC_matrix</span><span class="p">(</span><span class="n">AUC</span><span class="p">,</span> <span class="n">edges_A</span><span class="p">,</span> <span class="n">edges_B</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Plot AUC matrix.</span>
 
 <span class="sd">    Args:</span>
@@ -1330,7 +1330,7 @@
 
 <div class="viewcode-block" id="multiprocess_plot_wrapper">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.multiprocess_plot_wrapper">[docs]</a>
-<span class="k">def</span> <span class="nf">multiprocess_plot_wrapper</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">multiprocess_plot_wrapper</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multiprocessing wrapper</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1355,7 +1355,7 @@
 
 <div class="viewcode-block" id="plotvars">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plotvars">[docs]</a>
-<span class="k">def</span> <span class="nf">plotvars</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">percentile_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">],</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plotvars</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">percentile_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">],</span>
              <span class="n">exclude_vals</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">plot_unweighted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span>
              <span class="n">num_cpus</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1404,7 +1404,7 @@
 
 <div class="viewcode-block" id="plotvar">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plotvar">[docs]</a>
-<span class="k">def</span> <span class="nf">plotvar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">percentile_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">],</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plotvar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">percentile_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">],</span>
             <span class="n">plot_unweighted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot a single variable.</span>
@@ -1427,7 +1427,7 @@
 
 <div class="viewcode-block" id="plot_reweight_result">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_reweight_result">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_reweight_result</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nbins</span><span class="p">,</span> <span class="n">binrange</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_reweight_result</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nbins</span><span class="p">,</span> <span class="n">binrange</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
                          <span class="n">plot_unweighted</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Here plot pure event counts</span>
@@ -1490,7 +1490,7 @@
 
 <div class="viewcode-block" id="plot_correlations">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_correlations">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_correlations</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">round_threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_correlations</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">round_threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot a cross-correlation matrix of vector data</span>
 <span class="sd">    </span>
@@ -1561,7 +1561,7 @@
 
 <div class="viewcode-block" id="draw_error_band">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.draw_error_band">[docs]</a>
-<span class="k">def</span> <span class="nf">draw_error_band</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_error_band</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="p">,</span> <span class="n">y_err</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate normals via centered finite differences (except the first point</span>
@@ -1570,8 +1570,8 @@
 
 <span class="sd">    https://matplotlib.org/stable/gallery/lines_bars_and_markers/curve_error_band.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
-    <span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">PathPatch</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathPatch</span>
 
     <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]]])</span>
     <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]]])</span>
@@ -1596,7 +1596,7 @@
 
 <div class="viewcode-block" id="ROC_plot">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.ROC_plot">[docs]</a>
-<span class="k">def</span> <span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">plot_thresholds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
+<span class="k">def</span><span class="w"> </span><span class="nf">ROC_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">plot_thresholds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
     <span class="n">thr_points_signal</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">],</span> \
     <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ROC&#39;</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1741,7 +1741,7 @@
 
 <div class="viewcode-block" id="MVA_plot">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.MVA_plot">[docs]</a>
-<span class="k">def</span> <span class="nf">MVA_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;MVA&#39;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MVA_plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;MVA&#39;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    MVA output plots</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1823,7 +1823,7 @@
 
 <div class="viewcode-block" id="plot_contour_grid">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_contour_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_contour_grid</span><span class="p">(</span><span class="n">pred_func</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="n">reso</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_contour_grid</span><span class="p">(</span><span class="n">pred_func</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">targetdir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="n">reso</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Classifier decision contour evaluated pairwise for each dimension,</span>
 <span class="sd">    other dimensions evaluated at zero=(0,0,...0) (thus z-normalized with 0-mean is suitable)</span>
@@ -1900,7 +1900,7 @@
 
 <div class="viewcode-block" id="plot_xgb_importance">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_xgb_importance">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_xgb_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tick_label</span><span class="p">,</span> <span class="n">importance_type</span><span class="o">=</span><span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_names</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_xgb_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tick_label</span><span class="p">,</span> <span class="n">importance_type</span><span class="o">=</span><span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_names</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot XGBoost model feature importance</span>
 <span class="sd">    </span>
@@ -1950,7 +1950,7 @@
 
 <div class="viewcode-block" id="table_writer">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.table_writer">[docs]</a>
-<span class="k">def</span> <span class="nf">table_writer</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">chi2_table</span><span class="p">,</span> <span class="n">print_to_screen</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">table_writer</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">chi2_table</span><span class="p">,</span> <span class="n">print_to_screen</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to write a chi2 table to a file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1969,7 +1969,7 @@
 
 <div class="viewcode-block" id="plot_AIRW">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.plot_AIRW">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_AIRW</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pick_ind</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_AIRW</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">pick_ind</span><span class="p">,</span>
               <span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">targetdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_cpus</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot AI based reweighting results</span>
@@ -2154,7 +2154,7 @@
 
 <div class="viewcode-block" id="multiprocess_AIRW_wrapper">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.plots.multiprocess_AIRW_wrapper">[docs]</a>
-<span class="k">def</span> <span class="nf">multiprocess_AIRW_wrapper</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">multiprocess_AIRW_wrapper</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multiprocessing plots</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2278,7 +2278,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

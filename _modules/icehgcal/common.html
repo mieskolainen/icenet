@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icehgcal.common &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -518,35 +518,35 @@
 <span class="c1"># Mikael Mieskolainen, 2023</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
-<span class="kn">import</span> <span class="nn">pprint</span>
-<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">iceroot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">iceroot</span>
 
-<span class="kn">from</span> <span class="nn">icehgcal</span> <span class="kn">import</span> <span class="n">preprocess</span>
-<span class="kn">from</span> <span class="nn">icehgcal</span> <span class="kn">import</span> <span class="n">graphio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icehgcal</span><span class="w"> </span><span class="kn">import</span> <span class="n">preprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icehgcal</span><span class="w"> </span><span class="kn">import</span> <span class="n">graphio</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># Globals</span>
-<span class="kn">from</span> <span class="nn">configs.hgcal.mctargets</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">configs.hgcal.mcfilter</span>  <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">configs.hgcal.cuts</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configs.hgcal.mctargets</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configs.hgcal.mcfilter</span><span class="w">  </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configs.hgcal.cuts</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 
 <div class="viewcode-block" id="read_data_tracklet">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.common.read_data_tracklet">[docs]</a>
-<span class="k">def</span> <span class="nf">read_data_tracklet</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_data_tracklet</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">runmode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    (HGCAL-TRK)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -580,7 +580,7 @@
 
 <div class="viewcode-block" id="process_tracklet_data">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.common.process_tracklet_data">[docs]</a>
-<span class="k">def</span> <span class="nf">process_tracklet_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_tracklet_data</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    (HGCAL-TRK)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -621,7 +621,7 @@
 
 <div class="viewcode-block" id="load_root_file">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.common.load_root_file">[docs]</a>
-<span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    (HGCAL-CND)</span>
 
@@ -702,7 +702,7 @@
 
 <div class="viewcode-block" id="process_root">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.common.process_root">[docs]</a>
-<span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">load_ids</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">maxevents</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_root</span><span class="p">(</span><span class="n">rootfile</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">load_ids</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">entry_start</span><span class="p">,</span> <span class="n">entry_stop</span><span class="p">,</span> <span class="n">maxevents</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    (HGCAL-CND)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -738,7 +738,7 @@
 
 <div class="viewcode-block" id="splitfactor">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.common.splitfactor">[docs]</a>
-<span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    (HGCAL-CND)</span>
 <span class="sd">    </span>
@@ -807,7 +807,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

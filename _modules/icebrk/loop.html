@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icebrk.loop &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -522,30 +522,30 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">uproot</span>
-<span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">import</span> <span class="nn">awkward</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uproot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">colored</span>
 
-<span class="kn">from</span> <span class="nn">iceplot</span> <span class="kn">import</span> <span class="n">iceplot</span>
-<span class="kn">from</span> <span class="nn">icenet.tools.io</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">prints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iceplot</span><span class="w"> </span><span class="kn">import</span> <span class="n">iceplot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools.io</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">prints</span>
 
-<span class="kn">import</span> <span class="nn">icebrk.features</span> <span class="k">as</span> <span class="nn">features</span>
-<span class="kn">import</span> <span class="nn">icebrk.tools</span> <span class="k">as</span> <span class="nn">tools</span>
-<span class="kn">import</span> <span class="nn">icebrk.histos</span> <span class="k">as</span> <span class="nn">histos</span>
-<span class="kn">import</span> <span class="nn">icebrk.cutstats</span> <span class="k">as</span> <span class="nn">cutstats</span>
-<span class="kn">import</span> <span class="nn">icebrk.fasthistos</span> <span class="k">as</span> <span class="nn">fasthistos</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.features</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">features</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.histos</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">histos</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.cutstats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cutstats</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.fasthistos</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fasthistos</span>
 
 
 <div class="viewcode-block" id="hdf5_write_handles">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_write_handles">[docs]</a>
-<span class="k">def</span> <span class="nf">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">N_weights</span><span class="p">,</span> <span class="n">rwmode</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hdf5_write_handles</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">N_weights</span><span class="p">,</span> <span class="n">rwmode</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create HDF5 file handles.</span>
 
 <span class="sd">    Args:</span>
@@ -579,7 +579,7 @@
 
 <div class="viewcode-block" id="hdf5_append">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hdf5_append">[docs]</a>
-<span class="k">def</span> <span class="nf">hdf5_append</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hdf5_append</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Append chunk of data to HDF5 file.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -638,7 +638,7 @@
 <span class="sd">&#39;&#39;&#39;</span>
 <div class="viewcode-block" id="poweranalysis">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.poweranalysis">[docs]</a>
-<span class="k">def</span> <span class="nf">poweranalysis</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">batch_obs</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">MAXN</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">reco</span><span class="p">,</span> <span class="n">BMAT</span><span class="p">,</span> <span class="n">WNORM</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">poweranalysis</span><span class="p">(</span><span class="n">evt_index</span><span class="p">,</span> <span class="n">batch_obs</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">MAXN</span><span class="p">,</span> <span class="n">isMC</span><span class="p">,</span> <span class="n">reco</span><span class="p">,</span> <span class="n">BMAT</span><span class="p">,</span> <span class="n">WNORM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Powerset analysis of the event</span>
 <span class="sd">    N.B.this is already CONDITIONED that we select a maximum MAXT3 triplets!</span>
 <span class="sd">    </span>
@@ -735,7 +735,7 @@
 
 <div class="viewcode-block" id="hist_flush">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.hist_flush">[docs]</a>
-<span class="k">def</span> <span class="nf">hist_flush</span><span class="p">(</span><span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span><span class="p">,</span> <span class="n">h5datasets</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hist_flush</span><span class="p">(</span><span class="n">reco</span><span class="p">,</span> <span class="n">hobj</span><span class="p">,</span> <span class="n">h5datasets</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Histogram observables with accumulation of previous histograms, and flush buffer arrays</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -786,7 +786,7 @@
 
 <div class="viewcode-block" id="initarrays">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.initarrays">[docs]</a>
-<span class="k">def</span> <span class="nf">initarrays</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">isMC</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initarrays</span><span class="p">(</span><span class="n">BUFFER</span><span class="p">,</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">isMC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Init histogramming arrays and objects</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -838,7 +838,7 @@
 
 <div class="viewcode-block" id="process">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.loop.process">[docs]</a>
-<span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="n">func_predict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="mi">10000000000</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">paths</span><span class="o">=</span><span class="p">[],</span> <span class="n">func_predict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MAXT3</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">MAXN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="mi">10000000000</span><span class="p">,</span>
     <span class="n">EVTGROUPSIZE</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">CHUNKBUFFER</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">BMAT</span><span class="o">=</span><span class="p">[],</span> <span class="n">WNORM</span><span class="o">=</span><span class="p">[],</span> <span class="n">SUPERSETS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">hd5dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputXY</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">outputP</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Main event processing loop</span>
@@ -933,7 +933,7 @@
 
     <span class="c1"># ==================================================================== ROOT file loop &gt;&gt;</span>
 
-    <span class="k">def</span> <span class="nf">print_input</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_input</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: Input: </span><span class="si">{</span><span class="n">paths</span><span class="p">[</span><span class="n">z</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.process: </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">events</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -1027,7 +1027,7 @@
                 
 
                 <span class="c1"># Sort the triplets</span>
-                <span class="k">def</span> <span class="nf">svprob_rank</span><span class="p">(</span><span class="n">tripletset</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">svprob_rank</span><span class="p">(</span><span class="n">tripletset</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">tripletset</span><span class="p">:</span>
                         <span class="c1"># Return first of the (possible) superset [** SOMETHING BROKEN HERE PROBABLY **]</span>
                         <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="n">SORTKEY</span><span class="p">][</span><span class="n">evt_index</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span>
@@ -1160,7 +1160,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

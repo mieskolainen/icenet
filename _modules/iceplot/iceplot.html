@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>iceplot.iceplot &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,19 +519,19 @@
 <span class="c1"># Licensed under the MIT License &lt;http://opensource.org/licenses/MIT&gt;.</span>
 
 
-<span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
 <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span> <span class="c1"># Important for multithreaded applications</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 
 
 <div class="viewcode-block" id="chi2_cost">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.chi2_cost">[docs]</a>
-<span class="k">def</span> <span class="nf">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="p">,</span> <span class="n">h_data</span><span class="p">,</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">chi2_cost</span><span class="p">(</span><span class="n">h_mc</span><span class="p">,</span> <span class="n">h_data</span><span class="p">,</span> <span class="n">return_nbins</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Chi2 cost function between two histograms</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -554,7 +554,7 @@
 
 <div class="viewcode-block" id="set_global_style">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.set_global_style">[docs]</a>
-<span class="k">def</span> <span class="nf">set_global_style</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mf">3.75</span><span class="p">),</span> <span class="n">font</span><span class="o">=</span><span class="s1">&#39;serif&#39;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">legend_handlelength</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_global_style</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mf">3.75</span><span class="p">),</span> <span class="n">font</span><span class="o">=</span><span class="s1">&#39;serif&#39;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">legend_fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">legend_handlelength</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Set global plot style.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">legend_fontsize</span>
@@ -577,7 +577,7 @@
 
 <div class="viewcode-block" id="colors">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.colors">[docs]</a>
-<span class="k">def</span> <span class="nf">colors</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.34</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">colors</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.34</span><span class="p">):</span>
 
     <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="n">imperial_dark_red</span><span class="p">,</span> <span class="n">imperial_dark_blue</span><span class="p">,</span> <span class="n">imperial_green</span><span class="p">,</span> <span class="n">imperial_light_blue</span><span class="p">]</span>
 
@@ -603,10 +603,10 @@
 
 <div class="viewcode-block" id="hobj">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.hobj">[docs]</a>
-<span class="k">class</span> <span class="nc">hobj</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">hobj</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Minimal histogram data object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">errs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cbins</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">binscale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">errs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cbins</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">binscale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counts</span>   <span class="o">=</span> <span class="n">counts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errs</span>     <span class="o">=</span> <span class="n">errs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>     <span class="o">=</span> <span class="n">bins</span>
@@ -621,12 +621,12 @@
     <span class="c1"># Compute histogram integral (piece-wise differential sum)</span>
 <div class="viewcode-block" id="hobj.integral">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.hobj.integral">[docs]</a>
-    <span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binscale</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">*</span> <span class="n">binwidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">))</span></div>
 
     
     <span class="c1"># + operator</span>
-    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span> <span class="c1"># Take the rhs</span>
             <span class="k">return</span> <span class="n">other</span>
@@ -643,7 +643,7 @@
         <span class="k">return</span> <span class="n">hobj</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">errs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cbins</span><span class="p">,</span> <span class="n">binscale</span><span class="p">)</span>
     
     <span class="c1"># += operator</span>
-    <span class="k">def</span> <span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span> <span class="c1"># Still empty</span>
             <span class="k">return</span> <span class="n">other</span>
@@ -663,7 +663,7 @@
 
 <div class="viewcode-block" id="stepspace">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.stepspace">[docs]</a>
-<span class="k">def</span> <span class="nf">stepspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stepspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Linear binning edges between [start, stop]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">+</span> <span class="n">step</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span></div>
@@ -672,7 +672,7 @@
 
 <div class="viewcode-block" id="plot_horizontal_line">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.plot_horizontal_line">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_horizontal_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ypos</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_horizontal_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ypos</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; For the ratio plot</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">xlim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
@@ -682,7 +682,7 @@
 
 <div class="viewcode-block" id="tick_calc">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.tick_calc">[docs]</a>
-<span class="k">def</span> <span class="nf">tick_calc</span><span class="p">(</span><span class="n">lim</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tick_calc</span><span class="p">(</span><span class="n">lim</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Tick spacing calculator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="n">step</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">step</span><span class="p">))]</span></div>
@@ -690,7 +690,7 @@
 
 <div class="viewcode-block" id="set_axis_ticks">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.set_axis_ticks">[docs]</a>
-<span class="k">def</span> <span class="nf">set_axis_ticks</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ticks</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_axis_ticks</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ticks</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Set ticks of the axis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span>   <span class="p">(</span><span class="n">dim</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
@@ -703,7 +703,7 @@
 
 <div class="viewcode-block" id="tick_creator">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.tick_creator">[docs]</a>
-<span class="k">def</span> <span class="nf">tick_creator</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xtick_step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ytick_step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylim_ratio</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tick_creator</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xtick_step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ytick_step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylim_ratio</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span>
         <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minorticks_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ytick_ratio_step</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
         <span class="n">labelsize_ratio</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Axis tick constructor.</span>
@@ -743,7 +743,7 @@
 
 <div class="viewcode-block" id="create_axes">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.create_axes">[docs]</a>
-<span class="k">def</span> <span class="nf">create_axes</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Counts&#39;</span><span class="p">,</span> <span class="n">ylabel_ratio</span><span class="o">=</span><span class="s1">&#39;Ratio&#39;</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_axes</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Counts&#39;</span><span class="p">,</span> <span class="n">ylabel_ratio</span><span class="o">=</span><span class="s1">&#39;Ratio&#39;</span><span class="p">,</span>
     <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Axes creator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -784,11 +784,11 @@
 
 <div class="viewcode-block" id="ordered_legend">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.ordered_legend">[docs]</a>
-<span class="k">def</span> <span class="nf">ordered_legend</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ordered_legend</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Ordered legends.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">unique_everseen</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unique_everseen</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="n">seen_add</span> <span class="o">=</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">or</span> <span class="n">seen_add</span><span class="p">(</span><span class="n">k</span><span class="p">))]</span>
@@ -814,7 +814,7 @@
 
 <div class="viewcode-block" id="binwidth">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.binwidth">[docs]</a>
-<span class="k">def</span> <span class="nf">binwidth</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">binwidth</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Return binwidth from a linear array &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
 
@@ -822,7 +822,7 @@
 
 <div class="viewcode-block" id="edge2centerbins">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.edge2centerbins">[docs]</a>
-<span class="k">def</span> <span class="nf">edge2centerbins</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">edge2centerbins</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Get centerbins from edgebins.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span></div>
@@ -831,7 +831,7 @@
 
 <div class="viewcode-block" id="ratioerr">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.ratioerr">[docs]</a>
-<span class="k">def</span> <span class="nf">ratioerr</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">sigma_A</span><span class="p">,</span> <span class="n">sigma_B</span><span class="p">,</span> <span class="n">sigma_AB</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1E-15</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ratioerr</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">sigma_A</span><span class="p">,</span> <span class="n">sigma_B</span><span class="p">,</span> <span class="n">sigma_AB</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1E-15</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Ratio f(A,B) = A/B error, by Taylor expansion of f.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">A</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span><span class="p">]</span> <span class="o">=</span> <span class="n">EPS</span>
@@ -842,7 +842,7 @@
 
 <div class="viewcode-block" id="hist_to_density">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.hist_to_density">[docs]</a>
-<span class="k">def</span> <span class="nf">hist_to_density</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">errs</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hist_to_density</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">errs</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Normalize to unit integral density function over the visible histogram range &quot;&quot;&quot;</span>
     
     <span class="n">norm</span>    <span class="o">=</span> <span class="n">binwidth</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">*</span> <span class="n">counts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
@@ -852,7 +852,7 @@
 
 <div class="viewcode-block" id="hist_to_density_fullspace">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.hist_to_density_fullspace">[docs]</a>
-<span class="k">def</span> <span class="nf">hist_to_density_fullspace</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">errs</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">totalweight</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hist_to_density_fullspace</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">errs</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">totalweight</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Normalize histogram to a unit integral density function</span>
 <span class="sd">        over total sum of event weights (not just the visible histogram range mass)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -863,7 +863,7 @@
 
 <div class="viewcode-block" id="hist">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.hist">[docs]</a>
-<span class="k">def</span> <span class="nf">hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate a histogram.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -895,7 +895,7 @@
 
 <div class="viewcode-block" id="hist_obj">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.hist_obj">[docs]</a>
-<span class="k">def</span> <span class="nf">hist_obj</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hist_obj</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; A wrapper to return a histogram object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">counts</span><span class="p">,</span> <span class="n">errs</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span> <span class="o">=</span> <span class="n">hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
@@ -905,7 +905,7 @@
 
 <div class="viewcode-block" id="generate_colormap">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.generate_colormap">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_colormap</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_colormap</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Default colormap.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Take colors</span>
@@ -922,7 +922,7 @@
 
 <div class="viewcode-block" id="hist_filled_error">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.hist_filled_error">[docs]</a>
-<span class="k">def</span> <span class="nf">hist_filled_error</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hist_filled_error</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cbins</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Stephist style error.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">new_args</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -938,7 +938,7 @@
 
 <div class="viewcode-block" id="superplot">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.superplot">[docs]</a>
-<span class="k">def</span> <span class="nf">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">observable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
+<span class="k">def</span><span class="w"> </span><span class="nf">superplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">observable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratio_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">yscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ratio_error_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
     <span class="n">legend_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_properties</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">},</span> <span class="n">bottom_PRC</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Superposition (overlaid) plotting</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1074,7 +1074,7 @@
 
 <div class="viewcode-block" id="change2density_labels">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.change2density_labels">[docs]</a>
-<span class="k">def</span> <span class="nf">change2density_labels</span><span class="p">(</span><span class="n">all_obs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">change2density_labels</span><span class="p">(</span><span class="n">all_obs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Change to density ~ 1/N dN/dx [1/xdim] type label to y-axis &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">all_obs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -1088,7 +1088,7 @@
 
 <div class="viewcode-block" id="histmc">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.histmc">[docs]</a>
-<span class="k">def</span> <span class="nf">histmc</span><span class="p">(</span><span class="n">mcdata</span><span class="p">,</span> <span class="n">all_obs</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">hist_style_step</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">histmc</span><span class="p">(</span><span class="n">mcdata</span><span class="p">,</span> <span class="n">all_obs</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">hist_style_step</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Over all observables of an MC sample &quot;&quot;&quot;</span>
 
     <span class="n">obj</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1122,7 +1122,7 @@
 
 <div class="viewcode-block" id="histhepdata">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.histhepdata">[docs]</a>
-<span class="k">def</span> <span class="nf">histhepdata</span><span class="p">(</span><span class="n">hepdata</span><span class="p">,</span> <span class="n">all_obs</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">MC_XS_SCALE</span><span class="o">=</span><span class="mf">1E12</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">hist_style_step</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">histhepdata</span><span class="p">(</span><span class="n">hepdata</span><span class="p">,</span> <span class="n">all_obs</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">MC_XS_SCALE</span><span class="o">=</span><span class="mf">1E12</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">hist_style_step</span><span class="p">):</span>
 
     <span class="c1"># Over all observables</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1159,7 +1159,7 @@
 
 <div class="viewcode-block" id="fuse_histograms">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.fuse_histograms">[docs]</a>
-<span class="k">def</span> <span class="nf">fuse_histograms</span><span class="p">(</span><span class="n">hist_list</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuse_histograms</span><span class="p">(</span><span class="n">hist_list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fuse a list of count histogram objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1174,11 +1174,11 @@
 
 <div class="viewcode-block" id="test_iceplot">
 <a class="viewcode-back" href="../../modules/iceplot.html#iceplot.iceplot.test_iceplot">[docs]</a>
-<span class="k">def</span> <span class="nf">test_iceplot</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_iceplot</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Visual unit tests &quot;&quot;&quot;</span>
     
-    <span class="kn">import</span> <span class="nn">pytest</span>
-    <span class="kn">import</span> <span class="nn">pathlib</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 
     <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./testfigs&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -1198,7 +1198,7 @@
     <span class="c1"># Mathematical definitions</span>
 
     <span class="c1"># Momentum squared</span>
-    <span class="k">def</span> <span class="nf">pt2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pt2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
 
 
@@ -1338,7 +1338,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

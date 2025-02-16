@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icebrk.cutstats &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,13 +519,13 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">icebrk.tools</span> <span class="k">as</span> <span class="nn">tools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icebrk.tools</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tools</span>
 
 
 <div class="viewcode-block" id="apply_cuts">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.apply_cuts">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;Selection cuts function.</span>
 
 <span class="sd">    Args:</span>
@@ -550,7 +550,7 @@
 
 <div class="viewcode-block" id="triplet_cuts">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.triplet_cuts">[docs]</a>
-<span class="k">def</span> <span class="nf">triplet_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">triplet_cuts</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">cutflow</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot; Triplet cuts &quot;&quot;&quot;</span>
 
 	<span class="k">return</span> <span class="kc">True</span></div>
@@ -559,7 +559,7 @@
 
 <div class="viewcode-block" id="collect_info_stats">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.collect_info_stats">[docs]</a>
-<span class="k">def</span> <span class="nf">collect_info_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">infostats</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">collect_info_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">infostats</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;Collect event information.</span>
 
 <span class="sd">    Args:</span>
@@ -581,7 +581,7 @@
 
 <div class="viewcode-block" id="collect_mcinfo_stats">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.collect_mcinfo_stats">[docs]</a>
-<span class="k">def</span> <span class="nf">collect_mcinfo_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">mcinfostats</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">collect_mcinfo_stats</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">evt_index</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">qsets</span><span class="p">,</span> <span class="n">MAXT3</span><span class="p">,</span> <span class="n">mcinfostats</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;Collect MC only information.</span>
 <span class="sd">	</span>
 <span class="sd">    Args:</span>
@@ -599,7 +599,7 @@
 
 <div class="viewcode-block" id="init_stat_objects">
 <a class="viewcode-back" href="../../modules/icebrk.html#icebrk.cutstats.init_stat_objects">[docs]</a>
-<span class="k">def</span> <span class="nf">init_stat_objects</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">init_stat_objects</span><span class="p">():</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;Initialize cutflow and statistics objects.</span>
 
 <span class="sd">    Args:</span>
@@ -634,7 +634,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

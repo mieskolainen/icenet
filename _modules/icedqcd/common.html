@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icedqcd.common &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,34 +517,34 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">import</span> <span class="nn">ray</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">prints</span><span class="p">,</span> <span class="n">iceroot</span>
-<span class="kn">from</span> <span class="nn">icenet.algo</span> <span class="kn">import</span> <span class="n">analytic</span>
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">dequantize</span>
-<span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">graphio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">io</span><span class="p">,</span> <span class="n">aux</span><span class="p">,</span> <span class="n">prints</span><span class="p">,</span> <span class="n">iceroot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.algo</span><span class="w"> </span><span class="kn">import</span> <span class="n">analytic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">dequantize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icedqcd</span><span class="w"> </span><span class="kn">import</span> <span class="n">graphio</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <span class="c1"># GLOBALS</span>
-<span class="kn">from</span> <span class="nn">configs.dqcd.cuts</span>   <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">configs.dqcd.filter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configs.dqcd.cuts</span><span class="w">   </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configs.dqcd.filter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 
 <div class="viewcode-block" id="load_root_file">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.load_root_file">[docs]</a>
-<span class="k">def</span> <span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_root_file</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Loads the root files</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
@@ -656,7 +656,7 @@
 
 <div class="viewcode-block" id="process_root">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.process_root">[docs]</a>
-<span class="k">def</span> <span class="nf">process_root</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_root</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isMC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply selections</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -699,7 +699,7 @@
 
 <div class="viewcode-block" id="splitfactor">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.common.splitfactor">[docs]</a>
-<span class="k">def</span> <span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dequantize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">splitfactor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">skip_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dequantize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform data into different datatypes.</span>
 <span class="sd">    </span>
@@ -931,7 +931,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

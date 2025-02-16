@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icefit.abcd &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,18 +519,18 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
-<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">stats</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
 
-<span class="kn">from</span> <span class="nn">icefit.cortools</span> <span class="kn">import</span> <span class="n">prc_CI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit.cortools</span><span class="w"> </span><span class="kn">import</span> <span class="n">prc_CI</span>
 
 
 <div class="viewcode-block" id="ABCD_eq">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.abcd.ABCD_eq">[docs]</a>
-<span class="k">def</span> <span class="nf">ABCD_eq</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ABCD_eq</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Basic estimator formula for count in &#39;A&#39; (signal domain)</span>
 <span class="sd">        </span>
@@ -549,7 +549,7 @@
 
 <div class="viewcode-block" id="ABCD_err">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.abcd.ABCD_err">[docs]</a>
-<span class="k">def</span> <span class="nf">ABCD_err</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;errorprop&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">lrange</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ABCD_err</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;errorprop&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">lrange</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ABCD uncertainty (confidence interval) methods</span>
 <span class="sd">    </span>
@@ -602,7 +602,7 @@
 
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;likelihood&#39;</span><span class="p">:</span>
 
-        <span class="k">def</span> <span class="nf">optfunc</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">optfunc</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">ABCD_2NLL</span><span class="p">(</span><span class="n">B</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mu_B</span><span class="o">=</span><span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">mu_D</span><span class="o">=</span><span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
         <span class="c1"># Initial guess and optimize (reservation for more general models)</span>
@@ -638,7 +638,7 @@
 <div class="viewcode-block" id="ABCD_2NLL">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.abcd.ABCD_2NLL">[docs]</a>
 <span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span>
-<span class="k">def</span> <span class="nf">ABCD_2NLL</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">mu_B</span><span class="p">,</span> <span class="n">mu_D</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-32</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ABCD_2NLL</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">mu_B</span><span class="p">,</span> <span class="n">mu_D</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-32</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ABCD estimators negative log-likelihood function</span>
 <span class="sd">    </span>
@@ -676,9 +676,9 @@
 
 <div class="viewcode-block" id="test_abcd">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.abcd.test_abcd">[docs]</a>
-<span class="k">def</span> <span class="nf">test_abcd</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_abcd</span><span class="p">():</span>
     
-    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
 
     <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1.5</span>
 
@@ -724,7 +724,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

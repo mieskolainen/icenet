@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icenet.deep.deeptools &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,19 +517,19 @@
 <span class="c1"># </span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
 
 <div class="viewcode-block" id="sigmoid_schedule">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.sigmoid_schedule">[docs]</a>
-<span class="k">def</span> <span class="nf">sigmoid_schedule</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">N_max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">clip_min</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sigmoid_schedule</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">N_max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">clip_min</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    https://arxiv.org/abs/2305.18900</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
     
     <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="n">N_max</span>
@@ -543,17 +543,17 @@
 
 <div class="viewcode-block" id="Multiply">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.Multiply">[docs]</a>
-<span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Multiply</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multiplication with a non-learnable constant alpha</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span>  <span class="n">alpha</span>
     
 <div class="viewcode-block" id="Multiply.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.Multiply.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span></div>
 </div>
@@ -562,7 +562,7 @@
 
 <div class="viewcode-block" id="grad_norm">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.grad_norm">[docs]</a>
-<span class="k">def</span> <span class="nf">grad_norm</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">grad_norm</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the total (Frobenius) norm for the gradients of a torch network</span>
 <span class="sd">    </span>
@@ -589,7 +589,7 @@
 
 <div class="viewcode-block" id="adaptive_gradient_clipping_">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.adaptive_gradient_clipping_">[docs]</a>
-<span class="k">def</span> <span class="nf">adaptive_gradient_clipping_</span><span class="p">(</span><span class="n">main_module</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">MI_module</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-9</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">adaptive_gradient_clipping_</span><span class="p">(</span><span class="n">main_module</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">MI_module</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adaptively clip the gradient from the mutual information module, so that its Frobenius norm</span>
 <span class="sd">    is at most that of the gradient from the main network.</span>
@@ -627,7 +627,7 @@
 
 <div class="viewcode-block" id="weights_init_all">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.weights_init_all">[docs]</a>
-<span class="k">def</span> <span class="nf">weights_init_all</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">init_funcs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weights_init_all</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">init_funcs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Examples:</span>
 <span class="sd">        model = MyNet()</span>
@@ -641,7 +641,7 @@
 
 <div class="viewcode-block" id="weights_init_uniform_rule">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.weights_init_uniform_rule">[docs]</a>
-<span class="k">def</span> <span class="nf">weights_init_uniform_rule</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weights_init_uniform_rule</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Initializes module weights from uniform [-a,a]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">classname</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
@@ -657,7 +657,7 @@
 
 <div class="viewcode-block" id="weights_init_normal">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.weights_init_normal">[docs]</a>
-<span class="k">def</span> <span class="nf">weights_init_normal</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weights_init_normal</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Initializes module weights from normal distribution</span>
 <span class="sd">    with a rule sigma ~ 1/sqrt(n)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -673,7 +673,7 @@
 
 <div class="viewcode-block" id="set_scheduler">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.deeptools.set_scheduler">[docs]</a>
-<span class="k">def</span> <span class="nf">set_scheduler</span><span class="p">(</span><span class="n">optimizer</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_scheduler</span><span class="p">(</span><span class="n">optimizer</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        optimizer: optimizers for different models</span>
@@ -738,7 +738,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

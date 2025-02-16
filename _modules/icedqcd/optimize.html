@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icedqcd.optimize &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -517,24 +517,24 @@
 <span class="c1"># </span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">scanf</span> <span class="kn">import</span> <span class="n">scanf</span>
-<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scanf</span><span class="w"> </span><span class="kn">import</span> <span class="n">scanf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ncx2</span><span class="p">,</span><span class="n">norm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">ncx2</span><span class="p">,</span><span class="n">norm</span>
 
-<span class="kn">from</span> <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">cortools</span><span class="p">,</span> <span class="n">statstools</span>
-<span class="kn">from</span> <span class="nn">icedqcd</span> <span class="kn">import</span> <span class="n">limits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">cortools</span><span class="p">,</span> <span class="n">statstools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icedqcd</span><span class="w"> </span><span class="kn">import</span> <span class="n">limits</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># --------------------------------------------</span>
 
 <span class="n">latex_header</span> <span class="o">=</span> \
@@ -553,7 +553,7 @@
 
 <div class="viewcode-block" id="func_binormal2">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.optimize.func_binormal2">[docs]</a>
-<span class="k">def</span> <span class="nf">func_binormal2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">func_binormal2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Formulas 4, (14):</span>
 <span class="sd">    https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570585/pdf/nihms-736507.pdf</span>
@@ -565,7 +565,7 @@
 
 <div class="viewcode-block" id="func_binormal">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.optimize.func_binormal">[docs]</a>
-<span class="k">def</span> <span class="nf">func_binormal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>  
+<span class="k">def</span><span class="w"> </span><span class="nf">func_binormal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>  
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    binormal-function</span>
 <span class="sd">    https://dpc10ster.github.io/RJafrocBook/binormal-model.html</span>
@@ -578,7 +578,7 @@
 
 <div class="viewcode-block" id="plot_ROC_fit">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.optimize.plot_ROC_fit">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_ROC_fit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">tpr_err</span><span class="p">,</span> <span class="n">fpr_err</span><span class="p">,</span> <span class="n">roc_obj</span><span class="p">,</span> <span class="n">roc_label</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">savename</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_ROC_fit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">tpr_err</span><span class="p">,</span> <span class="n">fpr_err</span><span class="p">,</span> <span class="n">roc_obj</span><span class="p">,</span> <span class="n">roc_label</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">savename</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot ROC fits</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -651,7 +651,7 @@
 
 <div class="viewcode-block" id="find_filter">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.optimize.find_filter">[docs]</a>
-<span class="k">def</span> <span class="nf">find_filter</span><span class="p">(</span><span class="n">rd</span><span class="p">,</span> <span class="n">model_param</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_filter</span><span class="p">(</span><span class="n">rd</span><span class="p">,</span> <span class="n">model_param</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find filter strings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -732,12 +732,12 @@
 
 <div class="viewcode-block" id="optimize_selection">
 <a class="viewcode-back" href="../../modules/icedqcd.html#icedqcd.optimize.optimize_selection">[docs]</a>
-<span class="k">def</span> <span class="nf">optimize_selection</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">optimize_selection</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main program</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">def</span> <span class="nf">dprint</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dprint</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">latex_filename</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -1077,7 +1077,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

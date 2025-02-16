@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icehgcal.graphio &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -518,24 +518,24 @@
 <span class="c1"># Mikael Mieskolainen, 2023</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span>   <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w">   </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span>   <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">Data</span>
-<span class="kn">import</span> <span class="nn">torch_geometric.transforms</span> <span class="k">as</span> <span class="nn">T</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w">   </span><span class="nn">torch_geometric.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch_geometric.transforms</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">T</span>
 
-<span class="kn">import</span> <span class="nn">icenet.algo.analytic</span> <span class="k">as</span> <span class="nn">analytic</span>
-<span class="kn">from</span>   <span class="nn">icenet.tools</span> <span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span>   <span class="nn">icenet.tools.icevec</span> <span class="kn">import</span> <span class="n">vec4</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">icenet.algo.analytic</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">analytic</span>
+<span class="kn">from</span><span class="w">   </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
+<span class="kn">from</span><span class="w">   </span><span class="nn">icenet.tools.icevec</span><span class="w"> </span><span class="kn">import</span> <span class="n">vec4</span>
 
 <span class="c1"># ------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">icenet</span> <span class="kn">import</span> <span class="nb">print</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>
 <span class="c1"># ------------------------------------------</span>
 
 <div class="viewcode-block" id="parse_graph_data_trackster">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.graphio.parse_graph_data_trackster">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_graph_data_trackster</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e9</span><span class="p">),</span> <span class="n">null_value</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_graph_data_trackster</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxevents</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e9</span><span class="p">),</span> <span class="n">null_value</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    TRACKSTER LEVEL</span>
 <span class="sd">    </span>
@@ -624,7 +624,7 @@
 
 <div class="viewcode-block" id="compute_edge_attr">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.graphio.compute_edge_attr">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_edge_attr</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_edge_attr</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 
     <span class="n">num_edges</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">edge_attr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_edges</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
@@ -641,7 +641,7 @@
 
 <div class="viewcode-block" id="parse_graph_data_candidate">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.graphio.parse_graph_data_candidate">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_graph_data_candidate</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_graph_data_candidate</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">graph_param</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">entry_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mf">999.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    EVENT LEVEL (PROCESSING CANDIDATES)</span>
 <span class="sd">    </span>
@@ -774,7 +774,7 @@
 
 <div class="viewcode-block" id="get_node_features">
 <a class="viewcode-back" href="../../modules/icehgcal.html#icehgcal.graphio.get_node_features">[docs]</a>
-<span class="k">def</span> <span class="nf">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_node_features</span><span class="p">(</span><span class="n">p4vec</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
 
     <span class="c1"># Node feature matrix</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">num_node_features</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -805,7 +805,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

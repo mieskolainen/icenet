@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>icefit.icelimit &mdash; icenet alpha documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -519,21 +519,21 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2023</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy.optimize</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ncx2</span><span class="p">,</span><span class="n">norm</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.optimize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">ncx2</span><span class="p">,</span><span class="n">norm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="c1">#import mystic</span>
 
-<span class="kn">from</span> <span class="nn">icefit</span> <span class="kn">import</span> <span class="n">lognormal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">lognormal</span>
 
 
 <div class="viewcode-block" id="convolve_systematics">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.icelimit.convolve_systematics">[docs]</a>
-<span class="k">def</span> <span class="nf">convolve_systematics</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">syst_error</span><span class="p">,</span> <span class="n">num_toys</span><span class="p">,</span> <span class="n">error_type</span><span class="o">=</span><span class="s1">&#39;log-normal-mean&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convolve_systematics</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">syst_error</span><span class="p">,</span> <span class="n">num_toys</span><span class="p">,</span> <span class="n">error_type</span><span class="o">=</span><span class="s1">&#39;log-normal-mean&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Produce an array of distribution convoluted values</span>
 <span class="sd">    </span>
@@ -563,7 +563,7 @@
 
 <div class="viewcode-block" id="LL_splusb">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.icelimit.LL_splusb">[docs]</a>
-<span class="k">def</span> <span class="nf">LL_splusb</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">LL_splusb</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Single channel Poisson log-likelihood</span>
 <span class="sd">    </span>
@@ -581,7 +581,7 @@
 
 <div class="viewcode-block" id="CL_single">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.icelimit.CL_single">[docs]</a>
-<span class="k">def</span> <span class="nf">CL_single</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">s_hypothesis</span><span class="p">,</span> <span class="n">bg_expected</span><span class="p">,</span> <span class="n">observed</span><span class="p">,</span> <span class="n">num_toys_pdf</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1E4</span><span class="p">),</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CL_single</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">s_hypothesis</span><span class="p">,</span> <span class="n">bg_expected</span><span class="p">,</span> <span class="n">observed</span><span class="p">,</span> <span class="n">num_toys_pdf</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1E4</span><span class="p">),</span>
     <span class="n">s_syst_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">s_syst_type</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">,</span>
     <span class="n">bg_syst_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bg_syst_type</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">,</span> <span class="n">use_CLs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -648,7 +648,7 @@
 
 <div class="viewcode-block" id="CL_single_asymptotic">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.icelimit.CL_single_asymptotic">[docs]</a>
-<span class="k">def</span> <span class="nf">CL_single_asymptotic</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">s_hypothesis</span><span class="p">,</span> <span class="n">bg_expected</span><span class="p">,</span> <span class="n">observed</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CL_single_asymptotic</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">s_hypothesis</span><span class="p">,</span> <span class="n">bg_expected</span><span class="p">,</span> <span class="n">observed</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    One tailed signal upper limits using asymptotic (Gaussian) approximation.</span>
 <span class="sd">    </span>
@@ -696,7 +696,7 @@
 
 <div class="viewcode-block" id="asymptotic_uncertainty_CLs">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.icelimit.asymptotic_uncertainty_CLs">[docs]</a>
-<span class="k">def</span> <span class="nf">asymptotic_uncertainty_CLs</span><span class="p">(</span><span class="n">mu_up</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">asymptotic_uncertainty_CLs</span><span class="p">(</span><span class="n">mu_up</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Asymptotic (Asimov) +-N sigma values around median expected</span>
 <span class="sd">    N = 0 gives the median.</span>
@@ -721,7 +721,7 @@
 
 <div class="viewcode-block" id="CL_single_compute">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.icelimit.CL_single_compute">[docs]</a>
-<span class="k">def</span> <span class="nf">CL_single_compute</span><span class="p">(</span><span class="n">s_hypothesis</span><span class="p">,</span> <span class="n">bg_expected</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s_syst_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bg_syst_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CL_single_compute</span><span class="p">(</span><span class="n">s_hypothesis</span><span class="p">,</span> <span class="n">bg_expected</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s_syst_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bg_syst_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">method</span><span class="o">=</span><span class="s1">&#39;toys&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">num_toys_pdf</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1E4</span><span class="p">),</span> <span class="n">num_toys_obs</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">1E3</span><span class="p">),</span> <span class="n">mu_bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1E4</span><span class="p">),</span>
     <span class="n">mu_init</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">max_restart</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">func_tol</span><span class="o">=</span><span class="mf">1E-5</span><span class="p">,</span> <span class="n">optimize_method</span><span class="o">=</span><span class="s1">&#39;golden&#39;</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -759,7 +759,7 @@
         <span class="n">X</span> <span class="o">=</span> <span class="n">observed</span>
 
     <span class="c1">## Cost function for the limit inversion (i.e. finding out value of r which corresponds to alpha)</span>
-    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">mu</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">mu</span><span class="p">):</span>
         <span class="n">mu_value</span> <span class="o">=</span> <span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="k">else</span> <span class="n">mu</span> <span class="c1"># if the optimization function uses lists</span>
         
         <span class="k">if</span>   <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;toys&#39;</span><span class="p">:</span>
@@ -819,7 +819,7 @@
 
 <div class="viewcode-block" id="test_limits_unit_test">
 <a class="viewcode-back" href="../../modules/icefit.html#icefit.icelimit.test_limits_unit_test">[docs]</a>
-<span class="k">def</span> <span class="nf">test_limits_unit_test</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_limits_unit_test</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple unit tests</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -894,7 +894,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
