@@ -14,6 +14,21 @@ EVAL_PARAM: &EVAL_PARAM
   readmode_operator: 'argmin'  # 
 
 
+# ----------------------------------------------------------------
+# Note for the custom losses with ICEBOOST
+# 
+# For Hessian (2nd order grad descent) control:
+# 
+#   ':hessian:constant:1.0'   (DEFAULT)
+#   ':hessian:iterative:0.9'  (Iterative, with the moving average parameter)
+#   ':hessian:hutchinson:10'  (Hutchinson, with the number of MC samples)
+#   ':hessian:exact'          (Exact autograd)
+# 
+# Usage:
+#   objective: 'custom:binary_cross_entropy:hessian:iterative:0.9'
+# ----------------------------------------------------------------
+
+
 ## MVA models
 
 # "Stage 1" model
@@ -164,7 +179,6 @@ iceboost0: &ICEBOOST0
     reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
     reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
     
-    # learning task parameters
     objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
     
     eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...

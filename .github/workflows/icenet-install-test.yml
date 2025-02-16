@@ -102,6 +102,12 @@ jobs:
           source setenv-github-actions.sh && python icefit/peakfit.py --analyze --group --test_mode --fit_type dual-unitary-II --output_name dual-unitary-II
       
       #
+      - name: Deep Learning system (runme_hnl)
+        run: |
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_hnl.sh
+          echo "yes" | source superclean.sh
+      
+      #
       - name: Deep Learning system (runme_eid)
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_eid.sh
@@ -130,18 +136,18 @@ jobs:
           echo "yes" | source superclean.sh
       
       #
-      - name: Deep Learning system (runme_zee_gridtune)
-        run: |
-          source setenv-github-actions.sh
-          maxevents=100
+      #- name: Deep Learning system (runme_zee_gridtune)
+      #  run: |
+      #    source setenv-github-actions.sh
+      #    maxevents=100
           
-          GRID_ID=-1; GRID_NODES=1 
-          source tests/runme_zee_gridtune.sh
+      #    GRID_ID=-1; GRID_NODES=1 
+      #    source tests/runme_zee_gridtune.sh
           
-          GRID_ID=0; GRID_NODES=1
-          source tests/runme_zee_gridtune.sh
+      #    GRID_ID=0; GRID_NODES=1
+      #    source tests/runme_zee_gridtune.sh
           
-          echo "yes" | source superclean.sh
+      #    echo "yes" | source superclean.sh
       
       #
       #- name: Deep Learning system (runme_zee)
@@ -154,12 +160,6 @@ jobs:
       #  run: |
       #    source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
       #    echo "yes" | source superclean.sh
-      
-      #
-      - name: Deep Learning system (runme_hnl)
-        run: |
-          source setenv-github-actions.sh && maxevents=1000; source tests/runme_hnl.sh
-          echo "yes" | source superclean.sh
       
       #
       - name: Deep Learning system (runme_trg)

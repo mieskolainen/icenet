@@ -6,7 +6,7 @@
 EVAL_PARAM: &EVAL_PARAM
   
   tensorboard: true
-
+  
   # Training and validation
   savemode: 1                  # Save and evaluate model file every n-th epoch (integer)
                                # (BDT will save always only the last one because it contains all epochs)
