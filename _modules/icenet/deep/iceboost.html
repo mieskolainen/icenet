@@ -1191,9 +1191,11 @@
         <span class="k">if</span> <span class="n">use_custom</span><span class="p">:</span>
             
             <span class="c1"># !</span>
-            <span class="n">loss_mode</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
-            <span class="n">x</span>         <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_trn</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-            <span class="n">MI_x</span>      <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_trn_MI</span><span class="p">)</span>
+            <span class="n">loss_mode</span>        <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
+            <span class="n">autogradObj</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
+            
+            <span class="n">x</span>    <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_trn</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">MI_x</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_trn_MI</span><span class="p">)</span>
             
             <span class="c1">## Set objective</span>
             <span class="n">a</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">autogradObj</span>
@@ -1238,9 +1240,11 @@
                     <span class="n">out_weights</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">w_val</span><span class="p">)</span>    
                 
                 <span class="c1"># !</span>
-                <span class="n">loss_mode</span> <span class="o">=</span> <span class="s1">&#39;eval&#39;</span>
-                <span class="n">x</span>         <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-                <span class="n">MI_x</span>      <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_val_MI</span><span class="p">)</span>
+                <span class="n">loss_mode</span>        <span class="o">=</span> <span class="s1">&#39;eval&#39;</span>
+                <span class="n">autogradObj</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;eval&#39;</span>
+                
+                <span class="n">x</span>    <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">MI_x</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_val_MI</span><span class="p">)</span>
                 
                 <span class="n">a</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">](</span><span class="n">preds</span><span class="o">=</span><span class="n">preds_eval</span><span class="p">,</span> <span class="n">targets</span><span class="o">=</span><span class="n">deval</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
                 <span class="n">track_loss_eval</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">track_loss</span><span class="p">)</span>  <span class="c1"># track_loss from custom loss</span>
