@@ -1038,8 +1038,8 @@ def create_model_filename_xgb(path: str, label: str, filetype='.dat', epoch:int 
         epoch == N,   we take the specific epoch
     
     """
-    print(f'Loading the latest model by timestamp', 'yellow')
-
+    epoch = int(epoch)
+    
     list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
     
     if len(list_of_files) == 0:
@@ -1051,7 +1051,7 @@ def create_model_filename_xgb(path: str, label: str, filetype='.dat', epoch:int 
     filename = max(list_of_files, key=os.path.getctime)
 
     dt = datetime.fromtimestamp(getmtime(filename))
-    print(f'Found a model file:')
+    print(f'Found the latest model file:')
     print(f'{filename} (modified {dt})', 'green')
     
     if epoch < 0:
@@ -1068,20 +1068,20 @@ def create_model_filename_xgb(path: str, label: str, filetype='.dat', epoch:int 
             losses = np.array(data['losses']['val_losses'])
             idx    = np.argmin(losses)
             
-            str = f'Using the best model at boost epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+            str = f'[{epoch}] Using the minimum loss model at boost epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
             print(f'{str}', 'magenta')
             
             N_trees = idx + 1 #! indexing from 0
 
         elif epoch == -2:
             
-            str = f'Using the model at the last boost epoch [{data["epoch"]}]'
+            str = f'[{epoch}] Using the model at the last boost epoch [{data["epoch"]}]'
             print(f'{str}', 'magenta')
             
             N_trees = data['epoch'] + 1 #! indexing from 0
         
     else:
-        print(f'Using the model with the provided boost epoch = {epoch}', 'yellow')
+        print(f'[{epoch}] Using the model with the provided boost epoch = {epoch}', 'yellow')
         N_trees = epoch + 1 #! indexing from 0
     
     return filename, N_trees
@@ -1096,15 +1096,14 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int = -1
     if  epoch == - 1, we try to find the best validation loss model
         epoch == - 2, we take the latest epoch
         epoch == N,   we take the specific epoch
-    
     """
+    epoch = int(epoch)
+    
     def createfilename(i):
         return f'{path}/{label}_{i}{filetype}'
     
-    if epoch is None or epoch < 0:
+    if epoch < 0:
         
-        print(f'Loading the latest model by timestamp', 'yellow')
-
         list_of_files = glob.glob(f'{path}/{label}_*{filetype}')
         
         if len(list_of_files) == 0:
@@ -1143,16 +1142,16 @@ def create_model_filename(path: str, label: str, filetype='.dat', epoch:int = -1
                 losses = np.array(data['losses']['val_losses'])
                 idx    = np.argmin(losses)
                 
-                str = f'Using the best model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
+                str = f'[{epoch}] Using the minimum loss model at epoch [{idx}] with validation loss = {losses[idx]:0.4f}'
                 print(f'{str}', 'magenta')
                 
                 filename = createfilename(idx)
         
         else:
-            print(f'Using the last saved epoch model', 'magenta')
+            print(f'[{epoch}] Using the last saved epoch model', 'magenta')
         
     else:
-        print(f'Using the model with the provided epoch = {epoch}', 'yellow')
+        print(f'[{epoch}] Using the model with the provided epoch = {epoch}', 'yellow')
         filename = createfilename(epoch)
     
     dt = datetime.fromtimestamp(getmtime(filename))
@@ -1382,7 +1381,7 @@ def auc_score(fpr, tpr):
     Returns:
         AUC score
     """
-    auc = scipy.integrate.trapz(y=tpr, x=fpr)
+    auc = np.trapz(y=tpr, x=fpr)
 
     return np.clip(auc, 0.0, 1.0)
 

@@ -5,6 +5,7 @@ channels:
   - conda-forge
 #  - intel # Intel has removed channel
   - defaults
+
 dependencies:
   - python==3.10.11
   - pip==24.0

@@ -16,6 +16,6 @@ do
   python analysis/zee.py --runmode eval    $MAX --config ${CONFIG}.yml --datapath $DATAPATH --evaltag mytest
 done
 
-#--supertune "models.iceboost_swd.model_param.objective='custom:binary_cross_entropy:hessian:squared_approx'"
+#--supertune "models.iceboost_swd.model_param.objective='custom:binary_cross_entropy:hessian:iterative:0.9'"
 #--supertune "models.iceboost_swd.SWD_param.var=['fixedGridRhoAll', 'probe_eta', 'probe_pt']"
 #--supertune "models.iceboost_swd.readmode=-2"

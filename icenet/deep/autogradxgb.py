@@ -16,13 +16,23 @@ from icenet import print
 
 class XgboostObjective():
     """
+    XGB custom loss driver class with torch (autograd)
+    
+    hessian_mode: 'iterative' or 'hutchinson' may make the model converge significantly
+    faster than 'constant' in some cases.
+    
+    N.B. Remember to call manually:
+    
+    obj.mode = 'train' or obj.mode = 'eval' while running the training boost iteration
+    loop, otherwise .grad_prev, .preds_prev will get mixed with iterative hessian mode.
+    
     Args:
         loss_func:       Loss function handle
-        mode:            'train' or 'eval'
+        mode:            'train' or 'eval', see the comment above
         flatten_grad:    For vector valued model output [experimental]
-        hessian_mode:    'constant', 'squared_approx', 'iterative', 'hutchinson', 'exact'
-        hessian_const:   Scalar parameter 'constant 'hessian_mode'
-        hessian_gamma:   Hessian momentum smoothing parameter for 'iterative' mode
+        hessian_mode:    'iterative', 'hutchinson', 'exact', 'constant', 'squared_approx' 
+        hessian_const:   Scalar parameter constant 'hessian_mode'
+        hessian_gamma:   Hessian momentum smoothing parameter for the 'iterative' mode
         hessian_slices:  Hutchinson Hessian diagonal estimator MC slice sample size
         device:          Torch device
     """
@@ -43,7 +53,7 @@ class XgboostObjective():
         self.hessian_mode   = hessian_mode
         self.hessian_const  = hessian_const
         self.hessian_gamma  = hessian_gamma
-        self.hessian_slices = hessian_slices
+        self.hessian_slices = int(hessian_slices)
         self.flatten_grad   = flatten_grad
         
         # For the optimization algorithms
@@ -95,7 +105,7 @@ class XgboostObjective():
     def iterative_hessian_update(self,
             grad: Tensor, preds: Tensor, absMax: float=10, EPS: float=1e-8):
         """
-        Iterative Hessian (diagonal) approximation update using finite differences
+        Iterative approximation of the Hessian diagonal using finite differences
         
         [experimental]
         
@@ -110,6 +120,7 @@ class XgboostObjective():
         
         # H_ii ~ difference in gradients / difference in predictions
         else:
+            
             dg = grad  - self.grad_prev
             ds = preds - self.preds_prev
             
@@ -145,23 +156,25 @@ class XgboostObjective():
             # Constant curvature
             case 'constant':
                 grad2 = self.hessian_const * torch.ones_like(grad1)
-        
+
             # Squared derivative based [uncontrolled] approximation (always positive curvature)
             case 'squared_approx':
                 grad2 = grad1 * grad1
-        
+
             # BFGS style iterative updates
             case 'iterative':
+                print(f'Computing Hessian diagonal with iterative finite difference ...')
+                
                 self.iterative_hessian_update(grad=grad1, preds=preds)
                 grad2 = self.hess_diag
-            
+
             # Hutchinson MC approximator ~ O(slices)
             case 'hutchinson':
                 
-                print('Computing Hessian diagonal with approximate Hutchinson estimator ...')
+                print(f'Computing Hessian diagonal with MC Hutchinson ...')
 
                 grad2 = torch.zeros_like(preds)
-
+                
                 for _ in tqdm(range(self.hessian_slices)):
                     
                     # Generate a Rademacher vector (each element +-1 with probability 0.5)

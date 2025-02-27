@@ -668,9 +668,11 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         if use_custom:
             
             # !
-            loss_mode = 'train'
-            x         = copy.deepcopy(data_trn.x)
-            MI_x      = copy.deepcopy(data_trn_MI)
+            loss_mode        = 'train'
+            autogradObj.mode = 'train'
+            
+            x    = copy.deepcopy(data_trn.x)
+            MI_x = copy.deepcopy(data_trn_MI)
             
             ## Set objective
             a['obj'] = autogradObj
@@ -715,9 +717,11 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     out_weights = copy.deepcopy(w_val)    
                 
                 # !
-                loss_mode = 'eval'
-                x         = copy.deepcopy(data_val.x)
-                MI_x      = copy.deepcopy(data_val_MI)
+                loss_mode        = 'eval'
+                autogradObj.mode = 'eval'
+                
+                x    = copy.deepcopy(data_val.x)
+                MI_x = copy.deepcopy(data_val_MI)
                 
                 a['obj'](preds=preds_eval, targets=deval)[1] / len(data_val.x)
                 track_loss_eval = copy.deepcopy(track_loss)  # track_loss from custom loss

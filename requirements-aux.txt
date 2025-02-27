@@ -1,46 +1,49 @@
 # XGBOOST
-xgboost==2.1.0
+xgboost==2.1.4
 
 # TENSORFLOW
-tensorflow==2.16.1
+tensorflow==2.17.1
 
 # ML friends
 tensorboardX==2.6.2.2
-einops==0.8.0
+einops==0.8.1
 
 # JAX
-jax==0.4.28
-jaxlib==0.4.28
+jax==0.4.38
+jaxlib==0.4.38
 
 # IMINUIT
 iminuit==2.30.1
 
 # MYSTIC
-mystic==0.4.2
+mystic==0.4.3
 
 # RAY
-ray[data,train,tune,serve,rllib]==2.22.0
+ray[data,train,tune,serve,rllib]==2.42.1
 hyperopt==0.2.7
-optuna==3.6.1
+optuna==4.2.1
 bayesian-optimization==1.4.3
 
 # UPROOT & friends
-uproot==5.3.7
-awkward==2.6.4
-vector==1.4.0
+uproot==5.5.2
+awkward==2.7.4
+vector==1.6.1
 
 # NUMPY & friends
-numpy==1.24.4      # Do not go over >= 1.24.4 (e.g. 1.26.4 tested --> iceboost custom loss gives weak results with icezee -- unknown reason!)
-numba==0.59.1
-pandas==2.2.2
-scipy==1.13.0
-matplotlib==3.9.0
-scikit-learn==1.4.2
+
+# Do not go over numpy > 1.24.4
+# (e.g. 1.26.4 tested --> iceboost custom loss gives weak results with icezee -- unknown reason!)
+numpy==1.24.4      
+numba==0.61.0
+pandas==2.2.3
+scipy==1.15.2
+matplotlib==3.10.0
+scikit-learn==1.6.1
 dcor==0.6
 shap2==0.42.0
 
 # UTILITIES
-pot==0.9.4
+pot==0.9.5
 prettytable==3.10.0
 scanf==1.5.2
 PyPDF2==3.0.1

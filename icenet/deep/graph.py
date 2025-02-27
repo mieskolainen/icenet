@@ -17,7 +17,7 @@ from   torch_geometric.nn import Set2Set, global_add_pool, global_mean_pool, glo
 from   torch_geometric.nn import NNConv, GINEConv, GATConv, SplineConv, GCNConv, SGConv, SAGEConv, EdgeConv, DynamicEdgeConv
 from   torch_geometric.nn import MessagePassing
 
-from torch_scatter import scatter_add, scatter_max, scatter_mean
+#from torch_scatter import scatter_add, scatter_max, scatter_mean
 
 from icenet.deep.da import GradientReversal
 
