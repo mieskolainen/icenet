@@ -162,7 +162,7 @@ def raytune_main(inputs, train_func=None):
     param = inputs['param']
     
     ### General raytune parameters
-    num_samples    = args['raytune']['param']['num_samples']
+    num_samples = args['raytune']['param']['num_samples']
     
     ### Construct hyperparameter config (setup) from yaml
     steer  = param['raytune']
@@ -219,7 +219,7 @@ def raytune_main(inputs, train_func=None):
             mode                = mode,
             num_samples         = num_samples
         ),
-        run_config  = RunConfig(name="icenet_raytune", local_dir=os.getcwd() + "/tmp"),
+        run_config  = RunConfig(name="icenet_raytune", storage_path=os.path.join(os.getcwd(), "tmp") ),
         param_space = param_space,
     )
     results = tuner.fit()
