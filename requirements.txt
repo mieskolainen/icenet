@@ -1,7 +1,7 @@
 -r requirements-aux.txt
 
 # PYTORCH
-torch==2.5.1
+torch==2.7.0+cu118
 torchvision==0.20.1
 torchaudio==2.5.1
 --extra-index-url https://download.pytorch.org/whl/cu118
