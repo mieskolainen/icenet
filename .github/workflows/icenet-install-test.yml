@@ -73,8 +73,8 @@ jobs:
         run: |
           pytest icenet/tools/stx.py -rP
           pytest icenet/tools/supertune.py -rP
-          pytest icefit/transport.py -rP
           pytest icefit/cortools.py -rP
+      # pytest icefit/transport.py -rP (gets cancelled by github-actions due to CPU limit)
       
       ## Integration tests
       - name: Deep Learning system integration test (clone stash)
@@ -144,7 +144,7 @@ jobs:
         run: |
           source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
           echo "yes" | source superclean.sh
-      
+
       # (This would require Condor cluster in general, but this imitates)
       #
       #- name: Deep Learning system (runme_zee_gridtune)

@@ -31,53 +31,5 @@ diff_param:
     max_reg:      100.0                # Maximum weight cut-off regularization
     mode:         'LR'                 # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
 
-# ---------------------------------------------------------------------
-# NOTES:
-#
-# Recipe for conditional 2-step re-weighter: p0 (source pdf) --> p1 (target pdf)
-# 
-# weights ~ p1(x|z) / p0(x|z) = p1(x,z) / p0(x,z) x p0(z) / p1(z)
-# 
-# Note that the marginals p1(z) and p0(z) are *not* aligned to be the same via
-# a generic conditional re-weighting, only p1(x|z) and p0(x|z).
-# 
-# However, if p0(z) = p1(z) i.e. their ratio = 1, then conditional and joint ratios
-# turn out to be the same, because p1(x|z) / p0(x|z) = p1(x,z) / p0(x,z).
-# ---------------------------------------------------------------------
-# 
-# 
-# Stage 1 model training:
-# ---------------------------------
-# 
-# >  train_mode.reweight_param.reweight                   = true
-# >  train_mode.reweight_param.reweight_mode              = 'write-skip'
-# >  train_mode.reweight_param.differential               = true
-# >  train_mode.reweight_param.equal_frac                 = true
-# >  train_mode.reweight_param.diff_param.type            = 'AIRW'
-# >  train_mode.reweight_param.var                        = ['z0', 'z1', ..., 'z{m-1}']
-# >  train_mode.reweight_param.diff_param.AIRW_param.mode = (irrelevant because of 'write-skip')
-# 
-# Stage 2 model training:
-# ---------------------------------
-# 
-# >  Train a classifier with input variables:
-#    concat([x,z]) = ['x0', 'x1', ..., 'x{n-1}', 'z0', 'z1', ..., 'z{m-1}']
-# 
-# Stage 1 model applied in evaluation:
-# ---------------------------------
-# 
-# >  eval_mode.reweight_param.reweight                    = true
-# >  eval_mode.reweight_param.reweight_mode               = 'load'
-# >  eval_mode.reweight_param.differential                = true
-# >  eval_mode.reweight_param.equal_frac                  = true
-# >  eval_mode.reweight_param.diff_param.type             = 'AIRW'
-# >  eval_mode.reweight_param.diff_param.AIRW_param.mode  = 'inverse-LR'
-# 
-# Stage 2 model applied in evaluation:
-# ---------------------------------
-# 
-# >  plot_param.OBS_reweight.transform_mode               = 'LR'
-# 
-# N.B. dataset event weights are automatically propagated through multiplicatively.
-# 
-# ---------------------------------------------------------------------
+
+# See NOTES.md

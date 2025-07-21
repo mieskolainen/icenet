@@ -48,33 +48,33 @@ iceboost4D:
   
   # booster parameters
   model_param:
-    num_boost_round: 550          # number of epochs (equal to the number of trees!)
+    num_boost_round: 400          # number of epochs (equal to the number of trees!)
     
     booster: 'gbtree'             # 'gbtree' (default), 'dart' (dropout boosting)
     tree_method: 'hist'
     device:      'auto'           # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.05           # Use smaller with large number of trees
+    learning_rate: 0.1            # Use smaller with large number of trees
     gamma: 1.5
-    max_depth: 8
+    max_depth: 11
     min_child_weight: 1.0
     max_delta_step: 1.0
     subsample: 1
     
-    colsample_bytree:  0.9
-    colsample_bylevel: 0.9
-    colsample_bynode:  0.9
+    colsample_bytree:  0.98
+    colsample_bylevel: 0.98
+    colsample_bynode:  0.98
     
     reg_lambda: 2.0               # L2 regularization
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    objective: 'custom:binary_cross_entropy:hessian:iterative:0.9'
+    objective: 'custom:binary_cross_entropy:hessian:iterative:0.8'
     eval_metric: ['custom']       # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
   opt_param:
-    noise_reg: 0.05               # Scheduled noise regularization
+    noise_reg: 0.0                # Scheduled noise regularization
   
   # BCE loss domains
   BCE_param:
