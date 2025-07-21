@@ -1,6 +1,6 @@
 # Logging tools (take a note that multiprocessing may result in log message collisions)
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import logging
 

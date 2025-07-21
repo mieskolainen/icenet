@@ -1,6 +1,6 @@
 # Event sample re-weighting tools
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import numpy as np
 import awkward as ak
@@ -47,7 +47,7 @@ def rw_transform_with_logits(logits, mode, absMax=30):
         return exp_(-logits)
     elif mode == 'DeepEfficiency':     # https://arxiv.org/abs/1809.06101
         return exp_(-logits) + 1.0
-    elif mode == 'direct':             # Direct
+    elif mode == 'direct':             # Direct probability
         return sigmoid_(logits)
     elif mode == 'identity' or mode == None:
         if type(logits) is torch.Tensor:
@@ -83,7 +83,7 @@ def rw_transform(phat, mode, EPS=1E-12):
         return (1.0 - phat) / phat
     elif mode == 'DeepEfficiency':        # https://arxiv.org/abs/1809.06101
         return 1.0 / phat
-    elif mode == 'direct':                # Direct
+    elif mode == 'direct':                # Direct probability
         return phat
     elif mode == 'identity' or mode == None:
         if type(phat) is torch.Tensor:
@@ -302,7 +302,6 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
     
     param     = args['models'][ID]
     
-    
     # ----------------------------------------
     # Conversions and pick variables of interest
     
@@ -338,6 +337,9 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
                           'data_val_MI': None,
                           'param':       param}
 
+                # Take in the output
+                # (this is not used but the model is re-loaded from the disk,
+                #  according the best model [epoch] criteria in the model card)
                 pdf['model'][c] = iceboost.train_xgb(**inputs)
     
     # ------------------------------------------------

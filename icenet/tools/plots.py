@@ -1,29 +1,28 @@
 # Plotting functions
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
+
+import gc
+import os
+import copy
+import multiprocessing
+import time
+
+from pprint import pprint
+from prettytable import PrettyTable
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
+
 import numpy as np
 import awkward as ak
 import torch
-import gc
-import os
-
-from pprint import pprint
-import copy
-from prettytable import PrettyTable
-import multiprocessing
-import time
 from tqdm import tqdm
 import pandas as pd
 
 from iceplot import iceplot
-from icefit import statstools
-from icefit import cortools
-
-from icenet.tools import aux
-from icenet.tools import reweight
-from icenet.tools import prints
+from icefit import statstools, cortools
+from icenet.tools import aux, reweight, prints
 
 # ------------------------------------------
 from icenet import print
@@ -186,49 +185,42 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85,
         ax:  figure axis
     """
     
-    fig,ax = plt.subplots(1,2, figsize=(10, 7.5))
-    
-    # How many loss terms
-    N_terms = 0
-    for key in losses.keys():
-        if 'eval' in key:
-            N_terms += 1
-    
-    for key in losses.keys():
+    fig, ax = plt.subplots(1, 2, figsize=(10, 7.5))
+    fig.subplots_adjust(wspace=0.3)  # Add horizontal space between subplots
+
+    # Count how many loss terms
+    N_terms = sum(1 for key in losses if 'eval' in key)
+
+    for key in losses:
         if ('sum' in key) and (N_terms == 2):
-            continue # Do not plot 'sum' if only sum made of one term
-        
-        ax[0].plot(losses[key], label=key)
+            continue  # Skip sum if redundant
+        txt = copy.deepcopy(key)
+        if 'eval' in txt:
+            txt = key.replace('eval', 'validate')
+        ax[0].plot(losses[key], label=txt)
     
     ax[0].set_xlabel('k (epoch)')
     ax[0].set_ylabel('loss')
     ax[0].legend(fontsize=6)
     ax[0].set_title(f'{label}', fontsize=10)
-    
-    plt.sca(ax[0])
-    plt.autoscale(enable=True, axis='x', tight=True)
-    plt.yscale(yscale)
-    plt.xscale(xscale)
-    
+    ax[0].set_yscale(yscale)
+    ax[0].set_xscale(xscale)
+    ax[0].set_aspect(1.0 / ax[0].get_data_ratio() * aspect)
+    ax[0].autoscale(enable=True, axis='x', tight=True)
+
     ax[1].plot(trn_aucs)
     ax[1].plot(val_aucs)
-    ax[1].legend(['train','validation'], fontsize=8)
+    ax[1].legend(['train', 'validate'], fontsize=8)
     ax[1].set_xlabel('k (epoch)')
     ax[1].set_ylabel('AUC')
+    ax[1].set_ylim([min(np.min(trn_aucs), np.min(val_aucs)), 1.0])
     ax[1].grid(True)
-    
-    plt.sca(ax[1])
-    plt.autoscale(enable=True, axis='x', tight=True)
-    plt.yscale(yscale)
-    plt.xscale(xscale)
-    
-    ax[0].set_aspect(1.0/ax[0].get_data_ratio()*aspect)
-    
-    for i in [1]:
-        ax[1].set_ylim([np.min([np.min(trn_aucs), np.min(val_aucs)]), 1.0])
-        ax[1].set_aspect(1.0/ax[i].get_data_ratio()*aspect)
+    ax[1].set_yscale(yscale)
+    ax[1].set_xscale(xscale)
+    ax[1].autoscale(enable=True, axis='x', tight=True)
+    ax[1].set_aspect(1.0 / ax[1].get_data_ratio() * aspect)
 
-    return fig,ax
+    return fig, ax
 
 
 def binned_2D_AUC(y_pred, y, X_kin, ids_kin, X, ids, edges, label, weights=None, VAR:list=['trk_pt', 'trk_eta']):
@@ -865,64 +857,177 @@ def plotvar(x, y, var, weights, nbins=70, percentile_range=[0.5, 99.5],
         print(f'Problem plotting variable "{var}"', 'red')
 
 
-def plot_reweight_result(X, y, nbins, binrange, weights, title = '', xlabel = 'x', linewidth=1.5,
-                         plot_unweighted=True):
+def plot_reweight_result(X, y, nbins, binrange, weights, title='', xlabel='x', linewidth=1.5,
+                         plot_unweighted=True, cmap='Set1', ylim_ratio=[0.7, 1.3]):
     """
-    Here plot pure event counts
-    so we see that also integrated class fractions are equalized (or not) after weighting!
+    Plot class-wise weighted and unweighted histograms and their ratio to the last class,
+    including propagated statistical uncertainties and shaded error bands.
     """
 
-    fig,ax    = plt.subplots(1, 2, figsize = (10, 4.25))
+    from matplotlib.gridspec import GridSpec
     class_ids = np.unique(y.astype(int))
     legends   = []
-    
-    min_x =  1e30
-    max_x = -1e30
-    
-    # Loop over classes
-    for c in class_ids:
 
-        ind = (y == c)
+    scheme = plt.get_cmap(cmap)
+    color_unw = {}
+    color_w   = {}
+
+    for i, c in enumerate(class_ids):
+        color_unw[c] = to_hex(scheme(2 * i % 20))
+        color_w[c]   = to_hex(scheme((2 * i + 1) % 20))
         
+    fig = plt.figure(figsize=(11, 6))
+    gs  = GridSpec(2, 2, height_ratios=[2.5, 1], hspace=0.0) # with tight vertical spacing
+
+    ax_main  = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
+    ax_ratio = [fig.add_subplot(gs[1, 0], sharex=ax_main[0]), fig.add_subplot(gs[1, 1], sharex=ax_main[1])]
+
+    ref_counts = [None, None]
+    ref_errs   = [None, None]
+    bin_edges  = None
+    color_map  = {}
+    hist_data  = {0: {}, 1: {}}
+    err_data   = {0: {}, 1: {}}
+    min_x      = +1e30
+    max_x      = -1e30
+
+    # ------------------------------------------------------------
+    # Main plots (linear, log)
+    
+    for idx, c in enumerate(class_ids):
+        
+        ind = (y == c)
         if np.sum(ind) == 0:
             print(f'No samples for class {c} -- continue')
             continue
         
-        # Compute histograms with numpy (we use nbins and range() for speed)
+        X_c  = X[ind]
+        w_c  = weights[ind]
+        w2_c = weights[ind] ** 2
+
         if plot_unweighted:
-            counts, edges = np.histogram(X[ind], bins=nbins, range=binrange, weights=None)
-        
-        counts_w, edges = np.histogram(X[ind], bins=nbins, range=binrange, weights=weights[ind])
-        mu, std = aux.weighted_avg_and_std(values=X[ind], weights=weights[ind])
-        
-        min_x = edges[0]  if edges[0]  < min_x else min_x
-        max_x = edges[-1] if edges[-1] > max_x else max_x
-        
-        # Linear and log scale scale (left and right plots)
+            counts_unw, edges = np.histogram(X_c, bins=nbins, range=binrange, weights=None)
+        counts_w,    edges    = np.histogram(X_c, bins=nbins, range=binrange, weights=w_c)
+        counts_w2,   _        = np.histogram(X_c, bins=nbins, range=binrange, weights=w2_c)
+        errs = np.sqrt(counts_w2)
+
+        bin_edges = edges
+        min_x = min(min_x, edges[0])
+        max_x = max(max_x, edges[-1])
+        mu, std = aux.weighted_avg_and_std(values=X_c, weights=w_c)
+
         for i in range(2):
-            
-            plt.sca(ax[i])
+            ax = ax_main[i]
+            cu = color_unw[c]
+            cw = color_w[c]
+
             if plot_unweighted:
-                plt.stairs(counts, edges, fill=False, linewidth = linewidth+0.75, linestyle='--') # bigger linewidth first
-            plt.stairs(counts_w, edges, fill=False, linewidth = linewidth, linestyle='-')
-            
+                ax.stairs(counts_unw, edges, fill=False, linewidth=linewidth + 0.75, linestyle='--', color=cu)
+
+            line_w = ax.stairs(counts_w, edges, fill=False, linewidth=linewidth, linestyle='-', color=cw)
+            color_map[c] = cw  # map weighted color for later reuse in ratio plot
+
+            hist_data[i][c] = counts_w
+            err_data[i][c]  = errs
+
+            if idx == len(class_ids) - 1:
+                ref_counts[i] = counts_w.astype(np.float64) + 1e-10
+                ref_errs[i]   = errs
+                ref_color     = cw
+
             if i == 0:
                 if plot_unweighted:
                     legends.append(f'$\\mathcal{{C}} = {c}$ (unweighted)')
                 legends.append(f'$\\mathcal{{C}} = {c}$ [$\\mu={mu:0.2f}, \\sigma={std:0.2f}$]')
+
+    # Formatting
+    for i in range(2):
+        ax_main[i].tick_params(labelbottom=False)
+        ax_main[i].xaxis.set_visible(False)  # remove space due to tick padding
+        ax_ratio[i].spines['top'].set_visible(False)
+
+        ax_main[i].set_xlim([min_x, max_x])
+        ax_main[i].set_xlabel('')
+
+    ax_main[0].set_ylabel('[weighted] counts')
+    ax_main[0].set_ylim(bottom=0)
+    ax_main[1].set_title(title, fontsize=10)
+    ax_main[1].set_yscale('log')
+    ax_main[1].legend(legends, fontsize=8)
+
+    # ------------------------------------------------------------
+    # Ratio plots
+    for i in range(2):
+        ref     = ref_counts[i]
+        ref_err = ref_errs[i]
+
+        with np.errstate(divide='ignore', invalid='ignore'):
+            rel_ref_err = ref_err / ref
+            rel_ref_err = np.nan_to_num(rel_ref_err, nan=0.0, posinf=0.0, neginf=0.0)
+
+        # Extend to match N+1 bin edges
+        y_ref_line_ext = np.append(np.ones_like(ref), 1.0)
+        y_ref_err_ext  = np.append(rel_ref_err, rel_ref_err[-1])
+
+        ax_ratio[i].step(bin_edges, y_ref_line_ext, where='post', color='black', linewidth=1)
+        ax_ratio[i].fill_between(bin_edges, 1 - y_ref_err_ext, 1 + y_ref_err_ext,
+                                 step='post', color=ref_color, alpha=0.35)
+
+        # Prepare legend handles and labels
+        legend_handles = []
+        legend_labels  = []
+
+        # Classes
+        for idx, c in enumerate(class_ids[:-1]):
+            num      = hist_data[i][c]
+            numerr   = err_data[i][c]
+            denom    = ref
+            denomerr = ref_err
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                ratio   = num / denom
+                rel_err = np.sqrt((numerr / num) ** 2 + (denomerr / denom) ** 2)
+                rel_err = np.nan_to_num(rel_err, nan=0.0, posinf=0.0, neginf=0.0)
+                err     = ratio * rel_err
+
+            ratio_ext = np.append(ratio, ratio[-1])
+            err_ext   = np.append(err,   err[-1])
+
+            line = ax_ratio[i].step(bin_edges, ratio_ext, where='post',
+                             label=f'Class {c}', lw=linewidth, color=color_map[c])
+            ax_ratio[i].fill_between(bin_edges, ratio_ext - err_ext, ratio_ext + err_ext,
+                                     step='post', color=color_map[c], alpha=0.3, edgecolor=None)
+
+            # Add chi2
+            sigma2 = numerr**2 + denomerr**2
+            
+            with np.errstate(divide='ignore', invalid='ignore'):
+                chi2 = np.nansum(((num - denom) ** 2) / sigma2)
+                ndf  = np.sum((num > 0) & (denom > 0))
+            
+            if ndf > 0:
+                chi2_str = rf"$\mathcal{{C}} = {c}$: $\,\chi^2 = {chi2:.1f} \, / \, {ndf} = {chi2/ndf:.2f}$"
+                legend_handles.append(line[0]) # step() returns a list
+                legend_labels.append(chi2_str)
+        
+        # Ratio axis formatting
+        ax_ratio[i].set_ylim([ylim_ratio[0], ylim_ratio[1]])
+        yticks = np.arange(ylim_ratio[0], ylim_ratio[1] + 0.001, 0.1)
+        ax_ratio[i].set_yticks(yticks[:-1])    # Remove topmost tick
+        ax_ratio[i].set_xlim([min_x, max_x])
+        ax_ratio[i].set_xlabel(xlabel)
+        ax_ratio[i].grid(True, linestyle=':', alpha=0.5)
+        
+        if i == 0:               
+            ax_ratio[i].set_ylabel('Ratio')
+        if i == 1:
+            if legend_handles:
+                ax_ratio[i].legend(legend_handles, legend_labels, loc='upper right', fontsize=7) 
+
+    # Final spacing
+    fig.subplots_adjust(hspace=0.02)
     
-    ax[0].set_ylabel('[weighted] counts')
-    ax[0].set_xlabel(xlabel)
-    ax[0].set_ylim([0,None])
-    ax[0].set_xlim([min_x, max_x])
-    
-    ax[1].set_xlabel(xlabel)
-    ax[1].set_title(title, fontsize=10)
-    ax[1].legend(legends, fontsize=8)
-    ax[1].set_yscale('log')
-    plt.tight_layout()
-    
-    return fig,ax
+    return fig, (ax_main, ax_ratio)
 
 
 def plot_correlations(X, ids, weights=None, y=None, round_threshold=0.0, targetdir=None, colorbar = False):
@@ -1449,7 +1554,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
     
     if RN_ID is not None:
-        print(f'Renormalizing with class [{RN_ID}] weight sum', 'yellow')
+        print(f'Renormalizing with class [renorm_origin = {RN_ID}] weight sum', 'yellow')
         
         sum_before = AIw0.sum()
         print(f'Sum(before): {sum_before:0.1f}')
@@ -1459,7 +1564,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         
         sum_after = AIw0.sum()
         print(f'Sum(after):  {sum_after:0.1f}')
-        ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.2f}'
+        ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.5f}'
         print(ratio)
         print('')
         
@@ -1598,7 +1703,7 @@ def multiprocess_AIRW_wrapper(p):
         'ylim'    : None,
         'xlabel'  : f'{ids[i]}',
         'ylabel'  : r'Weighted counts',
-        'units'   : {'x': r'a.u.', 'y' : r'1'},
+        'units'   : {'x': r'a.u.', 'y' : 'counts'},
         'label'   : f'{label}',
         'figsize' : (4, 3.75),
         
@@ -1627,7 +1732,7 @@ def multiprocess_AIRW_wrapper(p):
     # Data source <-> Observable collections
     class1    = data_template.copy() # Deep copies
     class0    = data_template.copy()
-    class0_ML = data_template.copy()
+    class0_AI = data_template.copy()
     
     class1.update({
         'label' : '$C_1$',
@@ -1641,14 +1746,14 @@ def multiprocess_AIRW_wrapper(p):
         'style' : iceplot.hist_style_step,
         'color' : iceplot.imperial_green
     })
-    class0_ML.update({
+    class0_AI.update({
         'label' : '$C_0$ (AI)',
         'hfunc' : 'hist',
         'style' : iceplot.hist_style_step,
         'color' : iceplot.imperial_dark_red
     })
 
-    data = [class1, class0, class0_ML]
+    data = [class1, class0, class0_AI]
     
     data[0]['hdata'] = iceplot.hist_obj(X_col[y == C1], bins=bins, weights=w[y == C1])
     data[1]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w[y == C0])

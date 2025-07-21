@@ -11,7 +11,7 @@ diff_param:
   maxevents: null                      # Maximum number of events for the PDF construction
   renorm_weight_to_count: true         # Renormalize sum(weights) == sum(counts) per class
   
-  var:  ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
+  var:  ['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll']
   type: 'AIRW'                         # 'AIRW', 'pseudo-ND', '2D', '1D'
   
   hist_param:
@@ -27,7 +27,7 @@ diff_param:
     max_reg: 1000.0                    # Maximum weight cut-off regularization
   
   AIRW_param:
-    active_model: iceboost3D           # Under models.yml
+    active_model: iceboost4D           # Under models.yml
     max_reg:      100.0                # Maximum weight cut-off regularization
     mode:         'LR'                 # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
 

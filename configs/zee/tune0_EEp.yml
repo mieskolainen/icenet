@@ -37,14 +37,14 @@ genesis_runmode:
   maxevents:  null
   inputmap:   null
   
-  mcfile:     {'trn': ['MC_train_EEp.parquet'],
-               'val': ['MC_val_EEp.parquet'],   
-               'tst': ['MC_test_EEp.parquet']}
+  mcfile:     {'trn': ['MC_train_EEp*.parquet'],
+               'val': ['MC_val_EEp*.parquet'],   
+               'tst': ['MC_test_EEp*.parquet']}
   
-  datafile:   {'trn': ['Data_train_EEp.parquet'],
-               'val': ['Data_val_EEp.parquet'],   
-               'tst': ['Data_test_EEp.parquet']}
-
+  datafile:   {'trn': ['Data_train_EEp*.parquet'],
+               'val': ['Data_val_EEp*.parquet'],   
+               'tst': ['Data_test_EEp*.parquet']}
+  
   drop_negative: true                 # Drop negative weight (MC) events
 
   tree_name:  null                    # 'ntuplizer/tree'

@@ -79,7 +79,7 @@ jobs:
       ## Integration tests
       - name: Deep Learning system integration test (clone stash)
         run: |
-          git clone https://github.com/mieskolainen/actions-stash.git
+          git clone --depth 1 https://github.com/mieskolainen/actions-stash.git
       
       #
       - name: Peakfit (single)
@@ -134,7 +134,18 @@ jobs:
         run: |
           source setenv-github-actions.sh && maxevents=10000; source tests/runme_brem_reweight.sh
           echo "yes" | source superclean.sh
+
+      - name: Deep Learning system (runme_zee)
+        run: |
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
+          echo "yes" | source superclean.sh
       
+      - name: Deep Learning system (runme_zee_mixed)
+        run: |
+          source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
+          echo "yes" | source superclean.sh
+      
+      # (This would require Condor cluster in general, but this imitates)
       #
       #- name: Deep Learning system (runme_zee_gridtune)
       #  run: |
@@ -147,18 +158,6 @@ jobs:
       #    GRID_ID=0; GRID_NODES=1
       #    source tests/runme_zee_gridtune.sh
           
-      #    echo "yes" | source superclean.sh
-      
-      #
-      #- name: Deep Learning system (runme_zee)
-      #  run: |
-      #    source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee.sh
-      #    echo "yes" | source superclean.sh
-      
-      #
-      #- name: Deep Learning system (runme_zee_mixed)
-      #  run: |
-      #    source setenv-github-actions.sh && maxevents=1000; source tests/runme_zee_mixed.sh
       #    echo "yes" | source superclean.sh
       
       #

@@ -9,6 +9,7 @@ KINEMATIC_VARS  = ['probe_mvaID',
 MVA_SCALAR_VARS = [
     'probe_eta',
     'probe_pt',
+    'probe_phi',
     'fixedGridRhoAll',
     'probe_sieie',
     'probe_sieip',
@@ -24,9 +25,8 @@ MVA_SCALAR_VARS = [
 ]
 
 # Technical for MI
-MI_VARS = ['probe_eta', 'probe_pt', 'fixedGridRhoAll']
+MI_VARS = ['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll']
 
 # These we load
 LOAD_VARS = list(set(KINEMATIC_VARS + MVA_SCALAR_VARS + MI_VARS))
 LOAD_VARS.sort() # Important, set() can have different order run-to-run !
-

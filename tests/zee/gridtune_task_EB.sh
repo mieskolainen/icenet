@@ -2,26 +2,26 @@
 # 
 # (Modify this file!)
 # 
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 SETCONDA="/home/hep/mmieskol/setconda.sh"
 ICEPATH="/vols/cms/mmieskol/icenet"
 
-DATAPATH="/vols/cms/pfk18/icenet_files/processed_29_nov_24"
+DATAPATH="/vols/cms/pfk18/icenet_files/processed_20Feb2025"
 CONFIG="tune0_EB"
 MODELTAG="GRIDTUNE"
 maxevents=500000
 
-BETA_ARRAY=(0.0 0.0025 0.005 0.01 0.02 0.04)
+BETA_ARRAY=(0.0 0.0025 0.005 0.01 0.02 0.04 0.1)
 SIGMA_ARRAY=(0.0 0.025 0.05 0.1 0.2)
-LR_ARRAY=(0.1)
+LR_ARRAY=(0.05 0.1)
 GAMMA_ARRAY=(1.5)
-MAXDEPTH_ARRAY=(13)
+MAXDEPTH_ARRAY=(8 12)
 LAMBDA_ARRAY=(2.0)
 ALPHA_ARRAY=(0.05)
 
-SWD_VAR="['.*']" # all
-#SWD_VAR="['fixedGridRhoAll', 'probe_eta', 'probe_pt']"
+#SWD_VAR="['.*']" # all
+SWD_VAR="['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll']"
 
 # ---------------------------------------
 

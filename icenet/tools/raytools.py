@@ -1,7 +1,7 @@
 # Parallel progressbar for ray
 # https://docs.ray.io/en/releases-1.11.1/ray-core/examples/progress_bar.html
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 
 import ray

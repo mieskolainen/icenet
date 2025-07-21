@@ -29,6 +29,9 @@ class LogitsWithTemperature(nn.Module):
         self.device      = device
         self.mode        = mode
 
+        self.before  = None
+        self.after   = None
+
     def temperature_scale(self, logits):
         """
         Temperature scaling on logits
@@ -94,6 +97,9 @@ class LogitsWithTemperature(nn.Module):
             
             ece_criterion_after.print()
             
+            self.before = ece_criterion_before
+            self.after  = ece_criterion_after
+            
             return ece_criterion_before, ece_criterion_after
 
         except Exception as e:
@@ -117,7 +123,10 @@ class ModelWithTemperature(nn.Module):
         self.temperature = nn.Parameter(1.0 * torch.ones(1, device=device))
         self.device      = device
         self.mode        = mode
-
+        
+        self.before  = None
+        self.after   = None
+            
     def forward(self, input: torch.Tensor):
         logits = self.model(input)
         return self.temperature_scale(logits)
@@ -227,6 +236,9 @@ class ModelWithTemperature(nn.Module):
             
             ece_criterion_after.print()
             
+            self.before = ece_criterion_before
+            self.after  = ece_criterion_after
+            
             return ece_criterion_before, ece_criterion_after
 
         except Exception as e:
@@ -258,9 +270,8 @@ class _ECELoss(nn.Module):
         
         self.ECE_binned  = torch.zeros(n_bins)
         self.ECE2_binned = torch.zeros(n_bins)
-        self.ECE         = 0
-        self.ECE2        = 0
-    
+        self.ECE         = None
+        self.ECE2        = None    
     
     def print(self):
         """

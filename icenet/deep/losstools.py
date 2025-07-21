@@ -1,6 +1,6 @@
 # Deep Learning loss functions and related tools
 # 
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 
 import torch_geometric
@@ -341,17 +341,28 @@ def MI_loss(X, Z, weights, MI, y):
     return loss
 
 
-def SWD_reweight_loss(logits, x, y, weights=None, p=1, num_slices=1000, norm_weights=True, mode='SWD'):
+def SWD_reweight_loss(logits: torch.Tensor,
+                      x: torch.Tensor,
+                      y: torch.Tensor,
+                      weights: torch.Tensor=None,
+                      p: int=1,
+                      num_slices: int=1000,
+                      norm_weights: bool=True,
+                      mode: str='SWD',
+                      class_idx: list=[0,1]):
     """
-    # Sliced Wasserstein reweight U (y==0) -> V (y==1) transport
+    Sliced Wasserstein reweight U (y==u) -> V (y==v) transport
+    for reweight regularization.
     """
-    u_idx = (y == 0)
-    v_idx = (y == 1)
+    
+    u_idx = (y == class_idx[0])
+    v_idx = (y == class_idx[1])
     
     u_values = x[u_idx, :]
     v_values = x[v_idx, :]
     
-    LR = torch.exp(logits[u_idx]).squeeze() # likelihood ratio
+    # likelihood (density) ratio
+    LR = torch.exp(logits[u_idx]).squeeze()
     
     if weights is not None:
         u_weights = weights[u_idx] * LR

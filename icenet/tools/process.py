@@ -1,6 +1,6 @@
 # Common input & data reading routines
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import argparse
 import gc
@@ -1030,9 +1030,11 @@ def train_models(data_trn, data_val, args=None):
     # ----------------------------------
     
     # Print training stats
+    print('Training sample statistics:')
     output_file = os.path.join(args["plotdir"], 'train', 'stats_train_weights.log')
     prints.print_weights(weights=data_trn['data'].w, y=data_trn['data'].y, output_file=output_file)
     
+    print('Validation sample statistics:')
     output_file = os.path.join(args["plotdir"], 'train', 'stats_validate_weights.log')
     prints.print_weights(weights=data_val['data'].w, y=data_val['data'].y, output_file=output_file)
     
@@ -1432,6 +1434,7 @@ def evaluate_models(data=None, info=None, args=None):
     # --------------------------------------------------------------------
     
     # Print evaluation stats
+    print('Evaluation sample statistics:')
     output_file = os.path.join(args["plotdir"], 'eval', 'stats_eval_weights.log')
     prints.print_weights(weights=data['data'].w, y=data['data'].y, output_file=output_file)
     
@@ -1790,6 +1793,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         filename = dir + "/stats_chi2_summary.log"
         open(filename, 'w').close() # Clear content
         
+        ## Collect post Stage 2 results
         df_per_tau = []
         
         for tau in args['plot_param']['OBS_reweight']['tau_values']:

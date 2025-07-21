@@ -1,10 +1,10 @@
-# Recompress and split Pandas parquet file
+# Recompress and split parquet (pandas) file into multiple files
 #
 # Example:
-#   python icefit/rezip.py input_data.parquet output_file \
+#   python icefit/rezip.py input_data.parquet output_file_name \
 #       --max_rows_per_file 500000 --compression brotli --compression_level 9
-#
-# m.mieskolainen@imperial.ac.uk, 2024
+# 
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import pandas as pd
 import os
@@ -31,13 +31,18 @@ def compress_parquet(df, output_file, compression, compression_level):
     # Get the file sizes
     output_size = os.path.getsize(output_file)
     print(f"Output File Size: {output_size / (1024 ** 2):.2f} MB")
+    
+    return output_size
 
 def main():
+    
+    print('rezip (m.mieskolainen@imperial.ac.uk, 2025)')
+    
     # Set up the argument parser
     parser = argparse.ArgumentParser(description="Split and/or compress a Parquet file.")
     
     # Required arguments
-    parser.add_argument("input_file", type=str, help="Path to the input Parquet file")
+    parser.add_argument("input_file",  type=str, help="Path to the input .parquet file")
     parser.add_argument("output_file", type=str, help="Base name for output files")
     
     # Argument for maximum rows per file
@@ -68,18 +73,22 @@ def main():
 
     # Get the input file size
     input_size = os.path.getsize(args.input_file)
-    print(f"Input File Size: {input_size / (1024 ** 2):.2f} MB")
+    print(f"Input File Size: {input_size / (1024 ** 2):.2f} MB ({args.input_file})")
     
     # Read the Parquet file into a pandas DataFrame
     df = pd.read_parquet(args.input_file)
     
     # Split the DataFrame into chunks
     chunk_number = 0
+    tot_output_size = 0
     for chunk_df in split_parquet(df, args.max_rows_per_file):
         # Automatically create output file names by appending the chunk number
         output_file = f"{args.output_file}_{chunk_number}.parquet"
-        compress_parquet(chunk_df, output_file, args.compression, args.compression_level)
+        tot_output_size += compress_parquet(chunk_df, output_file, args.compression, args.compression_level)
         chunk_number += 1
+
+    print(f'Total output size: {tot_output_size / (1024 ** 2):.2f} MB')
+    print()
 
 if __name__ == "__main__":
     main()

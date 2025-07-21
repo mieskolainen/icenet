@@ -1,6 +1,6 @@
 # Functions to evaluate (a boolean) expression tree and cuts for vector (component) data
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import pyparsing as pp
 import numpy as np

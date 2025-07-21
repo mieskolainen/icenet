@@ -1,4 +1,6 @@
-# Array job
+# Array job with a job queue size of (4), which is the
+# total number of jobs, which run either in parallel or not
+# (depending on cluster resources)
 
 executable     = task.sh
 arguments      = "$(PROCESS) 4 $(ClusterId)"

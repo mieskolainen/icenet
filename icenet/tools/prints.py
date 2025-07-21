@@ -1,6 +1,6 @@
 # Printing functions
-# 
-# m.mieskolainen@imperial.ac.uk, 2024
+#
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import numpy as np
 import psutil
@@ -73,7 +73,6 @@ def print_flow(flow):
         frac = value / total
         print(f'{index} | {key:20s} | {value:6.0f} [{frac:6.4f}]')
 
-
 def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
     """
     Print event weights table
@@ -81,7 +80,7 @@ def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
     
     class_ids = np.unique(y.astype(int))
     
-    table = PrettyTable(["class", "events", "sum(w)", "mean(w)", "std(w)",
+    table = PrettyTable(["class", "events", "ESS", "sum(w)", "mean(w)", "std(w)",
                          "min(w)", "Q1(w)", "Q5(w)", "med(w)", "Q95(w)", "Q99(w)", "max(w)"]) 
     
     for c in class_ids:
@@ -91,6 +90,7 @@ def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
         
         table.add_row([f'{c}',
                        f'{np.sum(ind)}',
+                       f'{aux.effective_sample_size(weights[ind]):0.1E}',
                        f'{np.round(np.sum(weights[ind]), 2)}',
                        f'{np.mean(weights[ind]):0.3E}',
                        f'{np.std(weights[ind]):0.3E}',
@@ -101,7 +101,7 @@ def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
                        f'{prc[4]:0.3E}',
                        f'{prc[5]:0.3E}',
                        f'{prc[6]:0.3E}'
-                       ])
+        ])
     
     print(table)
     print('')

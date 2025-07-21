@@ -1,6 +1,6 @@
 # "Pandas style" frame wrapper for columnar data with advanced indexing
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import numpy as np
 from icenet.tools import stx

@@ -31,20 +31,19 @@ mva_param: &MVA_INPUT_PARAM
     knn_k: 8                          # Number of nearest neighbours considered
     values: null                      # Special values which indicate the need for imputation, if null, then only Inf/Nan
 
-
 # ----------------------------------------------------
 genesis_runmode:
   
   maxevents:  null
   inputmap:   null
   
-  mcfile:     {'trn': ['MC_train_EB.parquet'],
-               'val': ['MC_val_EB.parquet'],   
-               'tst': ['MC_test_EB.parquet']}
+  mcfile:     {'trn': ['MC_train_EB*.parquet'],
+               'val': ['MC_val_EB*.parquet'],   
+               'tst': ['MC_test_EB*.parquet']}
   
-  datafile:   {'trn': ['Data_train_EB.parquet'],
-               'val': ['Data_val_EB.parquet'],   
-               'tst': ['Data_test_EB.parquet']}
+  datafile:   {'trn': ['Data_train_EB*.parquet'],
+               'val': ['Data_val_EB*.parquet'],   
+               'tst': ['Data_test_EB*.parquet']}
   
   drop_negative: true                 # Drop negative weight (MC) events
   

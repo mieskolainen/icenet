@@ -2,7 +2,7 @@
 #
 # (Do not modify this file!)
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 echo "Grid tuning job started"
 pwd

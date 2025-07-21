@@ -2,7 +2,9 @@
 EVAL_PARAM: &EVAL_PARAM
   
   tensorboard: true
-
+  ECE_metrics: 30              # Compute temperature calibration evolution (every n-th epoch, integer)
+                               # Need to be multiple of `savemode`
+  
   # Training and validation
   savemode: 3                  # Save and evaluate model file every n-th epoch (integer)
                                # (BDT will save always only the last one because it contains all epochs)
@@ -10,8 +12,8 @@ EVAL_PARAM: &EVAL_PARAM
   
   # Post-training evaluation
   readmode: -1                 # specific epoch (int), -1 finds the best loss model, -2 takes the last epoch model
-  readmode_metric: 'loss'      # e.g. 'loss', 'AUC' ... [currently only 'loss']
-  readmode_operator: 'argmin'  # 
+  #readmode_metric: 'loss'     # e.g. 'loss', 'AUC' ... [currently not implemented, only 'loss']
+  #readmode_operator: 'argmin' # 'argmin', 'argmax' [currently not implemented, by default 'argmin']
 
 
 # ----------------------------------------------------------------
@@ -19,13 +21,13 @@ EVAL_PARAM: &EVAL_PARAM
 # 
 # For Hessian (2nd order grad descent) control:
 # 
-#   ':hessian:constant:1.0'   (DEFAULT)
-#   ':hessian:iterative:0.9'  (Iterative, with the moving average parameter)
-#   ':hessian:hutchinson:10'  (Hutchinson, with the number of MC samples)
+#   ':hessian:constant:1.0'   (Constant set on the diagonal, slow convergence  --> many trees needed)
+#   ':hessian:iterative:0.9'  (Iterative, with exponential moving average window size, e.g. 1/(1-0.9)~10)
+#   ':hessian:hutchinson:10'  (Hutchinson MC estimator, with the number of MC samples [higher better])
 #   ':hessian:exact'          (Exact autograd)
 # 
-# Usage:
-#   objective: 'custom:binary_cross_entropy:hessian:iterative:0.9'
+# Usage example:
+#   objective: 'custom:binary_cross_entropy:hessian:hutchinson:20'
 # ----------------------------------------------------------------
 
 
@@ -34,10 +36,10 @@ EVAL_PARAM: &EVAL_PARAM
 # "Stage 1" model
 #
 # https://xgboost.readthedocs.io/en/latest/parameter.html
-iceboost3D:
+iceboost4D:
   train:   'xgb'
   predict: 'xgb_logistic'
-  label:   'ICEBOOST3D'
+  label:   'ICEBOOST4D'
   raytune:  xgb_setup_0
   
   # ** Custom set of variables **
@@ -52,27 +54,27 @@ iceboost3D:
     tree_method: 'hist'
     device:      'auto'           # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.05
+    learning_rate: 0.05           # Use smaller with large number of trees
     gamma: 1.5
-    max_depth: 13
+    max_depth: 8
     min_child_weight: 1.0
     max_delta_step: 1.0
     subsample: 1
     
-    colsample_bytree:  1.0
-    colsample_bylevel: 1.0
-    colsample_bynode:  1.0
+    colsample_bytree:  0.9
+    colsample_bylevel: 0.9
+    colsample_bynode:  0.9
     
     reg_lambda: 2.0               # L2 regularization
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    objective: 'custom:binary_cross_entropy:hessian:iterative:0.9'
+    eval_metric: ['custom']       # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
   opt_param:
-    noise_reg: 0.1                # Scheduled noise regularization
+    noise_reg: 0.05               # Scheduled noise regularization
   
   # BCE loss domains
   BCE_param:
@@ -86,13 +88,14 @@ iceboost3D:
   #  beta: 1.0e-3
   #  p: 1                  # p-norm (1,2, ...)
   #  num_slices: 500       # Number of MC projections (Higher the better) 
-  #  mode: 'SWD'           # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
+  #  mode: 'SWD-QR'        # 'SWD' (basic), 'SWD-QR' (see icefit/transport.py)
   #  max_N: 400000         # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
   #  var: ['.*']           # Use all variables in SWD
+  #  class_idx: [0,1]      # Classes for U -> V (first one multiplied with x exp(logit))
   #  norm_weights: False   # Normalization enforced (if False, model should learn to keep the normalization)
   
   plot_trees: false
-  
+ 
   <<: *EVAL_PARAM
 
 # ------------------------------------------------
@@ -118,9 +121,9 @@ xgb0:
     tree_method: 'hist'
     device:      'auto'           # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.08
+    learning_rate: 0.05           # Use smaller with large number of trees
     gamma: 1.5
-    max_depth: 13
+    max_depth: 10
     min_child_weight: 1.0
     max_delta_step: 1.0
     subsample: 1
@@ -165,9 +168,9 @@ iceboost0: &ICEBOOST0
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.1       # Learning rate (slower -> more conservative updates)
+    learning_rate: 0.05      # Use smaller with large number of trees
     gamma: 1.5               # Minimum loss reduction required to make a further partition on a leaf node
-    max_depth: 13            # Maximum depth of a tree (too high may overfit)
+    max_depth: 10            # Maximum depth of a tree (too high may overfit)
     min_child_weight: 1.0    # Minimum sum of instance weight (hessian) needed in a child (higher -> more conservative)
     max_delta_step: 1.0      # Constraint on the maximum change in the model's weights
     subsample: 1             # Subsample ratio of the training instance (=1 uses all data)
@@ -179,10 +182,10 @@ iceboost0: &ICEBOOST0
     reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
     reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
     
-    objective: 'custom:binary_cross_entropy' # Note that 'multi:softprob' does not work with distillation
+    objective: 'custom:binary_cross_entropy:hessian:iterative:0.9'
     
-    eval_metric: ['custom']                  # for custom losses, otherwise 'logloss', 'mlogloss' ...
-
+    eval_metric: ['custom']  # for custom losses, otherwise 'logloss', 'mlogloss' ...
+  
   # Special optimization
   opt_param:
     noise_reg: 0.1           # Scheduled noise regularization
@@ -193,7 +196,7 @@ iceboost0: &ICEBOOST0
       classes: [0,1]
       beta: 1.0
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-  #    label_eps: 0.05           # label smoothing epsilon (regularization)
+  #    label_eps: 0.05       # label smoothing epsilon (regularization)
   
   plot_trees: false
   
@@ -208,7 +211,7 @@ iceboost_swd:
   
   label: 'ICEBOOST-SWD'
   
-  bootstrap: 3
+  bootstrap: 0         # Number of bootstrap re-trainings (0, or integer)
 
   # BCE loss domains [use with custom:binary_cross_entropy]
   BCE_param:
@@ -216,18 +219,26 @@ iceboost_swd:
       beta: 1.0
       classes: [0,1]
       #set_filter: *MAIN_DOMAIN_FILTER # Comment out for 'inclusive'
-      label_eps: 0.0     # label smoothing epsilon (regularization)
+      label_eps: 0.0      # label smoothing epsilon (regularization)
   
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
     beta: 2.0e-2
-    p: 1                   # p-norm (1,2, ...)
-    num_slices: 500        # Number of MC projections (Higher the better) 
-    mode: 'SWD'            # 'SWD' (basic), 'EBSW' (see icefit/transport.py)
-    max_N: 400000          # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
-    var: ['.*']            # Use all variables in SWD
-    #var: ['fixedGridRhoAll', 'probe_eta', 'probe_pt'] # Use specific ones
-    norm_weights: False    # Normalization enforced (if False, model should learn to keep the normalization)
+    p: 1                # p-norm (1,2, ...)
+    num_slices: 500     # Number of MC projections (Higher the better) 
+    mode: 'SWD-QR'      # 'SWD' (basic), 'SWD-QR' (see icefit/transport.py)
+    max_N: 500000       # Max events limit (~500k & 500 slices should be ok with 32 GB VRAM)
+    #var: ['.*']        # Use all variables in SWD
+    var: ['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll'] # Use only Stage-1 variables
+    
+    class_idx: [0,0]    # Classes for U -> V transport, with two strategies:
+                        
+                        # 1. [0,0] (match simulation post Stage-1 x Stage-2 against simulation post Stage-1)
+                        #          (this strategy should use only input variables used in Stage-1 !)
+                        # 2. [0,1] (match simulation post Stage-1 x Stage-2 against data)
+                        #          (this strategy can use all input variables, or only Stage-1 variables)
+
+    norm_weights: False # Normalization enforced (if False, model should learn to keep the normalization)
 
 
 # -----------------------------------------------------------------------------
@@ -297,7 +308,7 @@ lzmlp0: &LZMLP
     #period: 30
     
     type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
-    step_size: 80             # Number of epochs for drop
+    step_size: 80              # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
@@ -387,7 +398,7 @@ fastkan0: &FASTKAN
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-      
+  
   <<: *EVAL_PARAM
 
   # Deploy (or test) mode device
@@ -471,12 +482,12 @@ dmlp0: &DMLP
     #period: 30
     
     type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
-    step_size: 80             # Number of epochs for drop
+    step_size: 80              # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'
   num_workers: 4
-    
+  
   <<: *EVAL_PARAM
 
 

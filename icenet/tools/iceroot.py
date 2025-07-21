@@ -1,6 +1,6 @@
 # ROOT file processing tools
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import numpy as np
 import uproot

@@ -1,6 +1,6 @@
 # Colored printing
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import inspect
 from datetime import datetime

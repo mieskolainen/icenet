@@ -1,6 +1,6 @@
 # iceboost == xgboost + torch autograd based extensions
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -100,8 +100,15 @@ def _sliced_wasserstein(preds: torch.Tensor, targets: torch.Tensor, weights: tor
     x    = torch.tensor(x, dtype=preds.dtype).to(device)
         
     loss = losstools.SWD_reweight_loss(
-                    logits=preds, x=x, y=targets, weights=w,
-                    p=SWD_param['p'], num_slices=SWD_param['num_slices'], mode=SWD_param['mode'])
+        logits=preds,
+        x=x,
+        y=targets,
+        weights=w,
+        p=SWD_param['p'],
+        num_slices=SWD_param['num_slices'],
+        mode=SWD_param['mode'],
+        class_idx=SWD_param['class_idx']
+    )
     
     txt             = f'SWD'
     track_loss[txt] = loss.item()
@@ -222,14 +229,6 @@ def _binary_cross_entropy(preds: torch.Tensor, targets: torch.Tensor, weights: t
         
         track_loss[txt] = loss.item()
         loss_str       += f'{txt} = {loss.item():0.5f} | '
-    
-    # --------------------------------------------------------------------
-    # Temperature post-calibration [just for diagnostics atm]
-    
-    if loss_mode == 'eval':
-        
-        ts = tempscale.LogitsWithTemperature(mode='binary', device=device)
-        ts.calibrate(logits=preds, labels=targets.to(torch.float32), weights=w)
     
     # --------------------------------------------------------------------
     # Sliced Wasserstein reweight U (y==0) -> V (y==1) transport
@@ -581,12 +580,12 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     
     # Custom loss object init
     
+    if param['model_param']['device'] == 'auto':
+        device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
+    else:
+        device = param['model_param']['device']
+    
     if use_custom:
-        
-        if param['model_param']['device'] == 'auto':
-            device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu:0')
-        else:
-            device = param['model_param']['device']
         
         ## Custom loss string of type 'custom_loss:loss_name:hessian:hessian_mode(:parameter)'
         strs = model_param['objective'].split(':')
@@ -598,10 +597,10 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         else:
             raise Exception(__name__ + f'.train_xgb: Unknown custom loss {strs[1]} (check syntax)')
         
-        ## Hessian treatment
+        ## Hessian diagonal treatment
         
         # Default values
-        hessian_mode   = 'constant'
+        hessian_mode   = 'iterative'
         hessian_const  = 1.0
         hessian_gamma  = 0.9
         hessian_slices = 10
@@ -631,6 +630,8 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             hessian_slices = hessian_slices,
             device         = device
         )
+    
+    ts = None
     
     for epoch in range(0, num_epochs):
         
@@ -698,7 +699,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         # ==============================================
         ## Validate
-        if epoch == 0 or ((epoch+1) % param['savemode']) == 0 or args['__raytune_running__']:
+        if (epoch == 0) or ((epoch+1) % int(param['savemode'])) == 0 or args['__raytune_running__']:
             
             # ------- AUC values ------
             if len(args['primary_classes']) >= 2:
@@ -710,7 +711,22 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                 preds_eval = model.predict(deval)
                 if len(preds_eval.shape) > 1: preds_eval = preds_eval[:, args['signal_class']]
                 metrics_eval = aux.Metric(y_true=data_val.y, y_pred=preds_eval, weights=w_val, class_ids=args['primary_classes'], hist=False, verbose=True)
-        
+
+            # --------------------------------------------------------------------
+            # Temperature post-calibration diagnostics
+            
+            ece_freq = int(param.get('ECE_metrics', 0))
+            if ece_freq > 0:
+                if epoch == 0 or (epoch + 1) % ece_freq == 0:
+                    
+                    ts = tempscale.LogitsWithTemperature(mode='binary', device=device)
+                    
+                    ts.calibrate(logits  = torch.as_tensor(preds_eval, device=device).to(torch.float32),
+                                 labels  = torch.as_tensor(data_val.y, device=device).to(torch.float32),
+                                 weights = torch.as_tensor(w_val,      device=device).to(torch.float32))
+
+            # --------------------------------------------------------------------
+            
             # ------- Loss values ------
             if use_custom:
                 if out_weights_on:
@@ -758,6 +774,13 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
             writer.add_scalar('loss/train',      trn_losses[-1], epoch)
             writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
+            
+            if ts is not None and ts.before.ECE is not None:
+                writer.add_scalar('ECE/validation/pre',   ts.before.ECE,  epoch)
+                writer.add_scalar('ECE/validation/post',  ts.after.ECE,   epoch)
+                writer.add_scalar('ECE2/validation/pre',  ts.before.ECE2, epoch)
+                writer.add_scalar('ECE2/validation/post', ts.after.ECE2,  epoch)
+                writer.add_scalar('tau/validation',       float(ts.temperature.item()), epoch)
         
         print(f'[{param["label"]}] Tree {epoch+1:03d}/{num_epochs:03d} | Train: loss = {trn_losses[-1]:0.4f}, AUC = {trn_aucs[-1]:0.4f} | Eval: loss = {val_losses[-1]:0.4f}, AUC = {val_aucs[-1]:0.4f}')
     
@@ -783,7 +806,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         
         with open(filename + '.pkl', 'wb') as file:
             data = {'model': model, 'ids': ids_trn, 'losses': losses, 'epoch': num_epochs-1, 'param': param}
-            print(f'Saving model and statistics to file: {filename}')
+            print(f'Saving model and statistics to file: {filename}.pkl')
             pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
         
         gc.collect() #!

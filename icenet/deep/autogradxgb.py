@@ -1,11 +1,13 @@
 # Custom pytorch-driven autograd losses for XGBoost
+# with various Hessian diagonal approaches
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import numpy as np
 import torch
 from torch import Tensor
 import xgboost
+import time
 from tqdm import tqdm
 
 from typing import Callable, Sequence, List, Tuple
@@ -18,8 +20,8 @@ class XgboostObjective():
     """
     XGB custom loss driver class with torch (autograd)
     
-    hessian_mode: 'iterative' or 'hutchinson' may make the model converge significantly
-    faster than 'constant' in some cases.
+    hessian_mode: 'hutchinson' (or 'iterative') may make the model converge
+    significantly faster (or better) than 'constant' in some cases.
     
     N.B. Remember to call manually:
     
@@ -30,19 +32,26 @@ class XgboostObjective():
         loss_func:       Loss function handle
         mode:            'train' or 'eval', see the comment above
         flatten_grad:    For vector valued model output [experimental]
-        hessian_mode:    'iterative', 'hutchinson', 'exact', 'constant', 'squared_approx' 
+        hessian_mode:    'constant', 'iterative', 'hutchinson', 'exact'
         hessian_const:   Scalar parameter constant 'hessian_mode'
-        hessian_gamma:   Hessian momentum smoothing parameter for the 'iterative' mode
-        hessian_slices:  Hutchinson Hessian diagonal estimator MC slice sample size
+        
+        hessian_gamma:   Hessian EMA smoothing parameter for the 'iterative' mode
+        hessian_eps:     Hessian estimate denominator regularization for the 'iterative'
+        hessian_absmax:  Hessian absolute clip parameter for the 'iterative'
+        
+        hessian_slices:  Hutchinson MC estimator MC slice sample size for the 'hutchinson' mode
         device:          Torch device
     """
+    
     def __init__(self,
             loss_func: Callable[[Tensor, Tensor], Tensor],
             mode: str='train',
-            flatten_grad: bool=False,
-            hessian_mode: str='constant',
-            hessian_const: float=1.0,
-            hessian_gamma: float=0.9,
+            flatten_grad:   bool=False,
+            hessian_mode:   str='hutchinson',
+            hessian_const:  float=1.0,
+            hessian_gamma:  float=0.9,
+            hessian_eps:    float=1e-8,
+            hessian_absmax: float=10.0,
             hessian_slices: int=10,
             device: torch.device='cpu'
         ):
@@ -52,8 +61,15 @@ class XgboostObjective():
         self.device         = device
         self.hessian_mode   = hessian_mode
         self.hessian_const  = hessian_const
+        
+        # Iterative mode
         self.hessian_gamma  = hessian_gamma
+        self.hessian_eps    = hessian_eps
+        self.hessian_absmax = hessian_absmax
+
+        # Hutchinson mode
         self.hessian_slices = int(hessian_slices)
+        
         self.flatten_grad   = flatten_grad
         
         # For the optimization algorithms
@@ -102,39 +118,90 @@ class XgboostObjective():
 
         return preds, targets, weights
 
-    def iterative_hessian_update(self,
-            grad: Tensor, preds: Tensor, absMax: float=10, EPS: float=1e-8):
+    @torch.no_grad
+    def iterative_hessian_update(self, grad: Tensor, preds: Tensor):
         """
         Iterative approximation of the Hessian diagonal using finite differences
-        
-        [experimental]
+        based on a previous boost iteration Hessian (full batch training ~ only one Hessian stored)
         
         Args:
             grad:  Current gradient vector
             preds: Current prediction vector
         """
+        print(f'Computing Hessian diag with iterative finite difference (gamma = {self.hessian_gamma})')
         
+        # Initialize to unit curvature as a neutral default
+        # (if sigma_i^2 = 1/H_ii, then this is a Gaussian N(0,1) prior)
         if self.hess_diag is None:
             self.hess_diag = torch.ones_like(grad)
             hess_diag_new  = torch.ones_like(grad)
         
         # H_ii ~ difference in gradients / difference in predictions
         else:
-            
             dg = grad  - self.grad_prev
             ds = preds - self.preds_prev
             
-            hess_diag_new = dg / (ds + EPS)
-            hess_diag_new = torch.clamp(hess_diag_new, min=-absMax, max=absMax)
+            hess_diag_new = dg / (ds + self.hessian_eps)
+            hess_diag_new = torch.clamp(hess_diag_new,
+                                        min=-self.hessian_absmax, max=self.hessian_absmax)
         
-        # Running smoothing update to stabilize
-        self.hess_diag = self.hessian_gamma * self.hess_diag + (1-self.hessian_gamma) * hess_diag_new
+        # Exponential Moving Average (EMA), approx filter size ~ 1 / (1 - gamma) steps
+        self.hess_diag = self.hessian_gamma * self.hess_diag + \
+                         (1 - self.hessian_gamma) * hess_diag_new
         
         # Save the gradient vector and predictions
-        self.grad_prev  = grad.clone()
-        self.preds_prev = preds.clone()
-    
-    def derivatives(self, loss: Tensor, preds: Tensor) -> Tuple[Tensor, Tensor]:
+        self.grad_prev  = grad.clone().detach()
+        self.preds_prev = preds.clone().detach()
+        
+    def hessian_hutchinson(self, grad: Tensor, preds: Tensor):
+        """
+        Hutchinson MC estimator for the Hessian diagonal ~ O(slices) (time)
+        """
+        tic = time.time()
+        print(f'Computing Hessian diag with Hutchinson MC (slices = {self.hessian_slices}) ... ')
+
+        grad2 = torch.zeros_like(preds)
+        
+        for _ in range(self.hessian_slices):
+            
+            # Generate a Rademacher vector (each element +-1 with probability 0.5)
+            v = torch.empty_like(preds).uniform_(-1, 1)
+            v = torch.sign(v)
+
+            # Compute Hessian-vector product H * v
+            Hv = torch.autograd.grad(grad, preds, grad_outputs=v, retain_graph=True)[0]
+
+            # Accumulate element-wise product v * Hv to get the diagonal
+            grad2 += v * Hv
+
+        print(f'Took {time.time()-tic:.2f} sec')
+
+        # Average over all samples
+        return grad2 / self.hessian_slices
+
+    def hessian_exact(self, grad: Tensor, preds: Tensor):
+        """
+        Hessian diagonal with exact autograd ~ O(data points) (time)
+        """
+        tic = time.time()
+        print('Computing Hessian diagonal with exact autograd ... ')
+
+        grad2 = torch.zeros_like(preds)
+        
+        for i in tqdm(range(len(preds))):
+            
+            # A basis vector
+            e_i = torch.zeros_like(preds)
+            e_i[i] = 1.0
+            
+            # Compute the Hessian-vector product H e_i
+            grad2[i] = torch.autograd.grad(grad, preds, grad_outputs=e_i, retain_graph=True)[0][i]
+
+        print(f'Took {time.time()-tic:.2f} sec')
+        
+        return grad2
+        
+    def derivatives(self, loss: Tensor, preds: Tensor) -> Tuple[np.ndarray, np.ndarray]:
         """
         Gradient and Hessian diagonal
         
@@ -143,72 +210,42 @@ class XgboostObjective():
             preds: model predictions
         
         Returns:
-            gradient vector, hessian diagonal vector
+            gradient vector, hessian diagonal vector as numpy arrays
         """
         
         ## Gradient
         grad1 = torch.autograd.grad(loss, preds, create_graph=True)[0]
         
         ## Diagonal elements of the Hessian matrix
-        
         match self.hessian_mode:
             
             # Constant curvature
             case 'constant':
+                print(f'Setting Hessian diagonal using a constant (hessian_const = {self.hessian_const})')
                 grad2 = self.hessian_const * torch.ones_like(grad1)
-
-            # Squared derivative based [uncontrolled] approximation (always positive curvature)
-            case 'squared_approx':
-                grad2 = grad1 * grad1
 
             # BFGS style iterative updates
             case 'iterative':
-                print(f'Computing Hessian diagonal with iterative finite difference ...')
-                
                 self.iterative_hessian_update(grad=grad1, preds=preds)
                 grad2 = self.hess_diag
 
-            # Hutchinson MC approximator ~ O(slices)
+            # Hutchinson based MC estimator
             case 'hutchinson':
-                
-                print(f'Computing Hessian diagonal with MC Hutchinson ...')
-
-                grad2 = torch.zeros_like(preds)
-                
-                for _ in tqdm(range(self.hessian_slices)):
-                    
-                    # Generate a Rademacher vector (each element +-1 with probability 0.5)
-                    v = torch.empty_like(preds).uniform_(-1, 1)
-                    v = torch.sign(v)
-
-                    # Compute Hessian-vector product H * v
-                    Hv = torch.autograd.grad(grad1, preds, grad_outputs=v, retain_graph=True)[0]
-
-                    # Accumulate element-wise product v * Hv to get the diagonal
-                    grad2 += v * Hv
-
-                # Average over all samples
-                grad2 /= self.hessian_slices
-                
+                grad2 = self.hessian_hutchinson(grad=grad1, preds=preds)
+            
             # Exact autograd (slow)
             case 'exact':
-                
-                print('Computing Hessian diagonal with exact autograd ...')
-                
-                grad2 = torch.zeros_like(preds)
-                
-                for i in tqdm(range(len(preds))):
-                    
-                    # A basis vector
-                    e_i = torch.zeros_like(preds)
-                    e_i[i] = 1.0
-                    
-                    # Compute the Hessian-vector product H e_i
-                    grad2[i] = torch.autograd.grad(grad1, preds, grad_outputs=e_i, retain_graph=True)[0][i]
+                grad2 = self.hessian_exact(grad=grad1, preds=preds)
 
+            # Squared derivative based [uncontrolled] approximation (always positive curvature)
+            case 'squared_approx':
+                print(f'Setting Hessian diagonal using grad^2 [DEBUG ONLY]')
+                grad2 = grad1 * grad1
+            
             case _:
                 raise Exception(f'Unknown "hessian_mode" {self.hessian_mode}')
         
+        # Return numpy arrays
         grad1, grad2 = grad1.detach().cpu().numpy(), grad2.detach().cpu().numpy()
         
         if self.flatten_grad:

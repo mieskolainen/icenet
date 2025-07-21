@@ -86,6 +86,6 @@ else
     echo ""
     
     export ICENET_ENV=True
-
+    
     echo '** ICENET: New environment variables set **'
 fi

@@ -1,31 +1,48 @@
 #!/bin/bash
 #
-# (Do not modify this file)
+# (Do not modify this file!)
 # 
 # Condor submission with first init job and then
 # an array job once that is finished. Emulating DAGMan without using it.
 #
 # This file expects variable `TASK_SCRIPT` set externally. See README.md.
 # 
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 mkdir logs -p
+
+# === Check for required environment variable ===
+if [ -z "$TASK_SCRIPT" ]; then
+    echo "Error: TASK_SCRIPT environment variable is not set."
+    echo "Please set it, e.g.: export TASK_SCRIPT=gridtune_task_EB.sh"
+    return
+fi
 
 # Fixed
 INIT_JOB="gridtune_init.job"
 ARRAY_JOB="gridtune_array.job"
 PERIOD=15
 
-# Replace the line and save to the temporary file
-TEMP_FILE="temp_$(basename "${INIT_JOB}")"
-sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" $INIT_JOB > $TEMP_FILE
+# === Extract clean identifier from TASK_SCRIPT ===
+TASK_BASENAME=$(basename "${TASK_SCRIPT}" .sh)
+TASK_NAME="${TASK_BASENAME//[^a-zA-Z0-9_]/_}"  # Sanitize
 
-# Submit the first job
+# === Create unique temporary job files ===
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+TEMP_FILE_INIT="tmp__${TASK_NAME}_${TIMESTAMP}_${INIT_JOB}"
+TEMP_FILE_ARRAY="tmp__${TASK_NAME}_${TIMESTAMP}_${ARRAY_JOB}"
+
+sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$INIT_JOB" > "$TEMP_FILE_INIT"
+sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$ARRAY_JOB" > "$TEMP_FILE_ARRAY"
+
+chmod +x *.sh
+
+# === Submit the first init job === 
 echo "Submitting init job"
-FIRST_JOB_ID=$(condor_submit $TEMP_FILE | awk '/submitted to cluster/ {print int($6)}')
+FIRST_JOB_ID=$(condor_submit $TEMP_FILE_INIT | awk '/submitted to cluster/ {print int($6)}')
 echo " "
-cat $TEMP_FILE
-rm $TEMP_FILE
+cat $TEMP_FILE_INIT
 
 # Check if job submission was successful
 if [[ -z "$FIRST_JOB_ID" ]]; then
@@ -72,15 +89,10 @@ while true; do
     sleep $PERIOD
 done
 
-# Submit the array job
+# === Submit the array job === 
 echo ""
 echo "Submitting array job"
 
-# Create temp file
-TEMP_FILE="temp_$(basename "${ARRAY_JOB}")"
-sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" $ARRAY_JOB > $TEMP_FILE
-
-condor_submit $TEMP_FILE
+condor_submit $TEMP_FILE_ARRAY
 echo " "
-cat $TEMP_FILE
-rm $TEMP_FILE
+cat $TEMP_FILE_ARRAY

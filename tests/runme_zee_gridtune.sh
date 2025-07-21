@@ -17,11 +17,10 @@
 # 
 # Step 2. Add executable rights to all relevant .sh files with: chmod +x *.sh
 # 
-# Step 3. Submit Condor jobs with:
-#         cd tests/zee
-#         source submit.sh
+# Step 3. Submit Condor jobs
+#         see the README.md under /tests/zee
 # 
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 # -----------------------------------------------------------------------
 
 # -----------------------------------------------------------------------

@@ -217,7 +217,10 @@ def create_axes(xlabel='$x$', ylabel=r'Counts', ylabel_ratio='Ratio',
     if kwargs['density']:
         ylabel = f'$1/N$  {ylabel} / [{units["x"]}]'
     else:
-        ylabel = f'{ylabel}  [{units["y"]} / {units["x"]}]'
+        if units["y"] == 'counts':
+            ylabel = f'{ylabel}'
+        else:
+            ylabel = f'{ylabel}  [{units["y"]} / {units["x"]}]'       
     xlabel = f'{xlabel} [{units["x"]}]'
     
     ax[0].set_ylabel(ylabel, fontsize=fontsize)

@@ -1,6 +1,6 @@
 # Auxialary functions
 # 
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import math
 import numpy as np
@@ -177,12 +177,21 @@ def sigmoid(x: np.ndarray):
 
     return result
 
-def weighted_avg_and_std(values, weights):
+def effective_sample_size(weights: np.ndarray):
+    """
+    Effective Sample Size
+    """
+    return (weights.sum())**2 / np.sum(weights**2)
+
+def weighted_avg_and_std(values: np.ndarray, weights: np.ndarray):
     """
     Return the weighted average and standard deviation
     """
     average  = np.average(values, weights=weights)
     variance = np.average((values - average)**2, weights=weights)
+    
+    # Ensure variance is non-negative
+    variance = np.clip(variance, 0.0, None)
     
     return average, np.sqrt(variance)
 

@@ -1,6 +1,6 @@
 # Generic model training wrapper functions [TBD; unify and simplify data structures further]
 #
-# m.mieskolainen@imperial.ac.uk, 2024
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import numpy as np
 import torch
@@ -31,13 +31,14 @@ from icenet.deep  import lzmlp
 from icenet.deep  import dbnf
 from icenet.deep  import vae
 from icenet.deep  import fastkan
-
 from icenet.deep  import cnn
 from icenet.deep  import graph
+from icenet.deep  import tempscale
 
 from icefit import mine
 
 from icenet.optim import adam
+
 
 # ------------------------------------------
 from icenet import print
@@ -327,6 +328,8 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     trn_aucs   = []
     val_aucs   = []
     
+    ts = None
+    
     for epoch in range(0, opt_param['epochs']):
 
         if MI is not None: # Reset diagnostics
@@ -338,18 +341,22 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         # Train
         loss = optimize.train(model=model, loader=train_loader, optimizer=optimizer, device=device, opt_param=opt_param, MI=MI)
         
-        if epoch == 0 or ((epoch+1) % param['savemode']) == 0 or epoch == opt_param['epochs']-1 or args['__raytune_running__']:
+        if epoch == 0 or ((epoch+1) % int(param['savemode'])) == 0 or epoch == opt_param['epochs']-1 or args['__raytune_running__']:
             _, train_acc, train_auc                   = optimize.test(model=model, loader=train_loader, device=device, opt_param=opt_param, MI=MI, compute_loss=False)
             validate_loss, validate_acc, validate_auc = optimize.test(model=model, loader=test_loader,  device=device, opt_param=opt_param, MI=MI, compute_loss=True)
             
-            # Temperature calibration
-            try:
-                from icenet.deep import tempscale
-                tt = tempscale.ModelWithTemperature(model=model, device=device, mode='softmax' if model.out_dim > 1 else 'binary')
-                tt.calibrate(valid_loader=test_loader)
-            except Exception as e:
-                print(e)
-                print('Could not evaluate temperature scaling -- skip')
+            # Temperature calibration metrics
+            ece_freq = int(param.get('ECE_metrics', 0))
+            if ece_freq > 0:
+                if epoch == 0 or (epoch + 1) % ece_freq == 0:
+                    
+                    try:
+                        ts = tempscale.ModelWithTemperature(model=model, device=device, mode='softmax' if model.out_dim > 1 else 'binary')
+                        ts.calibrate(valid_loader=test_loader)
+                    
+                    except Exception as e:
+                        print(e)
+                        print('Could not evaluate temperature scaling -- skip')
         
         ## ** Save values **
         optimize.trackloss(loss=loss, loss_history=loss_history_train)
@@ -377,6 +384,13 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             writer.add_scalar('loss/train',      trn_losses[-1], epoch)
             writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
+            
+            if ts is not None and ts.before.ECE is not None:
+                writer.add_scalar('ECE/validation/pre',   ts.before.ECE,  epoch)
+                writer.add_scalar('ECE/validation/post',  ts.after.ECE,   epoch)
+                writer.add_scalar('ECE2/validation/pre',  ts.before.ECE2, epoch)
+                writer.add_scalar('ECE2/validation/post', ts.after.ECE2,  epoch)
+                writer.add_scalar('tau/validation',       float(ts.temperature.item()), epoch)
         
         if not args['__raytune_running__'] and (epoch == 0 or ((epoch+1) % param['savemode']) == 0 or epoch == opt_param['epochs']-1):
             

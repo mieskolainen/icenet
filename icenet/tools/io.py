@@ -1,6 +1,6 @@
 # Input data containers and memory management
-# 
-# m.mieskolainen@imperial.ac.uk, 2024
+#
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import numpy as np
 import awkward as ak
@@ -12,7 +12,8 @@ import os
 import psutil
 import subprocess
 import re
-
+import pathlib
+from natsort import natsorted
 
 # MVA imputation
 from sklearn.impute import KNNImputer
@@ -175,27 +176,23 @@ def glob_expand_files(datasets, datapath, recursive_glob=False):
         #print(__name__ + f'.glob_expand_files: After expanding the range: {datasets}')
 
     # Parse input files into a list
-    files = list()
+    files = []
     for data in datasets:
         
-        x = datapath + '/' + data
-        expanded_files = glob(x, recursive=recursive_glob) # This does e.g. _*.root expansion (finds the files)
-
-        # Loop over expanded set of files
-        if expanded_files != []:
-            for i in range(len(expanded_files)):
-                files.append(expanded_files[i])
+        # This does e.g. _*.root expansion (finds the files)
+        x = str(pathlib.Path(datapath) / data)
+        expanded_files = glob(x, recursive=recursive_glob)
+        
+        files.extend(expanded_files)
     
     if files == []:
        files = [datapath]
     
-    # Transform multiple slashes
-    for i in range(len(files)):
-        files[i] = files[i].replace('////','/').replace('///', '/').replace('//', '/')
-
-    # Make them unique
-    files = list(set(files))
-    files.sort()
+    # Normalize e.g. for accidental multiple slashes
+    files = [os.path.normpath(f) for f in files]
+    
+    # Make them unique and natural sorted
+    files = natsorted(set(files))
     
     #print(__name__ + f'.glob_expand_files: Final files: {files}')
     
