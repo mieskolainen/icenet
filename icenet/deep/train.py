@@ -385,7 +385,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
             writer.add_scalar('AUC/validation',  val_aucs[-1],   epoch)
             writer.add_scalar('AUC/train',       trn_aucs[-1],   epoch)
             
-            if ts is not None and ts.before.ECE is not None:
+            if ts is not None and ts.before is not None:
                 writer.add_scalar('ECE/validation/pre',   ts.before.ECE,  epoch)
                 writer.add_scalar('ECE/validation/post',  ts.after.ECE,   epoch)
                 writer.add_scalar('ECE2/validation/pre',  ts.before.ECE2, epoch)

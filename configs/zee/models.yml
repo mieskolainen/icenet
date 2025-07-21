@@ -56,20 +56,20 @@ iceboost4D:
     
     learning_rate: 0.1            # Use smaller with large number of trees
     gamma: 1.5
-    max_depth: 11
+    max_depth: 8
     min_child_weight: 1.0
     max_delta_step: 1.0
     subsample: 1
     
-    colsample_bytree:  0.98
-    colsample_bylevel: 0.98
-    colsample_bynode:  0.98
+    colsample_bytree:  1.0        # Keep at 1.0 (otherwise fixedGridRhoAll variable not well modelled)
+    colsample_bylevel: 0.9
+    colsample_bynode:  0.9
     
     reg_lambda: 2.0               # L2 regularization
     reg_alpha: 0.05               # L1 regularization
     
     # learning task parameters
-    objective: 'custom:binary_cross_entropy:hessian:iterative:0.8'
+    objective: 'custom:binary_cross_entropy:hessian:hutchinson:100'
     eval_metric: ['custom']       # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
@@ -89,7 +89,7 @@ iceboost4D:
   #  p: 1                  # p-norm (1,2, ...)
   #  num_slices: 500       # Number of MC projections (Higher the better) 
   #  mode: 'SWD-QR'        # 'SWD' (basic), 'SWD-QR' (see icefit/transport.py)
-  #  max_N: 400000         # Max events limit (400k & 500 slices works with 32 GB Nvidia V100)
+  #  max_N: 400000         # Max events limit (~500k & 500 slices works with 32 GB VRAM)
   #  var: ['.*']           # Use all variables in SWD
   #  class_idx: [0,1]      # Classes for U -> V (first one multiplied with x exp(logit))
   #  norm_weights: False   # Normalization enforced (if False, model should learn to keep the normalization)
@@ -128,7 +128,7 @@ xgb0:
     max_delta_step: 1.0
     subsample: 1
 
-    colsample_bytree:  0.9
+    colsample_bytree:  1.0
     colsample_bylevel: 0.9
     colsample_bynode:  0.9
     
@@ -175,7 +175,7 @@ iceboost0: &ICEBOOST0
     max_delta_step: 1.0      # Constraint on the maximum change in the model's weights
     subsample: 1             # Subsample ratio of the training instance (=1 uses all data)
     
-    colsample_bytree:  0.9   # Specifies the fraction of features to be randomly selected for each tree
+    colsample_bytree:  1.0   # Specifies the fraction of features to be randomly selected for each tree
     colsample_bylevel: 0.9   # As 'bytree' but applied to individual tree levels
     colsample_bynode:  0.9   # The fraction of features to be randomly selected for each split in a tree
     

@@ -1,14 +1,13 @@
-# Instructions for the hyperparameter grid scan
-# using Condor for `icezee`
-#
-# m.mieskolainen@imperial.ac.uk, 2025
+# Instructions for the hyperparameter grid scan using Condor for `icezee`
+
+m.mieskolainen@imperial.ac.uk, 2025
 
 Launch by executing the commands in the folder `tests/zee`:
 
 ```
 cd tests/zee
 chmod +x *.sh
-``
+```
 
 ## Method 1: DAGMan Condor Launch
 
