@@ -514,8 +514,8 @@
              
   <h1>Source code for icenet.tools.io</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Input data containers and memory management</span>
-<span class="c1"># </span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
+<span class="c1">#</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
@@ -527,7 +527,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">natsort</span><span class="w"> </span><span class="kn">import</span> <span class="n">natsorted</span>
 
 <span class="c1"># MVA imputation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNNImputer</span>
@@ -713,27 +714,23 @@
         <span class="c1">#print(__name__ + f&#39;.glob_expand_files: After expanding the range: {datasets}&#39;)</span>
 
     <span class="c1"># Parse input files into a list</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
         
-        <span class="n">x</span> <span class="o">=</span> <span class="n">datapath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">data</span>
-        <span class="n">expanded_files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive_glob</span><span class="p">)</span> <span class="c1"># This does e.g. _*.root expansion (finds the files)</span>
-
-        <span class="c1"># Loop over expanded set of files</span>
-        <span class="k">if</span> <span class="n">expanded_files</span> <span class="o">!=</span> <span class="p">[]:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expanded_files</span><span class="p">)):</span>
-                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expanded_files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1"># This does e.g. _*.root expansion (finds the files)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">datapath</span><span class="p">)</span> <span class="o">/</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">expanded_files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive_glob</span><span class="p">)</span>
+        
+        <span class="n">files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">expanded_files</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">files</span> <span class="o">==</span> <span class="p">[]:</span>
        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapath</span><span class="p">]</span>
     
-    <span class="c1"># Transform multiple slashes</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)):</span>
-        <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;////&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;///&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;//&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Make them unique</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">files</span><span class="p">))</span>
-    <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="c1"># Normalize e.g. for accidental multiple slashes</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+    
+    <span class="c1"># Make them unique and natural sorted</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">natsorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">files</span><span class="p">))</span>
     
     <span class="c1">#print(__name__ + f&#39;.glob_expand_files: Final files: {files}&#39;)</span>
     

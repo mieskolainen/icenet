@@ -546,6 +546,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">device</span>      <span class="o">=</span> <span class="n">device</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>        <span class="o">=</span> <span class="n">mode</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">before</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">after</span>   <span class="o">=</span> <span class="kc">None</span>
+
 <div class="viewcode-block" id="LogitsWithTemperature.temperature_scale">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.tempscale.LogitsWithTemperature.temperature_scale">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">temperature_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">):</span>
@@ -616,6 +619,9 @@
             
             <span class="n">ece_criterion_after</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>
             
+            <span class="bp">self</span><span class="o">.</span><span class="n">before</span> <span class="o">=</span> <span class="n">ece_criterion_before</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">after</span>  <span class="o">=</span> <span class="n">ece_criterion_after</span>
+            
             <span class="k">return</span> <span class="n">ece_criterion_before</span><span class="p">,</span> <span class="n">ece_criterion_after</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -643,7 +649,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device</span>      <span class="o">=</span> <span class="n">device</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>        <span class="o">=</span> <span class="n">mode</span>
-
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">before</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">after</span>   <span class="o">=</span> <span class="kc">None</span>
+            
 <div class="viewcode-block" id="ModelWithTemperature.forward">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.tempscale.ModelWithTemperature.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
@@ -761,6 +770,9 @@
             
             <span class="n">ece_criterion_after</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>
             
+            <span class="bp">self</span><span class="o">.</span><span class="n">before</span> <span class="o">=</span> <span class="n">ece_criterion_before</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">after</span>  <span class="o">=</span> <span class="n">ece_criterion_after</span>
+            
             <span class="k">return</span> <span class="n">ece_criterion_before</span><span class="p">,</span> <span class="n">ece_criterion_after</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -794,9 +806,8 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">ECE_binned</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_bins</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ECE2_binned</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_bins</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ECE</span>         <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ECE2</span>        <span class="o">=</span> <span class="mi">0</span>
-    
+        <span class="bp">self</span><span class="o">.</span><span class="n">ECE</span>         <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ECE2</span>        <span class="o">=</span> <span class="kc">None</span>    
     
     <span class="k">def</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

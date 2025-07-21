@@ -515,7 +515,7 @@
   <h1>Source code for icenet.deep.iceboost</h1><div class="highlight"><pre>
 <span></span><span class="c1"># iceboost == xgboost + torch autograd based extensions</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -618,8 +618,15 @@
     <span class="n">x</span>    <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">preds</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         
     <span class="n">loss</span> <span class="o">=</span> <span class="n">losstools</span><span class="o">.</span><span class="n">SWD_reweight_loss</span><span class="p">(</span>
-                    <span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">targets</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
-                    <span class="n">p</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;num_slices&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
+        <span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">targets</span><span class="p">,</span>
+        <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span>
+        <span class="n">num_slices</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;num_slices&#39;</span><span class="p">],</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">],</span>
+        <span class="n">class_idx</span><span class="o">=</span><span class="n">SWD_param</span><span class="p">[</span><span class="s1">&#39;class_idx&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
     
     <span class="n">txt</span>             <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SWD&#39;</span>
     <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
@@ -740,14 +747,6 @@
         
         <span class="n">track_loss</span><span class="p">[</span><span class="n">txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="n">loss_str</span>       <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s1">0.5f</span><span class="si">}</span><span class="s1"> | &#39;</span>
-    
-    <span class="c1"># --------------------------------------------------------------------</span>
-    <span class="c1"># Temperature post-calibration [just for diagnostics atm]</span>
-    
-    <span class="k">if</span> <span class="n">loss_mode</span> <span class="o">==</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span>
-        
-        <span class="n">ts</span> <span class="o">=</span> <span class="n">tempscale</span><span class="o">.</span><span class="n">LogitsWithTemperature</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">ts</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># Sliced Wasserstein reweight U (y==0) -&gt; V (y==1) transport</span>
@@ -1104,12 +1103,12 @@
     
     <span class="c1"># Custom loss object init</span>
     
+    <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;device&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu:0&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
+    
     <span class="k">if</span> <span class="n">use_custom</span><span class="p">:</span>
-        
-        <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;device&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
-            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu:0&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">device</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;model_param&#39;</span><span class="p">][</span><span class="s1">&#39;device&#39;</span><span class="p">]</span>
         
         <span class="c1">## Custom loss string of type &#39;custom_loss:loss_name:hessian:hessian_mode(:parameter)&#39;</span>
         <span class="n">strs</span> <span class="o">=</span> <span class="n">model_param</span><span class="p">[</span><span class="s1">&#39;objective&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
@@ -1121,10 +1120,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.train_xgb: Unknown custom loss </span><span class="si">{</span><span class="n">strs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> (check syntax)&#39;</span><span class="p">)</span>
         
-        <span class="c1">## Hessian treatment</span>
+        <span class="c1">## Hessian diagonal treatment</span>
         
         <span class="c1"># Default values</span>
-        <span class="n">hessian_mode</span>   <span class="o">=</span> <span class="s1">&#39;constant&#39;</span>
+        <span class="n">hessian_mode</span>   <span class="o">=</span> <span class="s1">&#39;iterative&#39;</span>
         <span class="n">hessian_const</span>  <span class="o">=</span> <span class="mf">1.0</span>
         <span class="n">hessian_gamma</span>  <span class="o">=</span> <span class="mf">0.9</span>
         <span class="n">hessian_slices</span> <span class="o">=</span> <span class="mi">10</span>
@@ -1154,6 +1153,8 @@
             <span class="n">hessian_slices</span> <span class="o">=</span> <span class="n">hessian_slices</span><span class="p">,</span>
             <span class="n">device</span>         <span class="o">=</span> <span class="n">device</span>
         <span class="p">)</span>
+    
+    <span class="n">ts</span> <span class="o">=</span> <span class="kc">None</span>
     
     <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">):</span>
         
@@ -1221,7 +1222,7 @@
         
         <span class="c1"># ==============================================</span>
         <span class="c1">## Validate</span>
-        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">((</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;savemode&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">((</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;savemode&#39;</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]:</span>
             
             <span class="c1"># ------- AUC values ------</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;primary_classes&#39;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
@@ -1233,7 +1234,22 @@
                 <span class="n">preds_eval</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">deval</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">preds_eval</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">preds_eval</span> <span class="o">=</span> <span class="n">preds_eval</span><span class="p">[:,</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;signal_class&#39;</span><span class="p">]]</span>
                 <span class="n">metrics_eval</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">Metric</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">data_val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">preds_eval</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w_val</span><span class="p">,</span> <span class="n">class_ids</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;primary_classes&#39;</span><span class="p">],</span> <span class="n">hist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        
+
+            <span class="c1"># --------------------------------------------------------------------</span>
+            <span class="c1"># Temperature post-calibration diagnostics</span>
+            
+            <span class="n">ece_freq</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ECE_metrics&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ece_freq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">ece_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    
+                    <span class="n">ts</span> <span class="o">=</span> <span class="n">tempscale</span><span class="o">.</span><span class="n">LogitsWithTemperature</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                    
+                    <span class="n">ts</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">logits</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">preds_eval</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                 <span class="n">labels</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                 <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">w_val</span><span class="p">,</span>      <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+
+            <span class="c1"># --------------------------------------------------------------------</span>
+            
             <span class="c1"># ------- Loss values ------</span>
             <span class="k">if</span> <span class="n">use_custom</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">out_weights_on</span><span class="p">:</span>
@@ -1281,6 +1297,13 @@
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/train&#39;</span><span class="p">,</span>      <span class="n">trn_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;AUC/validation&#39;</span><span class="p">,</span>  <span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>   <span class="n">epoch</span><span class="p">)</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;AUC/train&#39;</span><span class="p">,</span>       <span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>   <span class="n">epoch</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ts</span><span class="o">.</span><span class="n">before</span><span class="o">.</span><span class="n">ECE</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;ECE/validation/pre&#39;</span><span class="p">,</span>   <span class="n">ts</span><span class="o">.</span><span class="n">before</span><span class="o">.</span><span class="n">ECE</span><span class="p">,</span>  <span class="n">epoch</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;ECE/validation/post&#39;</span><span class="p">,</span>  <span class="n">ts</span><span class="o">.</span><span class="n">after</span><span class="o">.</span><span class="n">ECE</span><span class="p">,</span>   <span class="n">epoch</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;ECE2/validation/pre&#39;</span><span class="p">,</span>  <span class="n">ts</span><span class="o">.</span><span class="n">before</span><span class="o">.</span><span class="n">ECE2</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;ECE2/validation/post&#39;</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">after</span><span class="o">.</span><span class="n">ECE2</span><span class="p">,</span>  <span class="n">epoch</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;tau/validation&#39;</span><span class="p">,</span>       <span class="nb">float</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">temperature</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">epoch</span><span class="p">)</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">] Tree </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1"> | Train: loss = </span><span class="si">{</span><span class="n">trn_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">trn_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1"> | Eval: loss = </span><span class="si">{</span><span class="n">val_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">, AUC = </span><span class="si">{</span><span class="n">val_aucs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
@@ -1306,7 +1329,7 @@
         
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="n">ids_trn</span><span class="p">,</span> <span class="s1">&#39;losses&#39;</span><span class="p">:</span> <span class="n">losses</span><span class="p">,</span> <span class="s1">&#39;epoch&#39;</span><span class="p">:</span> <span class="n">num_epochs</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">}</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving model and statistics to file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saving model and statistics to file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
         
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span> <span class="c1">#!</span>

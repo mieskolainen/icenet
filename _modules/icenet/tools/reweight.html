@@ -515,7 +515,7 @@
   <h1>Source code for icenet.tools.reweight</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Event sample re-weighting tools</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
@@ -564,7 +564,7 @@
         <span class="k">return</span> <span class="n">exp_</span><span class="p">(</span><span class="o">-</span><span class="n">logits</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;DeepEfficiency&#39;</span><span class="p">:</span>     <span class="c1"># https://arxiv.org/abs/1809.06101</span>
         <span class="k">return</span> <span class="n">exp_</span><span class="p">(</span><span class="o">-</span><span class="n">logits</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span>
-    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>             <span class="c1"># Direct</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>             <span class="c1"># Direct probability</span>
         <span class="k">return</span> <span class="n">sigmoid_</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;identity&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
@@ -603,7 +603,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">phat</span><span class="p">)</span> <span class="o">/</span> <span class="n">phat</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;DeepEfficiency&#39;</span><span class="p">:</span>        <span class="c1"># https://arxiv.org/abs/1809.06101</span>
         <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">phat</span>
-    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>                <span class="c1"># Direct</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>                <span class="c1"># Direct probability</span>
         <span class="k">return</span> <span class="n">phat</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;identity&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">phat</span><span class="p">)</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
@@ -831,7 +831,6 @@
     
     <span class="n">param</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span>
     
-    
     <span class="c1"># ----------------------------------------</span>
     <span class="c1"># Conversions and pick variables of interest</span>
     
@@ -867,6 +866,9 @@
                           <span class="s1">&#39;data_val_MI&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="s1">&#39;param&#39;</span><span class="p">:</span>       <span class="n">param</span><span class="p">}</span>
 
+                <span class="c1"># Take in the output</span>
+                <span class="c1"># (this is not used but the model is re-loaded from the disk,</span>
+                <span class="c1">#  according the best model [epoch] criteria in the model card)</span>
                 <span class="n">pdf</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">iceboost</span><span class="o">.</span><span class="n">train_xgb</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
     
     <span class="c1"># ------------------------------------------------</span>
