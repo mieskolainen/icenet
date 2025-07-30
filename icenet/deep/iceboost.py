@@ -2,15 +2,17 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2025
 
+import os
+import glob
+import copy
+import pickle
+import gc
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import os
 import xgboost
-import copy
 from tqdm import tqdm
-import pickle
-import gc
 
 # icenet
 from icenet.tools import aux, stx, plots, io
@@ -479,7 +481,12 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     # TensorboardX
     if not args['__raytune_running__'] and param['tensorboard']:
         from tensorboardX import SummaryWriter
-        writer = SummaryWriter(os.path.join(args['modeldir'], param['label']))
+        
+        tb_path = os.path.join(args['modeldir'], param['label'])
+        for f in glob.glob(os.path.join(tb_path, 'events.out.tfevents.*')):
+            os.remove(f) # Clean old logs
+        
+        writer  = SummaryWriter(tb_path)
     
     if 'SWD_param' in param:
         SWD_param = param['SWD_param']

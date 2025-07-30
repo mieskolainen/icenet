@@ -18,6 +18,12 @@ if [ -z "$TASK_SCRIPT" ]; then
     return
 fi
 
+if [ -z "$maxevents" ]; then
+    echo "Error: maxevents environment variable is not set."
+    echo "Please set it, e.g.: export maxevents=500000"
+    return
+fi
+
 # Fixed
 INIT_JOB="gridtune_init.job"
 ARRAY_JOB="gridtune_array.job"
@@ -33,8 +39,16 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 TEMP_FILE_INIT="tmp__${TASK_NAME}_${TIMESTAMP}_${INIT_JOB}"
 TEMP_FILE_ARRAY="tmp__${TASK_NAME}_${TIMESTAMP}_${ARRAY_JOB}"
 
-sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$INIT_JOB" > "$TEMP_FILE_INIT"
-sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$ARRAY_JOB" > "$TEMP_FILE_ARRAY"
+# Replace executable line
+sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$INIT_JOB" \
+| sed "/^environment\s*=/d" \
+| sed "1ienvironment = \"CONFIG=${CONFIG};maxevents=${maxevents}\"" \
+> "$TEMP_FILE_INIT"
+
+sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$ARRAY_JOB" \
+| sed "/^environment\s*=/d" \
+| sed "1ienvironment = \"CONFIG=${CONFIG};maxevents=${maxevents}\"" \
+> "$TEMP_FILE_ARRAY"
 
 chmod +x *.sh
 

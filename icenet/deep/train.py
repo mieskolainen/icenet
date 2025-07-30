@@ -2,16 +2,16 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2025
 
-import numpy as np
-import torch
-import torch_geometric
-import xgboost
-
 import os
+import glob
 import pickle
 import copy
 import multiprocessing
 
+import numpy as np
+import torch
+import torch_geometric
+import xgboost
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
@@ -314,7 +314,12 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
     # TensorboardX
     if not args['__raytune_running__'] and 'tensorboard' in param and param['tensorboard']:
         from tensorboardX import SummaryWriter
-        writer = SummaryWriter(os.path.join(args['modeldir'], param['label']))
+        
+        tb_path = os.path.join(args['modeldir'], param['label'])
+        for f in glob.glob(os.path.join(tb_path, 'events.out.tfevents.*')):
+            os.remove(f) # Clean old logs
+        
+        writer = SummaryWriter(tb_path)
     
     # --------------------------------------------------------------------
     # Training loop

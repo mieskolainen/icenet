@@ -13,10 +13,35 @@ import numpy as np
 import math
 import copy
 
+def ess_metric(h):
+    """
+    Return the effective sample size per histogram bin.
+    
+    Returns:
+        ESS per bin
+        Entries (unweighted fills) per bin
+    """
+    
+    with np.errstate(divide="ignore", invalid="ignore"):
+        n_eff = (h.counts / h.errs) ** 2
+        n_eff[~np.isfinite(n_eff)] = 0.0
 
-def chi2_cost(h_mc, h_data, return_nbins=False):
+    return n_eff, h.entries
+
+def chi2_cost(h_mc, h_data, vartype: str='hybrid', rho: float=0.0, return_nbins: bool=False):
     """
     Chi2 cost function between two histograms
+    
+    Args:
+        h_mc:     mc histogram object
+        h_data:   data histogram object
+        vartype:
+            - 'hybrid':  MC model (+) Data variance included, both inexact
+            - 'pearson': MC model variance only included, data assumed exact
+            - 'neyman':  Data variance only included, model assumed exact
+    
+        rho:  correlation coefficient between histograms (scalar or np.ndarray),
+              used with vartype = 'hybrid'
     """
     counts_mc   = h_mc.counts * h_mc.binscale
     err_mc      = h_mc.errs   * h_mc.binscale
@@ -26,12 +51,21 @@ def chi2_cost(h_mc, h_data, return_nbins=False):
 
     ind = (counts_data > 0) & (counts_mc > 0)
     
-    chi2 = np.sum((counts_mc[ind] - counts_data[ind])**2 / (err_mc[ind]**2 + err_data[ind]**2))
+    if   vartype.lower() == 'hybrid':
+        var = err_mc[ind]**2 + err_data[ind]**2 - 2*(rho*err_mc*err_data)[ind]
+    elif vartype.lower() == 'pearson':
+        var = err_mc[ind]**2
+    elif vartype.lower() == 'neyman':
+        var = err_data[ind]**2
+    else:
+        raise Exception(f'chi2_cost: Unknown vartype {vartype}')
+    
+    chi2 = np.sum((counts_mc[ind] - counts_data[ind])**2 / var)
 
     if not return_nbins:
         return chi2
     else:
-        return chi2, int(np.sum(ind))    
+        return chi2, int(np.sum(ind))
 
 
 def set_global_style(dpi=120, figsize=(4,3.75), font='serif', font_size=8, legend_fontsize=7, legend_handlelength=1):
@@ -48,11 +82,13 @@ def set_global_style(dpi=120, figsize=(4,3.75), font='serif', font_size=8, legen
 
 
 # Colors
-imperial_dark_blue  = (0, 0.24, 0.45)
-imperial_light_blue = (0, 0.43, 0.69)
-imperial_dark_red   = (0.75, 0.10, 0.0)
-imperial_green      = (0.0, 0.54, 0.23)
+imperial_dark_blue   = (0, 0.24, 0.45)
+imperial_light_blue  = (0, 0.43, 0.69)
+imperial_very_light_blue = (0, 0.53, 0.79)
 
+imperial_dark_red    = (0.75, 0.10, 0.0)
+imperial_green       = (0.0, 0.54, 0.23)
+imperial_light_brown = (0.8235, 0.7059, 0.5490)
 
 def colors(i, power=0.34):
 
@@ -80,13 +116,14 @@ hist_style_bar  = {'zorder': 0, 'ls': '-', 'lw': 1, 'histtype': 'bar'}
 class hobj:
     """ Minimal histogram data object.
     """
-    def __init__(self, counts = 0, errs = 0, bins = 0, cbins = 0, binscale=1.0):
-        self.counts   = counts
+    def __init__(self, counts = 0, errs = 0, bins = 0, cbins = 0, entries=0, binscale=1.0):
+        self.counts   = counts    # Possibly weighted
         self.errs     = errs
         self.bins     = bins
         self.cbins    = cbins
         self.binscale = binscale
-
+        self.entries  = entries   # How many raw event fills per bin
+        
         if (np.sum(counts) == 0):
             self.is_empty = True
         else:
@@ -108,22 +145,24 @@ class hobj:
         # Harmonic sum
         binscale = 1/(1/self.binscale + 1/other.binscale)
 
-        counts = self.counts + other.counts
-        errs   = np.sqrt(self.errs**2   + other.errs**2)
-
-        return hobj(counts, errs, self.bins, self.cbins, binscale)
+        counts  = self.counts + other.counts
+        errs    = np.sqrt(self.errs**2   + other.errs**2)
+        entries = self.entries + other.entries
+        
+        return hobj(counts=counts, errs=errs, bins=self.bins, cbins=self.cbins, entries=entries, binscale=binscale)
     
     # += operator
     def __iadd__(self, other):
-
+        
         if (self.is_empty == True): # Still empty
             return other
 
         if ((self.bins == other.bins).all() == False):
             raise(__name__ + ' += operator: cannot operate on different sized histograms')
 
-        self.counts = self.counts + other.counts
-        self.errs   = np.sqrt(self.errs**2 + other.errs**2)
+        self.counts  = self.counts + other.counts
+        self.errs    = np.sqrt(self.errs**2 + other.errs**2)
+        self.entries = self.entries + other.entries
         
         # Harmonic sum
         self.binscale = 1/(1/self.binscale + 1/other.binscale)
@@ -299,7 +338,8 @@ def hist_to_density_fullspace(counts, errs, bins, totalweight):
 
 
 def hist(x, bins=30, density=False, weights=None):
-    """ Calculate a histogram.
+    """
+    Calculate a histogram.
     """
     x = np.array(x)
 
@@ -320,18 +360,23 @@ def hist(x, bins=30, density=False, weights=None):
     inds = np.digitize(x, bins)
     errs = np.asarray([np.linalg.norm(weights[inds==k],2) for k in range(1, len(bins))])
 
+    # Get entries
+    in_range   = np.isfinite(x) & (x >= bins[0]) & (x <= bins[-1])
+    entries, _ = np.histogram(x[in_range], bins=bins)
+    
     # Density integral 1 over the histogram bins range
     if density:
         counts, errs = hist_to_density(counts=counts, errs=errs, bins=bins)
 
-    return counts, errs, bins, cbins
+    return counts, errs, bins, cbins, entries
 
 
 def hist_obj(x, bins=30, weights=None):
     """ A wrapper to return a histogram object.
     """
-    counts, errs, bins, cbins = hist(x, bins=bins, weights=weights)
-    return hobj(counts, errs, bins, cbins)
+    counts, errs, bins, cbins, entries = hist(x, bins=bins, weights=weights)
+
+    return hobj(counts=counts, errs=errs, bins=bins, cbins=cbins, entries=entries)
 
 
 def generate_colormap():
@@ -513,8 +558,8 @@ def histmc(mcdata, all_obs, density=False, scale=None, color=(0,0,1), label='non
     for OBS in all_obs.keys():
 
         # Histogram it
-        counts, errs, bins, cbins = hist(x=mcdata['data'][OBS], bins=all_obs[OBS]['bins'], weights=mcdata['weights'])
-
+        counts, errs, bins, cbins, entries = hist(x=mcdata['data'][OBS], bins=all_obs[OBS]['bins'], weights=mcdata['weights'])
+        
         # Compute differential cross section within histogram range
         # Note that division by sum(weights) handles the histogram range integral (overflow) properly
         binscale = mcdata['xsection_pb'] / binwidth(bins) / np.sum(mcdata['weights']) 
@@ -528,7 +573,7 @@ def histmc(mcdata, all_obs, density=False, scale=None, color=(0,0,1), label='non
             counts,errs = hist_to_density(counts=counts, errs=errs, bins=bins)
             binscale    = 1.0
         
-        obj[OBS] = {'hdata': hobj(counts, errs, bins, cbins, binscale),
+        obj[OBS] = {'hdata': hobj(counts=counts, errs=errs, bins=bins, cbins=cbins, entries=entries, binscale=binscale),
                     'hfunc' : 'hist', 'color': color, 'label': label, 'style' : style}
 
         print(f'integral = {obj[OBS]["hdata"].integral():0.2E} ({OBS})')

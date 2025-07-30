@@ -54,16 +54,16 @@ iceboost4D:
     tree_method: 'hist'
     device:      'auto'           # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.1            # Use smaller with large number of trees
-    gamma: 1.5
-    max_depth: 8
+    learning_rate: 0.05           # Use smaller with large number of trees
+    gamma: 1.0
+    max_depth: 9
     min_child_weight: 1.0
     max_delta_step: 1.0
     subsample: 1
     
     colsample_bytree:  1.0        # Keep at 1.0 (otherwise fixedGridRhoAll variable not well modelled)
-    colsample_bylevel: 0.9
-    colsample_bynode:  0.9
+    colsample_bylevel: 1.0
+    colsample_bynode:  1.0
     
     reg_lambda: 2.0               # L2 regularization
     reg_alpha: 0.05               # L1 regularization
@@ -89,13 +89,13 @@ iceboost4D:
   #  p: 1                  # p-norm (1,2, ...)
   #  num_slices: 500       # Number of MC projections (Higher the better) 
   #  mode: 'SWD-QR'        # 'SWD' (basic), 'SWD-QR' (see icefit/transport.py)
-  #  max_N: 400000         # Max events limit (~500k & 500 slices works with 32 GB VRAM)
+  #  max_N: 500000         # Max events limit (~500k x 500 slices works with 32 GB VRAM)
   #  var: ['.*']           # Use all variables in SWD
   #  class_idx: [0,1]      # Classes for U -> V (first one multiplied with x exp(logit))
   #  norm_weights: False   # Normalization enforced (if False, model should learn to keep the normalization)
   
   plot_trees: false
- 
+  
   <<: *EVAL_PARAM
 
 # ------------------------------------------------
@@ -117,23 +117,23 @@ xgb0:
   model_param:
     num_boost_round: 550          # number of epochs (equal to the number of trees!)
     
-    booster: 'gbtree'             # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'
+    booster:     'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'           # [xgb default 'hist']
     device:      'auto'           # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.05           # Use smaller with large number of trees
-    gamma: 1.5
-    max_depth: 10
-    min_child_weight: 1.0
-    max_delta_step: 1.0
-    subsample: 1
+    learning_rate: 0.3            # [xgb default 0.3]
+    gamma: 0.0                    # [xgb default 0.0]
+    max_depth: 6                  # [xgb default   6]
+    min_child_weight: 1.0         # [xgb default 1.0]
+    max_delta_step: 1.0           # [xgb default 1.0]
+    subsample: 1.0                # [xgb default 1.0]
 
-    colsample_bytree:  1.0
-    colsample_bylevel: 0.9
-    colsample_bynode:  0.9
+    colsample_bytree:  1.0        # [xgb default 1.0]
+    colsample_bylevel: 1.0        # [xgb default 1.0]
+    colsample_bynode:  1.0        # [xgb default 1.0]
     
-    reg_lambda: 2.0               # L2 regularization
-    reg_alpha: 0.05               # L1 regularization
+    reg_lambda: 1.0               # [xgb default 1.0]
+    reg_alpha:  0.0               # [xgb default 0.0]
     
     # learning task parameters
     objective: 'binary:logistic'  # Note that 'multi:softprob' does not work with distillation
@@ -141,7 +141,7 @@ xgb0:
   
   # Special optimization
   opt_param:
-    noise_reg: 0.1                # Scheduled noise regularization
+    noise_reg: 0.0                # Scheduled noise regularization
   
   plot_trees: false
   
@@ -168,16 +168,16 @@ iceboost0: &ICEBOOST0
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.05      # Use smaller with large number of trees
-    gamma: 1.5               # Minimum loss reduction required to make a further partition on a leaf node
+    learning_rate: 0.2       # Use smaller with large number of trees
+    gamma: 1.0               # Minimum loss reduction required to make a further partition on a leaf node (~ controls the depth)
     max_depth: 10            # Maximum depth of a tree (too high may overfit)
     min_child_weight: 1.0    # Minimum sum of instance weight (hessian) needed in a child (higher -> more conservative)
     max_delta_step: 1.0      # Constraint on the maximum change in the model's weights
     subsample: 1             # Subsample ratio of the training instance (=1 uses all data)
     
     colsample_bytree:  1.0   # Specifies the fraction of features to be randomly selected for each tree
-    colsample_bylevel: 0.9   # As 'bytree' but applied to individual tree levels
-    colsample_bynode:  0.9   # The fraction of features to be randomly selected for each split in a tree
+    colsample_bylevel: 1.0   # As 'bytree' but applied to individual tree levels
+    colsample_bynode:  1.0   # The fraction of features to be randomly selected for each split in a tree
     
     reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
     reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
@@ -188,7 +188,7 @@ iceboost0: &ICEBOOST0
   
   # Special optimization
   opt_param:
-    noise_reg: 0.1           # Scheduled noise regularization
+    noise_reg: 0.0           # Scheduled noise regularization
   
   # BCE loss domains [use with custom:binary_cross_entropy]
   BCE_param:
@@ -224,11 +224,12 @@ iceboost_swd:
   # Sliced Wasserstein distance [use with custom:binary_cross_entropy and custom:sliced_wasserstein]
   SWD_param:
     beta: 2.0e-2
-    p: 1                # p-norm (1,2, ...)
+    p: 1                # p-norm (1, 2, ...)
     num_slices: 500     # Number of MC projections (Higher the better) 
     mode: 'SWD-QR'      # 'SWD' (basic), 'SWD-QR' (see icefit/transport.py)
-    max_N: 500000       # Max events limit (~500k & 500 slices should be ok with 32 GB VRAM)
+    max_N: 500000       # Max events limit (~500k x 500 slices should be ok with 32 GB VRAM)
     #var: ['.*']        # Use all variables in SWD
+    
     var: ['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll'] # Use only Stage-1 variables
     
     class_idx: [0,0]    # Classes for U -> V transport, with two strategies:
@@ -237,7 +238,7 @@ iceboost_swd:
                         #          (this strategy should use only input variables used in Stage-1 !)
                         # 2. [0,1] (match simulation post Stage-1 x Stage-2 against data)
                         #          (this strategy can use all input variables, or only Stage-1 variables)
-
+    
     norm_weights: False # Normalization enforced (if False, model should learn to keep the normalization)
 
 

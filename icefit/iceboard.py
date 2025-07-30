@@ -14,6 +14,8 @@
 # 
 # m.mieskolainen@imperial.ac.uk, 2024
 
+import tensorflow as tf # Keep at the top
+
 import os
 import argparse
 import time
@@ -22,9 +24,7 @@ import shutil
 from termcolor import cprint
 from pathlib import Path
 
-import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
-import re
 from collections import defaultdict
 
 def read_tensorboard_data(tensorboard_file):

@@ -3,9 +3,9 @@ import socket
 import os
 import psutil
 
-__version__    = '0.1.5.0'
+__version__    = '0.1.5.2'
 __release__    = 'alpha'
-__date__       = '21/07/2025'
+__date__       = '30/07/2025'
 __author__     = 'm.mieskolainen@imperial.ac.uk'
 __repository__ = 'github.com/mieskolainen/icenet'
 __asciiart__   = \

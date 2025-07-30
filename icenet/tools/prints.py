@@ -103,6 +103,7 @@ def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
                        f'{prc[6]:0.3E}'
         ])
     
+    print(header)
     print(table)
     print('')
     
@@ -117,7 +118,6 @@ def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
                 print('\n', file=f)
     
     return table
-
 
 def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, output_file=None):
     """ Print statistics of X

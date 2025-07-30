@@ -28,7 +28,7 @@
 
 DEFAULT_DATAPATH="./actions-stash/input/icezee"
 DEFAULT_CONFIG="tune0_EEm"
-DEFAULT_MODELTAG="GRIDTUNE"
+DEFAULT_MODELTAG="GRIDTUNE-P1"
 
 DEFAULT_BETA_ARRAY=(0.0 0.1)
 DEFAULT_SIGMA_ARRAY=(0.0 0.2)
@@ -89,6 +89,9 @@ else
   MAX=""
 fi
 
+# Import
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/gridtune_utils.sh"
 
 # -----------------------------------------------------------------------
 # Initialization (Stage 1 training and pickle file creation)
@@ -99,61 +102,8 @@ if [[ $GRID_ID == -1 && $GRID_NODES == 1 ]]; then
 
   python analysis/zee.py --runmode genesis $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH
   
-  python analysis/zee.py --runmode train   $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-    --run_id "INIT" --compute 0
-  
-  python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-    --run_id "INIT" --compute 0
-  
   return 0 # do not use exit
 fi
-
-
-# -----------------------------------------------------------------------
-# Generic functions
-
-# Function to generate all combinations of N arrays
-generate_combinations() {
-  local arr=("${!1}")   # First array
-  shift
-  if [ "$#" -eq 0 ]; then
-    # Base case: return each element of the last array as a combination
-    for elem in "${arr[@]}"; do
-      echo "$elem"
-    done
-  else
-    # Recursive case: get combinations of the remaining arrays
-    local sub_combinations=($(generate_combinations "$@"))
-    for elem in "${arr[@]}"; do
-      for sub_comb in "${sub_combinations[@]}"; do
-        echo "$elem,$sub_comb"
-      done
-    done
-  fi
-}
-
-# Function to assign combinations
-assign_combinations() {
-  local total_combinations=$1
-  local grid_id=$2
-  local grid_nodes=$3
-  local -n indices_ref=$4
-
-  # Calculate total combinations and assign combinations per node
-  local combinations_per_node=$(( (total_combinations + grid_nodes - 1) / grid_nodes )) # ceil(TOTAL_COMBINATIONS / GRID_NODES)
-
-  # Calculate the start and end index for this GRID_ID
-  local start_index=$(( grid_id * combinations_per_node ))
-  local end_index=$(( start_index + combinations_per_node ))
-
-  # Ensure we don't go out of bounds
-  if [ "$end_index" -gt "$total_combinations" ]; then
-    end_index=$total_combinations
-  fi
-
-  # Store the start and end indices in the reference array
-  indices_ref=($start_index $end_index)
-}
 
 # -----------------------------------------------------------------------
 # Combinatorics and indices
@@ -175,21 +125,18 @@ for (( i = START_INDEX; i < END_INDEX; i++ )); do
 COMBINATION="${COMBINATIONS[$i]}"
 
 # 1. Extract individual variable values from the combination string
-IFS=',' read -r BETA SIGMA LR GAMMA MAXDEPTH LAMBDA ALPHA <<< "$COMBINATION"
+IFS=',' read -r LR GAMMA MAXDEPTH LAMBDA ALPHA <<< "$COMBINATION"
 
 # 2. Label the run
-RUN_ID="beta_${BETA}__sigma_${SIGMA}__lr_${LR}__gamma_${GAMMA}__maxdepth_${MAXDEPTH}__lambda_${LAMBDA}__alpha_${ALPHA}"
+RUN_ID="lr_${LR}__gamma_${GAMMA}__maxdepth_${MAXDEPTH}__lambda_${LAMBDA}__alpha_${ALPHA}"
 
 # 3. Define tune command
 SUPERTUNE="\
-models.iceboost_swd.SWD_param.beta=${BETA} \
-models.iceboost_swd.opt_param.noise_reg=${SIGMA} \
-models.iceboost_swd.model_param.learning_rate=${LR} \
-models.iceboost_swd.model_param.gamma=${GAMMA} \
-models.iceboost_swd.model_param.max_depth=${MAXDEPTH} \
-models.iceboost_swd.model_param.reg_lambda=${LAMBDA} \
-models.iceboost_swd.model_param.reg_alpha=${ALPHA} \
-models.iceboost_swd.SWD_param.var=${SWD_VAR} \
+models.iceboost4D.model_param.learning_rate=${LR} \
+models.iceboost4D.model_param.gamma=${GAMMA} \
+models.iceboost4D.model_param.max_depth=${MAXDEPTH} \
+models.iceboost4D.model_param.reg_lambda=${LAMBDA} \
+models.iceboost4D.model_param.reg_alpha=${ALPHA}
 "
 
 # Print out
@@ -198,15 +145,10 @@ echo $SUPERTUNE
 echo ""
 
 # 4. Run
-python analysis/zee.py --runmode genesis $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH 
+python analysis/zee.py --runmode train $MAX   --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
+  --run_id $RUN_ID --supertune "${SUPERTUNE}" --compute 0
 
-python analysis/zee.py --runmode train   $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-  --run_id $RUN_ID --supertune "${SUPERTUNE}" # Note " "
-
-python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-  --run_id $RUN_ID --evaltag "minloss" --supertune "models.iceboost_swd.readmode=-1" 
-
-python analysis/zee.py --runmode eval    $MAX --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
-  --run_id $RUN_ID --evaltag "last"    --supertune "models.iceboost_swd.readmode=-2" 
+python analysis/zee.py --runmode eval  $MAX   --modeltag ${MODELTAG} --config ${CONFIG}.yml --datapath $DATAPATH \
+  --run_id $RUN_ID --compute 0
 
 done

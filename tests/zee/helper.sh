@@ -4,7 +4,13 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2025
 
-echo "Grid tuning job started"
+if [ -z "$TUNESCRIPT" ]; then
+    echo "Error: TUNESCRIPT environment variable is not set."
+    echo "Please set it, e.g.: export TUNESCRIPT=runme_zee_gridtune_S1.sh"
+    return
+fi
+
+echo "Grid tuning job started with TUNESCRIPT=${TUNESCRIPT}"
 pwd
 
 # Init conda
@@ -17,7 +23,7 @@ cd $ICEPATH
 source $ICEPATH/setenv.sh
 
 # Execute
-source $ICEPATH/tests/runme_zee_gridtune.sh
+source $ICEPATH/tests/$TUNESCRIPT
 
 # Create the done file when the job completes
 donefile="${ICEPATH}/tmp/icenet_${HTC_CLUSTER_ID}_${HTC_PROCESS_ID}.done"

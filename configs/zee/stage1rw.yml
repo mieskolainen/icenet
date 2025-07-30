@@ -12,6 +12,7 @@ diff_param:
   renorm_weight_to_count: true         # Renormalize sum(weights) == sum(counts) per class
   
   var:  ['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll']
+  
   type: 'AIRW'                         # 'AIRW', 'pseudo-ND', '2D', '1D'
   
   hist_param:

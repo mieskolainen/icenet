@@ -1,9 +1,6 @@
-# Array job with a job queue size of (4), which is the
-# total number of jobs, which run either in parallel or not
-# (depending on cluster resources)
-
 executable     = task.sh
 arguments      = "$(PROCESS) 4 $(ClusterId)"
+getenv         = True
 error          = logs/gridtune_array.$(CLUSTER).$(PROCESS).out
 output         = logs/gridtune_array.$(CLUSTER).$(PROCESS).output
 log            = logs/gridtune_array.$(CLUSTER).$(PROCESS).log
@@ -14,3 +11,7 @@ requirements   = (TARGET.GPUs_DeviceName =?= "Tesla V100-PCIE-32GB") || (TARGET.
 +MaxRuntime    = 86000
 
 queue 4
+
+# Array job with a job queue size of (4), which is the
+# total number of jobs, which run either in parallel or not
+# (depending on cluster resources)

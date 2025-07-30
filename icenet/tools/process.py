@@ -8,6 +8,7 @@ import socket
 import copy
 import glob
 import time
+import glob
 from importlib import import_module
 import os
 import pickle
@@ -353,8 +354,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         
         # ----------------------------------------------------------------
         ## Save args to yaml as a checkpoint of the run configuration
-        dir = aux.makedir(f'{args["plotdir"]}/{runmode}')
-        aux.yaml_dump(data=args, filename=f'{dir}/args.yml')
+        outdir = aux.makedir(f'{args["plotdir"]}/{runmode}')
+        aux.yaml_dump(data=args, filename=f'{outdir}/args.yml')
         # ----------------------------------------------------------------
     
     # "Simplified" data reader
@@ -1743,8 +1744,19 @@ def make_plots(data, args, runmode):
     return True
 
 @iceprint.icelog(LOGGER)
-def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
-    X_kin, ids_kin, X_RAW, ids_RAW):
+def plot_XYZ_wrap(
+        func_predict: callable,
+        x_input: np.ndarray,
+        y: np.ndarray,
+        weights: np.ndarray,
+        label: str,
+        targetdir: str,
+        args: dict,
+        X_kin: np.ndarray,
+        ids_kin: list,
+        X_RAW: np.ndarray,
+        ids_RAW: list
+    ):
     """ 
     Arbitrary plot steering function.
     Add new plot types here, steered from plots.yml
@@ -1773,7 +1785,6 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     y_pred = func_predict(x_input)
     y_preds.append(copy.deepcopy(y_pred))
     
-    
     # --------------------------------------
     ### Output score re-weighted observables
     
@@ -1789,41 +1800,79 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
         
         ## Plot over different temperature values
         sublabel = 'inclusive'
-        dir      = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
-        filename = dir + "/stats_chi2_summary.log"
-        open(filename, 'w').close() # Clear content
+        outdir   = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
+        
+        filenames = {}
+        for mname in ['hybrid', 'pearson', 'neyman']:
+            filenames[mname] = os.path.join(outdir, f"stats_chi2_{mname}_summary.log")
+            open(filenames[mname], 'w').close() # Clear content
         
         ## Collect post Stage 2 results
         df_per_tau = []
         
         for tau in args['plot_param']['OBS_reweight']['tau_values']:
             
-            local_dir = aux.makedir(os.path.join(dir, f'tau_{tau:0.3f}'))
+            local_dir = aux.makedir(os.path.join(outdir, f'tau_{tau:0.3f}'))
             
+            # ------------------------------------------------------------------
             # Tensorboard
+            for f in glob.glob(os.path.join(local_dir, 'events.out.tfevents.*')):
+                os.remove(f) # Clean old logs
+
             writer = tensorboardX.SummaryWriter(local_dir)
+            # ------------------------------------------------------------------
             
             # AIRW plots
-            chi2_table, df, chi2 = plots.plot_AIRW(X=X_RAW, y=y, ids=ids_RAW, weights=weights, y_pred=y_pred,
-                pick_ind=pick_ind, label=label, sublabel=sublabel,
-                param=args['plot_param']['OBS_reweight'], tau=tau,
-                targetdir=local_dir, num_cpus=args['num_cpus'])
+            metric_table, df, mets = plots.plot_AIRW(
+                X         = X_RAW,
+                y         = y,
+                ids       = ids_RAW,
+                weights   = weights,
+                y_pred    = y_pred,
+                pick_ind  = pick_ind,
+                label     = label,
+                sublabel  = sublabel,
+                param     = args['plot_param']['OBS_reweight'],
+                tau       = tau,
+                targetdir = local_dir,
+                num_cpus  = args['num_cpus']
+            )
             
-            # Dump into pickle
+            ## Dump into a pickle
             with open(os.path.join(local_dir, "stats_chi2.pkl"), "wb") as f:
-                pickle.dump(chi2, f, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(mets, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-            # Add Tensorboard values
-            for i in range(len(chi2)):
-                writer.add_scalar(f"chi2__{chi2[i]['id']}", chi2[i]['chi2_0_AI'] / chi2[i]['ndf_0_AI'])
-            
-            # -----------------------------------------------------------
-            
+            ## Append to the DataFrame
             df_per_tau.append(df)
-            plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
+            
+            ## Add Tensorboard values
+            for i in range(len(mets)):
+                
+                ID = mets[i]['id']
+                
+                #print(mets[i])
+                
+                # Relative ESS (use / in Tensorboard)
+                writer.add_scalar(f"rESS/C0S1_C0/{ID}",    mets[i]['ESS']['C0S1']  / mets[i]['ESS']['C0'])
+                writer.add_scalar(f"rESS/C0S12_C0S1/{ID}", mets[i]['ESS']['C0S12'] / mets[i]['ESS']['C0S1'])
+
+                # Chi2
+                for dt in mets[i]['chi2'].keys():          # Loop over denominators (hybrid, pearson ...)
+                    for obj in mets[i]['chi2'][dt].keys(): # Loop over (data, mc) pairs
+                        
+                        # (use / in Tensorboard)
+                        writer.add_scalar(f"chi2/{dt}/{obj}/{ID}", mets[i]['chi2'][dt][obj] / mets[i]['ndf'])
+            
+            ## Write tables to the disk
+            for mname in filenames.keys():
+                plots.table_writer(
+                    filename   = filenames[mname],
+                    label      = f'category: {sublabel} | AI model: {label} | tau: {tau:0.2f} | chi2: {mname}',
+                    table      = metric_table[mname],
+                    print_to_screen = False # Done already by plot_AIRW
+                )
             
             gc.collect() #!
-        
         
         # Save to a parquet file
         if args['plot_param']['OBS_reweight']['save_parquet']:
@@ -1840,11 +1889,10 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
             for i in range(len(df_per_tau)):
                 df = pd.concat([df, df_per_tau[i]], axis=1)
             
-            parquet_file = f'{dir}/dataframe.parquet'
+            parquet_file = f'{outdir}/dataframe.parquet'
             df.to_parquet(parquet_file, index=False, compression='gzip')
             
             print(f'Saved dataframe to a parquet file with gzip compression: {parquet_file}')
-        
         
         # ** Set filtered **
         if 'set_filter' in args['plot_param']['OBS_reweight']:
@@ -1860,21 +1908,39 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
                 
                 ## Plot over different temperature values
                 sublabel = text_filterset[m]
-                dir      = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
-                filename = dir + "/chi2_summary.log"
-                open(filename, 'w').close() # Clear content
+                outdir   = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
+                
+                filenames = {'hybrid': None, 'pearson': None, 'neyman': None}
+                for mname in filenames.keys():    
+                    filenames[mname] = os.path.join(outdir, f"stats_chi2_{mname}_summary.log")
+                    open(filenames[mname], 'w').close() # Clear content
                 
                 for tau in args['plot_param']['OBS_reweight']['tau_values']:
                     
                     mask = mask_filterset[m,:]
                     
-                    chi2_table = plots.plot_AIRW(X=X_RAW[mask,:], y=y[mask], ids=ids_RAW, weights=weights[mask], y_pred=y_pred[mask],
-                                         pick_ind=pick_ind, label=label, sublabel=sublabel,
-                                         param=args['plot_param']['OBS_reweight'], tau=tau,
-                                         targetdir=targetdir + '/OBS_reweight')
+                    metric_table, df, mets = plots.plot_AIRW(
+                        X         = X_RAW[mask,:],
+                        y         = y[mask],
+                        ids       = ids_RAW,
+                        weights   = weights[mask],
+                        y_pred    = y_pred[mask],
+                        pick_ind  = pick_ind,
+                        label     = label,
+                        sublabel  = sublabel,
+                        param     = args['plot_param']['OBS_reweight'],
+                        tau       = tau,
+                        targetdir = targetdir + '/OBS_reweight'
+                    )
                     
-                    plots.table_writer(filename=filename, label=label, sublabel=sublabel, tau=tau, chi2_table=chi2_table)
-    
+                    ## Write tables to the disk
+                    for mname in filenames.keys():
+                        plots.table_writer(
+                            filename   = filenames[mname],
+                            label      = f'category: {sublabel} | AI model: {label} | tau: {tau:0.2f} | chi2: {mname}',
+                            table      = metric_table[mname],
+                            print_to_screen = False  # Done already by plot_AIRW
+                        )
     
     # --------------------------------------
     ### ROC plots
@@ -2067,7 +2133,7 @@ def plot_XYZ_wrap(func_predict, x_input, y, weights, label, targetdir, args,
     return True
 
 @iceprint.icelog(LOGGER)
-def plot_XYZ_multiple_models(targetdir, args):
+def plot_XYZ_multiple_models(targetdir: str, args: dict):
 
     global roc_mstats
     global roc_labels
