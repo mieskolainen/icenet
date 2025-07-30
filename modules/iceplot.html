@@ -446,6 +446,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#iceplot.iceplot.colors"><code class="docutils literal notranslate"><span class="pre">colors()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iceplot.iceplot.create_axes"><code class="docutils literal notranslate"><span class="pre">create_axes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iceplot.iceplot.edge2centerbins"><code class="docutils literal notranslate"><span class="pre">edge2centerbins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iceplot.iceplot.ess_metric"><code class="docutils literal notranslate"><span class="pre">ess_metric()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iceplot.iceplot.fuse_histograms"><code class="docutils literal notranslate"><span class="pre">fuse_histograms()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iceplot.iceplot.generate_colormap"><code class="docutils literal notranslate"><span class="pre">generate_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iceplot.iceplot.hist"><code class="docutils literal notranslate"><span class="pre">hist()</span></code></a></li>
@@ -534,8 +535,24 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="iceplot.iceplot.chi2_cost">
-<span class="sig-name descname"><span class="pre">chi2_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h_mc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#chi2_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceplot.iceplot.chi2_cost" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">chi2_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h_mc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vartype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hybrid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_nbins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#chi2_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceplot.iceplot.chi2_cost" title="Link to this definition">¶</a></dt>
 <dd><p>Chi2 cost function between two histograms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h_mc</strong> – mc histogram object</p></li>
+<li><p><strong>h_data</strong> – data histogram object</p></li>
+<li><p><strong>vartype</strong> – <ul>
+<li><p>‘hybrid’:  MC model (+) Data variance included, both inexact</p></li>
+<li><p>’pearson’: MC model variance only included, data assumed exact</p></li>
+<li><p>’neyman’:  Data variance only included, model assumed exact</p></li>
+</ul>
+</p></li>
+<li><p><strong>rho</strong> – correlation coefficient between histograms (scalar or np.ndarray),
+used with vartype = ‘hybrid’</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -553,6 +570,18 @@
 <dt class="sig sig-object py" id="iceplot.iceplot.edge2centerbins">
 <span class="sig-name descname"><span class="pre">edge2centerbins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#edge2centerbins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceplot.iceplot.edge2centerbins" title="Link to this definition">¶</a></dt>
 <dd><p>Get centerbins from edgebins.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="iceplot.iceplot.ess_metric">
+<span class="sig-name descname"><span class="pre">ess_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#ess_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceplot.iceplot.ess_metric" title="Link to this definition">¶</a></dt>
+<dd><p>Return the effective sample size per histogram bin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ESS per bin
+Entries (unweighted fills) per bin</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -611,7 +640,7 @@ over total sum of event weights (not just the visible histogram range mass)</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="iceplot.iceplot.hobj">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hobj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#hobj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceplot.iceplot.hobj" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hobj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iceplot/iceplot.html#hobj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iceplot.iceplot.hobj" title="Link to this definition">¶</a></dt>
 <dd><p>Minimal histogram data object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iceplot.iceplot.hobj.integral">

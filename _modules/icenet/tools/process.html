@@ -443,6 +443,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.colors"><code class="docutils literal notranslate"><span class="pre">colors()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.create_axes"><code class="docutils literal notranslate"><span class="pre">create_axes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.edge2centerbins"><code class="docutils literal notranslate"><span class="pre">edge2centerbins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.ess_metric"><code class="docutils literal notranslate"><span class="pre">ess_metric()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.fuse_histograms"><code class="docutils literal notranslate"><span class="pre">fuse_histograms()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.generate_colormap"><code class="docutils literal notranslate"><span class="pre">generate_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hist"><code class="docutils literal notranslate"><span class="pre">hist()</span></code></a></li>
@@ -523,6 +524,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
@@ -873,8 +875,8 @@
         
         <span class="c1"># ----------------------------------------------------------------</span>
         <span class="c1">## Save args to yaml as a checkpoint of the run configuration</span>
-        <span class="nb">dir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">aux</span><span class="o">.</span><span class="n">yaml_dump</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">dir</span><span class="si">}</span><span class="s1">/args.yml&#39;</span><span class="p">)</span>
+        <span class="n">outdir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">runmode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">aux</span><span class="o">.</span><span class="n">yaml_dump</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outdir</span><span class="si">}</span><span class="s1">/args.yml&#39;</span><span class="p">)</span>
         <span class="c1"># ----------------------------------------------------------------</span>
     
     <span class="c1"># &quot;Simplified&quot; data reader</span>
@@ -2299,8 +2301,19 @@
 <div class="viewcode-block" id="plot_XYZ_wrap">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.plot_XYZ_wrap">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span>
-    <span class="n">X_kin</span><span class="p">,</span> <span class="n">ids_kin</span><span class="p">,</span> <span class="n">X_RAW</span><span class="p">,</span> <span class="n">ids_RAW</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_XYZ_wrap</span><span class="p">(</span>
+        <span class="n">func_predict</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
+        <span class="n">x_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">targetdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">X_kin</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">ids_kin</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">X_RAW</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">ids_RAW</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">    Arbitrary plot steering function.</span>
 <span class="sd">    Add new plot types here, steered from plots.yml</span>
@@ -2329,7 +2342,6 @@
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">(</span><span class="n">x_input</span><span class="p">)</span>
     <span class="n">y_preds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">y_pred</span><span class="p">))</span>
     
-    
     <span class="c1"># --------------------------------------</span>
     <span class="c1">### Output score re-weighted observables</span>
     
@@ -2345,41 +2357,79 @@
         
         <span class="c1">## Plot over different temperature values</span>
         <span class="n">sublabel</span> <span class="o">=</span> <span class="s1">&#39;inclusive&#39;</span>
-        <span class="nb">dir</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="nb">dir</span> <span class="o">+</span> <span class="s2">&quot;/stats_chi2_summary.log&quot;</span>
-        <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># Clear content</span>
+        <span class="n">outdir</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hybrid&#39;</span><span class="p">,</span> <span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="s1">&#39;neyman&#39;</span><span class="p">]:</span>
+            <span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;stats_chi2_</span><span class="si">{</span><span class="n">mname</span><span class="si">}</span><span class="s2">_summary.log&quot;</span><span class="p">)</span>
+            <span class="nb">open</span><span class="p">(</span><span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># Clear content</span>
         
         <span class="c1">## Collect post Stage 2 results</span>
         <span class="n">df_per_tau</span> <span class="o">=</span> <span class="p">[]</span>
         
         <span class="k">for</span> <span class="n">tau</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">][</span><span class="s1">&#39;tau_values&#39;</span><span class="p">]:</span>
             
-            <span class="n">local_dir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;tau_</span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+            <span class="n">local_dir</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;tau_</span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
             
+            <span class="c1"># ------------------------------------------------------------------</span>
             <span class="c1"># Tensorboard</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_dir</span><span class="p">,</span> <span class="s1">&#39;events.out.tfevents.*&#39;</span><span class="p">)):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># Clean old logs</span>
+
             <span class="n">writer</span> <span class="o">=</span> <span class="n">tensorboardX</span><span class="o">.</span><span class="n">SummaryWriter</span><span class="p">(</span><span class="n">local_dir</span><span class="p">)</span>
+            <span class="c1"># ------------------------------------------------------------------</span>
             
             <span class="c1"># AIRW plots</span>
-            <span class="n">chi2_table</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">chi2</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_AIRW</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">,</span>
-                <span class="n">pick_ind</span><span class="o">=</span><span class="n">pick_ind</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span>
-                <span class="n">param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">],</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
-                <span class="n">targetdir</span><span class="o">=</span><span class="n">local_dir</span><span class="p">,</span> <span class="n">num_cpus</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">])</span>
+            <span class="n">metric_table</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">mets</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_AIRW</span><span class="p">(</span>
+                <span class="n">X</span>         <span class="o">=</span> <span class="n">X_RAW</span><span class="p">,</span>
+                <span class="n">y</span>         <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+                <span class="n">ids</span>       <span class="o">=</span> <span class="n">ids_RAW</span><span class="p">,</span>
+                <span class="n">weights</span>   <span class="o">=</span> <span class="n">weights</span><span class="p">,</span>
+                <span class="n">y_pred</span>    <span class="o">=</span> <span class="n">y_pred</span><span class="p">,</span>
+                <span class="n">pick_ind</span>  <span class="o">=</span> <span class="n">pick_ind</span><span class="p">,</span>
+                <span class="n">label</span>     <span class="o">=</span> <span class="n">label</span><span class="p">,</span>
+                <span class="n">sublabel</span>  <span class="o">=</span> <span class="n">sublabel</span><span class="p">,</span>
+                <span class="n">param</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">],</span>
+                <span class="n">tau</span>       <span class="o">=</span> <span class="n">tau</span><span class="p">,</span>
+                <span class="n">targetdir</span> <span class="o">=</span> <span class="n">local_dir</span><span class="p">,</span>
+                <span class="n">num_cpus</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
             
-            <span class="c1"># Dump into pickle</span>
+            <span class="c1">## Dump into a pickle</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_dir</span><span class="p">,</span> <span class="s2">&quot;stats_chi2.pkl&quot;</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">chi2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">mets</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
 
-            <span class="c1"># Add Tensorboard values</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chi2</span><span class="p">)):</span>
-                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;chi2__</span><span class="si">{</span><span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2_0_AI&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">chi2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf_0_AI&#39;</span><span class="p">])</span>
-            
-            <span class="c1"># -----------------------------------------------------------</span>
-            
+            <span class="c1">## Append to the DataFrame</span>
             <span class="n">df_per_tau</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-            <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">chi2_table</span><span class="o">=</span><span class="n">chi2_table</span><span class="p">)</span>
+            
+            <span class="c1">## Add Tensorboard values</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mets</span><span class="p">)):</span>
+                
+                <span class="n">ID</span> <span class="o">=</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                
+                <span class="c1">#print(mets[i])</span>
+                
+                <span class="c1"># Relative ESS (use / in Tensorboard)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rESS/C0S1_C0/</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>    <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ESS&#39;</span><span class="p">][</span><span class="s1">&#39;C0S1&#39;</span><span class="p">]</span>  <span class="o">/</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ESS&#39;</span><span class="p">][</span><span class="s1">&#39;C0&#39;</span><span class="p">])</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rESS/C0S12_C0S1/</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ESS&#39;</span><span class="p">][</span><span class="s1">&#39;C0S12&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ESS&#39;</span><span class="p">][</span><span class="s1">&#39;C0S1&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Chi2</span>
+                <span class="k">for</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>          <span class="c1"># Loop over denominators (hybrid, pearson ...)</span>
+                    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2&#39;</span><span class="p">][</span><span class="n">dt</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="c1"># Loop over (data, mc) pairs</span>
+                        
+                        <span class="c1"># (use / in Tensorboard)</span>
+                        <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;chi2/</span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2&#39;</span><span class="p">][</span><span class="n">dt</span><span class="p">][</span><span class="n">obj</span><span class="p">]</span> <span class="o">/</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf&#39;</span><span class="p">])</span>
+            
+            <span class="c1">## Write tables to the disk</span>
+            <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span>
+                    <span class="n">filename</span>   <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span>
+                    <span class="n">label</span>      <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;category: </span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1"> | AI model: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | tau: </span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> | chi2: </span><span class="si">{</span><span class="n">mname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">table</span>      <span class="o">=</span> <span class="n">metric_table</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span>
+                    <span class="n">print_to_screen</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># Done already by plot_AIRW</span>
+                <span class="p">)</span>
             
             <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span> <span class="c1">#!</span>
-        
         
         <span class="c1"># Save to a parquet file</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">][</span><span class="s1">&#39;save_parquet&#39;</span><span class="p">]:</span>
@@ -2396,11 +2446,10 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_per_tau</span><span class="p">)):</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">df_per_tau</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             
-            <span class="n">parquet_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">dir</span><span class="si">}</span><span class="s1">/dataframe.parquet&#39;</span>
+            <span class="n">parquet_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outdir</span><span class="si">}</span><span class="s1">/dataframe.parquet&#39;</span>
             <span class="n">df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">parquet_file</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
             
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saved dataframe to a parquet file with gzip compression: </span><span class="si">{</span><span class="n">parquet_file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        
         
         <span class="c1"># ** Set filtered **</span>
         <span class="k">if</span> <span class="s1">&#39;set_filter&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">]:</span>
@@ -2416,21 +2465,39 @@
                 
                 <span class="c1">## Plot over different temperature values</span>
                 <span class="n">sublabel</span> <span class="o">=</span> <span class="n">text_filterset</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
-                <span class="nb">dir</span>      <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">filename</span> <span class="o">=</span> <span class="nb">dir</span> <span class="o">+</span> <span class="s2">&quot;/chi2_summary.log&quot;</span>
-                <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># Clear content</span>
+                <span class="n">outdir</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                
+                <span class="n">filenames</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;hybrid&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;pearson&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;neyman&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+                <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>    
+                    <span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;stats_chi2_</span><span class="si">{</span><span class="n">mname</span><span class="si">}</span><span class="s2">_summary.log&quot;</span><span class="p">)</span>
+                    <span class="nb">open</span><span class="p">(</span><span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># Clear content</span>
                 
                 <span class="k">for</span> <span class="n">tau</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">][</span><span class="s1">&#39;tau_values&#39;</span><span class="p">]:</span>
                     
                     <span class="n">mask</span> <span class="o">=</span> <span class="n">mask_filterset</span><span class="p">[</span><span class="n">m</span><span class="p">,:]</span>
                     
-                    <span class="n">chi2_table</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_AIRW</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_RAW</span><span class="p">[</span><span class="n">mask</span><span class="p">,:],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
-                                         <span class="n">pick_ind</span><span class="o">=</span><span class="n">pick_ind</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span>
-                                         <span class="n">param</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">],</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
-                                         <span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/OBS_reweight&#39;</span><span class="p">)</span>
+                    <span class="n">metric_table</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">mets</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_AIRW</span><span class="p">(</span>
+                        <span class="n">X</span>         <span class="o">=</span> <span class="n">X_RAW</span><span class="p">[</span><span class="n">mask</span><span class="p">,:],</span>
+                        <span class="n">y</span>         <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+                        <span class="n">ids</span>       <span class="o">=</span> <span class="n">ids_RAW</span><span class="p">,</span>
+                        <span class="n">weights</span>   <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+                        <span class="n">y_pred</span>    <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+                        <span class="n">pick_ind</span>  <span class="o">=</span> <span class="n">pick_ind</span><span class="p">,</span>
+                        <span class="n">label</span>     <span class="o">=</span> <span class="n">label</span><span class="p">,</span>
+                        <span class="n">sublabel</span>  <span class="o">=</span> <span class="n">sublabel</span><span class="p">,</span>
+                        <span class="n">param</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">],</span>
+                        <span class="n">tau</span>       <span class="o">=</span> <span class="n">tau</span><span class="p">,</span>
+                        <span class="n">targetdir</span> <span class="o">=</span> <span class="n">targetdir</span> <span class="o">+</span> <span class="s1">&#39;/OBS_reweight&#39;</span>
+                    <span class="p">)</span>
                     
-                    <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">sublabel</span><span class="o">=</span><span class="n">sublabel</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">chi2_table</span><span class="o">=</span><span class="n">chi2_table</span><span class="p">)</span>
-    
+                    <span class="c1">## Write tables to the disk</span>
+                    <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span>
+                            <span class="n">filename</span>   <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span>
+                            <span class="n">label</span>      <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;category: </span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1"> | AI model: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | tau: </span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> | chi2: </span><span class="si">{</span><span class="n">mname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">table</span>      <span class="o">=</span> <span class="n">metric_table</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span>
+                            <span class="n">print_to_screen</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Done already by plot_AIRW</span>
+                        <span class="p">)</span>
     
     <span class="c1"># --------------------------------------</span>
     <span class="c1">### ROC plots</span>
@@ -2626,7 +2693,7 @@
 <div class="viewcode-block" id="plot_XYZ_multiple_models">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.process.plot_XYZ_multiple_models">[docs]</a>
 <span class="nd">@iceprint</span><span class="o">.</span><span class="n">icelog</span><span class="p">(</span><span class="n">LOGGER</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
     <span class="k">global</span> <span class="n">roc_mstats</span>
     <span class="k">global</span> <span class="n">roc_labels</span>

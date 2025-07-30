@@ -443,6 +443,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.colors"><code class="docutils literal notranslate"><span class="pre">colors()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.create_axes"><code class="docutils literal notranslate"><span class="pre">create_axes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.edge2centerbins"><code class="docutils literal notranslate"><span class="pre">edge2centerbins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.ess_metric"><code class="docutils literal notranslate"><span class="pre">ess_metric()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.fuse_histograms"><code class="docutils literal notranslate"><span class="pre">fuse_histograms()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.generate_colormap"><code class="docutils literal notranslate"><span class="pre">generate_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/iceplot.html#iceplot.iceplot.hist"><code class="docutils literal notranslate"><span class="pre">hist()</span></code></a></li>
@@ -517,16 +518,16 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch_geometric</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch_geometric</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
@@ -846,7 +847,12 @@
     <span class="c1"># TensorboardX</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;__raytune_running__&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;tensorboard&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">tensorboardX</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>
-        <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span>
+        
+        <span class="n">tb_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;modeldir&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tb_path</span><span class="p">,</span> <span class="s1">&#39;events.out.tfevents.*&#39;</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># Clean old logs</span>
+        
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">tb_path</span><span class="p">)</span>
     
     <span class="c1"># --------------------------------------------------------------------</span>
     <span class="c1"># Training loop</span>
