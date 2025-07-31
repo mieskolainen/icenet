@@ -532,11 +532,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">optimize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">deeptools</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span> <span class="n">bnaf</span> <span class="kn">import</span><span class="w"> </span><span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux_torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">aux_torch</span>
 
 
 <div class="viewcode-block" id="compute_log_p_x">
@@ -550,7 +549,7 @@
 <span class="sd">        model : model object</span>
 <span class="sd">        x     : N minibatch vectors</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        log-likelihood value</span>
+<span class="sd">        log-likelihood (density) value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Evaluate the non-diagonal and the diagonal part</span>
@@ -595,7 +594,7 @@
 <span class="sd">        return_prob : return pdf(S) / (pdf(S) + pdf(B)), else pdf(S) / pdf(B)</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        likelihood ratio (or alternatively probability)</span>
+<span class="sd">        likelihood (density) ratio (or alternatively probability)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="nb">print</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;.predict: Computing density (likelihood) ratio for N = </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> events | return_prob = </span><span class="si">{</span><span class="n">return_prob</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -652,6 +651,8 @@
 <span class="sd">        modeldir    : directory to save the model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
+    <span class="n">opt_param</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">]</span>
+    
     <span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">model_to_cuda</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">])</span>
 
     <span class="c1"># TensorboardX</span>
@@ -692,7 +693,7 @@
     <span class="n">training_loader</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_set</span><span class="p">,</span>   <span class="o">**</span><span class="n">params_train</span><span class="p">)</span>
     <span class="n">validation_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">validation_set</span><span class="p">,</span> <span class="o">**</span><span class="n">params_validate</span><span class="p">)</span>
     
-    <span class="c1"># Loss function</span>
+    <span class="c1"># Loss function (NLL)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Note:</span>
 <span class="sd">        log-likelihood functions can be weighted linearly, due to</span>
@@ -701,25 +702,41 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">lossvec</span> <span class="o">=</span> <span class="n">compute_log_p_x</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">lossvec</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># log-likelihood</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">lossvec</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     
-    <span class="n">trn_losses</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">val_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">trn_losses</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">val_losses</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">trn_losses_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">val_losses_list</span> <span class="o">=</span> <span class="p">[]</span>
     
     <span class="c1"># Training loop</span>
     <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">],</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">]),</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">88</span><span class="p">):</span>
         
         <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="c1"># !</span>
 
-        <span class="n">train_loss</span>  <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">training_loader</span><span class="p">:</span>
-
+        <span class="n">trn_loss</span>  <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Scheduled noise regularization</span>
+        <span class="n">sigma2</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;noise_reg&#39;</span> <span class="ow">in</span> <span class="n">opt_param</span> <span class="ow">and</span> <span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;noise_reg&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">noise_reg</span> <span class="o">=</span> <span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;noise_reg&#39;</span><span class="p">]</span>
+            <span class="n">sigma2</span> <span class="o">=</span> <span class="n">noise_reg</span> <span class="o">*</span> <span class="n">deeptools</span><span class="o">.</span><span class="n">sigmoid_schedule</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">N_max</span><span class="o">=</span><span class="n">opt_param</span><span class="p">[</span><span class="s1">&#39;epochs&#39;</span><span class="p">])</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Noisereg sigma2 = </span><span class="si">{</span><span class="n">sigma2</span><span class="si">:</span><span class="s1">0.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">training_loader</span><span class="p">:</span>
+            
             <span class="c1"># Transfer to GPU</span>
-            <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
+            <span class="c1"># ---------------------------------------------------------------</span>
+            <span class="c1"># Add scheduled noise regularization</span>
+            <span class="k">if</span> <span class="n">sigma2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sigma2</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma2</span><span class="p">)</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="c1"># ---------------------------------------------------------------    </span>
+
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
             
             <span class="c1"># Zero gradients, calculate loss, calculate gradients and update parameters</span>
             <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
@@ -727,9 +744,9 @@
             <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">max_norm</span><span class="o">=</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;clip_norm&#39;</span><span class="p">])</span>
             <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
-            <span class="n">train_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+            <span class="n">trn_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
 
-        <span class="n">train_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">train_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">trn_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">trn_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
 
         <span class="c1"># ----------------------------------------------------------------</span>
@@ -739,36 +756,39 @@
             
             <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># !</span>
 
-            <span class="n">validation_loss</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">val_loss</span> <span class="o">=</span> <span class="p">[]</span>
             
             <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             
-                <span class="k">for</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_weights</span> <span class="ow">in</span> <span class="n">validation_loader</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">validation_loader</span><span class="p">:</span>
 
                     <span class="c1"># Transfer to GPU</span>
-                    <span class="n">batch_x</span>       <span class="o">=</span> <span class="n">batch_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="n">batch_weights</span> <span class="o">=</span> <span class="n">batch_weights</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     
-                    <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">batch_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">batch_weights</span><span class="p">)</span>
-                    <span class="n">validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">lossfunc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+                    <span class="n">val_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
             
-            <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">val_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
             <span class="n">optimizer</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
         
         <span class="c1"># ----------------------------------------------------------------</span>
         
-        <span class="c1"># Save metrics</span>
-        <span class="n">trn_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-        <span class="n">val_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+        <span class="c1">## ** Save values **</span>
+        <span class="n">optimize</span><span class="o">.</span><span class="n">trackloss</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;NLL&#39;</span><span class="p">:</span> <span class="n">trn_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()},</span> <span class="n">loss_history</span><span class="o">=</span><span class="n">trn_losses</span><span class="p">)</span>
+        <span class="n">optimize</span><span class="o">.</span><span class="n">trackloss</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;NLL&#39;</span><span class="p">:</span> <span class="n">val_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()},</span> <span class="n">loss_history</span><span class="o">=</span><span class="n">val_losses</span><span class="p">)</span>
+        
+        <span class="n">trn_losses_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trn_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+        <span class="n">val_losses_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
         
         <span class="c1"># Step scheduler</span>
-        <span class="n">stop</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
         
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch </span><span class="si">{:3d}</span><span class="s1">/</span><span class="si">{:3d}</span><span class="s1"> | Train: loss: </span><span class="si">{:4.3f}</span><span class="s1"> | Validation: loss: </span><span class="si">{:4.3f}</span><span class="s1"> | lr: </span><span class="si">{:0.3E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">epoch</span><span class="p">,</span>
+            <span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;start_epoch&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;opt_param&#39;</span><span class="p">][</span><span class="s1">&#39;epochs&#39;</span><span class="p">],</span>
-            <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-            <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">trn_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="n">val_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
             <span class="n">scheduler</span><span class="o">.</span><span class="n">get_last_lr</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
         <span class="p">)</span>
         
@@ -780,19 +800,21 @@
                 <span class="n">model</span>     <span class="o">=</span> <span class="n">model</span><span class="p">,</span>
                 <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">,</span>
                 <span class="n">epoch</span>     <span class="o">=</span> <span class="n">epoch</span><span class="p">,</span>
-                <span class="n">losses</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;trn_losses&#39;</span><span class="p">:</span> <span class="n">trn_losses</span><span class="p">,</span> <span class="s1">&#39;val_losses&#39;</span><span class="p">:</span> <span class="n">val_losses</span><span class="p">},</span>
+                <span class="n">losses</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;trn_losses&#39;</span><span class="p">:</span> <span class="n">trn_losses_list</span><span class="p">,</span> <span class="s1">&#39;val_losses&#39;</span><span class="p">:</span> <span class="n">val_losses_list</span><span class="p">},</span>
                 <span class="n">filename</span>  <span class="o">=</span> <span class="n">filename</span>
             <span class="p">)()</span> <span class="c1"># Note ()</span>
 
         <span class="k">if</span> <span class="s1">&#39;tensorboard&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">get_last_lr</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
-            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/validation&#39;</span><span class="p">,</span> <span class="n">validation_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
-            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/train&#39;</span><span class="p">,</span> <span class="n">train_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/validation&#39;</span><span class="p">,</span> <span class="n">val_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;loss/train&#39;</span><span class="p">,</span> <span class="n">trn_loss</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">epoch</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">stop</span><span class="p">:</span>
-            <span class="k">break</span></div>
+            <span class="k">break</span>
+    
+    <span class="k">return</span> <span class="n">trn_losses</span><span class="p">,</span> <span class="n">val_losses</span></div>
 
-        
+
 
 <div class="viewcode-block" id="create_model">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.deep.dbnf.create_model">[docs]</a>

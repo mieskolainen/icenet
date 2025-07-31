@@ -1142,7 +1142,7 @@ if they are intended to be used for in <code class="docutils literal notranslate
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>log-likelihood value</p>
+<dd class="field-even"><p>log-likelihood (density) value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1204,7 +1204,7 @@ if they are intended to be used for in <code class="docutils literal notranslate
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>likelihood ratio (or alternatively probability)</p>
+<dd class="field-even"><p>likelihood (density) ratio (or alternatively probability)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4755,8 +4755,8 @@ including propagated statistical uncertainties and shaded error bands.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>losses</strong> – loss values in a dictionary</p></li>
-<li><p><strong>trn_aucs</strong> – training metrics</p></li>
-<li><p><strong>val_aucs</strong> – validation metrics</p></li>
+<li><p><strong>trn_aucs</strong> – training metrics (or None)</p></li>
+<li><p><strong>val_aucs</strong> – validation metrics (or None)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
