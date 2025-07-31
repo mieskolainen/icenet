@@ -1,3 +1,8 @@
+# Conditional variables (Stage-1), used by models
+COND_VARS: &COND_VARS
+  ['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll']
+
+
 # ** Model save and load parameters **
 EVAL_PARAM: &EVAL_PARAM
   
@@ -168,16 +173,16 @@ iceboost0: &ICEBOOST0
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.2       # Use smaller with large number of trees
-    gamma: 1.0               # Minimum loss reduction required to make a further partition on a leaf node (~ controls the depth)
-    max_depth: 10            # Maximum depth of a tree (too high may overfit)
+    learning_rate: 0.1       # Use smaller with large number of trees
+    gamma: 1.5               # Minimum loss reduction required to make a further partition on a leaf node (~ controls the depth)
+    max_depth: 8             # Maximum depth of a tree (too high may overfit)
     min_child_weight: 1.0    # Minimum sum of instance weight (hessian) needed in a child (higher -> more conservative)
     max_delta_step: 1.0      # Constraint on the maximum change in the model's weights
     subsample: 1             # Subsample ratio of the training instance (=1 uses all data)
     
     colsample_bytree:  1.0   # Specifies the fraction of features to be randomly selected for each tree
-    colsample_bylevel: 1.0   # As 'bytree' but applied to individual tree levels
-    colsample_bynode:  1.0   # The fraction of features to be randomly selected for each split in a tree
+    colsample_bylevel: 0.9   # As 'bytree' but applied to individual tree levels
+    colsample_bynode:  0.9   # The fraction of features to be randomly selected for each split in a tree
     
     reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
     reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
@@ -187,6 +192,7 @@ iceboost0: &ICEBOOST0
     eval_metric: ['custom']  # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
+  # (this can help with gapped/iso variables such as dR ...)
   opt_param:
     noise_reg: 0.0           # Scheduled noise regularization
   
@@ -230,7 +236,7 @@ iceboost_swd:
     max_N: 500000       # Max events limit (~500k x 500 slices should be ok with 32 GB VRAM)
     #var: ['.*']        # Use all variables in SWD
     
-    var: ['probe_eta', 'probe_pt', 'probe_phi', 'fixedGridRhoAll'] # Use only Stage-1 variables
+    var: *COND_VARS     # Use only Stage-1 variables (defined in the header)
     
     class_idx: [0,0]    # Classes for U -> V transport, with two strategies:
                         
@@ -247,12 +253,82 @@ iceboost_swd:
 # however, performance with BDTs may be better without.
 # -----------------------------------------------------------------------------
 
+## Flow Transport Model (latent space flip)
+#
+iceflow: &ICEFLOW
+  train:   'rflow'
+  predict: 'torch_rflow'
+  
+  label:   'ICEFLOW'
+  raytune:  null
+  
+  # ** Custom set of variables ** [not active]
+  #include_MVA_vars: ['.*']
+  #exclude_MVA_vars: ['.*']
+  
+  # Set conditional variable names here (see the header of this file)
+  cond_vars: *COND_VARS
+
+  # Deterministic or Stochastic transport
+  stochastic: True
+
+  model_param:
+
+    flow_layers: 6
+    flow_type:   'spline'  # 'spline', 'realnvp'
+    permute:     True
+    
+    # Two MLPs per flow layer, this gives a list [{}, {}]
+    nn_param:
+      - hidden_dim: [96, 96, 96]
+        layer_norm: true
+        act: silu
+        dropout: 0.01
+
+      - hidden_dim: [96, 96, 96]
+        layer_norm: true
+        act: silu
+        dropout: 0.01
+
+  # Optimization
+  opt_param:  
+    #lossfunc: 'default'      # Not active
+    noise_reg: 0.001           # Scheduled noise regularization
+
+    optimizer: 'AdamW'
+    clip_norm: 1.0
+    
+    epochs: 200
+    batch_size: 4096
+    lr: 3.0e-4
+    weight_decay: 1.0e-3      # L2-regularization
+  
+  # Scheduler
+  scheduler_param:
+
+    #type: 'cos'
+    #period: 30
+
+    type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
+    step_size: 100             # Number of epochs for drop
+    gamma: 0.1
+  
+  device: 'auto'               # alternative 'cpu:0', 'cuda:0'
+  num_workers: 4
+  
+  <<: *EVAL_PARAM
+
+  # Override
+  savemode: 1
+  deploy_device: 'auto'        # Deploy device; 'auto', 'cpu', 'cuda'
+
+
 ## Lipschitz MLP
 #
 lzmlp0: &LZMLP
   train:   'torch_generic'
   predict: 'torch_scalar'
-  raw_logit: true               # Return raw logits
+  raw_logit: true              # Return raw logits
 
   label:   'LZMLP'
   raytune:  null
@@ -289,7 +365,7 @@ lzmlp0: &LZMLP
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
     
-    noise_reg: 0.1                    # Scheduled noise regularization
+    noise_reg: 0.001                   # Scheduled noise regularization
 
     #gamma: -0.5                      # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
@@ -331,7 +407,7 @@ lzmlp0_nozero:
   label:   'LZMLP-NOZERO'
 
 
-## FastKAN
+## FastKAN [this model is sensitive to hyperparameter -- untuned]
 #
 fastkan0: &FASTKAN
   train:   'torch_generic'
@@ -375,7 +451,7 @@ fastkan0: &FASTKAN
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ beta * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ beta * torch.sum(logits**2)
 
-    noise_reg: 0.1                    # Scheduled noise regularization
+    noise_reg: 0.001                   # Scheduled noise regularization
 
     #gamma: 2                         # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
@@ -464,7 +540,7 @@ dmlp0: &DMLP
     #logit_L1_beta: 1.0e-2            # logit norm reg. ~ lambda * torch.sum(|logits|)
     logit_L2_beta: 5.0e-3             # logit norm reg. ~ lambda * torch.sum(logits**2)
     
-    noise_reg: 0.1                    # Scheduled noise regularization
+    noise_reg: 0.001                   # Scheduled noise regularization
 
     #gamma: 2                         # focal_entropy "exponent"
     #temperature: 1                   # logit_norm_cross_entropy "temperature"
@@ -505,7 +581,8 @@ dmlp0_nozero:
   label:   'DMLP-NOZERO'
 
 
-## Deep Normalizing Flow
+## Deep Normalizing Flow (BNAF)
+# (train a separate flow for class 0 and class 1 for a density (pdf) ratio)
 #
 dbnf0:
   train:   'flow'
@@ -513,13 +590,20 @@ dbnf0:
   label:   'DBNF0'
   raytune:  null
 
+  # ** Custom set of variables ** [not active]
+  #include_MVA_vars: ['.*']
+  #exclude_MVA_vars: ['.*']
+  
   # Gradient descent
   opt_param:
     lossfunc: 'flow_logpx'
+
+    noise_reg: 0.001           # Scheduled noise regularization
+
     optimizer: 'Adam'
     clip_norm: 0.1
     
-    epochs: 250
+    epochs: 200
     batch_size: 512           # Keep it high!
     lr: 4.0e-4
     weight_decay: 0.0         # L2-regularization (0 seems OK) 
@@ -537,7 +621,7 @@ dbnf0:
 
   # Model structure
   model_param:  
-    flows: 10                 # number of flow blocks
+    flows: 8                  # number of flow blocks
     layers: 0                 # intermediate layers in a flow block
     hidden_dim: 10            # 
     residual: 'gated'         # choises 'none', 'normal', 'gated'

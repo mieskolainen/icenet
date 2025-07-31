@@ -5,23 +5,21 @@
 # https://github.com/nicola-decao/BNAF (MIT license)
 #
 #
-# m.mieskolainen@imperial.ac.uk, 2024
-
+# m.mieskolainen@imperial.ac.uk, 2025
 
 import os
+import glob
+
 import torch
 import torch.nn.functional as F
-
+from torch.utils import data
 import numpy as np
 from tqdm import tqdm
-from torch.utils import data
 
-
-from icenet.deep  import optimize
+from icenet.deep  import optimize, deeptools
 
 from . bnaf import *
-from icenet.tools import aux
-from icenet.tools import aux_torch
+from icenet.tools import aux, aux_torch
 
 
 def compute_log_p_x(model, x):
@@ -33,7 +31,7 @@ def compute_log_p_x(model, x):
         model : model object
         x     : N minibatch vectors
     Returns:
-        log-likelihood value
+        log-likelihood (density) value
     """
 
     # Evaluate the non-diagonal and the diagonal part
@@ -72,7 +70,7 @@ def predict(X, models, return_prob=True, EPS=1E-9):
         return_prob : return pdf(S) / (pdf(S) + pdf(B)), else pdf(S) / pdf(B)
     
     Returns:
-        likelihood ratio (or alternatively probability)
+        likelihood (density) ratio (or alternatively probability)
     """
     
     print(__name__ + f'.predict: Computing density (likelihood) ratio for N = {X.shape[0]} events | return_prob = {return_prob}')
@@ -109,26 +107,21 @@ class Dataset(torch.utils.data.Dataset):
 
 def train(model, optimizer, scheduler, trn_x, val_x,
           trn_weights, val_weights, param, modeldir, save_name):
-    """ Train the model density.
-    
-    Args:
-        model       : initialized model object
-        optimizer   : optimizer object
-        scheduler   : optimization scheduler
-        trn_x       : training vectors
-        val_x       : validation vectors
-        trn_weights : training weights
-        val_weights : validation weights
-        param       : parameters
-        modeldir    : directory to save the model
+    """ Train the model density
     """
+    
+    opt_param = param['opt_param']
     
     model, device = optimize.model_to_cuda(model, param['device'])
 
     # TensorboardX
     if 'tensorboard' in param and param['tensorboard']:
         from tensorboardX import SummaryWriter
-        writer = SummaryWriter(os.path.join('tmp/tensorboard/', save_name))
+        
+        for f in glob.glob(os.path.join(modeldir, 'events.out.tfevents.*')):
+            os.remove(f) # Clean old logs
+        
+        writer = SummaryWriter(modeldir)
 
     if trn_weights is None:
         trn_weights = torch.ones(trn_x.shape[0], dtype=torch.float32)
@@ -159,34 +152,48 @@ def train(model, optimizer, scheduler, trn_x, val_x,
     training_loader   = torch.utils.data.DataLoader(training_set,   **params_train)
     validation_loader = torch.utils.data.DataLoader(validation_set, **params_validate)
     
-    # Loss function
+    # Loss function (NLL)
     """
     Note:
         log-likelihood functions can be weighted linearly, due to
         \\prod_i p_i(\\theta; x_i)**w_i ==\\log==> \\sum_i w_i \\log p_i(\\theta; x_i)
     """
-    def lossfunc(model, x, weights):
-        w = weights / torch.sum(weights, dim=0)
-        lossvec = compute_log_p_x(model, x)
-        return -(lossvec * w).sum(dim=0) # log-likelihood
     
-    trn_losses = []
-    val_losses = []
+    trn_losses = {}
+    val_losses = {}
+    trn_losses_list = []
+    val_losses_list = []
     
     # Training loop
     for epoch in tqdm(range(param['opt_param']['start_epoch'], param['opt_param']['start_epoch'] + param['opt_param']['epochs']), ncols = 88):
         
         model.train() # !
 
-        train_loss  = []
-
-        for batch_x, batch_weights in training_loader:
-
+        trn_loss = 0.0
+        denom    = 0.0
+        
+        # Scheduled noise regularization
+        sigma2 = None
+        if 'noise_reg' in opt_param and opt_param['noise_reg'] > 0.0:
+            noise_reg = opt_param['noise_reg']
+            sigma2 = noise_reg * deeptools.sigmoid_schedule(t=epoch, N_max=opt_param['epochs'])
+            
+            print(f'Noise reg. sigma2 = {sigma2:0.3E}')
+        
+        for x, w in training_loader:
+            
             # Transfer to GPU
-            batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
-            batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
+            x = x.to(device, dtype=torch.float32, non_blocking=True)
+            w = w.to(device, dtype=torch.float32, non_blocking=True)
 
-            loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
+            # ---------------------------------------------------------------
+            # Add scheduled noise regularization
+            if sigma2 is not None:
+                x = np.sqrt(1 - sigma2)*x + np.sqrt(sigma2)*torch.randn_like(x)
+            # ---------------------------------------------------------------    
+
+            # Compute loss [per batch w normalized]
+            loss = -(w * compute_log_p_x(model, x)).sum() / w.sum()
             
             # Zero gradients, calculate loss, calculate gradients and update parameters
             optimizer.zero_grad()
@@ -194,67 +201,83 @@ def train(model, optimizer, scheduler, trn_x, val_x,
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=param['opt_param']['clip_norm'])
             optimizer.step()
 
-            train_loss.append(loss)
+            trn_loss += loss.item()
+            denom    += 1
 
-        train_loss = torch.stack(train_loss).mean()
+        trn_loss = trn_loss / denom
+        
         optimizer.swap()
 
         # ----------------------------------------------------------------
         # Compute validation loss
         
-        if epoch == 0 or (epoch % param['evalmode']) == 0:
-        
+        if epoch == 0 or (epoch % param['savemode']) == 0:
+            
             model.eval() # !
 
-            validation_loss = []
+            val_loss = 0.0
+            denom    = 0.0
             
             with torch.no_grad():
             
-                for batch_x, batch_weights in validation_loader:
+                for x, w in validation_loader:
 
                     # Transfer to GPU
-                    batch_x       = batch_x.to(device, dtype=torch.float32, non_blocking=True)
-                    batch_weights = batch_weights.to(device, dtype=torch.float32, non_blocking=True)
+                    x = x.to(device, dtype=torch.float32, non_blocking=True)
+                    w = w.to(device, dtype=torch.float32, non_blocking=True)
+
+                    # Compute loss [per batch w normalized]
+                    loss = -(w * compute_log_p_x(model, x)).sum()
                     
-                    loss = lossfunc(model=model, x=batch_x, weights=batch_weights)
-                    validation_loss.append(loss)
+                    val_loss += loss.item()
+                    denom    += 1
             
-            validation_loss = torch.stack(validation_loss).mean()
+            val_loss = val_loss / denom
+
             optimizer.swap()
         
         # ----------------------------------------------------------------
         
-        # Save metrics
-        trn_losses.append(train_loss.item())
-        val_losses.append(validation_loss.item())
+        ## ** Save values **
+        optimize.trackloss(loss={'NLL': trn_loss}, loss_history=trn_losses)
+        optimize.trackloss(loss={'NLL': val_loss}, loss_history=val_losses)
+        
+        trn_losses_list.append(trn_loss)
+        val_losses_list.append(val_loss)
         
         # Step scheduler
-        stop = scheduler.step(validation_loss)
+        stop = scheduler.step(val_loss)
         
         print('Epoch {:3d}/{:3d} | Train: loss: {:4.3f} | Validation: loss: {:4.3f} | lr: {:0.3E}'.format(
-            epoch,
+            epoch+1,
             param['opt_param']['start_epoch'] + param['opt_param']['epochs'],
-            train_loss.item(),
-            validation_loss.item(),
+            trn_loss,
+            val_loss,
             scheduler.get_last_lr()[0])
         )
         
         # Save
-        filename = f'{modeldir}/{save_name}_{epoch}.pth'
-        aux_torch.save_torch_model(model     = model,
-                                   optimizer = optimizer,
-                                   epoch     = epoch,
-                                   losses    = {'trn_losses': trn_losses, 'val_losses': val_losses},
-                                   filename  = filename)()
+        if epoch == 0 or (epoch % param['savemode']) == 0:
+            
+            filename = f'{modeldir}/{save_name}_{epoch}.pth'
+            aux_torch.save_torch_model(
+                model     = model,
+                optimizer = optimizer,
+                epoch     = epoch,
+                losses    = {'trn_losses': trn_losses_list, 'val_losses': val_losses_list},
+                filename  = filename
+            )() # Note ()
 
         if 'tensorboard' in param and param['tensorboard']:
             writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
-            writer.add_scalar('loss/validation', validation_loss.item(), epoch)
-            writer.add_scalar('loss/train', train_loss.item(), epoch)
+            writer.add_scalar('loss/validation', val_loss, epoch)
+            writer.add_scalar('loss/train', trn_loss, epoch)
         
         if stop:
             break
-        
+    
+    return trn_losses, val_losses
+
 
 def create_model(param, verbose=False, rngseed=0):
     """ Construct the network object.
@@ -266,7 +289,7 @@ def create_model(param, verbose=False, rngseed=0):
     """
 
     # For random permutations
-    np.random.seed(rngseed)
+    aux.set_random_seed(rngseed)
     
     flows = []
     for f in range(param['flows']):
@@ -294,8 +317,7 @@ def create_model(param, verbose=False, rngseed=0):
     # Create the model
     model  = Sequential(*flows)
     
-    params = sum((p != 0).sum() if len(p.shape) > 1 else torch.tensor(p.shape).item()
-                 for p in model.parameters()).item()
+    params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
     # Print model information    
     print('{}'.format(model))

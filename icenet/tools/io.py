@@ -729,6 +729,14 @@ def apply_zscore(X : np.array, X_mu, X_std, EPS=1E-12):
         Y[:,i] = (X[:,i] - X_mu[i]) / max(X_std[i], EPS)
     return Y
 
+@numba.njit(parallel=True)
+def reverse_zscore(Y: np.array, X_mu, X_std, EPS=1E-12):
+    """ Reverse Z-score normalization
+    """
+    X = np.zeros(Y.shape)
+    for i in range(len(X_mu)):
+        X[:, i] = Y[:, i] * max(X_std[i], EPS) + X_mu[i]
+    return X
 
 @numba.njit(parallel=True)
 def apply_madscore(X : np.array, X_m, X_mad, EPS=1E-12):

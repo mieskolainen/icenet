@@ -200,7 +200,7 @@ def train(model, loader, optimizer, device, opt_param: dict, MI: dict=None):
         noise_reg = opt_param['noise_reg']
         sigma2 = noise_reg * deeptools.sigmoid_schedule(t=opt_param['current_epoch'], N_max=opt_param['epochs'])
         
-        print(f'Noise regularization sigma2 = {sigma2:0.4f}')
+        print(f'Noise reg. sigma2 = {sigma2:0.3E}')
     # -------------------------------------------------------------------
     
     for _, batch in tqdm(enumerate(loader)):

@@ -80,9 +80,9 @@ This multi-objective optimization depends on a combination of several factors:
 
 The bias variance trade-off should be seen in 2D scatter plots in tensorboard. For example the pair
 
-- `rESS/C0S12_C0S1/mvaID` & `chi2/hybrid/C1_C0S12/mvaID`
+- `rESS/C0S12_C0S1/probe_eta` & `chi2/hybrid/C1_C0S12/mvaID`
 
-should resolve a *Pareto frontier* with hyperparameter trials. The first metric here measures the reduction in effective sample size due to the S2-model (variance) and the second one measures overall goodness-of-fit (primarily bias) against data.
+should resolve a *Pareto frontier* with hyperparameter trials. The first metric here measures the reduction in effective sample size due to the S2-model (variance) [choose variables used in S1-stage] and the second one measures overall goodness-of-fit (primarily bias) against data [choose variables used in S2-stage].
 
 The conditionality preservation can be monitored with
 

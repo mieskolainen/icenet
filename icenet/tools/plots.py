@@ -171,16 +171,15 @@ def plot_matrix(XY, x_bins, y_bins, vmin=0, vmax=None, cmap='RdBu', figsize=(4,3
 
     return fig,ax,c
 
-
 def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85,
                                yscale='linear', xscale='linear'):
     """ Training evolution plots.
 
     Args:
         losses:   loss values in a dictionary
-        trn_aucs: training metrics
-        val_aucs: validation metrics
-    
+        trn_aucs: training metrics (or None)
+        val_aucs: validation metrics (or None)
+
     Returns:
         fig: figure handle
         ax:  figure axis
@@ -195,9 +194,7 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85,
     for key in losses:
         if ('sum' in key) and (N_terms == 2):
             continue  # Skip sum if redundant
-        txt = copy.deepcopy(key)
-        if 'eval' in txt:
-            txt = key.replace('eval', 'validate')
+        txt = key.replace('eval', 'validate') if 'eval' in key else key
         ax[0].plot(losses[key], label=txt)
     
     ax[0].set_xlabel('k (epoch)')
@@ -209,12 +206,29 @@ def plot_train_evolution_multi(losses, trn_aucs, val_aucs, label, aspect=0.85,
     ax[0].set_aspect(1.0 / ax[0].get_data_ratio() * aspect)
     ax[0].autoscale(enable=True, axis='x', tight=True)
 
-    ax[1].plot(trn_aucs)
-    ax[1].plot(val_aucs)
-    ax[1].legend(['train', 'validate'], fontsize=8)
+    # Plot AUCs only if they are not None
+    auc_labels = []
+    if trn_aucs is not None:
+        ax[1].plot(trn_aucs)
+        auc_labels.append('train')
+    if val_aucs is not None:
+        ax[1].plot(val_aucs)
+        auc_labels.append('validate')
+
+    if auc_labels:
+        ax[1].legend(auc_labels, fontsize=8)
+        ax[1].set_ylabel('AUC')
+        ymin = 0.0
+        ymax = 1.0
+        if trn_aucs is not None and len(trn_aucs) > 0:
+            ymin = min(ymin, np.min(trn_aucs))
+        if val_aucs is not None and len(val_aucs) > 0:
+            ymin = min(ymin, np.min(val_aucs))
+        ax[1].set_ylim([ymin, ymax])
+    else:
+        ax[1].set_ylabel('AUC (no data)')
+
     ax[1].set_xlabel('k (epoch)')
-    ax[1].set_ylabel('AUC')
-    ax[1].set_ylim([min(np.min(trn_aucs), np.min(val_aucs)), 1.0])
     ax[1].grid(True)
     ax[1].set_yscale(yscale)
     ax[1].set_xscale(xscale)
@@ -1490,12 +1504,16 @@ def table_writer(filename, label, table, print_to_screen=False):
 
 
 def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
-              label, sublabel, param, tau=1.0, targetdir=None, num_cpus=0):
+              label, sublabel, param, tau=1.0, X_new=None, targetdir=None, num_cpus=0, map_mode='RW'):
     """
     Plot AI based reweighting results
+    
+    Args:
+        map_mode: 'RW' (Stage-2 reweight) or 'FT' (Stage-2 feature transport)
     """
     
     prints.printbar()
+
     print(f'label = {label} | sublabel = {sublabel} | tau = {tau}', 'green')
     
     ## Print stats
@@ -1509,8 +1527,9 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     RN_ID = param['renorm_origin']
     mode  = param['transform_mode']
     
-    # ---------------------------------------------------
+    # ===============================================================
     ## 0. Extract out Stage-1 AI weights
+    ## Remember that we can have negative weights here
     
     try:
         idx, _ = aux.pick_index(all_ids=ids, vars=['raw_weight'])
@@ -1519,90 +1538,104 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         # Normalize to the class 1 weight sum
         w0_raw = w0_raw / np.sum(w0_raw) * np.sum(weights[y == C1])
         
-        w0_S1  = weights[y == C0] / w0_raw
+        w0_S1_only = weights[y == C0] / w0_raw
         
     except:
         raise Exception('plot_AIRW: Input data X must contain "raw_weight" column')
     
-    # ---------------------------------------------------
-    ## 1. Transform model output scores to Stage-2 AI weights
+    # ===============================================================
     
-    # Handle logits vs probabilities
-    min_y_pred, max_y_pred = np.min(y_pred), np.max(y_pred)
-    
-    THRESH = 1E-5
-    if min_y_pred < (-THRESH) or max_y_pred > (1.0 + THRESH):
-        print(f'Detected raw logit output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
-        logits = y_pred[y == C0]
-        probs  = aux.sigmoid(logits)
-        print(f'Corresponding probability output [{np.min(probs):0.4f}, {np.max(probs):0.4f}]')
-    else:
-        print(f'Detected probability output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
-        logits = aux.inverse_sigmoid(p = y_pred[y == C0], EPS=EPS)
-        print(f'Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
-    
-    # Apply temperature scaling
-    logits /= tau
-    
-    # Get weights after the re-weighting transform
-    w0_S2 = reweight.rw_transform_with_logits(logits=logits, mode=mode)
-    
-    prints.print_weights(weights=weights, y=y, output_file=output_file,
-        header='Step 1: Input event weights [raw x S1]', write_mode='w')
-    
-    prints.print_weights(weights=w0_S2, y=np.zeros(len(w0_S2)), output_file=output_file,
-        header='Step 2: S2 only weights', write_mode='a')
-    
-    # Cut-off regularize anomalous high weights
-    w0_S2 = np.clip(w0_S2, 0.0, maxW)
-    
-    prints.print_weights(weights=w0_S2, y=np.zeros(len(w0_S2)), output_file=output_file,
-        header=f'Step 3: S2 only weights [cutoff regularized with maxW = {maxW}]', write_mode='a')
-    
-    # Log-space smoothen weights
-    w0_S2 = aux.log_space_weight_smooth(w0_S2, lambda_shrink=lambda_shrink)
-    
-    prints.print_weights(weights=w0_S2, y=np.zeros(len(w0_S2)), output_file=output_file,
-        header=f'Step 4: S2 only weights [log-space smoothing with lambda_shrink = {lambda_shrink}]', write_mode='a')
-    
-    # Apply multiplicatively to event weights (which can be negative)
-    w0_tot = weights[y == C0] * w0_S2
+    # Option: S2-Reweight
+    if map_mode == 'RW':
+        
+        # ---------------------------------------------------
+        ## 1. Transform model output scores to Stage-2 AI weights
+        
+        # Handle logits vs probabilities
+        min_y_pred, max_y_pred = np.min(y_pred), np.max(y_pred)
+        
+        THRESH = 1E-5
+        if min_y_pred < (-THRESH) or max_y_pred > (1.0 + THRESH):
+            print(f'Detected raw logit output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+            logits = y_pred[y == C0]
+            probs  = aux.sigmoid(logits)
+            print(f'Corresponding probability output [{np.min(probs):0.4f}, {np.max(probs):0.4f}]')
+        else:
+            print(f'Detected probability output [{min_y_pred:0.4f}, {max_y_pred:0.4f}] from the model')
+            logits = aux.inverse_sigmoid(p = y_pred[y == C0], EPS=EPS)
+            print(f'Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
+        
+        # Apply temperature scaling
+        logits /= tau
+        
+        # Get weights after the re-weighting transform
+        w0_S2_only = reweight.rw_transform_with_logits(logits=logits, mode=mode)
+        
+        prints.print_weights(weights=weights, y=y, output_file=output_file,
+            header='Step 1: Input event weights [raw x S1]', write_mode='w')
+        
+        prints.print_weights(weights=w0_S2_only, y=np.zeros(len(w0_S2_only)), output_file=output_file,
+            header='Step 2: S2 only weights', write_mode='a')
+        
+        # Cut-off regularize anomalous high weights
+        w0_S2_only = np.clip(w0_S2_only, 0.0, maxW)
+        
+        prints.print_weights(weights=w0_S2_only, y=np.zeros(len(w0_S2_only)), output_file=output_file,
+            header=f'Step 3: S2 only weights [cutoff regularized with maxW = {maxW}]', write_mode='a')
+        
+        # Log-space smoothen weights
+        w0_S2_only = aux.log_space_weight_smooth(w0_S2_only, lambda_shrink=lambda_shrink)
+        
+        prints.print_weights(weights=w0_S2_only, y=np.zeros(len(w0_S2_only)), output_file=output_file,
+            header=f'Step 4: S2 only weights [log-space smoothing with lambda_shrink = {lambda_shrink}]', write_mode='a')
+        
+        # Apply multiplicatively to event weights (which can be negative)
+        w0_tot = weights[y == C0] * w0_S2_only
 
-    prints.print_weights(weights=w0_tot, y=np.zeros(len(w0_tot)), output_file=output_file,
-        header=f'Step 5: Total weights [input weights x S2 weights]', write_mode='a')
-    
-    # ---------------------------------------------------
-    ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
-    
-    if RN_ID is not None:
-        print(f'Renormalizing with class [renorm_origin = {RN_ID}] weight sum', 'yellow')
-
-        sum_before = w0_tot.sum()
-        print(f'Sum(before): {sum_before:0.1f}')
-        
-        w0_tot /= np.sum(w0_tot)                # Normalize
-        w0_tot *= np.sum(weights[y == RN_ID]) # Scale
-        
-        sum_after = w0_tot.sum()
-        print(f'Sum(after):  {sum_after:0.1f}')
-        ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.5f}'
-        print(ratio)
-        print('')
-        
-        # Print stats
         prints.print_weights(weights=w0_tot, y=np.zeros(len(w0_tot)), output_file=output_file,
-            header=f'Step 6: Total weights sum renormalized [wrt. class ID = {RN_ID}] | {ratio}', write_mode='a')
+            header=f'Step 5: Total weights [input weights x S2 weights]', write_mode='a')
+        
+        # ---------------------------------------------------
+        ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
+        
+        if RN_ID is not None:
+            print(f'Renormalizing with class [renorm_origin = {RN_ID}] weight sum', 'yellow')
+
+            sum_before = w0_tot.sum()
+            print(f'Sum(before): {sum_before:0.1f}')
+            
+            w0_tot /= np.sum(w0_tot)              # Normalize
+            w0_tot *= np.sum(weights[y == RN_ID]) # Scale
+            
+            sum_after = w0_tot.sum()
+            print(f'Sum(after):  {sum_after:0.1f}')
+            ratio = f'Ratio = Sum(after) / Sum(before) = {sum_after/sum_before:0.5f}'
+            print(ratio)
+            print('')
+            
+            # Print stats
+            prints.print_weights(weights=w0_tot, y=np.zeros(len(w0_tot)), output_file=output_file,
+                header=f'Step 6: Total weights sum renormalized [wrt. class ID = {RN_ID}] | {ratio}', write_mode='a')
+        
+        # ===================================================
+        # Add data to a DataFrame
+        
+        tau_str = str(np.round(tau, 3))
+        
+        # Create DataFrame
+        w_post_S2 = copy.deepcopy(weights)
+        w_post_S2[y == C0] = w0_tot # only C0
+        
+        df = pd.DataFrame(w_post_S2, columns=[f'w_post_S2__tau_{tau_str}'])
     
-    # ===================================================
-    # Add data to a DataFrame
+    # Option: S2-Transport
+    elif map_mode == 'FT':
+        w0_S2_only = None
+        w0_tot     = weights[y == C0]
+        df         = None
     
-    tau_str = str(np.round(tau, 3))
-    
-    # Create DataFrame
-    w_post_S2 = copy.deepcopy(weights)
-    w_post_S2[y == C0] = w0_tot # only C0
-    
-    df = pd.DataFrame(w_post_S2, columns=[f'w_post_S2__tau_{tau_str}'])
+    else:
+        raise Exception(f'plot_AIRW: Unknown "map_mode" = {map_mode}')
     
     
     # ===================================================
@@ -1611,8 +1644,11 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     
     param = {
         'i':          None,
+        'i_new':      None,
         
         'X':          None,
+        'X_new':      None,
+        
         'y':          None,
         'weights':    None,
         'ids':        None,
@@ -1627,27 +1663,36 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         
         'label':      label,
         'param':      param,
-        'local_dir':  targetdir
+        'local_dir':  targetdir,
+        'map_mode':   map_mode
     }
     
     # Loop over each observable (specific column of X)
     paramlist = []
     
+    k = 0
     for i in pick_ind:
         paramlist.append(copy.deepcopy(param)) 
         
-        # big numpy arrays should share the memory (i.e. no copy of X)
+        # Column ndexing
         paramlist[-1]['i']          = i
+        paramlist[-1]['i_new']      = k         # linear running
+        
+        # big numpy arrays should share the memory (i.e. no copy of X)
         paramlist[-1]['X']          = X
+        paramlist[-1]['X_new']      = X_new
+        
         paramlist[-1]['y']          = y
         paramlist[-1]['weights']    = weights
         paramlist[-1]['ids']        = ids
         
         paramlist[-1]['w0_raw']     = w0_raw
-        paramlist[-1]['w0_S1_only'] = w0_S1
-        paramlist[-1]['w0_S2_only'] = w0_S2
+        paramlist[-1]['w0_S1_only'] = w0_S1_only
+        paramlist[-1]['w0_S2_only'] = w0_S2_only
         paramlist[-1]['w0_tot']     = w0_tot
-    
+
+        k += 1
+
     # ---------------------------------------------------------------
     ## Start multiprocessing
     
@@ -1679,7 +1724,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
 
     ## Collect for the total metrics
     for i in range(len(mets)):
-        
+
         total_ndf += mets[i]['ndf']
         
         for key in mets[i]['ESS'].keys():    
@@ -1688,7 +1733,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         for dt in mets[i]['chi2'].keys():
             for obj in mets[i]['chi2'][dt].keys():
                 total_chi2[dt][obj] += mets[i]['chi2'][dt][obj]
-    
+
     # Append metrics
     mets.append({
         'id':   'total',
@@ -1716,8 +1761,8 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
             
             f"C0 | chi2_{{{L},C1}}/ndf ",
             f"C0xS1 | chi2_{{{L},C1}}/ndf ",
-            f"C0xS1xS2 | chi2_{{{L},C1}}/ndf ",
-            f"C0xS2 | chi2_{{{L},C0}}/ndf "
+            f"C0xS2 | chi2_{{{L},C0}}/ndf ",
+            f"C0xS1xS2 | chi2_{{{L},C1}}/ndf "
         ])
         
         for i in range(len(mets)):
@@ -1731,8 +1776,8 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
                 
                 np.round(mets[i]['chi2'][mname]['C1_C0']    / mets[i]['ndf'], 2),
                 np.round(mets[i]['chi2'][mname]['C1_C0S1']  / mets[i]['ndf'], 2),
-                np.round(mets[i]['chi2'][mname]['C1_C0S12'] / mets[i]['ndf'], 2),
-                np.round(mets[i]['chi2'][mname]['C0_C0S2']  / mets[i]['ndf'], 2)
+                np.round(mets[i]['chi2'][mname]['C0_C0S2']  / mets[i]['ndf'], 2),
+                np.round(mets[i]['chi2'][mname]['C1_C0S12'] / mets[i]['ndf'], 2)
             ]
             
             metric_table[mname].add_row(row, divider=True if (i == len(mets)-1 or i == len(mets)-2) else False)
@@ -1758,9 +1803,11 @@ def multiprocess_AIRW_wrapper(p):
     Multiprocessing plots
     """
     
-    i          = p['i'] # Column index
+    i          = p['i']           # Column index
+    i_new      = p['i_new']       # 
     
     X          = p['X']
+    X_new      = p['X_new']
     y          = p['y']
     w          = p['weights']
     ids        = p['ids']
@@ -1770,15 +1817,22 @@ def multiprocess_AIRW_wrapper(p):
     w0_S2_only = p['w0_S2_only']  # Only Stage-2 AI weight
     w0_tot     = p['w0_tot']      # Raw x S1 x S2 (mod renormalization)
     
-    C0         = p['C0']     # Class indices
-    C1         = p['C1']
+    C0        = p['C0']           # Class indices
+    C1        = p['C1']
     
-    label      = p['label']
-    param      = p['param']
-    local_dir  = p['local_dir']
+    label     = p['label']
+    param     = p['param']
+    local_dir = p['local_dir']
+    
+    map_mode  = p['map_mode']     # 'RW', or 'FT'
     
     X_col = copy.deepcopy(X[:, i])
-    bins  = binengine(bindef=param['edges'], x=X_col)
+    
+    # Transported
+    if map_mode == 'FT':
+        X_col_new = copy.deepcopy(X_new[:,i_new])
+    
+    bins = binengine(bindef=param['edges'], x=X_col)
     
     # ----------------------------------------------------
     
@@ -1816,11 +1870,11 @@ def multiprocess_AIRW_wrapper(p):
     }
     
     # Data source <-> Observable collections
-    class1     = data_template.copy() # Deep copies
-    class0     = data_template.copy()
-    class0_S1  = data_template.copy()
-    class0_S12 = data_template.copy()
-    class0_S2  = data_template.copy()
+    class1     = copy.deepcopy(data_template)
+    class0     = copy.deepcopy(data_template)
+    class0_S1  = copy.deepcopy(data_template)
+    class0_S2  = copy.deepcopy(data_template)
+    class0_S12 = copy.deepcopy(data_template)
     
     class1.update({
         'label' : '$C_1$',
@@ -1840,27 +1894,47 @@ def multiprocess_AIRW_wrapper(p):
         'style' : iceplot.hist_style_step,
         'color' : iceplot.imperial_green
     })
-    class0_S12.update({
-        'label' : '$C_0 \\times S_1 \\cdot S_2$',
-        'hfunc' : 'hist',
-        'style' : iceplot.hist_style_step,
-        'color' : iceplot.imperial_dark_red
-    })
     class0_S2.update({
         'label' : '$C_0 \\times S_2$',
         'hfunc' : 'hist',
         'style' : iceplot.hist_style_step,
         'color' : iceplot.imperial_very_light_blue
     })
+    class0_S12.update({
+        'label' : '$C_0 \\times S_1 \\cdot S_2$',
+        'hfunc' : 'hist',
+        'style' : iceplot.hist_style_step,
+        'color' : iceplot.imperial_dark_red
+    })
     
-    data = [class1, class0, class0_S1, class0_S12, class0_S2]
+    data = [class1, class0, class0_S1, class0_S2, class0_S12]
     
+    # Class 1
     data[0]['hdata'] = iceplot.hist_obj(X_col[y == C1], bins=bins, weights=w[y == C1])
     
-    data[1]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_raw)              # raw C0
-    data[2]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w[y == C0])          # raw x S1
-    data[3]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_tot)              # raw x S1 x S2
-    data[4]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_raw * w0_S2_only) # raw x S2
+    # Raw weights Class 0
+    data[1]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_raw)
+    
+    # Raw weights Class 0 x S1
+    data[2]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w[y == C0])
+    
+    # Reweight
+    if   map_mode == 'RW':
+        
+        # raw x S2
+        data[3]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_raw * w0_S2_only)
+
+        # raw x S1 x S2
+        data[4]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_tot)
+        
+    # Transport (no weights for S2)
+    elif map_mode == 'FT':
+        
+        # raw x S2(T)
+        data[3]['hdata'] = iceplot.hist_obj(X_col_new[y == C0], bins=bins, weights=w0_raw)
+        
+        # raw x S1 x S2(T)
+        data[4]['hdata'] = iceplot.hist_obj(X_col_new[y == C0], bins=bins, weights=w0_tot)
     
     ## Chi2 vs Data
     chi2 = {'hybrid': {}, 'pearson': {}, 'neyman': {}}
@@ -1868,20 +1942,20 @@ def multiprocess_AIRW_wrapper(p):
     for dt in chi2.keys():
         chi2[dt]['C1_C0'], ndf  = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
         chi2[dt]['C1_C0S1'], _  = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
-        chi2[dt]['C1_C0S12'], _ = iceplot.chi2_cost(h_mc=data[3]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
-        chi2[dt]['C0_C0S2'],  _ = iceplot.chi2_cost(h_mc=data[4]['hdata'], h_data=data[1]['hdata'], vartype=dt, return_nbins=True)
+        chi2[dt]['C0_C0S2'],  _ = iceplot.chi2_cost(h_mc=data[3]['hdata'], h_data=data[1]['hdata'], vartype=dt, return_nbins=True)
+        chi2[dt]['C1_C0S12'], _ = iceplot.chi2_cost(h_mc=data[4]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
     
     ## Effective Sample Sizes
     binESS_C0,    n_C0    = iceplot.ess_metric(h=data[1]['hdata'])
     binESS_C0S1,  n_C0S1  = iceplot.ess_metric(h=data[2]['hdata'])
-    binESS_C0S12, n_C0S12 = iceplot.ess_metric(h=data[3]['hdata'])
-    binESS_C0S2,  n_C0S2  = iceplot.ess_metric(h=data[4]['hdata'])
+    binESS_C0S2,  n_C0S2  = iceplot.ess_metric(h=data[3]['hdata'])
+    binESS_C0S12, n_C0S12 = iceplot.ess_metric(h=data[4]['hdata'])
     
     ESS          = {}
     ESS['C0']    = (binESS_C0).sum()    / n_C0.sum()
     ESS['C0S1']  = (binESS_C0S1).sum()  / n_C0S1.sum()
-    ESS['C0S12'] = (binESS_C0S12).sum() / n_C0S12.sum()
     ESS['C0S2']  = (binESS_C0S2).sum()  / n_C0S2.sum()
+    ESS['C0S12'] = (binESS_C0S12).sum() / n_C0S12.sum()
     
     mets = {
         'id':   ids[i],
@@ -1893,15 +1967,15 @@ def multiprocess_AIRW_wrapper(p):
     # Legends
     data[1]['label'] += f' | $\\chi_{{H,C_1}}^2 = {chi2["hybrid"]["C1_C0"]:0.0f} \, / \, {ndf} = {chi2["hybrid"]["C1_C0"]/ndf:0.1f}$, $\\bar{{\\mathcal{{E}}}}={ESS["C0"]:0.2f}$'
     data[2]['label'] += f' | $\\chi_{{H,C_1}}^2 = {chi2["hybrid"]["C1_C0S1"]:0.0f} \, / \, {ndf} = {chi2["hybrid"]["C1_C0S1"]/ndf:0.1f}$, $\\bar{{\\mathcal{{E}}}}={ESS["C0S1"]:0.2f}$'
-    data[3]['label'] += f' | $\\chi_{{H,C_1}}^2 = {chi2["hybrid"]["C1_C0S12"]:0.0f} \, / \, {ndf} = {chi2["hybrid"]["C1_C0S12"]/ndf:0.1f}$, $\\bar{{\\mathcal{{E}}}}={ESS["C0S12"]:0.2f}$'
-    data[4]['label'] += f' | $\\chi_{{H,C_0}}^2 = {chi2["hybrid"]["C0_C0S2"]:0.0f} \, / \, {ndf} = {chi2["hybrid"]["C0_C0S2"]/ndf:0.1f}$, $\\bar{{\\mathcal{{E}}}}={ESS["C0S2"]:0.2f}$'
+    data[3]['label'] += f' | $\\chi_{{H,C_0}}^2 = {chi2["hybrid"]["C0_C0S2"]:0.0f} \, / \, {ndf} = {chi2["hybrid"]["C0_C0S2"]/ndf:0.1f}$, $\\bar{{\\mathcal{{E}}}}={ESS["C0S2"]:0.2f}$'
+    data[4]['label'] += f' | $\\chi_{{H,C_1}}^2 = {chi2["hybrid"]["C1_C0S12"]:0.0f} \, / \, {ndf} = {chi2["hybrid"]["C1_C0S12"]/ndf:0.1f}$, $\\bar{{\\mathcal{{E}}}}={ESS["C0S12"]:0.2f}$'
     
     # Plot it
     for mode in ['log', 'linear']:
         
         fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale=mode, ratio_error_plot=True, legend_properties={'fontsize': 5.5})
         
-        binESS_list = [None, None, None, binESS_C0S12 / (binESS_C0S1+1e-9), None]
+        binESS_list = [None, None, None, None, binESS_C0S12 / (binESS_C0S1+1e-9)]
         
         ax_ess = ess_subplot(
             fig         = fig0,

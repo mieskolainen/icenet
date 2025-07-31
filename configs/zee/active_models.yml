@@ -1,18 +1,5 @@
 # Active AI models for 'EB', 'EEm', 'EEp'
 
-## Test models
-#- dbnf0
-
-#- lzmlp0_nozero
-#- dmlp0_nozero
-#- fastkan0_nozero
-
-#- lzmlp0
-#- lzmlp1
-#- lzmlp2
-#- lzmlp3
-#- lzmlp4
-
 ## BDT based
 - iceboost_swd
 #- iceboost0
@@ -22,3 +9,11 @@
 #- fastkan0
 #- lzmlp0
 #- dmlp0
+#- dbnf0
+
+#- lzmlp0_nozero
+#- dmlp0_nozero
+#- fastkan0_nozero
+
+## Flow based transport [experimental]
+# - iceflow

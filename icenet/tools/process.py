@@ -3,6 +3,7 @@
 # m.mieskolainen@imperial.ac.uk, 2025
 
 import argparse
+import traceback
 import gc
 import socket
 import copy
@@ -1325,7 +1326,13 @@ def train_models(data_trn, data_val, args=None):
                                      data_val = data_val['data'][idx_val],
                                      args     = args,
                                      param    = param)
-
+                
+                elif param['train'] == 'rflow':
+                    train.train_rflow(data_trn = data_trn['data'][idx_trn],
+                                      data_val = data_val['data'][idx_val],
+                                      args     = args,
+                                      param    = param)
+                
                 elif param['train'] == 'cut':
                     None
                 
@@ -1373,8 +1380,9 @@ def train_models(data_trn, data_val, args=None):
             
             except Exception as e:
                 prints.printbar('*')
-                print(f'Exception occured: \n {e} \n', 'red')
-                print(f"Check the model '{ID}' definition: training failed -- continue!", 'red')
+                exc_str = ''.join(traceback.format_exception(*sys.exc_info()))
+                print(exc_str)  # or log it, write to file, etc.
+                print(f"Exception occured. Check the model '{ID}' definition: training failed -- continue!", 'red')
                 prints.printbar('*')
                 exceptions += 1
     
@@ -1564,8 +1572,9 @@ def evaluate_models(data=None, info=None, args=None):
     print(args['active_models'], 'green')
     print('')
     
+    skip_multi_comparison = False
     exceptions = 0
-    
+
     try:
         
         for k in range(len(args['active_models'])):
@@ -1628,8 +1637,94 @@ def evaluate_models(data=None, info=None, args=None):
                     plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
                         targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
 
-                plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
+                plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
             
+            elif param['predict'] == 'torch_rflow':
+                
+                label    = inputs['label']
+                sublabel = 'inclusive'
+                outdir   = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
+                
+                filenames = {}
+                for mname in ['hybrid', 'pearson', 'neyman']:
+                    filenames[mname] = os.path.join(outdir, f"stats_chi2_{mname}_summary.log")
+                    open(filenames[mname], 'w').close() # Clear content
+                
+                # We use tau here as the noise std for inference time control of
+                # the stochastic (Kantorovich) variable
+                for tau in [0.0, 0.5, 1.0, 2.0]:
+                    
+                    func_predict = predict.pred_rflow(args=args, param=param, ids=ids, tau=tau)
+                    
+                    # Map
+                    X_new = predict.batched_predict(
+                        func_predict = func_predict,
+                        x            = X_ptr,
+                        c            = torch.tensor(y, dtype=torch.float), # Domain labels
+                        batch_size   = param['eval_batch_size']
+                    )
+                    
+                    if (param['cond_vars'] is None) or (param['cond_vars'] == []):
+                        x_mask = np.ones(len(ids), dtype=bool)
+                    else:
+                        x_mask = ~np.array([name in param['cond_vars'] for name in ids], dtype=bool)
+                    
+                    ## Revert Z-score standardization
+                    if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
+                        
+                        pickle_file = os.path.join(args["modeldir"], 'zscore.pkl')
+                        print(f'Reverting z-score transform of flow transported ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+                        
+                        with open(pickle_file, 'rb') as f:
+                            Z_data = pickle.load(f)
+                        
+                        X_mu, X_std = Z_data['X_mu'], Z_data['X_std']
+                        X_new = io.reverse_zscore(X_new, X_mu[x_mask], X_std[x_mask])
+                    
+                    ## Revert other preprocessing transforms
+                    
+                    # [reservation here ...]
+                    
+                    # ------------------------------------------------------------------------
+                    ## Plotting
+                    
+                    # We can only plot the flow x-space variables (conditional do not change)
+                    x_vars      = [name for name in ids if name not in param['cond_vars']]
+                    pick_ind, _ = aux.pick_index(all_ids=ids_RAW, vars=x_vars)
+                    
+                    # AIRW plots
+                    local_dir   = aux.makedir(os.path.join(outdir, f'tau_{tau:0.3f}'))
+                    
+                    metric_table, df, mets = plots.plot_AIRW(
+                        X         = X_RAW,
+                        y         = y,
+                        ids       = ids_RAW,
+                        weights   = weights,
+                        y_pred    = None,
+                        X_new     = X_new,
+                        pick_ind  = pick_ind,
+                        label     = label,
+                        sublabel  = sublabel,
+                        param     = args['plot_param']['OBS_reweight'],
+                        tau       = tau,
+                        targetdir = local_dir,
+                        num_cpus  = args['num_cpus'],
+                        map_mode  = 'FT'  # Transport
+                    )
+
+                    ## Write tables to the combined summary files
+                    for mname in filenames.keys():
+                        plots.table_writer(
+                            filename   = filenames[mname],
+                            label      = f'category: {sublabel} | AI model: {label} | tau: {tau:0.2f} | chi2: {mname}',
+                            table      = metric_table[mname],
+                            print_to_screen = False # Done already by plot_AIRW
+                        )
+
+                # -----------------------------------------------
+
+                skip_multi_comparison = True # Only for density estimators
+
             elif   param['predict'] == 'torch_graph':
                 func_predict = predict.pred_torch_graph(args=args, param=param)
 
@@ -1678,14 +1773,18 @@ def evaluate_models(data=None, info=None, args=None):
     
     except Exception as e:
         prints.printbar('*')
-        print(e, 'red')
+        exc_str = ''.join(traceback.format_exception(*sys.exc_info()))
+        print(exc_str)  # or log it, write to file, etc.
         print(f'Exception occured, check your steering cards and training phase! -- exit', 'red')
         prints.printbar('*')
         
         return False
     
     ## Multiple model comparisons
-    plot_XYZ_multiple_models(targetdir=targetdir, args=args)
+    if not skip_multi_comparison:
+        plot_XYZ_multiple_models(targetdir=targetdir, args=args)
+    else:
+        print('Skipping multiple comparison plots (triggered by a certain model type)', 'red')
     
     ## Pickle results to output
     resdict = {'roc_mstats':        roc_mstats,
@@ -1863,7 +1962,7 @@ def plot_XYZ_wrap(
                         # (use / in Tensorboard)
                         writer.add_scalar(f"chi2/{dt}/{obj}/{ID}", mets[i]['chi2'][dt][obj] / mets[i]['ndf'])
             
-            ## Write tables to the disk
+            ## Write tables to the combined summary files
             for mname in filenames.keys():
                 plots.table_writer(
                     filename   = filenames[mname],

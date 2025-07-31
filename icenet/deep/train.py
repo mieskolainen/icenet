@@ -29,6 +29,7 @@ from icenet.deep  import maxo
 from icenet.deep  import dmlp
 from icenet.deep  import lzmlp
 from icenet.deep  import dbnf
+from icenet.deep  import rflow
 from icenet.deep  import vae
 from icenet.deep  import fastkan
 from icenet.deep  import cnn
@@ -424,7 +425,7 @@ def torch_loop(model, train_loader, test_loader, args, param, config={'params': 
         plotdir = aux.makedir(f'{args["plotdir"]}/train/loss/{param["label"]}')
         
         ltr = {f'train: {k}': v for k, v in loss_history_train.items()}
-        lev = {f'eval:  {k}': v for k, v in loss_history_eval.items()}
+        lev = {f'validate: {k}': v for k, v in loss_history_eval.items()}
         
         losses_ = ltr | lev
         
@@ -708,9 +709,167 @@ def train_flow(config={'params': {}}, data_trn=None, data_val=None, args=None, p
         modeldir  = aux.makedir(f"{args['modeldir']}/{param['label']}")
         save_name = f'{param["label"]}_class_{classid}'
         
-        dbnf.train(model=model, optimizer=optimizer, scheduler=sched,
-            trn_x=trn.x, val_x=val.x, trn_weights=trn.w, val_weights=val.w,
-            param=param, modeldir=modeldir, save_name=save_name)
+        trn_losses, val_losses = dbnf.train(
+            model=model,
+            optimizer=optimizer,
+            scheduler=sched,
+            trn_x=trn.x,
+            val_x=val.x,
+            trn_weights=trn.w,
+            val_weights=val.w,
+            param=param,
+            modeldir=modeldir,
+            save_name=save_name
+        )
+
+        # ----------------------------------------------------------------------
+        ## Plot evolution
+        plotdir = aux.makedir(f'{args["plotdir"]}/train/loss/{param["label"]}')
+        
+        ltr = {f'train: {k}': v for k, v in trn_losses.items()}
+        lev = {f'validate: {k}': v for k, v in val_losses.items()}
+        
+        losses_ = ltr | lev
+        
+        for yscale in ['linear', 'log']:
+            for xscale in ['linear', 'log']:
+                
+                fig,ax = plots.plot_train_evolution_multi(
+                    losses=losses_, trn_aucs=None, val_aucs=None,
+                    label=param["label"], yscale=yscale, xscale=xscale
+                )
+
+                plt.savefig(f"{plotdir}/{param['label']}__class_{classid}__losses_yscale_{yscale}_xscale_{xscale}.pdf", bbox_inches='tight')
+                plt.close(fig)
+        
+        # ----------------------------------------------------------------------
+
+    return True
+
+
+def train_rflow(config={'params': {}}, data_trn=None, data_val=None, args=None, param=None):
+    """
+    Train flow domain transport model
+    
+    Args:
+        See other train_*
+
+    Returns:
+        trained model
+    """
+    
+    # Set input dimensions
+    param['model_param']['cond_dim'] = 0 if not param['cond_vars'] else len(param['cond_vars'])
+    param['model_param']['x_dim']    = data_trn.x.shape[1] - param['model_param']['cond_dim']
+    
+    print(f'Using conditional variables: {param["cond_vars"]}')
+    
+    # -----------------------------------------------
+    # Stochastic version has one conditional more (due to random r)
+    # One dimension comes from the class label
+    if param['stochastic']:
+        print(f'Using stochastic (Kantorovich like) map')
+        param['model_param']['cond_dim'] += 2
+    else:
+        print(f'Using deterministic (Monge like) map')
+        param['model_param']['cond_dim'] += 1    
+    
+    # -----------------------------------------------------------
+    # Prepare tensors
+    
+    if (param['cond_vars'] is None) or (param['cond_vars'] == []):
+        c_mask = None
+        x_mask = np.ones(len(data_trn.ids), dtype=bool)
+    else:
+        c_mask = np.array([name in param['cond_vars'] for name in data_trn.ids], dtype=bool)
+        x_mask = ~c_mask
+    
+    trn_set = rflow.prepare_dataset(
+        x = data_trn.x[:, x_mask],
+        c = None if c_mask is None else data_trn.x[:, c_mask],
+        y = data_trn.y,
+        w = data_trn.w
+    )
+    
+    val_set = rflow.prepare_dataset(
+        x = data_val.x[:, x_mask],
+        c = None if c_mask is None else data_val.x[:, c_mask],
+        y = data_val.y,
+        w = data_val.w
+    )
+    
+    # N.B. We use 'sampler' with 'BatchSampler', which loads a set of events using multiple event indices (faster) than the default
+    # one which takes events one-by-one and concatenates the results (slow).
+    params_train = {'batch_size' : None,
+                    'num_workers': param['num_workers'],
+                    'sampler'    : torch.utils.data.BatchSampler(
+                        torch.utils.data.RandomSampler(trn_set), param['opt_param']['batch_size'], drop_last=False
+                    ),
+                    'pin_memory' : True}
+    
+    params_validate = {'batch_size': None,
+                    'num_workers'  : param['num_workers'],
+                    'sampler'      : torch.utils.data.BatchSampler(
+                        torch.utils.data.RandomSampler(val_set), param['eval_batch_size'], drop_last=False
+                    ),
+                    'pin_memory'   : True}
+    
+    trn_loader = torch.utils.data.DataLoader(trn_set, **params_train)
+    val_loader = torch.utils.data.DataLoader(val_set, **params_validate)
+
+    print(f'Training [{param["label"]}] transport flow ...')
+    
+    # -------------------------------------------------------
+    # Create model
+    model = rflow.create_model(model_param=param['model_param'])
+
+    # Create optimizer & scheduler
+    if   param['opt_param']['optimizer'] == 'Adam':
+        optimizer = adam.Adam(model.parameters(), lr = param['opt_param']['lr'], \
+            weight_decay = param['opt_param']['weight_decay'], polyak = param['opt_param']['polyak'])
+    
+    elif param['opt_param']['optimizer'] == 'AdamW':
+        optimizer = torch.optim.AdamW(model.parameters(), lr = param['opt_param']['lr'], \
+            weight_decay = param['opt_param']['weight_decay'])
+    
+    scheduler = deeptools.set_scheduler(optimizer=optimizer, param=param['scheduler_param'])
+    
+    modeldir  = aux.makedir(f"{args['modeldir']}/{param['label']}")
+    save_name = f'{param["label"]}'
+    
+    # Train it
+    trn_losses, val_losses = rflow.train(
+        model=model,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        trn_loader=trn_loader,
+        val_loader=val_loader,
+        param=param,
+        modeldir=modeldir,
+        save_name=save_name
+    )
+    
+    # ----------------------------------------------------------------------
+    ## Plot evolution
+    plotdir = aux.makedir(f'{args["plotdir"]}/train/loss/{param["label"]}')
+    
+    ltr = {f'train: {k}': v for k, v in trn_losses.items()}
+    lev = {f'validate: {k}': v for k, v in val_losses.items()}
+    
+    losses_ = ltr | lev
+    
+    for yscale in ['linear', 'log']:
+        for xscale in ['linear', 'log']:
+            
+            fig,ax = plots.plot_train_evolution_multi(
+                losses=losses_, trn_aucs=None, val_aucs=None,
+                label=param["label"], yscale=yscale, xscale=xscale
+            )
+            
+            plt.savefig(f"{plotdir}/{param['label']}_losses_yscale_{yscale}_xscale_{xscale}.pdf", bbox_inches='tight')
+            plt.close(fig)
+    
+    # ----------------------------------------------------------------------
     
     return True
 
