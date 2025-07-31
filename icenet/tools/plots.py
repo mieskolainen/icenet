@@ -1503,6 +1503,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     
     EPS   = param['EPS']
     maxW  = param['maxW']
+    lambda_shrink = param['lambda_shrink']
     C0    = param['C0']
     C1    = param['C1']
     RN_ID = param['renorm_origin']
@@ -1540,39 +1541,42 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         logits = aux.inverse_sigmoid(p = y_pred[y == C0], EPS=EPS)
         print(f'Corresponding logit output [{np.min(logits):0.4f}, {np.max(logits):0.4f}]')
     
-    # 1. Apply temperature scaling
+    # Apply temperature scaling
     logits /= tau
     
-    # 2. Get weights after the re-weighting transform
+    # Get weights after the re-weighting transform
     w0_S2 = reweight.rw_transform_with_logits(logits=logits, mode=mode)
     
     prints.print_weights(weights=weights, y=y, output_file=output_file,
         header='Step 1: Input event weights [raw x S1]', write_mode='w')
     
-    ## Print stats
     prints.print_weights(weights=w0_S2, y=np.zeros(len(w0_S2)), output_file=output_file,
         header='Step 2: S2 only weights', write_mode='a')
     
-    # 3. Cut-off regularize anomalous high weights before event weights
+    # Cut-off regularize anomalous high weights
     w0_S2 = np.clip(w0_S2, 0.0, maxW)
     
-    ## Print stats
     prints.print_weights(weights=w0_S2, y=np.zeros(len(w0_S2)), output_file=output_file,
         header=f'Step 3: S2 only weights [cutoff regularized with maxW = {maxW}]', write_mode='a')
     
-    # 4. Apply multiplicatively to event weights (which can be negative)
+    # Log-space smoothen weights
+    w0_S2 = aux.log_space_weight_smooth(w0_S2, lambda_shrink=lambda_shrink)
+    
+    prints.print_weights(weights=w0_S2, y=np.zeros(len(w0_S2)), output_file=output_file,
+        header=f'Step 4: S2 only weights [log-space smoothing with lambda_shrink = {lambda_shrink}]', write_mode='a')
+    
+    # Apply multiplicatively to event weights (which can be negative)
     w0_tot = weights[y == C0] * w0_S2
 
-    ## Print stats
     prints.print_weights(weights=w0_tot, y=np.zeros(len(w0_tot)), output_file=output_file,
-        header=f'Step 4: Total weights [input weights x S2 weights]', write_mode='a')
+        header=f'Step 5: Total weights [input weights x S2 weights]', write_mode='a')
     
     # ---------------------------------------------------
     ## 2. Renormalize (optional) (e.g. we want fixed overall normalization, or debug)
     
     if RN_ID is not None:
         print(f'Renormalizing with class [renorm_origin = {RN_ID}] weight sum', 'yellow')
-        
+
         sum_before = w0_tot.sum()
         print(f'Sum(before): {sum_before:0.1f}')
         
@@ -1587,8 +1591,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         
         # Print stats
         prints.print_weights(weights=w0_tot, y=np.zeros(len(w0_tot)), output_file=output_file,
-            header=f'Step 5: Total weights sum renormalized [wrt. class ID = {RN_ID}] | {ratio}', write_mode='a')
-    
+            header=f'Step 6: Total weights sum renormalized [wrt. class ID = {RN_ID}] | {ratio}', write_mode='a')
     
     # ===================================================
     # Add data to a DataFrame
@@ -1596,7 +1599,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
     tau_str = str(np.round(tau, 3))
     
     # Create DataFrame
-    w_post_S2    = copy.deepcopy(weights)
+    w_post_S2 = copy.deepcopy(weights)
     w_post_S2[y == C0] = w0_tot # only C0
     
     df = pd.DataFrame(w_post_S2, columns=[f'w_post_S2__tau_{tau_str}'])

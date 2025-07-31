@@ -136,6 +136,62 @@ def get_datetime():
     """
     return str(datetime.now()).replace(' ', '_').replace(':','-').split('.')[0]
 
+def log_space_weight_smooth(weights: np.ndarray, lambda_shrink: float=0.2,
+                            operator: str='mean', eps: float=1e-10,):
+    """
+    Apply log-space smoothing separately to positive and negative weights.
+    
+    Args:
+        weights:       Input event weights (can be positive or negative)
+        lambda_shrink: Smoothing strength; 0 = no smoothing, 1 = full flattening
+        operator:      'mean' or 'median'
+        eps:           Smallest absolute weight allowed to avoid log(0)
+    
+    Returns:
+        smoothed weights with sign structure preserved
+    """
+    
+    if lambda_shrink < eps: # No smoothing
+        return weights
+    
+    weights   = np.asarray(weights)
+    
+    pos_mask  = weights > eps
+    neg_mask  = weights < -eps
+    zero_mask = (~pos_mask) & (~neg_mask)
+    smoothed  = np.zeros_like(weights)
+
+    # Positive branch
+    if np.any(pos_mask):
+        w_pos    = weights[pos_mask]
+        r_pos    = np.log(w_pos)
+        
+        if operator == 'median':
+            r_mean = np.median(r_pos)
+        else:
+            r_mean = np.mean(r_pos)
+        
+        r_smooth = (1 - lambda_shrink) * r_pos + lambda_shrink * r_mean
+        smoothed[pos_mask] = np.exp(r_smooth)
+
+    # Negative branch
+    if np.any(neg_mask):
+        w_neg    = -weights[neg_mask]  # use absolute values
+        r_neg    = np.log(w_neg)
+        
+        if operator == 'median':
+            r_mean = np.median(r_neg)
+        else:
+            r_mean = np.mean(r_neg)
+        
+        r_smooth = (1 - lambda_shrink) * r_neg + lambda_shrink * r_mean
+        smoothed[neg_mask] = -np.exp(r_smooth)
+
+    # Zero weights
+    smoothed[zero_mask] = 0.0
+    
+    return smoothed
+
 def q_exp(x, q: float=1.0):
     """
     q-exponent

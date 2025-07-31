@@ -65,6 +65,7 @@ OBS_reweight:
   # Regularization
   EPS:  1.0E-8            # Technical
   maxW: 100               # Maximum ML weight cutoff
+  lambda_shrink: 0.0      # log-space weight smoothing (0 no smoothing, 1 maximum)
   
   # Renormalize weights (set null for no renormalization)
   renorm_origin: 1        # Reference class ID (0,1) to use for the renormalization
