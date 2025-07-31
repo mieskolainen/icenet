@@ -521,17 +521,16 @@
 <span class="c1"># https://github.com/nicola-decao/BNAF (MIT license)</span>
 <span class="c1">#</span>
 <span class="c1">#</span>
-<span class="c1"># m.mieskolainen@imperial.ac.uk, 2024</span>
-
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span>
-
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">optimize</span>
 
@@ -658,7 +657,11 @@
     <span class="c1"># TensorboardX</span>
     <span class="k">if</span> <span class="s1">&#39;tensorboard&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">tensorboardX</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>
-        <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;tmp/tensorboard/&#39;</span><span class="p">,</span> <span class="n">save_name</span><span class="p">))</span>
+        
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">modeldir</span><span class="p">,</span> <span class="s1">&#39;events.out.tfevents.*&#39;</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># Clean old logs</span>
+        
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="n">modeldir</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">trn_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">trn_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">trn_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -732,8 +735,8 @@
         <span class="c1"># ----------------------------------------------------------------</span>
         <span class="c1"># Compute validation loss</span>
         
-        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;evalmode&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        
+        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;savemode&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            
             <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> <span class="c1"># !</span>
 
             <span class="n">validation_loss</span> <span class="o">=</span> <span class="p">[]</span>
@@ -770,12 +773,16 @@
         <span class="p">)</span>
         
         <span class="c1"># Save</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">modeldir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">save_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">.pth&#39;</span>
-        <span class="n">aux_torch</span><span class="o">.</span><span class="n">save_torch_model</span><span class="p">(</span><span class="n">model</span>     <span class="o">=</span> <span class="n">model</span><span class="p">,</span>
-                                   <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">,</span>
-                                   <span class="n">epoch</span>     <span class="o">=</span> <span class="n">epoch</span><span class="p">,</span>
-                                   <span class="n">losses</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;trn_losses&#39;</span><span class="p">:</span> <span class="n">trn_losses</span><span class="p">,</span> <span class="s1">&#39;val_losses&#39;</span><span class="p">:</span> <span class="n">val_losses</span><span class="p">},</span>
-                                   <span class="n">filename</span>  <span class="o">=</span> <span class="n">filename</span><span class="p">)()</span>
+        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;savemode&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            
+            <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">modeldir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">save_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">.pth&#39;</span>
+            <span class="n">aux_torch</span><span class="o">.</span><span class="n">save_torch_model</span><span class="p">(</span>
+                <span class="n">model</span>     <span class="o">=</span> <span class="n">model</span><span class="p">,</span>
+                <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">,</span>
+                <span class="n">epoch</span>     <span class="o">=</span> <span class="n">epoch</span><span class="p">,</span>
+                <span class="n">losses</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;trn_losses&#39;</span><span class="p">:</span> <span class="n">trn_losses</span><span class="p">,</span> <span class="s1">&#39;val_losses&#39;</span><span class="p">:</span> <span class="n">val_losses</span><span class="p">},</span>
+                <span class="n">filename</span>  <span class="o">=</span> <span class="n">filename</span>
+            <span class="p">)()</span> <span class="c1"># Note ()</span>
 
         <span class="k">if</span> <span class="s1">&#39;tensorboard&#39;</span> <span class="ow">in</span> <span class="n">param</span> <span class="ow">and</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">]:</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">get_last_lr</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">epoch</span><span class="p">)</span>
@@ -799,7 +806,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># For random permutations</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">rngseed</span><span class="p">)</span>
+    <span class="n">aux</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="n">rngseed</span><span class="p">)</span>
     
     <span class="n">flows</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;flows&#39;</span><span class="p">]):</span>

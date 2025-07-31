@@ -1344,6 +1344,17 @@
     <span class="k">return</span> <span class="n">Y</span></div>
 
 
+<div class="viewcode-block" id="reverse_zscore">
+<a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.reverse_zscore">[docs]</a>
+<span class="nd">@numba</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reverse_zscore</span><span class="p">(</span><span class="n">Y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span><span class="p">,</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1E-12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Reverse Z-score normalization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_mu</span><span class="p">)):</span>
+        <span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">X_std</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">+</span> <span class="n">X_mu</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">X</span></div>
+
 
 <div class="viewcode-block" id="apply_madscore">
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.io.apply_madscore">[docs]</a>

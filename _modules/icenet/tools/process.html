@@ -519,6 +519,7 @@
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
@@ -1873,7 +1874,13 @@
                                      <span class="n">data_val</span> <span class="o">=</span> <span class="n">data_val</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">idx_val</span><span class="p">],</span>
                                      <span class="n">args</span>     <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
                                      <span class="n">param</span>    <span class="o">=</span> <span class="n">param</span><span class="p">)</span>
-
+                
+                <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;rflow&#39;</span><span class="p">:</span>
+                    <span class="n">train</span><span class="o">.</span><span class="n">train_rflow</span><span class="p">(</span><span class="n">data_trn</span> <span class="o">=</span> <span class="n">data_trn</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">idx_trn</span><span class="p">],</span>
+                                      <span class="n">data_val</span> <span class="o">=</span> <span class="n">data_val</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">idx_val</span><span class="p">],</span>
+                                      <span class="n">args</span>     <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
+                                      <span class="n">param</span>    <span class="o">=</span> <span class="n">param</span><span class="p">)</span>
+                
                 <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cut&#39;</span><span class="p">:</span>
                     <span class="kc">None</span>
                 
@@ -1921,8 +1928,9 @@
             
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured: </span><span class="se">\n</span><span class="s1"> </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Check the model &#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">&#39; definition: training failed -- continue!&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="n">exc_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">exc_str</span><span class="p">)</span>  <span class="c1"># or log it, write to file, etc.</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception occured. Check the model &#39;</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">&#39; definition: training failed -- continue!&quot;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
                 <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
                 <span class="n">exceptions</span> <span class="o">+=</span> <span class="mi">1</span>
     
@@ -2115,8 +2123,9 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">],</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
+    <span class="n">skip_multi_comparison</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">exceptions</span> <span class="o">=</span> <span class="mi">0</span>
-    
+
     <span class="k">try</span><span class="p">:</span>
         
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;active_models&#39;</span><span class="p">])):</span>
@@ -2179,8 +2188,94 @@
                     <span class="n">plots</span><span class="o">.</span><span class="n">plot_contour_grid</span><span class="p">(</span><span class="n">pred_func</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X_ptr</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">param</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X_ptr</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">param</span><span class="p">,</span><span class="s1">&#39;ids&#39;</span><span class="p">),</span> <span class="n">transform</span><span class="o">=</span><span class="s1">&#39;torch&#39;</span><span class="p">,</span> 
                         <span class="n">targetdir</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/eval/2D-contours/</span><span class="si">{</span><span class="n">param</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">))</span>
 
-                <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X_ptr</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">param</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+                <span class="n">plot_XYZ_wrap</span><span class="p">(</span><span class="n">func_predict</span><span class="o">=</span><span class="n">func_predict</span><span class="p">,</span> <span class="n">x_input</span><span class="o">=</span><span class="n">aux</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="n">X_ptr</span><span class="p">,</span><span class="n">ids</span><span class="p">,</span><span class="n">param</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
             
+            <span class="k">elif</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_rflow&#39;</span><span class="p">:</span>
+                
+                <span class="n">label</span>    <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+                <span class="n">sublabel</span> <span class="o">=</span> <span class="s1">&#39;inclusive&#39;</span>
+                <span class="n">outdir</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">targetdir</span><span class="si">}</span><span class="s1">/OBS_reweight/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                
+                <span class="n">filenames</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hybrid&#39;</span><span class="p">,</span> <span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="s1">&#39;neyman&#39;</span><span class="p">]:</span>
+                    <span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;stats_chi2_</span><span class="si">{</span><span class="n">mname</span><span class="si">}</span><span class="s2">_summary.log&quot;</span><span class="p">)</span>
+                    <span class="nb">open</span><span class="p">(</span><span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c1"># Clear content</span>
+                
+                <span class="c1"># We use tau here as the noise std for inference time control of</span>
+                <span class="c1"># the stochastic (Kantorovich) variable</span>
+                <span class="k">for</span> <span class="n">tau</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]:</span>
+                    
+                    <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_rflow</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">)</span>
+                    
+                    <span class="c1"># Map</span>
+                    <span class="n">X_new</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">batched_predict</span><span class="p">(</span>
+                        <span class="n">func_predict</span> <span class="o">=</span> <span class="n">func_predict</span><span class="p">,</span>
+                        <span class="n">x</span>            <span class="o">=</span> <span class="n">X_ptr</span><span class="p">,</span>
+                        <span class="n">c</span>            <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">),</span> <span class="c1"># Domain labels</span>
+                        <span class="n">batch_size</span>   <span class="o">=</span> <span class="mi">10000</span>
+                    <span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;cond_vars&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;cond_vars&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[]):</span>
+                        <span class="n">x_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">name</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;cond_vars&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                    
+                    <span class="c1">## Revert Z-score standardization</span>
+                    <span class="k">if</span>   <span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore&#39;</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;varnorm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;zscore-weighted&#39;</span><span class="p">:</span>
+                        
+                        <span class="n">pickle_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;modeldir&quot;</span><span class="p">],</span> <span class="s1">&#39;zscore.pkl&#39;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Reverting z-score transform of flow transported ... [</span><span class="si">{</span><span class="n">pickle_file</span><span class="si">}</span><span class="s1">] (</span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">get_file_timestamp</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+                        
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">Z_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                        
+                        <span class="n">X_mu</span><span class="p">,</span> <span class="n">X_std</span> <span class="o">=</span> <span class="n">Z_data</span><span class="p">[</span><span class="s1">&#39;X_mu&#39;</span><span class="p">],</span> <span class="n">Z_data</span><span class="p">[</span><span class="s1">&#39;X_std&#39;</span><span class="p">]</span>
+                        <span class="n">X_new</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">reverse_zscore</span><span class="p">(</span><span class="n">X_new</span><span class="p">,</span> <span class="n">X_mu</span><span class="p">[</span><span class="n">x_mask</span><span class="p">],</span> <span class="n">X_std</span><span class="p">[</span><span class="n">x_mask</span><span class="p">])</span>
+                    
+                    <span class="c1">## Revert other preprocessing transforms</span>
+                    
+                    <span class="c1"># [reservation here ...]</span>
+                    
+                    <span class="c1"># ------------------------------------------------------------------------</span>
+                    <span class="c1">## Plotting</span>
+                    
+                    <span class="c1"># We can only plot the flow x-space variables (conditional do not change)</span>
+                    <span class="n">x_vars</span>      <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ids</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;cond_vars&#39;</span><span class="p">]]</span>
+                    <span class="n">pick_ind</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">pick_index</span><span class="p">(</span><span class="n">all_ids</span><span class="o">=</span><span class="n">ids_RAW</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">x_vars</span><span class="p">)</span>
+                    
+                    <span class="c1"># AIRW plots</span>
+                    <span class="n">local_dir</span>   <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;tau_</span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+                    
+                    <span class="n">metric_table</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">mets</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_AIRW</span><span class="p">(</span>
+                        <span class="n">X</span>         <span class="o">=</span> <span class="n">X_RAW</span><span class="p">,</span>
+                        <span class="n">y</span>         <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+                        <span class="n">ids</span>       <span class="o">=</span> <span class="n">ids_RAW</span><span class="p">,</span>
+                        <span class="n">weights</span>   <span class="o">=</span> <span class="n">weights</span><span class="p">,</span>
+                        <span class="n">y_pred</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">X_new</span>     <span class="o">=</span> <span class="n">X_new</span><span class="p">,</span>
+                        <span class="n">pick_ind</span>  <span class="o">=</span> <span class="n">pick_ind</span><span class="p">,</span>
+                        <span class="n">label</span>     <span class="o">=</span> <span class="n">label</span><span class="p">,</span>
+                        <span class="n">sublabel</span>  <span class="o">=</span> <span class="n">sublabel</span><span class="p">,</span>
+                        <span class="n">param</span>     <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;plot_param&#39;</span><span class="p">][</span><span class="s1">&#39;OBS_reweight&#39;</span><span class="p">],</span>
+                        <span class="n">tau</span>       <span class="o">=</span> <span class="n">tau</span><span class="p">,</span>
+                        <span class="n">targetdir</span> <span class="o">=</span> <span class="n">local_dir</span><span class="p">,</span>
+                        <span class="n">num_cpus</span>  <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;num_cpus&#39;</span><span class="p">],</span>
+                        <span class="n">map_mode</span>  <span class="o">=</span> <span class="s1">&#39;FT&#39;</span>  <span class="c1"># Transport</span>
+                    <span class="p">)</span>
+
+                    <span class="c1">## Write tables to the combined summary files</span>
+                    <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span>
+                            <span class="n">filename</span>   <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span>
+                            <span class="n">label</span>      <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;category: </span><span class="si">{</span><span class="n">sublabel</span><span class="si">}</span><span class="s1"> | AI model: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> | tau: </span><span class="si">{</span><span class="n">tau</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1"> | chi2: </span><span class="si">{</span><span class="n">mname</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">table</span>      <span class="o">=</span> <span class="n">metric_table</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span>
+                            <span class="n">print_to_screen</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># Done already by plot_AIRW</span>
+                        <span class="p">)</span>
+
+                <span class="c1"># -----------------------------------------------</span>
+
+                <span class="n">skip_multi_comparison</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># Only for density estimators</span>
+
             <span class="k">elif</span>   <span class="n">param</span><span class="p">[</span><span class="s1">&#39;predict&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;torch_graph&#39;</span><span class="p">:</span>
                 <span class="n">func_predict</span> <span class="o">=</span> <span class="n">predict</span><span class="o">.</span><span class="n">pred_torch_graph</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
 
@@ -2229,14 +2324,18 @@
     
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="n">exc_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">exc_str</span><span class="p">)</span>  <span class="c1"># or log it, write to file, etc.</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Exception occured, check your steering cards and training phase! -- exit&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="n">prints</span><span class="o">.</span><span class="n">printbar</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="kc">False</span>
     
     <span class="c1">## Multiple model comparisons</span>
-    <span class="n">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_multi_comparison</span><span class="p">:</span>
+        <span class="n">plot_XYZ_multiple_models</span><span class="p">(</span><span class="n">targetdir</span><span class="o">=</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Skipping multiple comparison plots (triggered by a certain model type)&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
     
     <span class="c1">## Pickle results to output</span>
     <span class="n">resdict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;roc_mstats&#39;</span><span class="p">:</span>        <span class="n">roc_mstats</span><span class="p">,</span>
@@ -2420,7 +2519,7 @@
                         <span class="c1"># (use / in Tensorboard)</span>
                         <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;chi2/</span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;chi2&#39;</span><span class="p">][</span><span class="n">dt</span><span class="p">][</span><span class="n">obj</span><span class="p">]</span> <span class="o">/</span> <span class="n">mets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ndf&#39;</span><span class="p">])</span>
             
-            <span class="c1">## Write tables to the disk</span>
+            <span class="c1">## Write tables to the combined summary files</span>
             <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">plots</span><span class="o">.</span><span class="n">table_writer</span><span class="p">(</span>
                     <span class="n">filename</span>   <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">mname</span><span class="p">],</span>
