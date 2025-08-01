@@ -7,7 +7,7 @@
 if [ -z "$TUNESCRIPT" ]; then
     echo "Error: TUNESCRIPT environment variable is not set."
     echo "Please set it, e.g.: export TUNESCRIPT=runme_zee_gridtune_S1.sh"
-    return
+    return 0
 fi
 
 echo "Grid tuning job started with TUNESCRIPT=${TUNESCRIPT}"

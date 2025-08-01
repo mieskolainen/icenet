@@ -3,11 +3,19 @@ arguments      = "-1 1 $(ClusterId)"
 error          = logs/gridtune_init.$(CLUSTER).out
 output         = logs/gridtune_init.$(CLUSTER).output
 log            = logs/gridtune_init.$(CLUSTER).log
+
+## GPU
 request_gpus   = 1
 request_memory = 80G
 requirements   = (TARGET.GPUs_DeviceName =?= "Tesla V100-PCIE-32GB") || (TARGET.GPUs_DeviceName =?= "NVIDIA RTX A6000")
 #requirements  = TARGET.GPUs_DeviceName =?= "Tesla P100-PCIE-12GB"
-+MaxRuntime    = 86000
++MaxRuntime    = 86400
+
+## CPU
+#request_gpus   = 0
+#request_cpus   = 4
+#request_memory = 4G
+#+MaxRuntime    = 8600
 
 queue
 

@@ -27,7 +27,7 @@ EVAL_PARAM: &EVAL_PARAM
 # For Hessian (2nd order grad descent) control:
 # 
 #   ':hessian:constant:1.0'   (Constant set on the diagonal, slow convergence  --> many trees needed)
-#   ':hessian:iterative:0.9'  (Iterative, with exponential moving average window size, e.g. 1/(1-0.9)~10)
+#   ':hessian:iterative:0.7'  (Iterative, with exponential moving average window size, e.g. 1/(1-0.7) ~ 3)
 #   ':hessian:hutchinson:10'  (Hutchinson MC estimator, with the number of MC samples [higher better])
 #   ':hessian:exact'          (Exact autograd)
 # 
@@ -187,14 +187,14 @@ iceboost0: &ICEBOOST0
     reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
     reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
     
-    objective: 'custom:binary_cross_entropy:hessian:iterative:0.9'
+    objective: 'custom:binary_cross_entropy:hessian:iterative:0.7'
     
     eval_metric: ['custom']  # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
   # (this can help with gapped/iso variables such as dR ...)
   opt_param:
-    noise_reg: 0.0           # Scheduled noise regularization
+    noise_reg: 0.01          # Scheduled noise regularization
   
   # BCE loss domains [use with custom:binary_cross_entropy]
   BCE_param:
@@ -274,10 +274,10 @@ iceflow: &ICEFLOW
 
   model_param:
 
-    flow_layers: 6
+    flow_layers: 8
     flow_type:   'spline'  # 'spline', 'realnvp'
     permute:     True
-    
+
     # Two MLPs per flow layer, this gives a list [{}, {}]
     nn_param:
       - hidden_dim: [96, 96, 96]
@@ -293,16 +293,16 @@ iceflow: &ICEFLOW
   # Optimization
   opt_param:  
     #lossfunc: 'default'      # Not active
-    noise_reg: 0.001           # Scheduled noise regularization
+    noise_reg: 1.0e-4         # Scheduled noise regularization
 
     optimizer: 'AdamW'
     clip_norm: 1.0
     
-    epochs: 200
-    batch_size: 4096
+    epochs: 500
+    batch_size: 2048
     lr: 3.0e-4
-    weight_decay: 1.0e-3      # L2-regularization
-  
+    weight_decay: 1.0e-3       # L2-regularization
+
   # Scheduler
   scheduler_param:
 
@@ -310,7 +310,7 @@ iceflow: &ICEFLOW
     #period: 30
 
     type: 'step'               # 'cos', 'warm-cos', 'exp', 'step', 'constant' (deeptools.set_scheduler)
-    step_size: 100             # Number of epochs for drop
+    step_size: 250             # Number of epochs for drop
     gamma: 0.1
   
   device: 'auto'               # alternative 'cpu:0', 'cuda:0'

@@ -1633,7 +1633,7 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
         w0_S2_only = None
         w0_tot     = weights[y == C0]
         df         = None
-    
+
     else:
         raise Exception(f'plot_AIRW: Unknown "map_mode" = {map_mode}')
     
@@ -1759,10 +1759,11 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
             "ESS(C0xS1)/ESS(C0)",
             "ESS(C0xS1xS2)/ESS(C0xS1)",
             
-            f"C0 | chi2_{{{L},C1}}/ndf ",
-            f"C0xS1 | chi2_{{{L},C1}}/ndf ",
-            f"C0xS2 | chi2_{{{L},C0}}/ndf ",
-            f"C0xS1xS2 | chi2_{{{L},C1}}/ndf "
+            f"C0 | chi2_{{{L},C1}}/ndf",
+            f"C0xS1 | chi2_{{{L},C1}}/ndf",
+            f"C0xS2 | chi2_{{{L},C0}}/ndf",
+            f"C0xS1xS2 | chi2_{{{L},C1}}/ndf",
+            f"C0xS1xS2 | chi2_{{{L},C0xS1}}/ndf"
         ])
         
         for i in range(len(mets)):
@@ -1774,10 +1775,11 @@ def plot_AIRW(X, y, ids, weights, y_pred, pick_ind,
                 np.round(mets[i]['ESS']['C0S1']  / mets[i]['ESS']['C0'],   2),
                 np.round(mets[i]['ESS']['C0S12'] / mets[i]['ESS']['C0S1'], 2),
                 
-                np.round(mets[i]['chi2'][mname]['C1_C0']    / mets[i]['ndf'], 2),
-                np.round(mets[i]['chi2'][mname]['C1_C0S1']  / mets[i]['ndf'], 2),
-                np.round(mets[i]['chi2'][mname]['C0_C0S2']  / mets[i]['ndf'], 2),
-                np.round(mets[i]['chi2'][mname]['C1_C0S12'] / mets[i]['ndf'], 2)
+                np.round(mets[i]['chi2'][mname]['C1_C0']      / mets[i]['ndf'], 2),
+                np.round(mets[i]['chi2'][mname]['C1_C0S1']    / mets[i]['ndf'], 2),
+                np.round(mets[i]['chi2'][mname]['C0_C0S2']    / mets[i]['ndf'], 2),
+                np.round(mets[i]['chi2'][mname]['C1_C0S12']   / mets[i]['ndf'], 2),
+                np.round(mets[i]['chi2'][mname]['C0S1_C0S12'] / mets[i]['ndf'], 2),
             ]
             
             metric_table[mname].add_row(row, divider=True if (i == len(mets)-1 or i == len(mets)-2) else False)
@@ -1901,7 +1903,7 @@ def multiprocess_AIRW_wrapper(p):
         'color' : iceplot.imperial_very_light_blue
     })
     class0_S12.update({
-        'label' : '$C_0 \\times S_1 \\cdot S_2$',
+        'label' : '$C_0 \\times S_1 S_2$',
         'hfunc' : 'hist',
         'style' : iceplot.hist_style_step,
         'color' : iceplot.imperial_dark_red
@@ -1909,53 +1911,54 @@ def multiprocess_AIRW_wrapper(p):
     
     data = [class1, class0, class0_S1, class0_S2, class0_S12]
     
-    # Class 1
+    # C1 (class 1)
     data[0]['hdata'] = iceplot.hist_obj(X_col[y == C1], bins=bins, weights=w[y == C1])
     
-    # Raw weights Class 0
+    # C0 (class 0)
     data[1]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_raw)
     
-    # Raw weights Class 0 x S1
+    # C0 x S1
     data[2]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w[y == C0])
     
-    # Reweight
+    # Stage-2 reweight
     if   map_mode == 'RW':
         
-        # raw x S2
+        # C0 x S2
         data[3]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_raw * w0_S2_only)
 
-        # raw x S1 x S2
+        # C0 x S1 x S2
         data[4]['hdata'] = iceplot.hist_obj(X_col[y == C0], bins=bins, weights=w0_tot)
-        
-    # Transport (no weights for S2)
+
+    # Stage-2 transport (no weights for S2)
     elif map_mode == 'FT':
         
-        # raw x S2(T)
+        # C0 x S2(T)
         data[3]['hdata'] = iceplot.hist_obj(X_col_new[y == C0], bins=bins, weights=w0_raw)
         
-        # raw x S1 x S2(T)
+        # C0 x S1 x S2(T)
         data[4]['hdata'] = iceplot.hist_obj(X_col_new[y == C0], bins=bins, weights=w0_tot)
     
     ## Chi2 vs Data
     chi2 = {'hybrid': {}, 'pearson': {}, 'neyman': {}}
     
     for dt in chi2.keys():
-        chi2[dt]['C1_C0'], ndf  = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
-        chi2[dt]['C1_C0S1'], _  = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
-        chi2[dt]['C0_C0S2'],  _ = iceplot.chi2_cost(h_mc=data[3]['hdata'], h_data=data[1]['hdata'], vartype=dt, return_nbins=True)
-        chi2[dt]['C1_C0S12'], _ = iceplot.chi2_cost(h_mc=data[4]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
+        chi2[dt]['C1_C0'], ndf    = iceplot.chi2_cost(h_mc=data[1]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
+        chi2[dt]['C1_C0S1'], _    = iceplot.chi2_cost(h_mc=data[2]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
+        chi2[dt]['C0_C0S2'],  _   = iceplot.chi2_cost(h_mc=data[3]['hdata'], h_data=data[1]['hdata'], vartype=dt, return_nbins=True)
+        chi2[dt]['C1_C0S12'], _   = iceplot.chi2_cost(h_mc=data[4]['hdata'], h_data=data[0]['hdata'], vartype=dt, return_nbins=True)
+        chi2[dt]['C0S1_C0S12'], _ = iceplot.chi2_cost(h_mc=data[4]['hdata'], h_data=data[2]['hdata'], vartype=dt, return_nbins=True) # Not plotted
     
     ## Effective Sample Sizes
-    binESS_C0,    n_C0    = iceplot.ess_metric(h=data[1]['hdata'])
-    binESS_C0S1,  n_C0S1  = iceplot.ess_metric(h=data[2]['hdata'])
-    binESS_C0S2,  n_C0S2  = iceplot.ess_metric(h=data[3]['hdata'])
-    binESS_C0S12, n_C0S12 = iceplot.ess_metric(h=data[4]['hdata'])
+    binESS_C0,    entries_C0    = iceplot.ess_metric(h=data[1]['hdata'])
+    binESS_C0S1,  entries_C0S1  = iceplot.ess_metric(h=data[2]['hdata'])
+    binESS_C0S2,  entries_C0S2  = iceplot.ess_metric(h=data[3]['hdata'])
+    binESS_C0S12, entries_C0S12 = iceplot.ess_metric(h=data[4]['hdata'])
     
     ESS          = {}
-    ESS['C0']    = (binESS_C0).sum()    / n_C0.sum()
-    ESS['C0S1']  = (binESS_C0S1).sum()  / n_C0S1.sum()
-    ESS['C0S2']  = (binESS_C0S2).sum()  / n_C0S2.sum()
-    ESS['C0S12'] = (binESS_C0S12).sum() / n_C0S12.sum()
+    ESS['C0']    = binESS_C0.sum()    / entries_C0.sum()
+    ESS['C0S1']  = binESS_C0S1.sum()  / entries_C0S1.sum()
+    ESS['C0S2']  = binESS_C0S2.sum()  / entries_C0S2.sum()
+    ESS['C0S12'] = binESS_C0S12.sum() / entries_C0S12.sum()
     
     mets = {
         'id':   ids[i],
@@ -1975,24 +1978,29 @@ def multiprocess_AIRW_wrapper(p):
         
         fig0, ax0 = iceplot.superplot(data, ratio_plot=True, yscale=mode, ratio_error_plot=True, legend_properties={'fontsize': 5.5})
         
-        binESS_list = [None, None, None, None, binESS_C0S12 / (binESS_C0S1+1e-9)]
+        EPS         = 1e-9
+        binESS_list = [None, None, binESS_C0S1 / np.clip(binESS_C0, EPS, None), None, binESS_C0S12 / np.clip(binESS_C0S1, EPS, None)]
+        colors      = [entry['color'] for entry in data]
         
         ax_ess = ess_subplot(
             fig         = fig0,
             ax_ratio    = ax0[1],
             bin_edges   = data[1]['hdata'].bins,
             binESS_list = binESS_list,
-            ax_main     = ax0[0],
-            labels      = None,
-            ylabel      = '$\\mathcal{E}(S_1 S_2)\, / \, \\mathcal{E}(S_1)$'
+            colors      = colors,
+            labels      = [None, None, '$\\mathcal{E}(C_0 \\times S_1)\, / \, \\mathcal{E}(C_0)$',
+                           None, '$\\mathcal{E}(C_0 \\times S_1 S_2)\, / \, \\mathcal{E}(C_0 \\times S_1)$'],
+            ylabel      = '$\\mathcal{E}_i \, / \, \\mathcal{E}_j$'
         )
-
+        
         fig0.savefig(aux.makedir(local_dir + '/pdf/') + f'/reweight_[{ids[i]}]__{mode}.pdf', bbox_inches='tight')
         fig0.savefig(aux.makedir(local_dir + '/png/') + f'/reweight_[{ids[i]}]__{mode}.png', bbox_inches='tight', dpi=300)
+        
         fig0.clf()
         plt.close(fig0)
     
     return mets
+
 
 def ess_subplot(
         fig,
@@ -2000,16 +2008,15 @@ def ess_subplot(
         bin_edges,          # array (n+1)
         binESS_list,        # list of arrays (n)
         *,
-        ax_main=None,       # for colour reuse
+        colors=None,        # for color reuse
         ylabel="ESS",
         gap=0.01,           # vertical gap below ratio (figure fraction)
         labels=None,
-        default_color="brown",
         linestyle='-',
-        lw=1.25
+        lw=1.0
     ):
     """
-    Append an ESS axis (same height as `ax_ratio`) directly underneath.
+    Append an ESS axis (same height as 'ax_ratio') directly underneath.
     """
     
     # ------------------------------------------------------------------
@@ -2017,15 +2024,15 @@ def ess_subplot(
     # ------------------------------------------------------------------
     edges = np.asarray(bin_edges, dtype=float)
     if edges.ndim != 1 or edges.size < 2:
-        raise ValueError("`bin_edges` must be 1‑D with at least 2 entries.")
+        raise ValueError("'bin_edges' must be 1D with at least 2 entries.")
     n_bins = edges.size - 1
 
     # ------------------------------------------------------------------
     # 1. Compute positions; enlarge figure if needed
     # ------------------------------------------------------------------
-    pos_ratio = ax_ratio.get_position()
+    pos_ratio  = ax_ratio.get_position()
     ess_height = pos_ratio.height
-    ess_y0 = pos_ratio.y0 - gap - ess_height
+    ess_y0     = pos_ratio.y0 - gap - ess_height
 
     if ess_y0 < 0.0: # not enough room -> enlarge fig
         grow_frac = -ess_y0
@@ -2036,31 +2043,31 @@ def ess_subplot(
     # ------------------------------------------------------------------
     # 2. Add ESS axis
     # ------------------------------------------------------------------
-    ax_ess = fig.add_axes([pos_ratio.x0, ess_y0, pos_ratio.width, ess_height],
-                          sharex=ax_ratio)
+    ax_ess = fig.add_axes([pos_ratio.x0, ess_y0, pos_ratio.width, ess_height], sharex=ax_ratio)
 
     # ------------------------------------------------------------------
     # 3. Plot each ESS curve (histogram style, edges + where='post')
     # ------------------------------------------------------------------
-    main_colors = [ln.get_color() for ln in ax_main.lines] if ax_main else []
 
     for i, ess in enumerate(binESS_list):
+        
         if ess is None:
             continue
+        
         y = np.asarray(ess, dtype=float)
         if y.size == 0 or np.all(np.isnan(y)):
             continue
+        
         if y.size != n_bins:
             raise ValueError(f"ESS curve #{i} has length {y.size}; expected {n_bins}.")
 
         # duplicate last entry so the final step spans the last bin
         y_plot = np.append(y, y[-1])
 
-        color = main_colors[i] if i < len(main_colors) else default_color
         label = labels[i] if labels and i < len(labels) else None
-
+        
         ax_ess.step(edges, y_plot, where='post',
-                    color=color, linestyle=linestyle, label=label, lw=lw)
+                    color=colors[i], linestyle=linestyle, label=label, lw=lw)
 
     # ------------------------------------------------------------------
     # 4. Visuals
@@ -2073,12 +2080,13 @@ def ess_subplot(
 
     # show x‑labels only on ESS axis
     ax_ratio.tick_params(labelbottom=False)
+    
     # remove external y‑tick marks, keep numeric labels
     ax_ess.tick_params(axis='y', length=0, labelsize=tick_font)
     ax_ess.tick_params(axis='x', labelsize=tick_font)
 
     ax_ess.set_xlabel(ax_ratio.get_xlabel(), fontsize=label_font)
-    ax_ess.set_ylabel(ylabel,               fontsize=label_font)
+    ax_ess.set_ylabel(ylabel,                fontsize=label_font)
 
     # fixed y‑range, ticks, and grid
     ax_ess.set_ylim(0, 1)
@@ -2086,6 +2094,6 @@ def ess_subplot(
     ax_ess.grid(True, axis='y', linestyle='--', alpha=0.4)
 
     if labels:
-        ax_ess.legend(fontsize=tick_font * 0.9)
+        ax_ess.legend(fontsize=tick_font * 0.65, frameon=False)
 
     return ax_ess

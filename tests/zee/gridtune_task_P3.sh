@@ -14,13 +14,13 @@ MODELTAG="GRIDTUNE-P3"
 if [ -z "$CONFIG" ]; then
     echo "Error: CONFIG environment variable is not set."
     echo "Please set it, e.g.: export CONFIG=tune0_EB"
-    return
+    return 0
 fi
 
 if [ -z "$maxevents" ]; then
     echo "Error: maxevents environment variable is not set."
     echo "Please set it, e.g.: export maxevents=1000000000"
-    return
+    return 0
 fi
 
 # ** icenet/setenv.sh uses these **

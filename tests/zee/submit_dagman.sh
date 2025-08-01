@@ -11,22 +11,22 @@
 mkdir -p logs
 
 # === Check for required environment variable ===
+if [ -z "$TASK_SCRIPT" ]; then
+    echo "Error: TASK_SCRIPT environment variable is not set."
+    echo "Please set it, e.g.: export TASK_SCRIPT=gridtune_task_EB.sh"
+    return 0
+fi
+
 if [ -z "$CONFIG" ]; then
     echo "Error: CONFIG environment variable is not set."
     echo "Please set it, e.g.: export CONFIG=tune0_EB"
-    return
+    return 0
 fi
 
 if [ -z "$maxevents" ]; then
     echo "Error: maxevents environment variable is not set."
     echo "Please set it, e.g.: export maxevents=500000"
-    return
-fi
-
-if [ -z "$TASK_SCRIPT" ]; then
-    echo "Error: TASK_SCRIPT environment variable is not set."
-    echo "Please set it, e.g.: export TASK_SCRIPT=gridtune_task_EB.sh"
-    return
+    return 0
 fi
 
 # === Fixed Parameters ===
@@ -46,12 +46,12 @@ TEMP_FILE_ARRAY="tmp__${TASK_NAME}_${TIMESTAMP}_$(basename "${ARRAY_JOB}")"
 # Replace executable line
 sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$INIT_JOB" \
 | sed "/^environment\s*=/d" \
-| sed "1ienvironment = \"CONFIG=${CONFIG};maxevents=${maxevents}\"" \
+| sed "1ienvironment = \"CONFIG=${CONFIG} maxevents=${maxevents}\"" \
 > "$TEMP_FILE_INIT"
 
 sed "s|^executable\s*=\s*task\.sh|executable = ${TASK_SCRIPT}|" "$ARRAY_JOB" \
 | sed "/^environment\s*=/d" \
-| sed "1ienvironment = \"CONFIG=${CONFIG};maxevents=${maxevents}\"" \
+| sed "1ienvironment = \"CONFIG=${CONFIG} maxevents=${maxevents}\"" \
 > "$TEMP_FILE_ARRAY"
 
 chmod +x *.sh

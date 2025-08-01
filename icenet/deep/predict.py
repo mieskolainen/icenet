@@ -26,12 +26,20 @@ from icenet.deep  import rflow
 from icenet import print
 # ------------------------------------------
 
-def batched_predict(func_predict, x, c=None, batch_size=1024):
+
+def batched_predict(func_predict, x, c=None, batch_size=32768, **kwargs):
     """
-    Wrapper for batching
+    Wrapper for batching.
+    
+    Args:
+        func_predict: prediction function to be called, which returns a numpy array
+        x:            main input
+        c:            conditional input
+        batch_size:   evaluation batch size
+        **kwargs:     additional arguments for func_predict()
     """
     
-    N = x.shape[0]
+    N = len(x)
     outputs = []
     
     for i in tqdm(range(0, N, batch_size)):
@@ -39,13 +47,14 @@ def batched_predict(func_predict, x, c=None, batch_size=1024):
         
         if c is not None:
             c_batch = c[i:i+batch_size]
-            out = func_predict(x_batch, c_batch)
+            out = func_predict(x_batch, c_batch, **kwargs)
         else:
-            out = func_predict(x_batch)
+            out = func_predict(x_batch, **kwargs)
 
         outputs.append(out)
     
     return np.concatenate(outputs, axis=0)
+
 
 def pred_cut(ids, param):
 
@@ -70,6 +79,7 @@ def pred_cut(ids, param):
     
     return func_predict
 
+
 def pred_cutset(ids, param):
 
     print(f'Evaluate [{param["label"]}] fixed cutset model ...')
@@ -91,6 +101,7 @@ def pred_cutset(ids, param):
         return y.astype(float)
     
     return func_predict
+
 
 def pred_graph_xgb(args, param):
     
@@ -138,11 +149,13 @@ def pred_graph_xgb(args, param):
 
         pred = xgb_model.predict(xgboost.DMatrix(data = x_tot), iteration_range=(0,N_trees))
         if len(pred.shape) > 1: pred = pred[:, args['signal_class']]
+        
         return pred
     
     return func_predict
 
-def pred_torch_graph(args, param, batch_size=5000, return_model=False):
+
+def pred_torch_graph(args, param, batch_size=4096, return_model=False):
     
     print(f'Evaluate [{param["label"]}] model ...')
     
@@ -277,9 +290,8 @@ def pred_flow(args, param, n_dims, return_model=False):
     else:
         return func_predict, models
 
-def pred_rflow(args, param, ids, tau=1.0, return_model=False):
 
-    print(f'Evaluate [{param["label"]}] model with tau = {tau} ...')
+def pred_rflow(args, param, ids, return_model=False):
     
     # --------------------------------------------------------------------
     # Set input dimensions
@@ -331,16 +343,18 @@ def pred_rflow(args, param, ids, tau=1.0, return_model=False):
     model.eval() # ! Turn on eval mode!
     
     @torch.no_grad()
-    def func_predict(x_, y_):
+    def func_predict(x_in, cond=None, tau=1.0):
         
-        x_ = x_.to(device)
-        y_ = y_.to(device)
-
-        x = x_[:, x_mask]
-        c = x_[:, c_mask] if c_mask is not None else None
+        x_in = x_in.to(device)
+        
+        if cond is not None:
+            cond = cond.to(device)
+        
+        x = x_in[:, x_mask]
+        c = x_in[:, c_mask] if c_mask is not None else None
         
         # Add class (domain) conditional variable
-        y_col = y_.view(-1, 1).to(dtype=c.dtype) # ensure dimensions
+        y_col = cond.view(-1, 1).to(dtype=c.dtype) # ensure dimensions
         c = torch.cat([c, y_col], dim=1)
         
         # If stochastic transport version, add a random variable
@@ -363,6 +377,7 @@ def pred_rflow(args, param, ids, tau=1.0, return_model=False):
         return func_predict
     else:
         return func_predict, model
+
 
 def pred_xgb(args, param, feature_names=None, return_model=False):
     

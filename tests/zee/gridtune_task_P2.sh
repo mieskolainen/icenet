@@ -14,13 +14,13 @@ MODELTAG="GRIDTUNE-P2"
 if [ -z "$CONFIG" ]; then
     echo "Error: CONFIG environment variable is not set."
     echo "Please set it, e.g.: export CONFIG=tune0_EB"
-    return
+    return 0
 fi
 
 if [ -z "$maxevents" ]; then
     echo "Error: maxevents environment variable is not set."
     echo "Please set it, e.g.: export maxevents=500000"
-    return
+    return 0
 fi
 
 # ---------------------------------------

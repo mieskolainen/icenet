@@ -292,8 +292,8 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     if runmode != 'genesis':
         
-        args['modeldir'] = aux.makedir(f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}')
         args['plotdir']  = aux.makedir(f'{cwd}/figs/{args["rootname"]}/config__{io.safetxt(args["config"])}/inputmap__{io.safetxt(cli_dict["inputmap"])}--modeltag__{args["modeltag"]}')
+        args['modeldir'] = f'{cwd}/checkpoint/{args["rootname"]}/config__{io.safetxt(args["config"])}/modeltag__{args["modeltag"]}'
         
         # Add conditional tag
         conditional_tag   = f'--use_conditional__{args["use_conditional"]}' if args["use_conditional"] else ""
@@ -346,18 +346,16 @@ def read_config(config_path='configs/xyz/', runmode='all'):
         args['run_id_now'] = run_id_now
         
         ## ** Create and set folders **
-        args['modeldir'] = aux.makedir(f"{args['modeldir']}/{run_id}")
+        args['modeldir'] = f"{args['modeldir']}/{run_id}"
         args['plotdir']  = aux.makedir(f"{args['plotdir']}/{run_id}")
+        
+        if runmode == 'train':
+            aux.makedir(args['modeldir'])
         
         if runmode == 'eval' and cli_dict['evaltag'] is not None:
             args['plotdir'] = aux.makedir(f"{args['plotdir']}/evaltag__{cli_dict['evaltag']}")
             print(f'Changing eval plotdir to: {args["plotdir"]}', 'red')
-        
-        # ----------------------------------------------------------------
-        ## Save args to yaml as a checkpoint of the run configuration
-        outdir = aux.makedir(f'{args["plotdir"]}/{runmode}')
-        aux.yaml_dump(data=args, filename=f'{outdir}/args.yml')
-        # ----------------------------------------------------------------
+    
     
     # "Simplified" data reader
     args['root_files'] = io.glob_expand_files(datasets=cli.datasets, datapath=cli.datapath)    
@@ -365,6 +363,11 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     
     # -------------------------------------------------------------------
     # Technical
+    
+    from icenet import __version__, __date__
+
+    args['__version__']  = __version__
+    args['__date__']     = __date__
     
     args['__runmode__']         = cli_dict['runmode']
     args['__use_cache__']       = bool(cli_dict['use_cache'])
@@ -384,7 +387,6 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     for key in ['grid_id', 'grid_nodes']:
         args[key] = cli_dict[key]
     
-    
     # -------------------------------------------------------------------
     ## Create aux dirs
     aux.makedir('tmp')
@@ -402,6 +404,14 @@ def read_config(config_path='configs/xyz/', runmode='all'):
     # ------------------------------------------------
     print(f'Created arguments dictionary with runmode = <{runmode}> :')    
     # ------------------------------------------------
+    
+    # ----------------------------------------------------------------
+    ## Finally, save args to yaml as a checkpoint of the run configuration
+    #  Saved later for 'genesis'
+    if runmode != "genesis": 
+        outdir = aux.makedir(f'{args["plotdir"]}/{runmode}')
+        aux.yaml_dump(data=args, filename=f'{outdir}/args.yml')
+    # ----------------------------------------------------------------
     
     return args, cli
 
@@ -1583,193 +1593,205 @@ def evaluate_models(data=None, info=None, args=None):
             param = args['models'][ID]
             print(f'Evaluating <{ID}> | {param} \n')
             
-            inputs = {'weights': weights, 'label': param['label'],
-                    'targetdir': targetdir, 'args':args, 'X_kin': X_kin, 'ids_kin': ids_kin, 'X_RAW': X_RAW, 'ids_RAW': ids_RAW}
+            if 'eval_batch_size' not in param:
+                param['eval_batch_size'] = 32768
+                print(f'Did not find parameter "eval_batch_size", using the default {param["eval_batch_size"]}.', 'red')
             
-            if   param['predict'] == 'xgb':
-                func_predict = predict.pred_xgb(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
+            inputs = {
+                'weights':   weights,
+                'label':     param['label'],
+                'targetdir': targetdir,
+                'args':      args,
+                'X_kin':     X_kin,
+                'ids_kin':   ids_kin,
+                'X_RAW':     X_RAW,
+                'ids_RAW':   ids_RAW
+            }
+            
+
+            # -----------------------------------------------------------------------------------
+            if param['predict'] == 'xgb':
+                
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_xgb(args=args, param=param, feature_names=aux.red(X,ids,param,'ids')),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
+                
                 if args['plot_param']['contours']['active']:
                     plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
                         targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
-                
-                plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
-
+            
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'xgb_logistic':
-                func_predict = predict.pred_xgb_logistic(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
+                
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_xgb_logistic(args=args, param=param, feature_names=aux.red(X,ids,param,'ids')),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
                 
                 if args['plot_param']['contours']['active']:
                     plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
                         targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
-                
-                plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
             
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'xgb_scalar':
-                func_predict = predict.pred_xgb_scalar(args=args, param=param, feature_names=aux.red(X,ids,param,'ids'))
+                
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_xgb_scalar(args=args, param=param, feature_names=aux.red(X,ids,param,'ids')),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
                 
                 if args['plot_param']['contours']['active']:
                     plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X,ids,param,'X'), y=y, ids=aux.red(X,ids,param,'ids'), transform='numpy', 
                         targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
-                
-                plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
-
+            
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'torch_vector':
-                func_predict = predict.pred_torch_generic(args=args, param=param)
-
+                
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_torch_generic(args=args, param=param),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
+                
                 if args['plot_param']['contours']['active']:
-                    plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'),
-                        targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'), transform='torch')
+                    plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch',
+                        targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
 
-                plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
-
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'torch_scalar':
-                func_predict = predict.pred_torch_scalar(args=args, param=param)
-
+                
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_torch_scalar(args=args, param=param),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
+                
                 if args['plot_param']['contours']['active']:
                     plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
                         targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
 
-                plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
-
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'torch_flow':
-                func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1])
-
-                if args['plot_param']['contours']['active']:
-                    plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
-                        targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
+                
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_flow(args=args, param=param, n_dims=X_ptr.shape[1]),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
 
                 plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X_ptr,ids,param,'X'), y=y, **inputs)
-            
+                
+                if args['plot_param']['contours']['active']:
+                    plots.plot_contour_grid(pred_func=func_predict, X=aux.red(X_ptr,ids,param,'X'), y=y, ids=aux.red(X_ptr,ids,param,'ids'), transform='torch', 
+                        targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
+
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'torch_rflow':
                 
-                label    = inputs['label']
-                sublabel = 'inclusive'
-                outdir   = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
+                func_predict = lambda input, tau : predict.batched_predict(
+                    func_predict = predict.pred_rflow(args=args, param=param, ids=ids),
+                    x            = input,
+                    batch_size   = param['eval_batch_size'],
+                    c            = torch.tensor(y, dtype=torch.float), # Domain labels
+                    tau          = tau                                 # Stochasticity
+                )
                 
-                filenames = {}
-                for mname in ['hybrid', 'pearson', 'neyman']:
-                    filenames[mname] = os.path.join(outdir, f"stats_chi2_{mname}_summary.log")
-                    open(filenames[mname], 'w').close() # Clear content
+                plot_AIRW_transport(func_predict=func_predict, x_input=X_ptr, y=y, ids=ids, param=param, **inputs)
                 
-                # We use tau here as the noise std for inference time control of
-                # the stochastic (Kantorovich) variable
-                for tau in [0.0, 0.5, 1.0, 2.0]:
-                    
-                    func_predict = predict.pred_rflow(args=args, param=param, ids=ids, tau=tau)
-                    
-                    # Map
-                    X_new = predict.batched_predict(
-                        func_predict = func_predict,
-                        x            = X_ptr,
-                        c            = torch.tensor(y, dtype=torch.float), # Domain labels
-                        batch_size   = param['eval_batch_size']
-                    )
-                    
-                    if (param['cond_vars'] is None) or (param['cond_vars'] == []):
-                        x_mask = np.ones(len(ids), dtype=bool)
-                    else:
-                        x_mask = ~np.array([name in param['cond_vars'] for name in ids], dtype=bool)
-                    
-                    ## Revert Z-score standardization
-                    if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
-                        
-                        pickle_file = os.path.join(args["modeldir"], 'zscore.pkl')
-                        print(f'Reverting z-score transform of flow transported ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
-                        
-                        with open(pickle_file, 'rb') as f:
-                            Z_data = pickle.load(f)
-                        
-                        X_mu, X_std = Z_data['X_mu'], Z_data['X_std']
-                        X_new = io.reverse_zscore(X_new, X_mu[x_mask], X_std[x_mask])
-                    
-                    ## Revert other preprocessing transforms
-                    
-                    # [reservation here ...]
-                    
-                    # ------------------------------------------------------------------------
-                    ## Plotting
-                    
-                    # We can only plot the flow x-space variables (conditional do not change)
-                    x_vars      = [name for name in ids if name not in param['cond_vars']]
-                    pick_ind, _ = aux.pick_index(all_ids=ids_RAW, vars=x_vars)
-                    
-                    # AIRW plots
-                    local_dir   = aux.makedir(os.path.join(outdir, f'tau_{tau:0.3f}'))
-                    
-                    metric_table, df, mets = plots.plot_AIRW(
-                        X         = X_RAW,
-                        y         = y,
-                        ids       = ids_RAW,
-                        weights   = weights,
-                        y_pred    = None,
-                        X_new     = X_new,
-                        pick_ind  = pick_ind,
-                        label     = label,
-                        sublabel  = sublabel,
-                        param     = args['plot_param']['OBS_reweight'],
-                        tau       = tau,
-                        targetdir = local_dir,
-                        num_cpus  = args['num_cpus'],
-                        map_mode  = 'FT'  # Transport
-                    )
-
-                    ## Write tables to the combined summary files
-                    for mname in filenames.keys():
-                        plots.table_writer(
-                            filename   = filenames[mname],
-                            label      = f'category: {sublabel} | AI model: {label} | tau: {tau:0.2f} | chi2: {mname}',
-                            table      = metric_table[mname],
-                            print_to_screen = False # Done already by plot_AIRW
-                        )
-
-                # -----------------------------------------------
-
                 skip_multi_comparison = True # Only for density estimators
 
+            # -----------------------------------------------------------------------------------
             elif   param['predict'] == 'torch_graph':
-                func_predict = predict.pred_torch_graph(args=args, param=param)
+                
+                func_predict = predict.pred_torch_graph(args=args, param=param, batch_size=param['eval_batch_size'])
 
-                # Geometric type -> need to use batch loader, get each graph, node or edge prediction
-                loader  = torch_geometric.loader.DataLoader(X_graph, batch_size=len(X_graph), shuffle=False)
-                for batch in loader: # Only one big batch
-                    plot_XYZ_wrap(func_predict = func_predict, x_input=X_graph, y=batch.to('cpu').y.detach().cpu().numpy(), **inputs)
+                # Wrapper full batch to get .y [batched evaluation inside predict.pred_torch_graph]
+                for batch in torch_geometric.loader.DataLoader(X_graph, batch_size=len(X_graph), shuffle=False):
+                    plot_XYZ_wrap(func_predict=func_predict, x_input=X_graph, y=batch.to('cpu').y.detach().cpu().numpy(), **inputs)
             
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'graph_xgb':
+                
+                # No batching
                 func_predict = predict.pred_graph_xgb(args=args, param=param)
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_graph, y=y, **inputs)
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=X_graph, y=y, **inputs)
             
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'torch_deps':
-                func_predict = predict.pred_torch_generic(args=args, param=param)
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_deps_ptr, y=y, **inputs)
+                
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_torch_generic(args=args, param=param),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=X_deps_ptr, y=y, **inputs)
 
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'torch_image':
-                func_predict = predict.pred_torch_generic(args=args, param=param)
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_2D_ptr, y=y, **inputs)
                 
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_torch_generic(args=args, param=param),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=X_2D_ptr, y=y, **inputs)
+                
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'torch_image_vector':
-                func_predict = predict.pred_torch_generic(args=args, param=param)
-
-                X_dual      = {}
-                X_dual['x'] = X_2D_ptr # image tensors
-                X_dual['u'] = X_ptr    # global features
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_dual, y=y, **inputs)
                 
-            elif param['predict'] == 'flr':
-                func_predict = predict.pred_flr(args=args, param=param)
-                plot_XYZ_wrap(func_predict = func_predict, x_input=aux.red(X,ids,param,'X'), y = y, **inputs)
+                func_predict = lambda input : predict.batched_predict(
+                    func_predict = predict.pred_torch_generic(args=args, param=param),
+                    x            = input,
+                    batch_size   = param['eval_batch_size']
+                )
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input={'x': X_2D_ptr, 'u': X_ptr}, y=y, **inputs)
             
-            elif param['predict'] == 'cut':
-                func_predict = predict.pred_cut(ids=ids_RAW, param=param)
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
-            
+            # -----------------------------------------------------------------------------------
             elif param['predict'] == 'cutset':
+
                 func_predict = predict.pred_cutset(ids=ids_RAW, param=param)
-                plot_XYZ_wrap(func_predict = func_predict, x_input = X_RAW, y = y, **inputs)
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=X_RAW, y=y, **inputs)
 
                 if args['plot_param']['contours']['active']:
                     plots.plot_contour_grid(pred_func=func_predict, X=X_RAW, y=y, ids=ids_RAW, transform='numpy', 
-                        targetdir=aux.makedir(os.path.join(f'{args["plotdir"]}', 'eval/2D-contours', f'{param["label"]}')))
+                        targetdir=aux.makedir(f'{args["plotdir"]}/eval/2D-contours/{param["label"]}/'))
+            
+            # -----------------------------------------------------------------------------------
+            elif param['predict'] == 'flr':
+                
+                func_predict = predict.pred_flr(args=args, param=param)
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=aux.red(X,ids,param,'X'), y=y, **inputs)
+            
+            # -----------------------------------------------------------------------------------
+            elif param['predict'] == 'cut':
+                
+                func_predict = predict.pred_cut(ids=ids_RAW, param=param)
+                
+                plot_XYZ_wrap(func_predict=func_predict, x_input=X_RAW, y=y, **inputs)
+            
             else:
                 raise Exception(__name__ + f'.Unknown param["predict"] = {param["predict"]} for ID = {ID}')
+    
     
     except Exception as e:
         prints.printbar('*')
@@ -1779,6 +1801,7 @@ def evaluate_models(data=None, info=None, args=None):
         prints.printbar('*')
         
         return False
+    
     
     ## Multiple model comparisons
     if not skip_multi_comparison:
@@ -1799,15 +1822,109 @@ def evaluate_models(data=None, info=None, args=None):
                'info':              info}
     
     targetfile = os.path.join(targetdir, 'eval_results.pkl')
-    print(f'Saving pickle output to:')
-    print(f'{targetfile}')
-    
     with open(targetfile, 'wb') as file:
         pickle.dump(resdict, file, protocol=pickle.HIGHEST_PROTOCOL)
     
+    print(f'Saved pickle output to:', 'green')
+    print(f'{targetfile} [{os.path.getsize(targetfile) / (1024 ** 3):0.3f} GB]', 'magenta')
+
     print(f'[done]', 'yellow')
     
     return True
+
+
+@iceprint.icelog(LOGGER)
+def plot_AIRW_transport(
+        func_predict: callable,
+        x_input: np.ndarray,
+        y: np.ndarray,
+        ids: list,
+        param:dict,
+        
+        weights: np.ndarray,
+        label: str,
+        targetdir: str,
+        args: dict,
+        X_kin: np.ndarray, # not used here
+        ids_kin: list,     # not used here
+        X_RAW: np.ndarray,
+        ids_RAW: list
+    ):
+    """
+    Wrapper for transport methods
+    """
+    
+    sublabel = 'inclusive'
+    outdir   = aux.makedir(f'{targetdir}/OBS_reweight/{label}/{sublabel}')
+    
+    filenames = {}
+    for mname in ['hybrid', 'pearson', 'neyman']:
+        filenames[mname] = os.path.join(outdir, f"stats_chi2_{mname}_summary.log")
+        open(filenames[mname], 'w').close() # Clear content
+    
+    # We use tau here as the noise std for inference time control of
+    # the stochastic (Kantorovich) variable
+    for tau in [0.0, 0.5, 1.0, 2.0]:
+        
+        X_new = func_predict(x_input, tau=tau)
+        
+        if (param['cond_vars'] is None) or (param['cond_vars'] == []):
+            x_mask = np.ones(len(ids), dtype=bool)
+        else:
+            x_mask = ~np.array([name in param['cond_vars'] for name in ids], dtype=bool)
+        
+        ## Revert Z-score standardization
+        if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
+            
+            pickle_file = os.path.join(args["modeldir"], 'zscore.pkl')
+            print(f'Reverting z-score transform of flow transported ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+            
+            with open(pickle_file, 'rb') as f:
+                Z_data = pickle.load(f)
+            
+            X_mu, X_std = Z_data['X_mu'], Z_data['X_std']
+            X_new = io.reverse_zscore(X_new, X_mu[x_mask], X_std[x_mask])
+        
+        ## Revert other preprocessing transforms
+        
+        # [reservation here ...]
+        
+        # ------------------------------------------------------------------------
+        ## Plotting
+        
+        # We can only plot the flow x-space variables (conditional do not change)
+        x_vars      = [name for name in ids if name not in param['cond_vars']]
+        pick_ind, _ = aux.pick_index(all_ids=ids_RAW, vars=x_vars)
+        
+        # AIRW plots
+        local_dir   = aux.makedir(os.path.join(outdir, f'tau_{tau:0.3f}'))
+        
+        metric_table, df, mets = plots.plot_AIRW(
+            X         = X_RAW,
+            y         = y,
+            ids       = ids_RAW,
+            weights   = weights,
+            y_pred    = None,
+            X_new     = X_new,
+            pick_ind  = pick_ind,
+            label     = label,
+            sublabel  = sublabel,
+            param     = args['plot_param']['OBS_reweight'],
+            tau       = tau,
+            targetdir = local_dir,
+            num_cpus  = args['num_cpus'],
+            map_mode  = 'FT'  # Transport
+        )
+
+        ## Write tables to the combined summary files
+        for mname in filenames.keys():
+            plots.table_writer(
+                filename   = filenames[mname],
+                label      = f'category: {sublabel} | AI model: {label} | tau: {tau:0.2f} | chi2: {mname}',
+                table      = metric_table[mname],
+                print_to_screen = False # Done already by plot_AIRW
+            )
+
 
 @iceprint.icelog(LOGGER)
 def make_plots(data, args, runmode):
