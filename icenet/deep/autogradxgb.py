@@ -1,5 +1,5 @@
 # Custom pytorch-driven autograd losses for XGBoost
-# with various Hessian diagonal approaches
+# with various Hessian diagonal approaches.
 #
 # m.mieskolainen@imperial.ac.uk, 2025
 
@@ -51,7 +51,7 @@ class XgboostObjective():
             hessian_const:  float=1.0,
             hessian_gamma:  float=0.9,
             hessian_eps:    float=1e-8,
-            hessian_absmax: float=10.0,
+            hessian_limit:  list=[1e-2, 20],
             hessian_slices: int=10,
             device: torch.device='cpu'
         ):
@@ -65,8 +65,8 @@ class XgboostObjective():
         # Iterative mode
         self.hessian_gamma  = hessian_gamma
         self.hessian_eps    = hessian_eps
-        self.hessian_absmax = hessian_absmax
-
+        self.hessian_limit  = hessian_limit
+        
         # Hutchinson mode
         self.hessian_slices = int(hessian_slices)
         
@@ -118,6 +118,19 @@ class XgboostObjective():
 
         return preds, targets, weights
 
+    def regulate_hess(self, hess: Tensor):
+        """
+        Regulate to be positive definite (H_ii > hessian_min)
+        as required by second order gradient descent.
+        
+        Do not clip to zero, as that might result in zero denominators
+        in the Hessian routines inside xgboost.
+        """
+        hess = torch.abs(hess) # ~ negative weights
+        hess = torch.clamp(hess, min=self.hessian_limit[0], max=self.hessian_limit[1])
+        
+        return hess
+        
     @torch.no_grad
     def iterative_hessian_update(self, grad: Tensor, preds: Tensor):
         """
@@ -142,8 +155,7 @@ class XgboostObjective():
             ds = preds - self.preds_prev
             
             hess_diag_new = dg / (ds + self.hessian_eps)
-            hess_diag_new = torch.clamp(hess_diag_new,
-                                        min=-self.hessian_absmax, max=self.hessian_absmax)
+            hess_diag_new = self.regulate_hess(hess_diag_new) # regulate
         
         # Exponential Moving Average (EMA), approx filter size ~ 1 / (1 - gamma) steps
         self.hess_diag = self.hessian_gamma * self.hess_diag + \
@@ -160,7 +172,7 @@ class XgboostObjective():
         tic = time.time()
         print(f'Computing Hessian diag with Hutchinson MC (slices = {self.hessian_slices}) ... ')
 
-        grad2 = torch.zeros_like(preds)
+        hess = torch.zeros_like(preds)
         
         for _ in range(self.hessian_slices):
             
@@ -172,13 +184,16 @@ class XgboostObjective():
             Hv = torch.autograd.grad(grad, preds, grad_outputs=v, retain_graph=True)[0]
 
             # Accumulate element-wise product v * Hv to get the diagonal
-            grad2 += v * Hv
-
-        print(f'Took {time.time()-tic:.2f} sec')
+            hess += v * Hv
 
         # Average over all samples
-        return grad2 / self.hessian_slices
+        hess = hess / self.hessian_slices
+        hess = self.regulate_hess(hess) # regulate
+        
+        print(f'Took {time.time()-tic:.2f} sec')
 
+        return hess
+        
     def hessian_exact(self, grad: Tensor, preds: Tensor):
         """
         Hessian diagonal with exact autograd ~ O(data points) (time)
@@ -186,7 +201,7 @@ class XgboostObjective():
         tic = time.time()
         print('Computing Hessian diagonal with exact autograd ... ')
 
-        grad2 = torch.zeros_like(preds)
+        hess = torch.zeros_like(preds)
         
         for i in tqdm(range(len(preds))):
             
@@ -195,11 +210,13 @@ class XgboostObjective():
             e_i[i] = 1.0
             
             # Compute the Hessian-vector product H e_i
-            grad2[i] = torch.autograd.grad(grad, preds, grad_outputs=e_i, retain_graph=True)[0][i]
+            hess[i] = torch.autograd.grad(grad, preds, grad_outputs=e_i, retain_graph=True)[0][i]
 
+        hess = self.regulate_hess(hess) # regulate
+        
         print(f'Took {time.time()-tic:.2f} sec')
         
-        return grad2
+        return hess
         
     def derivatives(self, loss: Tensor, preds: Tensor) -> Tuple[np.ndarray, np.ndarray]:
         """
