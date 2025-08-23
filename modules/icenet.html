@@ -392,7 +392,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#icenet-deep">icenet.deep</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.autogradxgb">icenet.deep.autogradxgb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icenet-deep-autogradxgb">icenet.deep.autogradxgb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-icenet.deep.da">icenet.deep.da</a></li>
@@ -754,94 +754,8 @@ non-negative matrix factorization update for basis components.</p>
 <section id="icenet-deep">
 <h2>icenet.deep<a class="headerlink" href="#icenet-deep" title="Link to this heading">¶</a></h2>
 <p>Deep learning model classes.</p>
-<section id="module-icenet.deep.autogradxgb">
-<span id="icenet-deep-autogradxgb"></span><h3>icenet.deep.autogradxgb<a class="headerlink" href="#module-icenet.deep.autogradxgb" title="Link to this heading">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="icenet.deep.autogradxgb.XgboostObjective">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">XgboostObjective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'train'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten_grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hutchinson'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian_const</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian_gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian_eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.01,</span> <span class="pre">20]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian_slices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/autogradxgb.html#XgboostObjective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.autogradxgb.XgboostObjective" title="Link to this definition">¶</a></dt>
-<dd><p>XGB custom loss driver class with torch (autograd)</p>
-<p>hessian_mode: ‘hutchinson’ (or ‘iterative’) may make the model converge
-significantly faster (or better) than ‘constant’ in some cases.</p>
-<p>N.B. Remember to call manually:</p>
-<p>obj.mode = ‘train’ or obj.mode = ‘eval’ while running the training boost iteration
-loop, otherwise .grad_prev, .preds_prev will get mixed with iterative hessian mode.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>loss_func</strong> – Loss function handle</p></li>
-<li><p><strong>mode</strong> – ‘train’ or ‘eval’, see the comment above</p></li>
-<li><p><strong>flatten_grad</strong> – For vector valued model output [experimental]</p></li>
-<li><p><strong>hessian_mode</strong> – ‘constant’, ‘iterative’, ‘hutchinson’, ‘exact’</p></li>
-<li><p><strong>hessian_const</strong> – Scalar parameter constant ‘hessian_mode’</p></li>
-<li><p><strong>hessian_gamma</strong> – Hessian EMA smoothing parameter for the ‘iterative’ mode</p></li>
-<li><p><strong>hessian_eps</strong> – Hessian estimate denominator regularization for the ‘iterative’</p></li>
-<li><p><strong>hessian_absmax</strong> – Hessian absolute clip parameter for the ‘iterative’</p></li>
-<li><p><strong>hessian_slices</strong> – Hutchinson MC estimator MC slice sample size for the ‘hutchinson’ mode</p></li>
-<li><p><strong>device</strong> – Torch device</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.autogradxgb.XgboostObjective.derivatives">
-<span class="sig-name descname"><span class="pre">derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/icenet/deep/autogradxgb.html#XgboostObjective.derivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.autogradxgb.XgboostObjective.derivatives" title="Link to this definition">¶</a></dt>
-<dd><p>Gradient and Hessian diagonal</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>loss</strong> – loss function values</p></li>
-<li><p><strong>preds</strong> – model predictions</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>gradient vector, hessian diagonal vector as numpy arrays</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.autogradxgb.XgboostObjective.hessian_exact">
-<span class="sig-name descname"><span class="pre">hessian_exact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/autogradxgb.html#XgboostObjective.hessian_exact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.autogradxgb.XgboostObjective.hessian_exact" title="Link to this definition">¶</a></dt>
-<dd><p>Hessian diagonal with exact autograd ~ O(data points) (time)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.autogradxgb.XgboostObjective.hessian_hutchinson">
-<span class="sig-name descname"><span class="pre">hessian_hutchinson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/autogradxgb.html#XgboostObjective.hessian_hutchinson"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.autogradxgb.XgboostObjective.hessian_hutchinson" title="Link to this definition">¶</a></dt>
-<dd><p>Hutchinson MC estimator for the Hessian diagonal ~ O(slices) (time)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.autogradxgb.XgboostObjective.iterative_hessian_update">
-<span class="sig-name descname"><span class="pre">iterative_hessian_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/autogradxgb.html#XgboostObjective.iterative_hessian_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.autogradxgb.XgboostObjective.iterative_hessian_update" title="Link to this definition">¶</a></dt>
-<dd><p>Iterative approximation of the Hessian diagonal using finite differences
-based on a previous boost iteration Hessian (full batch training ~ only one Hessian stored)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>grad</strong> – Current gradient vector</p></li>
-<li><p><strong>preds</strong> – Current prediction vector</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.autogradxgb.XgboostObjective.regulate_hess">
-<span class="sig-name descname"><span class="pre">regulate_hess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/autogradxgb.html#XgboostObjective.regulate_hess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.autogradxgb.XgboostObjective.regulate_hess" title="Link to this definition">¶</a></dt>
-<dd><p>Regulate to be positive definite (H_ii &gt; hessian_min)
-as required by second order gradient descent.</p>
-<p>Do not clip to zero, as that might result in zero denominators
-in the Hessian routines inside xgboost.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="icenet.deep.autogradxgb.XgboostObjective.torch_conversion">
-<span class="sig-name descname"><span class="pre">torch_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DMatrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/deep/autogradxgb.html#XgboostObjective.torch_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.deep.autogradxgb.XgboostObjective.torch_conversion" title="Link to this definition">¶</a></dt>
-<dd><p>Conversion from xgboost.Dmatrix object</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="icenet-deep-autogradxgb">
+<h3>icenet.deep.autogradxgb<a class="headerlink" href="#icenet-deep-autogradxgb" title="Link to this heading">¶</a></h3>
 </section>
 <section id="module-icenet.deep.bnaf">
 <span id="icenet-deep-bnaf"></span><h3>icenet.deep.bnaf<a class="headerlink" href="#module-icenet.deep.bnaf" title="Link to this heading">¶</a></h3>
@@ -4292,6 +4206,47 @@ and values the memory used by the GPU.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.io.infer_precision">
+<span class="sig-name descname"><span class="pre">infer_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">small_spacing_quantile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_pairs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_pairs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_coarse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_fine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_ieee</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#infer_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.infer_precision" title="Link to this definition">¶</a></dt>
+<dd><p>GPT5 driven (briefly tested)</p>
+<p>Estimate effective mantissa (fraction) bits p from a float array whose values are
+on a binary quantization grid (possibly reduced precision). Invariant to affine
+transforms y = a*x + b with a &gt; 0.</p>
+<dl class="simple">
+<dt>Method:</dt><dd><ul class="simple">
+<li><p>Take unique sorted values u (in float64 for stability).</p></li>
+<li><p>Center once with a robust location m = median(u).</p></li>
+<li><p>Spacings: d = u[i+1] - u[i]          (shift-invariant)</p></li>
+<li><p>Centered midpoints: c0 = (u[i]+u[i+1])/2 - m  (shift-invariant)</p></li>
+<li><p>For r in [0,1): z_r = log2(d) - ( floor(log2|c0| + r) - 1 )
+For a binary quantizer with p fraction bits, z_r clusters near -p.</p></li>
+<li><p>Pick r minimizing MAD(z_r), then p = round(-median(z_r)).</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Positive scaling y = a*x shifts both log2(d) and log2|c0| by log2(a); the r-search re-aligns
+exponent bins, leaving z_r (and thus p) unchanged. Centering cancels b.</p></li>
+<li><p>For true full-precision float64 random arrays, you typically won’t recover 52 without
+huge N. This is intended for <em>reduced</em> precision data.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mantissa_bits_eff : int | None
+mad_bits          : float | None
+samples_used      : int
+pairs_used        : int
+notes             : str
+debug             : dict (if return_debug)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict with keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.io.make_hash_sha256_file">
 <span class="sig-name descname"><span class="pre">make_hash_sha256_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#make_hash_sha256_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.make_hash_sha256_file" title="Link to this definition">¶</a></dt>
 <dd><p>Create SHA256 hash from a file</p>
@@ -4315,6 +4270,29 @@ and values the memory used by the GPU.</p>
 <dt class="sig sig-object py" id="icenet.tools.io.make_hashable">
 <span class="sig-name descname"><span class="pre">make_hashable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">o</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/io.html#make_hashable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.make_hashable" title="Link to this definition">¶</a></dt>
 <dd><p>Turn a python object into hashable type (recursively)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icenet.tools.io.optimal_dequantize">
+<span class="sig-name descname"><span class="pre">optimal_dequantize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'median'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'min_nonzero'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'min_nonzero'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Generator</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/icenet/tools/io.html#optimal_dequantize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.io.optimal_dequantize" title="Link to this definition">¶</a></dt>
+<dd><p>Optimal dequantization based on effective mantissa bits and a uniform
+quantization model. Adds heteroscedastic Gaussian noise with relative STD.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – float array</p></li>
+<li><p><strong>p</strong> – effective mantissa bits</p></li>
+<li><p><strong>scale</strong> – extra multiplier for the dequantization strength</p></li>
+<li><p><strong>zero_mode</strong> – how to set the <em>reference magnitude</em> used for x == 0 elements:
+- “median”:     use median(<a href="#id7"><span class="problematic" id="id8">|x_nonzero|</span></a>)
+- “min_nonzero”:use min(<a href="#id9"><span class="problematic" id="id10">|x_nonzero|</span></a>) (more conservative near zero)</p></li>
+<li><p><strong>rng</strong> – optional numpy Generator (for reproducibility)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dequantized array (same shape as x).</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -4705,7 +4683,7 @@ other dimensions evaluated at zero=(0,0,…0) (thus z-normalized with 0-mean is 
 <li><p><strong>ids</strong> – Variable names (list of length D)</p></li>
 <li><p><strong>weights</strong> – Event weights</p></li>
 <li><p><strong>y</strong> – Class labels per event (list of length N)</p></li>
-<li><p><strong>round_threshold</strong> – Correlation matrix <a href="#id7"><span class="problematic" id="id8">|C|</span></a> &lt; threshold to set matrix elements to zero</p></li>
+<li><p><strong>round_threshold</strong> – Correlation matrix <a href="#id11"><span class="problematic" id="id12">|C|</span></a> &lt; threshold to set matrix elements to zero</p></li>
 <li><p><strong>targetdir</strong> – Output plot directory</p></li>
 <li><p><strong>colorbar</strong> – Colorbar on the plot</p></li>
 </ul>
@@ -4847,7 +4825,7 @@ ax:  figure axis</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – array (n x dim)</p></li>
-<li><p><strong>ids</strong> – variable names (dim)</p></li>
+<li><p><strong>ids</strong> – variable names list with len = dim</p></li>
 <li><p><strong>W</strong> – event weights</p></li>
 <li><p><strong>exclude_vals</strong> – exclude special values from the stats</p></li>
 </ul>
@@ -5135,7 +5113,14 @@ pdf     : computed pdfs</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="icenet.tools.reweight.map_xyw">
 <span class="sig-name descname"><span class="pre">map_xyw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icenet/tools/reweight.html#map_xyw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icenet.tools.reweight.map_xyw" title="Link to this definition">¶</a></dt>
-<dd><p>For AIRW helper</p>
+<dd><dl class="simple">
+<dt>Make a 2-class slice (c vs reference_class) and reweight so that:</dt><dd><ul class="simple">
+<li><p>classes are balanced (each has half of the total <em>effective</em> mass), and</p></li>
+<li><p>the total sum of weights equals the total number of selected events (N).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Rows are not duplicated/dropped; only weights are rescaled.</p>
 </dd></dl>
 
 <dl class="py function">

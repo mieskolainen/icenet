@@ -388,7 +388,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.autogradxgb">icenet.deep.autogradxgb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-autogradxgb">icenet.deep.autogradxgb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
@@ -532,7 +532,7 @@
 
 <span class="c1"># icenet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">stx</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">io</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w"> </span><span class="kn">import</span> <span class="n">autogradxgb</span><span class="p">,</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">tempscale</span><span class="p">,</span> <span class="n">deeptools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w"> </span><span class="kn">import</span> <span class="n">iceboostgrad</span><span class="p">,</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">losstools</span><span class="p">,</span> <span class="n">tempscale</span><span class="p">,</span> <span class="n">deeptools</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">icefit</span><span class="w"> </span><span class="kn">import</span> <span class="n">mine</span><span class="p">,</span> <span class="n">cortools</span>
 
 <span class="c1"># ------------------------------------------</span>
@@ -1131,9 +1131,9 @@
         <span class="c1">## Hessian diagonal treatment</span>
         
         <span class="c1"># Default values</span>
-        <span class="n">hessian_mode</span>   <span class="o">=</span> <span class="s1">&#39;iterative&#39;</span>
+        <span class="n">hessian_mode</span>   <span class="o">=</span> <span class="s1">&#39;hutchinson&#39;</span>
         <span class="n">hessian_const</span>  <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="n">hessian_gamma</span>  <span class="o">=</span> <span class="mf">0.9</span>
+        <span class="n">hessian_beta</span>   <span class="o">=</span> <span class="mf">0.9</span>
         <span class="n">hessian_slices</span> <span class="o">=</span> <span class="mi">10</span>
         
         <span class="c1"># E.g. &#39;hessian:constant:1.0&#39;, &#39;hessian:iterative:0.9&#39;, &#39;hessian:hutchinson:10&#39; or &#39;hessian:exact&#39;</span>
@@ -1146,18 +1146,18 @@
                     <span class="n">hessian_const</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strs</span><span class="p">[</span><span class="n">strs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;hessian&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
                 
                 <span class="k">elif</span> <span class="n">hessian_mode</span> <span class="o">==</span> <span class="s1">&#39;iterative&#39;</span><span class="p">:</span>
-                    <span class="n">hessian_gamma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strs</span><span class="p">[</span><span class="n">strs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;hessian&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">hessian_beta</span>  <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strs</span><span class="p">[</span><span class="n">strs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;hessian&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
             
                 <span class="k">elif</span> <span class="n">hessian_mode</span> <span class="o">==</span> <span class="s1">&#39;hutchinson&#39;</span><span class="p">:</span>
                     <span class="n">hessian_slices</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strs</span><span class="p">[</span><span class="n">strs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;hessian&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using default Hessian estimator parameters&#39;</span><span class="p">)</span>
         
-        <span class="n">autogradObj</span> <span class="o">=</span> <span class="n">autogradxgb</span><span class="o">.</span><span class="n">XgboostObjective</span><span class="p">(</span>
+        <span class="n">autogradObj</span> <span class="o">=</span> <span class="n">iceboostgrad</span><span class="o">.</span><span class="n">AutogradObjective</span><span class="p">(</span>
             <span class="n">loss_func</span>      <span class="o">=</span> <span class="n">loss_func</span><span class="p">,</span>
             <span class="n">hessian_mode</span>   <span class="o">=</span> <span class="n">hessian_mode</span><span class="p">,</span>
             <span class="n">hessian_const</span>  <span class="o">=</span> <span class="n">hessian_const</span><span class="p">,</span>
-            <span class="n">hessian_gamma</span>  <span class="o">=</span> <span class="n">hessian_gamma</span><span class="p">,</span>
+            <span class="n">hessian_beta</span>   <span class="o">=</span> <span class="n">hessian_beta</span><span class="p">,</span>
             <span class="n">hessian_slices</span> <span class="o">=</span> <span class="n">hessian_slices</span><span class="p">,</span>
             <span class="n">device</span>         <span class="o">=</span> <span class="n">device</span>
         <span class="p">)</span>

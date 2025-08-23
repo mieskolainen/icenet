@@ -388,7 +388,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.autogradxgb">icenet.deep.autogradxgb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-autogradxgb">icenet.deep.autogradxgb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
@@ -518,11 +518,13 @@
 <span class="c1">#</span>
 <span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">icenet.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">prints</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">icenet.deep</span><span class="w">  </span><span class="kn">import</span> <span class="n">iceboost</span><span class="p">,</span> <span class="n">predict</span>
@@ -788,27 +790,39 @@
 <a class="viewcode-back" href="../../../modules/icenet.html#icenet.tools.reweight.map_xyw">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">map_xyw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="nb">vars</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">reference_class</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    For AIRW helper</span>
+<span class="sd">    Make a 2-class slice (c vs reference_class) and reweight so that:</span>
+<span class="sd">      - classes are balanced (each has half of the total *effective* mass), and</span>
+<span class="sd">      - the total sum of weights equals the total number of selected events (N).</span>
+
+<span class="sd">    Rows are not duplicated/dropped; only weights are rescaled.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Select the two classes</span>
+    <span class="n">sel</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">reference_class</span><span class="p">)</span>
+    <span class="n">new_data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">sel</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">sel</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="n">sel</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="nb">vars</span><span class="p">)</span>
+
+    <span class="c1"># Relabel to {0,1}: 0 -&gt; class c, 1 -&gt; reference_class</span>
+    <span class="n">y_new</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">reference_class</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y_new</span>
+
+    <span class="c1"># Target total per class</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">target_per_class</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_new</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_new</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span>
     
-    <span class="c1"># Source and Target collected</span>
-    <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">reference_class</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-12</span>
     
-    <span class="n">new_data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">IceXYW</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">ids</span><span class="o">=</span><span class="nb">vars</span><span class="p">)</span>
-    
-    <span class="c1"># ----------------------------</span>
-    <span class="c1"># Change labels to (0,1)</span>
-    <span class="n">y_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">y_new</span><span class="p">[</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">y_new</span><span class="p">[</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">reference_class</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>                
-    
-    <span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y_new</span> <span class="c1"># !</span>
-    <span class="c1"># ----------------------------</span>
-    
-    <span class="c1"># Equalize class balance for the training</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_new</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
-        <span class="n">new_data</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+            <span class="k">continue</span>  <span class="c1"># no samples of this class in the slice</span>
+        
+        <span class="n">class_sum</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">new_data</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">mask</span><span class="p">]))</span>
+        
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">class_sum</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">:</span>
+            <span class="n">class_sum</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span>
+
+        <span class="c1"># Rescale this class to the target</span>
+        <span class="n">new_data</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">target_per_class</span> <span class="o">/</span> <span class="n">class_sum</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">new_data</span></div>
 
@@ -848,9 +862,57 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Training N-dim reweighting&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;x.shape = </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;variables = </span><span class="si">{</span><span class="n">variables</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
-    <span class="c1"># Train model per class pair</span>
+    <span class="c1"># Train model per class pair (will skip if we use this function to evaluate)</span>
     <span class="k">if</span> <span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training mode:&#39;</span><span class="p">)</span>
+        
+        <span class="n">aux</span><span class="o">.</span><span class="n">makedir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">],</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">))</span>
+        
+        <span class="c1"># Training</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training sample RAW weights:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">],</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">,</span> <span class="s1">&#39;stats_train_input_weights_raw.log&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">print_weights</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training sample RAW data:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;stats_train_input_data_raw.log&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">print_variables</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
+        
+        <span class="c1"># Validation</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Validation sample RAW weights:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">],</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">,</span> <span class="s1">&#39;stats_validate_input_weights_raw.log&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">print_weights</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">w_val</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_val</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Validation sample RAW data:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;stats_validate_input_data_raw.log&#39;</span><span class="p">)</span>
+        <span class="n">prints</span><span class="o">.</span><span class="n">print_variables</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">w_val</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
+        
+        <span class="c1"># --------------------------------------------------</span>
+        <span class="c1"># Optimal Dequantization</span>
+        
+        <span class="k">if</span> <span class="s1">&#39;optimal_dequantize&#39;</span> <span class="ow">in</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;AIRW_param&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;AIRW_param&#39;</span><span class="p">][</span><span class="s1">&#39;optimal_dequantize&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Optimal Dequantization for training data based on mantissa bit depth&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+                
+                <span class="n">out</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">infer_precision</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">x</span><span class="p">[:,</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">p</span>   <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mantissa_bits_eff&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">variables</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;infer_precision failed to return mantissa_bits_eff for variable </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> -- skip&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">scale</span>  <span class="o">=</span> <span class="n">diff_args</span><span class="p">[</span><span class="s1">&#39;AIRW_param&#39;</span><span class="p">][</span><span class="s1">&#39;optimal_dequantize&#39;</span><span class="p">]</span> <span class="c1"># Additional scale boost</span>
+                    <span class="n">x</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">optimal_dequantize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training data after dequantization:&#39;</span><span class="p">)</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;stats_train_input_data_dequant.log&#39;</span><span class="p">)</span>
+            <span class="n">prints</span><span class="o">.</span><span class="n">print_variables</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
+        
+        <span class="c1"># Here one could add Z-standardization (but not needed with xgboost)</span>
         
         <span class="n">pdf</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="n">ID</span><span class="p">,</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;vars&#39;</span><span class="p">:</span> <span class="n">variables</span><span class="p">}</span>
         
@@ -859,6 +921,16 @@
                 
                 <span class="n">data_trn</span> <span class="o">=</span> <span class="n">map_xyw</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">)</span> 
                 <span class="n">data_val</span> <span class="o">=</span> <span class="n">map_xyw</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_val</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w_val</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">reference_class</span><span class="o">=</span><span class="n">reference_class</span><span class="p">)</span>
+                
+                <span class="c1"># Train</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Training sample weights going into training:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+                <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">],</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">,</span> <span class="s1">&#39;stats_train_input_weights.log&#39;</span><span class="p">)</span>
+                <span class="n">prints</span><span class="o">.</span><span class="n">print_weights</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">data_trn</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
+                
+                <span class="c1"># Validate</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Validation sample weights going into training:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+                <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;plotdir&quot;</span><span class="p">],</span> <span class="s1">&#39;train/AIRW_S1&#39;</span><span class="p">,</span> <span class="s1">&#39;stats_validate_input_weights.log&#39;</span><span class="p">)</span>
+                <span class="n">prints</span><span class="o">.</span><span class="n">print_weights</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">data_val</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">data_val</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
                 
                 <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data_trn&#39;</span><span class="p">:</span>    <span class="n">data_trn</span><span class="p">,</span>
                           <span class="s1">&#39;data_val&#39;</span><span class="p">:</span>    <span class="n">data_val</span><span class="p">,</span>

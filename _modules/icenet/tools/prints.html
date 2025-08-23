@@ -388,7 +388,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.autogradxgb">icenet.deep.autogradxgb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#icenet-deep-autogradxgb">icenet.deep.autogradxgb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
@@ -642,7 +642,9 @@
                        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="si">:</span><span class="s1">0.3E</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="p">])</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    
     <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     
@@ -666,7 +668,7 @@
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        X            : array (n x dim)</span>
-<span class="sd">        ids          : variable names (dim)</span>
+<span class="sd">        ids          : variable names list with len = dim</span>
 <span class="sd">        W            : event weights</span>
 <span class="sd">        exclude_vals : exclude special values from the stats</span>
 <span class="sd">    </span>
@@ -677,31 +679,38 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Excluding values: </span><span class="si">{</span><span class="n">exclude_vals</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
-    <span class="n">table</span> <span class="o">=</span> <span class="n">PrettyTable</span><span class="p">([</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="s2">&quot;variable&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">,</span> <span class="s2">&quot;Q5&quot;</span><span class="p">,</span> <span class="s2">&quot;med&quot;</span><span class="p">,</span> <span class="s2">&quot;Q95&quot;</span><span class="p">,</span> <span class="s2">&quot;Q99&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;# unique&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;#Inf&quot;</span><span class="p">,</span> <span class="s2">&quot;#NaN&quot;</span><span class="p">])</span> 
+    <span class="n">table</span> <span class="o">=</span> <span class="n">PrettyTable</span><span class="p">([</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="s2">&quot;variable&quot;</span><span class="p">,</span>
+                         <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">,</span> <span class="s2">&quot;Q5&quot;</span><span class="p">,</span> <span class="s2">&quot;med&quot;</span><span class="p">,</span> <span class="s2">&quot;Q95&quot;</span><span class="p">,</span> <span class="s2">&quot;Q99&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+                         <span class="s2">&quot;#unique&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span>
+                         <span class="s2">&quot;#Inf&quot;</span><span class="p">,</span> <span class="s2">&quot;#NaN&quot;</span><span class="p">,</span> <span class="s2">&quot;eff. mantissa (bits)&quot;</span><span class="p">])</span> 
     
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">x</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-            
+
             <span class="k">if</span> <span class="n">exclude_vals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># Exclude special values    </span>
+                <span class="c1"># Exclude special values</span>
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exclude_vals</span><span class="p">)):</span>
                     <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="n">exclude_vals</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
 
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
 
             <span class="n">prc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
-            
+
             <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">mean</span><span class="p">,</span><span class="n">std</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">weighted_avg_and_std</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">W</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">mean</span><span class="p">,</span><span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> 
+                <span class="n">mean</span><span class="p">,</span><span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="n">num_unique</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
             
             <span class="n">isinf</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
             <span class="n">isnan</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
+            <span class="c1"># Try to find the number of effective mantissa bits</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">infer_precision</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">mantissa_bits_eff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s1">&#39;mantissa_bits_eff&#39;</span><span class="p">]</span>
+            
             <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">10.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
@@ -712,8 +721,11 @@
                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prc</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="si">:</span><span class="s1">10.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prc</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="si">:</span><span class="s1">10.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">num_unique</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s1">10.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">std</span><span class="si">:</span><span class="s1">10.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">isinf</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">isnan</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s1">10.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">std</span><span class="si">:</span><span class="s1">10.2E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">isinf</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">isnan</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                           <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mantissa_bits_eff</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
         
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
