@@ -1,0 +1,1271 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icefit.transport &mdash; icenet alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/documentation_options.js?v=1f169f65"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#preliminaries-conda-installation">Preliminaries: Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#pre-installed-cuda-paths-obsolete">Pre-installed CUDA paths (OBSOLETE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#automated-setup">Automated setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#initialize-the-environment">Initialize the environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#possible-problems">Possible problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#show-installation-paths-of-binaries">Show installation paths of binaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#gpu-support-commands">GPU-support commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#htcondor-gpu-job-submission">HTCondor GPU job submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#conda-virtual-environment-commands">Conda virtual environment commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/installation.html#c-library-versions">C-library versions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#basic-design-principles">Basic design principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#yaml-configuration-files">YAML-configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#folder-structure">Folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#ai-algorithms-and-models">AI-algorithms and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#advanced-ml-training-technology">Advanced ML-training technology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#automated-selectors-and-combinatorics-for-distributions">Automated selectors and combinatorics for distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/introduction.html#sun-grid-engine-sge-htcondor-execution">Sun Grid Engine (SGE) / HTCondor execution</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../notes/markup.html">Markup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icebrem.html">icebrem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrem.html#module-icebrem.common">icebrem.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrem.html#icebrem.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrem.html#icebrem.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrem.html#icebrem.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icebrk.html">icebrk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#icebrk-common">icebrk.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.cutstats">icebrk.cutstats</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.cutstats.apply_cuts"><code class="docutils literal notranslate"><span class="pre">apply_cuts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.cutstats.collect_info_stats"><code class="docutils literal notranslate"><span class="pre">collect_info_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.cutstats.collect_mcinfo_stats"><code class="docutils literal notranslate"><span class="pre">collect_mcinfo_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.cutstats.init_stat_objects"><code class="docutils literal notranslate"><span class="pre">init_stat_objects()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.cutstats.triplet_cuts"><code class="docutils literal notranslate"><span class="pre">triplet_cuts()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.fasthistos">icebrk.fasthistos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.fasthistos.initialize"><code class="docutils literal notranslate"><span class="pre">initialize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.features">icebrk.features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.features.construct_new_branches"><code class="docutils literal notranslate"><span class="pre">construct_new_branches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.features.generate_feature_names"><code class="docutils literal notranslate"><span class="pre">generate_feature_names()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.features.getdimension"><code class="docutils literal notranslate"><span class="pre">getdimension()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.histos">icebrk.histos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.histos.calc_MC_observables"><code class="docutils literal notranslate"><span class="pre">calc_MC_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.histos.calc_batch_MC_observables"><code class="docutils literal notranslate"><span class="pre">calc_batch_MC_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.histos.calc_batch_observables"><code class="docutils literal notranslate"><span class="pre">calc_batch_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.histos.calc_observables"><code class="docutils literal notranslate"><span class="pre">calc_observables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.histos.pickle_files"><code class="docutils literal notranslate"><span class="pre">pickle_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.loop">icebrk.loop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.loop.hdf5_append"><code class="docutils literal notranslate"><span class="pre">hdf5_append()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.loop.hdf5_write_handles"><code class="docutils literal notranslate"><span class="pre">hdf5_write_handles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.loop.hist_flush"><code class="docutils literal notranslate"><span class="pre">hist_flush()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.loop.initarrays"><code class="docutils literal notranslate"><span class="pre">initarrays()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.loop.poweranalysis"><code class="docutils literal notranslate"><span class="pre">poweranalysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.loop.process"><code class="docutils literal notranslate"><span class="pre">process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.PDG">icebrk.PDG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icebrk.html#module-icebrk.tools">icebrk.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.construct_MC_tree"><code class="docutils literal notranslate"><span class="pre">construct_MC_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.construct_MC_truth"><code class="docutils literal notranslate"><span class="pre">construct_MC_truth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.construct_input_vec"><code class="docutils literal notranslate"><span class="pre">construct_input_vec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.construct_kinematics"><code class="docutils literal notranslate"><span class="pre">construct_kinematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.construct_output_vec"><code class="docutils literal notranslate"><span class="pre">construct_output_vec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.deltar_3"><code class="docutils literal notranslate"><span class="pre">deltar_3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.find_connected_triplets"><code class="docutils literal notranslate"><span class="pre">find_connected_triplets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.get_first_indices"><code class="docutils literal notranslate"><span class="pre">get_first_indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.index_of_first_signal"><code class="docutils literal notranslate"><span class="pre">index_of_first_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.index_of_last_signal"><code class="docutils literal notranslate"><span class="pre">index_of_last_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icebrk.html#icebrk.tools.print_MC_event"><code class="docutils literal notranslate"><span class="pre">print_MC_event()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icedqcd.html">icedqcd</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.common">icedqcd.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.deploy">icedqcd.deploy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.create_ID_label"><code class="docutils literal notranslate"><span class="pre">create_ID_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.f2s"><code class="docutils literal notranslate"><span class="pre">f2s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.generate_cartesian_param"><code class="docutils literal notranslate"><span class="pre">generate_cartesian_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.get_predictor"><code class="docutils literal notranslate"><span class="pre">get_predictor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.process_data"><code class="docutils literal notranslate"><span class="pre">process_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.deploy.zscore_normalization"><code class="docutils literal notranslate"><span class="pre">zscore_normalization()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.graphio">icedqcd.graphio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.limits">icedqcd.limits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.create_limit_plots_vector"><code class="docutils literal notranslate"><span class="pre">create_limit_plots_vector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.create_limit_tables"><code class="docutils literal notranslate"><span class="pre">create_limit_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.find_limits"><code class="docutils literal notranslate"><span class="pre">find_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.limit_wrapper_dict"><code class="docutils literal notranslate"><span class="pre">limit_wrapper_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.plot_brazil"><code class="docutils literal notranslate"><span class="pre">plot_brazil()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.limits.run_limits_vector"><code class="docutils literal notranslate"><span class="pre">run_limits_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icedqcd.html#module-icedqcd.optimize">icedqcd.optimize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.find_filter"><code class="docutils literal notranslate"><span class="pre">find_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.func_binormal"><code class="docutils literal notranslate"><span class="pre">func_binormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.func_binormal2"><code class="docutils literal notranslate"><span class="pre">func_binormal2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.optimize_selection"><code class="docutils literal notranslate"><span class="pre">optimize_selection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icedqcd.html#icedqcd.optimize.plot_ROC_fit"><code class="docutils literal notranslate"><span class="pre">plot_ROC_fit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icefit.html">icefit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.abcd">icefit.abcd</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.abcd.ABCD_2NLL"><code class="docutils literal notranslate"><span class="pre">ABCD_2NLL()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.abcd.ABCD_eq"><code class="docutils literal notranslate"><span class="pre">ABCD_eq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.abcd.ABCD_err"><code class="docutils literal notranslate"><span class="pre">ABCD_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.abcd.test_abcd"><code class="docutils literal notranslate"><span class="pre">test_abcd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.commutator">icefit.commutator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.crv"><code class="docutils literal notranslate"><span class="pre">crv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.selection_A"><code class="docutils literal notranslate"><span class="pre">selection_A()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.commutator.selection_B"><code class="docutils literal notranslate"><span class="pre">selection_B()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.cortools">icefit.cortools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.H_score"><code class="docutils literal notranslate"><span class="pre">H_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.I_score"><code class="docutils literal notranslate"><span class="pre">I_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.bw2bins"><code class="docutils literal notranslate"><span class="pre">bw2bins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.corrcoeff_weighted_torch"><code class="docutils literal notranslate"><span class="pre">corrcoeff_weighted_torch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.distance_corr"><code class="docutils literal notranslate"><span class="pre">distance_corr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.distance_corr_torch"><code class="docutils literal notranslate"><span class="pre">distance_corr_torch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.freedman_diaconis_bin"><code class="docutils literal notranslate"><span class="pre">freedman_diaconis_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.gaussian_mutual_information"><code class="docutils literal notranslate"><span class="pre">gaussian_mutual_information()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.hacine_entropy_bin"><code class="docutils literal notranslate"><span class="pre">hacine_entropy_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.hacine_joint_entropy_bin"><code class="docutils literal notranslate"><span class="pre">hacine_joint_entropy_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.mutual_information"><code class="docutils literal notranslate"><span class="pre">mutual_information()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.optbins"><code class="docutils literal notranslate"><span class="pre">optbins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.optbins2d"><code class="docutils literal notranslate"><span class="pre">optbins2d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.pearson_corr"><code class="docutils literal notranslate"><span class="pre">pearson_corr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.percentile_per_dim"><code class="docutils literal notranslate"><span class="pre">percentile_per_dim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.prc_CI"><code class="docutils literal notranslate"><span class="pre">prc_CI()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.scott_bin"><code class="docutils literal notranslate"><span class="pre">scott_bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.test_constant"><code class="docutils literal notranslate"><span class="pre">test_constant()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.cortools.test_gaussian"><code class="docutils literal notranslate"><span class="pre">test_gaussian()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.dequantize">icefit.dequantize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.U"><code class="docutils literal notranslate"><span class="pre">U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.compute_ind"><code class="docutils literal notranslate"><span class="pre">compute_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.construct_icdf"><code class="docutils literal notranslate"><span class="pre">construct_icdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.fast_loop"><code class="docutils literal notranslate"><span class="pre">fast_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.iDQF"><code class="docutils literal notranslate"><span class="pre">iDQF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.dequantize.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.em">icefit.em</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.EM_frac"><code class="docutils literal notranslate"><span class="pre">EM_frac()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.gausspdf"><code class="docutils literal notranslate"><span class="pre">gausspdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.mixture_nll"><code class="docutils literal notranslate"><span class="pre">mixture_nll()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.em.test_EM"><code class="docutils literal notranslate"><span class="pre">test_EM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.iceboard">icefit.iceboard</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.iceboard.combine_hparam"><code class="docutils literal notranslate"><span class="pre">combine_hparam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.iceboard.create_symlink"><code class="docutils literal notranslate"><span class="pre">create_symlink()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.iceboard.extract_variable_values"><code class="docutils literal notranslate"><span class="pre">extract_variable_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.iceboard.process_folders"><code class="docutils literal notranslate"><span class="pre">process_folders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.iceboard.read_tensorboard_data"><code class="docutils literal notranslate"><span class="pre">read_tensorboard_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.icelimit">icefit.icelimit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.CL_single"><code class="docutils literal notranslate"><span class="pre">CL_single()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.CL_single_asymptotic"><code class="docutils literal notranslate"><span class="pre">CL_single_asymptotic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.CL_single_compute"><code class="docutils literal notranslate"><span class="pre">CL_single_compute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.LL_splusb"><code class="docutils literal notranslate"><span class="pre">LL_splusb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.asymptotic_uncertainty_CLs"><code class="docutils literal notranslate"><span class="pre">asymptotic_uncertainty_CLs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.convolve_systematics"><code class="docutils literal notranslate"><span class="pre">convolve_systematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.icelimit.test_limits_unit_test"><code class="docutils literal notranslate"><span class="pre">test_limits_unit_test()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.jacobian">icefit.jacobian</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.jacobian.get_full_hessian"><code class="docutils literal notranslate"><span class="pre">get_full_hessian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.jacobian.get_gradient"><code class="docutils literal notranslate"><span class="pre">get_gradient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.jacobian.get_jacobian"><code class="docutils literal notranslate"><span class="pre">get_jacobian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.jacobian.observed_fisher_info"><code class="docutils literal notranslate"><span class="pre">observed_fisher_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.jacobian.test_dimension_interfaces"><code class="docutils literal notranslate"><span class="pre">test_dimension_interfaces()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.jacobian.test_hessians"><code class="docutils literal notranslate"><span class="pre">test_hessians()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.jacobian.test_jacobians"><code class="docutils literal notranslate"><span class="pre">test_jacobians()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.lognormal">icefit.lognormal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.create_label"><code class="docutils literal notranslate"><span class="pre">create_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.lognormal_param"><code class="docutils literal notranslate"><span class="pre">lognormal_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.rand_lognormal"><code class="docutils literal notranslate"><span class="pre">rand_lognormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.rand_powexp"><code class="docutils literal notranslate"><span class="pre">rand_powexp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.test_accuracy"><code class="docutils literal notranslate"><span class="pre">test_accuracy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.lognormal.test_lognormal"><code class="docutils literal notranslate"><span class="pre">test_lognormal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mantissa">icefit.mantissa</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.bits2digits"><code class="docutils literal notranslate"><span class="pre">bits2digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.digits2bits"><code class="docutils literal notranslate"><span class="pre">digits2bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.plots"><code class="docutils literal notranslate"><span class="pre">plots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.reduce_mantissa_bits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_bits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.reduce_mantissa_digits"><code class="docutils literal notranslate"><span class="pre">reduce_mantissa_digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mantissa.round_sig"><code class="docutils literal notranslate"><span class="pre">round_sig()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.mine">icefit.mine</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.MINENet"><code class="docutils literal notranslate"><span class="pre">MINENet</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_mine"><code class="docutils literal notranslate"><span class="pre">apply_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.apply_mine_batched"><code class="docutils literal notranslate"><span class="pre">apply_mine_batched()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.compute_mine"><code class="docutils literal notranslate"><span class="pre">compute_mine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.estimate"><code class="docutils literal notranslate"><span class="pre">estimate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.sample_batch"><code class="docutils literal notranslate"><span class="pre">sample_batch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.mine.train_loop"><code class="docutils literal notranslate"><span class="pre">train_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.peakfit">icefit.peakfit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.fit_and_analyze"><code class="docutils literal notranslate"><span class="pre">fit_and_analyze()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.fit_task"><code class="docutils literal notranslate"><span class="pre">fit_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.fit_task_multi"><code class="docutils literal notranslate"><span class="pre">fit_task_multi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.get_rootfiles_jpsi"><code class="docutils literal notranslate"><span class="pre">get_rootfiles_jpsi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.group_systematics"><code class="docutils literal notranslate"><span class="pre">group_systematics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.run_jpsi_peakfit"><code class="docutils literal notranslate"><span class="pre">run_jpsi_peakfit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.rezip">icefit.rezip</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.rezip.compress_parquet"><code class="docutils literal notranslate"><span class="pre">compress_parquet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.rezip.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.rezip.split_parquet"><code class="docutils literal notranslate"><span class="pre">split_parquet()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.score">icefit.score</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.score.logL"><code class="docutils literal notranslate"><span class="pre">logL()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.statstools">icefit.statstools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.ADS"><code class="docutils literal notranslate"><span class="pre">ADS()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.analytical_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">analytical_extreme_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.clopper_pearson_err"><code class="docutils literal notranslate"><span class="pre">clopper_pearson_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.columnar_mask_efficiency"><code class="docutils literal notranslate"><span class="pre">columnar_mask_efficiency()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.cormat2covmat"><code class="docutils literal notranslate"><span class="pre">cormat2covmat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.correlation_matrix"><code class="docutils literal notranslate"><span class="pre">correlation_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.covmat2corrmat"><code class="docutils literal notranslate"><span class="pre">covmat2corrmat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.error_on_mu"><code class="docutils literal notranslate"><span class="pre">error_on_mu()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.error_on_std"><code class="docutils literal notranslate"><span class="pre">error_on_std()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.geom_mean_2D"><code class="docutils literal notranslate"><span class="pre">geom_mean_2D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.mc_extreme_multivariate_npdf"><code class="docutils literal notranslate"><span class="pre">mc_extreme_multivariate_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.mc_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">mc_extreme_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.p2zscore"><code class="docutils literal notranslate"><span class="pre">p2zscore()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.poisson_ratio"><code class="docutils literal notranslate"><span class="pre">poisson_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.poisson_tail"><code class="docutils literal notranslate"><span class="pre">poisson_tail()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.prod_eprop"><code class="docutils literal notranslate"><span class="pre">prod_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.ratio_eprop"><code class="docutils literal notranslate"><span class="pre">ratio_eprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_efficiency_ratio"><code class="docutils literal notranslate"><span class="pre">test_efficiency_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_extreme_npdf"><code class="docutils literal notranslate"><span class="pre">test_extreme_npdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.test_ratios"><code class="docutils literal notranslate"><span class="pre">test_ratios()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.weighted_binomial_err"><code class="docutils literal notranslate"><span class="pre">weighted_binomial_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.statstools.welch_ttest"><code class="docutils literal notranslate"><span class="pre">welch_ttest()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icefit.html#module-icefit.transport">icefit.transport</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.qr_projections"><code class="docutils literal notranslate"><span class="pre">qr_projections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.quantile_function"><code class="docutils literal notranslate"><span class="pre">quantile_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.rand_projections"><code class="docutils literal notranslate"><span class="pre">rand_projections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.sliced_wasserstein_distance"><code class="docutils literal notranslate"><span class="pre">sliced_wasserstein_distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.test_1D"><code class="docutils literal notranslate"><span class="pre">test_1D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.test_swd"><code class="docutils literal notranslate"><span class="pre">test_swd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.test_swd_advanced"><code class="docutils literal notranslate"><span class="pre">test_swd_advanced()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icefit.html#icefit.transport.wasserstein_distance_1D"><code class="docutils literal notranslate"><span class="pre">wasserstein_distance_1D()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehgcal.html">icehgcal</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icehgcal.html#module-icehgcal.common">icehgcal.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.common.process_tracklet_data"><code class="docutils literal notranslate"><span class="pre">process_tracklet_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.common.read_data_tracklet"><code class="docutils literal notranslate"><span class="pre">read_data_tracklet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icehgcal.html#module-icehgcal.graphio">icehgcal.graphio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.graphio.compute_edge_attr"><code class="docutils literal notranslate"><span class="pre">compute_edge_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.graphio.get_node_features"><code class="docutils literal notranslate"><span class="pre">get_node_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.graphio.parse_graph_data_candidate"><code class="docutils literal notranslate"><span class="pre">parse_graph_data_candidate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.graphio.parse_graph_data_trackster"><code class="docutils literal notranslate"><span class="pre">parse_graph_data_trackster()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icehgcal.html#module-icehgcal.preprocess">icehgcal.preprocess</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.preprocess.compute_edges"><code class="docutils literal notranslate"><span class="pre">compute_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.preprocess.create_trackster_data"><code class="docutils literal notranslate"><span class="pre">create_trackster_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehgcal.html#icehgcal.preprocess.event_loop"><code class="docutils literal notranslate"><span class="pre">event_loop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icehnl.html">icehnl</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icehnl.html#module-icehnl.common">icehnl.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehnl.html#icehnl.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icehnl.html#icehnl.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceid.html">iceid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceid.html#module-iceid.common">iceid.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceid.html#iceid.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceid.html#iceid.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceid.html#module-iceid.graphio">iceid.graphio</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceid.html#iceid.graphio.get_node_features"><code class="docutils literal notranslate"><span class="pre">get_node_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceid.html#iceid.graphio.parse_graph_data"><code class="docutils literal notranslate"><span class="pre">parse_graph_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceid.html#iceid.graphio.parse_tensor_data"><code class="docutils literal notranslate"><span class="pre">parse_tensor_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icemc.html">icemc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icemc.html#module-icemc.analyzehepmc">icemc.analyzehepmc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.beta"><code class="docutils literal notranslate"><span class="pre">beta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.compute_stats"><code class="docutils literal notranslate"><span class="pre">compute_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.event_processor_contact_topology"><code class="docutils literal notranslate"><span class="pre">event_processor_contact_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.event_processor_sequential_topology"><code class="docutils literal notranslate"><span class="pre">event_processor_sequential_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.gamma"><code class="docutils literal notranslate"><span class="pre">gamma()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.pdf_merger"><code class="docutils literal notranslate"><span class="pre">pdf_merger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.wrapper_contact_topology"><code class="docutils literal notranslate"><span class="pre">wrapper_contact_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#icemc.analyzehepmc.wrapper_sequential_topology"><code class="docutils literal notranslate"><span class="pre">wrapper_sequential_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icemc.html#module-icemc.icemc">icemc.icemc</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icenet.html">icenet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-algo">icenet.algo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.analytic">icenet.algo.analytic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.flr">icenet.algo.flr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.algo.nmf">icenet.algo.nmf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-deep">icenet.deep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.daux">icenet.deep.daux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.fastkan">icenet.deep.fastkan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.flows">icenet.deep.flows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.iceboostgrad">icenet.deep.iceboostgrad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.lzmlp">icenet.deep.lzmlp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.mlgr">icenet.deep.mlgr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.rflow">icenet.deep.rflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.splines">icenet.deep.splines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-optim">icenet.optim</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.adam">icenet.optim.adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.adamax">icenet.optim.adamax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.optim.scheduler">icenet.optim.scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icenet.html#icenet-tools">icenet.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-icelogger">icenet.tools.icelogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.iceprint">icenet.tools.iceprint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.plots">icenet.tools.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.prints">icenet.tools.prints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.process">icenet.tools.process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icenet.html#icenet-tools-supertune">icenet.tools.supertune</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/iceplot.html">iceplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/iceplot.html#module-iceplot.iceplot">iceplot.iceplot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.binwidth"><code class="docutils literal notranslate"><span class="pre">binwidth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.change2density_labels"><code class="docutils literal notranslate"><span class="pre">change2density_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.chi2_cost"><code class="docutils literal notranslate"><span class="pre">chi2_cost()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.colors"><code class="docutils literal notranslate"><span class="pre">colors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.create_axes"><code class="docutils literal notranslate"><span class="pre">create_axes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.edge2centerbins"><code class="docutils literal notranslate"><span class="pre">edge2centerbins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.ess_metric"><code class="docutils literal notranslate"><span class="pre">ess_metric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.fuse_histograms"><code class="docutils literal notranslate"><span class="pre">fuse_histograms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.generate_colormap"><code class="docutils literal notranslate"><span class="pre">generate_colormap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.hist"><code class="docutils literal notranslate"><span class="pre">hist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.hist_filled_error"><code class="docutils literal notranslate"><span class="pre">hist_filled_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.hist_obj"><code class="docutils literal notranslate"><span class="pre">hist_obj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.hist_to_density"><code class="docutils literal notranslate"><span class="pre">hist_to_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.hist_to_density_fullspace"><code class="docutils literal notranslate"><span class="pre">hist_to_density_fullspace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.histhepdata"><code class="docutils literal notranslate"><span class="pre">histhepdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.histmc"><code class="docutils literal notranslate"><span class="pre">histmc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.hobj"><code class="docutils literal notranslate"><span class="pre">hobj</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.ordered_legend"><code class="docutils literal notranslate"><span class="pre">ordered_legend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.plot_horizontal_line"><code class="docutils literal notranslate"><span class="pre">plot_horizontal_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.ratioerr"><code class="docutils literal notranslate"><span class="pre">ratioerr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.set_axis_ticks"><code class="docutils literal notranslate"><span class="pre">set_axis_ticks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.set_global_style"><code class="docutils literal notranslate"><span class="pre">set_global_style()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.stepspace"><code class="docutils literal notranslate"><span class="pre">stepspace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.superplot"><code class="docutils literal notranslate"><span class="pre">superplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.test_iceplot"><code class="docutils literal notranslate"><span class="pre">test_iceplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.tick_calc"><code class="docutils literal notranslate"><span class="pre">tick_calc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/iceplot.html#iceplot.iceplot.tick_creator"><code class="docutils literal notranslate"><span class="pre">tick_creator()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icetrg.html">icetrg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icetrg.html#module-icetrg.common">icetrg.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icetrg.html#icetrg.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icetrg.html#icetrg.common.process_root"><code class="docutils literal notranslate"><span class="pre">process_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icetrg.html#icetrg.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/icezee.html">icezee</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/icezee.html#module-icezee.common">icezee.common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icezee.html#icezee.common.load_helper"><code class="docutils literal notranslate"><span class="pre">load_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icezee.html#icezee.common.load_root_file"><code class="docutils literal notranslate"><span class="pre">load_root_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icezee.html#icezee.common.splitfactor"><code class="docutils literal notranslate"><span class="pre">splitfactor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/icezee.html#icezee.common.truncate"><code class="docutils literal notranslate"><span class="pre">truncate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">icenet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">icefit.transport</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for icefit.transport</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Optimal Transport (Wasserstein) distance measures (tests under construction)</span>
+<span class="c1"># </span>
+<span class="c1"># run tests with: pytest icefit/transport.py -rP -vv</span>
+<span class="c1">#</span>
+<span class="c1"># m.mieskolainen@imperial.ac.uk, 2025</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<div class="viewcode-block" id="quantile_function">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.quantile_function">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">quantile_function</span><span class="p">(</span><span class="n">qs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">cumweights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the quantile function of an empirical distribution</span>
+<span class="sd">    </span>
+<span class="sd">    (handles also multiple independent columns, i.e. for vectorized SWD)</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        qs:         quantile positions where the quantile function is evaluated, (n,) or (n,2)</span>
+<span class="sd">        cumweights: cumulative weights of the 1D empirical distribution, (n,) or (n,2)</span>
+<span class="sd">        values:     locations of the 1D empirical distribution</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        quantiles of the distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">qs</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">cumweights</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">cumweights</span> <span class="o">=</span> <span class="n">cumweights</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">cumweights</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">idx</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">take_along_dim</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="wasserstein_distance_1D">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.wasserstein_distance_1D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wasserstein_distance_1D</span><span class="p">(</span><span class="n">u_values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">v_values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                            <span class="n">u_weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">v_weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inverse_power</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">norm_weights</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">require_sort</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wasserstein 1D distance over two empirical samples.</span>
+<span class="sd">    </span>
+<span class="sd">    This function computes with quantile functions (not just CDFs as with special case p=1),</span>
+<span class="sd">    thus compatible with arbitrary p.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        u_values:       sample U vectors (n, [possibly multiple independent columns, for vectorized])</span>
+<span class="sd">        v_values:       sample V vectors (m, [as above])</span>
+<span class="sd">        u_weights:      sample U weights (n,) (if None, assumed to be unit)</span>
+<span class="sd">        v_weights:      sample V weights (m,)</span>
+<span class="sd">        p:              p-norm parameter (p = 1 is &#39;Earth Movers&#39;, 2 = is W-2, ...)     </span>
+<span class="sd">        num_slices:     number of random MC projections (slices) (higher the better)</span>
+<span class="sd">        inverse_power:  apply final inverse power 1/p</span>
+<span class="sd">        norm_weights:   normalize per sample (U,V) weights to sum to one</span>
+<span class="sd">        require_sort:   always by default, unless presorted</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        distance between the empirical sample distributions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">zero_pad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper zero-padding function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">how_pad</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">element</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">pad_width</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">t</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">how_pad</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="n">n</span> <span class="o">=</span> <span class="n">u_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">v_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">u_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">u_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">u_values</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">u_values</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">v_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">v_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">m</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">v_values</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">v_values</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">norm_weights</span><span class="p">:</span>
+        <span class="n">u_weights</span> <span class="o">=</span> <span class="n">u_weights</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">u_weights</span><span class="p">)</span>
+        <span class="n">v_weights</span> <span class="o">=</span> <span class="n">v_weights</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v_weights</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">u_values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># need (n,d) view, expand is memory friendly</span>
+        <span class="n">u_weights</span> <span class="o">=</span> <span class="n">u_weights</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_values</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">v_weights</span> <span class="o">=</span> <span class="n">v_weights</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">v_values</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">require_sort</span><span class="p">:</span>
+        <span class="n">u_sorter</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">u_values</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">u_values</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">take_along_dim</span><span class="p">(</span><span class="n">u_values</span><span class="p">,</span> <span class="n">u_sorter</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">u_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">take_along_dim</span><span class="p">(</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">u_sorter</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">v_sorter</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">v_values</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">v_values</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">take_along_dim</span><span class="p">(</span><span class="n">v_values</span><span class="p">,</span> <span class="n">v_sorter</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">v_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">take_along_dim</span><span class="p">(</span><span class="n">v_weights</span><span class="p">,</span> <span class="n">v_sorter</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">u_cumweights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">v_cumweights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">v_weights</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Compute quantile functions</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">u_cumweights</span><span class="p">,</span> <span class="n">v_cumweights</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">u_quantiles</span> <span class="o">=</span> <span class="n">quantile_function</span><span class="p">(</span><span class="n">qs</span><span class="o">=</span><span class="n">qs</span><span class="p">,</span> <span class="n">cumweights</span><span class="o">=</span><span class="n">u_cumweights</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">u_values</span><span class="p">)</span>
+    <span class="n">v_quantiles</span> <span class="o">=</span> <span class="n">quantile_function</span><span class="p">(</span><span class="n">qs</span><span class="o">=</span><span class="n">qs</span><span class="p">,</span> <span class="n">cumweights</span><span class="o">=</span><span class="n">v_cumweights</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">v_values</span><span class="p">)</span>
+    
+    <span class="k">del</span> <span class="n">u_cumweights</span><span class="p">,</span> <span class="n">v_cumweights</span>
+    
+    <span class="c1"># Boundary conditions</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">zero_pad</span><span class="p">(</span><span class="n">qs</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">+</span> <span class="p">(</span><span class="n">qs</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+    
+    <span class="c1"># Measure and integrand</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">qs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="o">...</span><span class="p">]</span> <span class="o">-</span> <span class="n">qs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">qs</span>
+    
+    <span class="n">dq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">u_quantiles</span> <span class="o">-</span> <span class="n">v_quantiles</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">u_quantiles</span><span class="p">,</span> <span class="n">v_quantiles</span>
+    
+    <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="n">dq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">inverse_power</span><span class="p">:</span>
+        <span class="n">dq</span><span class="o">.</span><span class="n">pow_</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="n">dq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dq</span><span class="o">.</span><span class="n">pow_</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="n">dq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="rand_projections">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.rand_projections">[docs]</a>
+<span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rand_projections</span><span class="p">(</span><span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Define N random projection directions on the unit sphere S^{dim-1}</span>
+<span class="sd">    Normally distributed components and final normalization guarantee (Harm) uniformity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">projections</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">projections</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="qr_projections">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.qr_projections">[docs]</a>
+<span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">qr_projections</span><span class="p">(</span>
+    <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span><span class="p">,</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">block_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_sign</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Orthogonal blocks of random directions, with optional +-1 sign flip.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">block_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">block_size</span> <span class="o">=</span> <span class="n">dim</span>
+
+    <span class="n">n_blocks</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">N</span> <span class="o">/</span> <span class="n">block_size</span><span class="p">)</span>
+    <span class="n">rays</span>     <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_blocks</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">block_size</span><span class="p">,</span> <span class="n">N</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">rays</span><span class="p">))</span>               <span class="c1"># last block may be smaller</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="n">dim</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reduced&quot;</span><span class="p">)</span>        <span class="c1"># (dim, k)</span>
+
+        <span class="k">if</span> <span class="n">random_sign</span><span class="p">:</span>                                  <span class="c1"># independent sign per vector</span>
+            <span class="n">signs</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">signs</span>
+
+        <span class="n">rays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>                                 <span class="c1"># store k vectors as rows</span>
+
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">rays</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)[:</span><span class="n">N</span><span class="p">]</span>                    <span class="c1"># (N, dim)</span></div>
+
+
+<div class="viewcode-block" id="sliced_wasserstein_distance">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.sliced_wasserstein_distance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sliced_wasserstein_distance</span><span class="p">(</span><span class="n">u_values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">v_values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                                <span class="n">u_weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">v_weights</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_slices</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;SWD&#39;</span><span class="p">,</span> 
+                                <span class="n">norm_weights</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inverse_power</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sliced Wasserstein Distance over arbitrary dimensional samples</span>
+<span class="sd">    </span>
+<span class="sd">    References:</span>
+<span class="sd">        https://arxiv.org/abs/1902.00434</span>
+<span class="sd">        https://arxiv.org/abs/2211.08775</span>
+<span class="sd">        https://arxiv.org/abs/2304.13586</span>
+<span class="sd">    </span>
+<span class="sd">    Notes:</span>
+<span class="sd">        When using this as a loss function e.g. with neural nets, large</span>
+<span class="sd">        minibatch sizes may be beneficial or needed.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        u_values:      sample U vectors (n x dim)</span>
+<span class="sd">        v_values:      sample V vectors (m x dim)</span>
+<span class="sd">        u_weights:     sample U weights (n,) (if None, assumed to be unit)</span>
+<span class="sd">        v_weights:     sample V weights (m,)</span>
+<span class="sd">        p:             p-norm parameter (p = 1 is &#39;Earth Movers&#39;, 2 = is W-2, ...)       </span>
+<span class="sd">        num_slices:    number of random MC projections (slices) (higher the better)</span>
+<span class="sd">        mode:          &#39;SWD&#39;  (basic uniform MC random)</span>
+<span class="sd">                       &#39;SWD-QR&#39; (orthogonal random blocks, lower estimator variance)</span>
+<span class="sd">        norm_weights:  normalize per sample (U,V) weights to sum to one</span>
+<span class="sd">        vectorized:    fully vectorized (may take more GPU/CPU memory, but 10x faster)</span>
+<span class="sd">        inverse_power: apply final inverse power</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        distance between the empirical sample distributions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Generate a random projection direction</span>
+    <span class="n">dim</span>        <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">u_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="k">if</span>   <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;SWD&#39;</span><span class="p">:</span>
+        <span class="n">directions</span> <span class="o">=</span> <span class="n">rand_projections</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">u_values</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;SWD-QR&#39;</span><span class="p">:</span>
+        <span class="n">directions</span> <span class="o">=</span> <span class="n">qr_projections</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">u_values</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown mode parameter: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">vectorized</span><span class="p">:</span>
+        
+        <span class="n">u_proj</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">u_values</span><span class="p">,</span> <span class="n">directions</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">v_proj</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_values</span><span class="p">,</span> <span class="n">directions</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">u_values</span><span class="o">=</span><span class="n">u_proj</span><span class="p">,</span> <span class="n">v_values</span><span class="o">=</span><span class="n">v_proj</span><span class="p">,</span>
+                    <span class="n">u_weights</span><span class="o">=</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="o">=</span><span class="n">v_weights</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+                    <span class="n">norm_weights</span><span class="o">=</span><span class="n">norm_weights</span><span class="p">,</span>
+                    <span class="n">inverse_power</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">u_values</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">u_values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_slices</span><span class="p">):</span>
+            
+            <span class="c1"># Project the distributions on the random direction</span>
+            <span class="n">u_proj</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">u_values</span><span class="p">,</span> <span class="n">directions</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span>
+            <span class="n">v_proj</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_values</span><span class="p">,</span> <span class="n">directions</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span>
+            
+            <span class="c1"># Calculate the 1-dim Wasserstein on the direction</span>
+            <span class="n">dist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">u_values</span><span class="o">=</span><span class="n">u_proj</span><span class="p">,</span> <span class="n">v_values</span><span class="o">=</span><span class="n">v_proj</span><span class="p">,</span>
+                            <span class="n">u_weights</span><span class="o">=</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="o">=</span><span class="n">v_weights</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+                            <span class="n">norm_weights</span><span class="o">=</span><span class="n">norm_weights</span><span class="p">,</span>
+                            <span class="n">inverse_power</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="c1"># Average over</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_slices</span>
+    
+    <span class="k">if</span> <span class="n">inverse_power</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dist</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+
+
+
+<div class="viewcode-block" id="test_1D">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.test_1D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_1D</span><span class="p">(</span><span class="n">EPS</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test function (fixed reference checked against scikit-learn)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">wasserstein_distance</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">ot</span>
+    
+    <span class="c1"># -----------------------------------------------</span>
+    <span class="c1">## p = 1 case checked against scikit-learn</span>
+    
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="n">u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">res</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">res_scikit</span> <span class="o">=</span> <span class="n">wasserstein_distance</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">v</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;1D case 1: p = 1 | </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">res_scikit</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">res_scikit</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    
+    <span class="n">res</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span>
+                                  <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]),</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+    
+    <span class="n">res_scikit</span> <span class="o">=</span> <span class="n">wasserstein_distance</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span>
+                                      <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;1D case 2: p = 1 | </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">res_scikit</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">res_scikit</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    
+    <span class="n">res</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.4</span><span class="p">,</span> <span class="mf">3.9</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">,</span> <span class="mf">7.8</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">4.5</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">]),</span>
+                                  <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.4</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.2</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">]))</span>
+    
+    <span class="n">res_scikit</span> <span class="o">=</span> <span class="n">wasserstein_distance</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.4</span><span class="p">,</span> <span class="mf">3.9</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">,</span> <span class="mf">7.8</span><span class="p">]),</span>     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.5</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">]),</span>
+                                      <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.4</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">]),</span>     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.2</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">]))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;1D case 3: p = 1 | res = </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s1"> res_scikit = </span><span class="si">{</span><span class="n">res_scikit</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">res_scikit</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    
+    <span class="c1"># -----------------------------------------------</span>
+    <span class="c1">## p = 1,2 against POT</span>
+    
+    <span class="n">u_values</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">v_values</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">u_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+    <span class="n">v_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+    
+    <span class="c1"># pot library does not normalize</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]:</span>
+        
+        <span class="n">res</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">u_values</span><span class="p">,</span> <span class="n">v_values</span><span class="p">,</span> <span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">norm_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">pot</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">wasserstein_1d</span><span class="p">(</span><span class="n">u_values</span><span class="p">,</span> <span class="n">v_values</span><span class="p">,</span> <span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;1D case 3: p = </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1"> | res = </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s1"> pot = </span><span class="si">{</span><span class="n">pot</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="n">res_grad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">u_values</span><span class="p">)</span>
+        <span class="n">pot_grad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">pot</span><span class="p">,</span> <span class="n">u_values</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gradient dW/du:       </span><span class="si">{</span><span class="n">res_grad</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gradient dW/du (POT): </span><span class="si">{</span><span class="n">pot_grad</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">pot</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">pot</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">atol</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    
+    <span class="c1"># -----------------------------------------------</span>
+    <span class="c1">## p = 2 case checked against pre-computed</span>
+    
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">2</span>
+    
+    <span class="n">res</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">]),</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">res</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mf">25.0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    
+    <span class="n">res</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                                  <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">res</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+    
+    <span class="n">res</span> <span class="o">=</span> <span class="n">wasserstein_distance_1D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.4</span><span class="p">,</span> <span class="mf">3.9</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">,</span> <span class="mf">7.8</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">4.5</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">]),</span>
+                                  <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.4</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.2</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">]),</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">res</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mf">19.09</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_swd">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.test_swd">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_swd</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test sliced Wasserstein distance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="kn">import</span><span class="w"> </span><span class="nn">ot</span> <span class="c1"># POT for reference</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">):</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>  <span class="c1"># if you are using multi-GPU.</span>
+        <span class="c1">#np.random.seed(seed)  # Numpy module.</span>
+        <span class="c1">#random.seed(seed)  # Python random module.</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
+    
+    <span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
+    
+    <span class="c1"># ---------------------------------------------------------</span>
+    <span class="c1"># 2D test</span>
+    
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># number of samples</span>
+    
+    <span class="c1"># Mean vectors</span>
+    <span class="n">mu_u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">mu_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    
+    <span class="c1"># Covariance matrices</span>
+    <span class="n">cov_u</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span>    <span class="mi">0</span><span class="p">],</span>
+                          <span class="p">[</span><span class="mi">0</span><span class="p">,</span>    <span class="mf">1.0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">cov_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">],</span>
+                          <span class="p">[</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="c1"># Function to generate random vectors</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_random_vectors</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">):</span>
+        <span class="n">distribution</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,))</span>
+        <span class="k">return</span> <span class="n">samples</span>
+    
+    <span class="c1"># Generate random vectors for both distributions</span>
+    <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">u_values</span> <span class="o">=</span> <span class="n">generate_random_vectors</span><span class="p">(</span><span class="n">mu_u</span><span class="p">,</span> <span class="n">cov_u</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">v_values</span> <span class="o">=</span> <span class="n">generate_random_vectors</span><span class="p">(</span><span class="n">mu_v</span><span class="p">,</span> <span class="n">cov_v</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">u_values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">v_values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    
+    <span class="c1"># ------------------------------------------------------------</span>
+    <span class="c1"># Versus POT</span>
+    
+    <span class="n">num_slices</span> <span class="o">=</span> <span class="mi">200</span>
+    
+    <span class="c1">#exact = wasserstein2_distance_gaussian(mu1=mu_u, cov1=cov_u, mu2=mu_v, cov2=cov_v)  </span>
+    
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]:</span>
+        
+        <span class="n">pot</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">sliced_wasserstein_distance</span><span class="p">(</span><span class="n">X_s</span><span class="o">=</span><span class="n">u_values</span><span class="p">,</span> <span class="n">X_t</span><span class="o">=</span><span class="n">v_values</span><span class="p">,</span>
+                                             <span class="n">a</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="n">n</span><span class="p">,</span>
+                                             <span class="n">n_projections</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gradient dW/du (POT): </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">pot</span><span class="p">,</span><span class="w"> </span><span class="n">u_values</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SWD&#39;</span><span class="p">,</span> <span class="s1">&#39;SWD-QR&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">vectorized</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]:</span>
+                
+                <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">sliced_wasserstein_distance</span><span class="p">(</span><span class="n">u_values</span><span class="o">=</span><span class="n">u_values</span><span class="p">,</span> <span class="n">v_values</span><span class="o">=</span><span class="n">v_values</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+                                    <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;p = </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1">: case 2 [</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">] | res = </span><span class="si">{</span><span class="n">res</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s1"> pot = </span><span class="si">{</span><span class="n">pot</span><span class="si">}</span><span class="s1"> (vectorized = </span><span class="si">{</span><span class="n">vectorized</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gradient dW/du: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">res</span><span class="p">,</span><span class="w"> </span><span class="n">u_values</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="k">assert</span> <span class="n">res</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">pot</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="nb">abs</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+        
+    <span class="c1"># ---------------------------------------------------------</span>
+    <span class="c1"># Fixed values 1D test</span>
+    
+    <span class="n">u_values</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">]])</span>
+    <span class="n">u_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span> <span class="c1"># event weights</span>
+    <span class="n">v_values</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">]])</span>
+    <span class="n">v_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span> <span class="c1"># event weights</span>
+    
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">num_slices</span> <span class="o">=</span> <span class="mi">200</span>
+    
+    <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SWD&#39;</span><span class="p">,</span> <span class="s1">&#39;SWD-QR&#39;</span><span class="p">]:</span>
+        
+        <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">sliced_wasserstein_distance</span><span class="p">(</span><span class="n">u_values</span><span class="o">=</span><span class="n">u_values</span><span class="p">,</span> <span class="n">v_values</span><span class="o">=</span><span class="n">v_values</span><span class="p">,</span>
+                                        <span class="n">u_weights</span><span class="o">=</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="o">=</span><span class="n">v_weights</span><span class="p">,</span>
+                                        <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">res</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mf">0.683</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+        
+    <span class="c1"># -------------------------------------------------------</span>
+    <span class="c1"># Test vectorized versus non-vectorized slicing implementation</span>
+
+    <span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    
+    <span class="n">u_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">v_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    
+    <span class="n">u_weights</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">v_weights</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SWD&#39;</span><span class="p">,</span> <span class="s1">&#39;SWD-QR&#39;</span><span class="p">]:</span>
+            
+            <span class="c1"># &#39;vectorized&#39;</span>
+            <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">d</span>     <span class="o">=</span> <span class="n">sliced_wasserstein_distance</span><span class="p">(</span><span class="n">u_values</span><span class="o">=</span><span class="n">u_values</span><span class="p">,</span> <span class="n">v_values</span><span class="o">=</span><span class="n">v_values</span><span class="p">,</span>
+                        <span class="n">u_weights</span><span class="o">=</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="o">=</span><span class="n">v_weights</span><span class="p">,</span>
+                        <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tic</span>
+            
+            <span class="c1"># &#39;non-vectorized&#39;</span>
+            <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            <span class="n">tic_alt</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">d_alt</span> <span class="o">=</span> <span class="n">sliced_wasserstein_distance</span><span class="p">(</span><span class="n">u_values</span><span class="o">=</span><span class="n">u_values</span><span class="p">,</span> <span class="n">v_values</span><span class="o">=</span><span class="n">v_values</span><span class="p">,</span>
+                        <span class="n">u_weights</span><span class="o">=</span><span class="n">u_weights</span><span class="p">,</span> <span class="n">v_weights</span><span class="o">=</span><span class="n">v_weights</span><span class="p">,</span>
+                        <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">toc_alt</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tic_alt</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;p = </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">) || D = </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1"> (vectorized, </span><span class="si">{</span><span class="n">toc</span><span class="si">:</span><span class="s1">0.2e</span><span class="si">}</span><span class="s1"> sec) | D = </span><span class="si">{</span><span class="n">d_alt</span><span class="si">}</span><span class="s1"> (non-vectorized, </span><span class="si">{</span><span class="n">toc_alt</span><span class="si">:</span><span class="s1">0.2e</span><span class="si">}</span><span class="s1"> sec)&#39;</span><span class="p">)</span>
+            
+            <span class="k">assert</span> <span class="n">d</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="n">d_alt</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span></div>
+
+
+<span class="c1"># ---------------------------------------------------------------------</span>
+<span class="c1"># Advanced SWD test: value, variance, runtime, memory and gradients</span>
+<span class="c1"># ---------------------------------------------------------------------</span>
+<div class="viewcode-block" id="test_swd_advanced">
+<a class="viewcode-back" href="../../modules/icefit.html#icefit.transport.test_swd_advanced">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_swd_advanced</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For each (dim, test-case, #rays) the routine compares two samplers</span>
+<span class="sd">    </span>
+<span class="sd">        - SWD:    i.i.d. Gaussian directions</span>
+<span class="sd">        - SWD-QR: QR-orthogonal blocks</span>
+<span class="sd">    </span>
+<span class="sd">    Metrics reported:</span>
+<span class="sd">        </span>
+<span class="sd">        - Monte-Carlo mean of SWD</span>
+<span class="sd">        - Variance across 100 replicates</span>
+<span class="sd">        - Relative mean-absolute error (RMAE) against a high-ray POT ref</span>
+<span class="sd">        - Mean relative gradient error vs. POT gradient</span>
+<span class="sd">        - Peak memory during a forward/backward pass</span>
+<span class="sd">        - Average wall-time per replicate</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="kn">import</span><span class="w"> </span><span class="nn">ot</span> <span class="c1"># POT for reference</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span>     <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_mog</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_components</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mixture-of-Gaussians with random means/covariances.&quot;&quot;&quot;</span>
+        
+        <span class="c1"># draw mixing weights that sum to 1</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Dirichlet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_components</span><span class="p">))</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+        <span class="n">comps</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">replacement</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># (n,)</span>
+
+        <span class="n">means</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_components</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span>
+        <span class="n">covs</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_components</span><span class="p">):</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+            <span class="n">covs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">A</span> <span class="o">@</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">dim</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dim</span><span class="p">))</span>
+        <span class="n">covs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">covs</span><span class="p">)</span> <span class="c1"># (k, d, d)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_components</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">comps</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">idx</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">mvn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">means</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">covs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvn</span><span class="o">.</span><span class="n">sample</span><span class="p">((</span><span class="n">idx</span><span class="o">.</span><span class="n">numel</span><span class="p">(),))</span>
+        
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_ring</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;d-dimensional ring/donut distribution.&quot;&quot;&quot;</span>
+        
+        <span class="n">theta</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">base</span>   <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">radius</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+                            <span class="n">radius</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">*</span> <span class="mf">0.1</span>
+            <span class="n">base</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">base</span><span class="p">,</span> <span class="n">extra</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">base</span> <span class="o">+</span> <span class="n">noise</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+    <span class="n">seed</span>            <span class="o">=</span> <span class="mi">123</span>
+    <span class="n">ray_grid</span>        <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="n">reps</span>            <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">n_samples</span>       <span class="o">=</span> <span class="mi">2048</span>
+    <span class="n">nrays_ref</span>       <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)</span>          <span class="c1"># POT reference rays</span>
+    <span class="n">rtol_grad</span>       <span class="o">=</span> <span class="mf">0.30</span>
+    <span class="n">atol_grad</span>       <span class="o">=</span> <span class="mf">1e-4</span>
+    <span class="n">device</span>          <span class="o">=</span> <span class="s1">&#39;cuda&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span>
+
+    <span class="c1"># -----------------------------------------------------------------</span>
+    <span class="c1"># helper to draw two independent clouds with a deterministic seed</span>
+    <span class="c1"># -----------------------------------------------------------------</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_draw_pair</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">base_seed</span><span class="p">):</span>
+        <span class="n">set_seed</span><span class="p">(</span><span class="n">base_seed</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">f1</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">set_seed</span><span class="p">(</span><span class="n">base_seed</span> <span class="o">+</span> <span class="mi">999</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">f2</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span>
+
+    <span class="n">test_cases</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;mog_vs_ring&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">bs</span><span class="p">:</span> <span class="n">_draw_pair</span><span class="p">(</span><span class="n">sample_mog</span><span class="p">,</span>  <span class="n">sample_ring</span><span class="p">,</span> <span class="n">base_seed</span><span class="o">=</span><span class="n">bs</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;mog_vs_mog&#39;</span><span class="p">,</span>  <span class="k">lambda</span> <span class="n">bs</span><span class="p">:</span> <span class="n">_draw_pair</span><span class="p">(</span><span class="n">sample_mog</span><span class="p">,</span>  <span class="n">sample_mog</span><span class="p">,</span>  <span class="n">base_seed</span><span class="o">=</span><span class="n">bs</span><span class="p">)),</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">64</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;** Dimension: </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s1"> **&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">make_xy</span> <span class="ow">in</span> <span class="n">test_cases</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test case: </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># ----------------------- data --------------------------------</span>
+            <span class="n">X_raw</span><span class="p">,</span> <span class="n">Y_raw</span> <span class="o">=</span> <span class="n">make_xy</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+            <span class="c1"># POT reference value (no grad needed)</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+                <span class="n">exact_val</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">sliced_wasserstein_distance</span><span class="p">(</span>
+                    <span class="n">X_s</span><span class="o">=</span><span class="n">X_raw</span><span class="p">,</span> <span class="n">X_t</span><span class="o">=</span><span class="n">Y_raw</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">n_projections</span><span class="o">=</span><span class="n">nrays_ref</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span>
+                <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  POT reference value (</span><span class="si">{</span><span class="n">nrays_ref</span><span class="si">:</span><span class="s1">0.0E</span><span class="si">}</span><span class="s1"> rays): </span><span class="si">{</span><span class="n">exact_val</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># POT reference gradient (needs requires_grad)</span>
+            <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            <span class="n">X_ref</span> <span class="o">=</span> <span class="n">X_raw</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">Y_ref</span> <span class="o">=</span> <span class="n">Y_raw</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+            <span class="n">pot_val</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">sliced_wasserstein_distance</span><span class="p">(</span>
+                <span class="n">X_s</span><span class="o">=</span><span class="n">X_ref</span><span class="p">,</span> <span class="n">X_t</span><span class="o">=</span><span class="n">Y_ref</span><span class="p">,</span> <span class="n">n_projections</span><span class="o">=</span><span class="n">nrays_ref</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="n">pot_val</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">grad_ref</span> <span class="o">=</span> <span class="n">X_ref</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+            <span class="n">ref_norm</span> <span class="o">=</span> <span class="n">grad_ref</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span>
+
+            <span class="c1"># ---------------------- table header -------------------------</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;rays&#39;</span><span class="si">:</span><span class="s2">&gt;6</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="s1">&#39;sampler&#39;</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="s1">&#39;mean&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;var&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="s1">&#39;RMAE&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="s1">&#39;grad err&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;peak MB&#39;</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="s1">&#39;ms/rep&#39;</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">header</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
+
+            <span class="c1"># Loop over #slices and samplers</span>
+            <span class="k">for</span> <span class="n">num_slices</span> <span class="ow">in</span> <span class="n">ray_grid</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+                
+                <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;SWD&#39;</span><span class="p">,</span> <span class="s1">&#39;SWD-QR&#39;</span><span class="p">):</span>
+                    <span class="c1"># ---------------------------------------------------</span>
+                    <span class="c1"># (1) PEAK-MEM measurement, run a few fwd/bwd passes</span>
+                    <span class="c1"># ---------------------------------------------------</span>
+                    <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;cuda&#39;</span><span class="p">):</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">reset_peak_memory_stats</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                        <span class="n">start_mem</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">process</span>   <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+                        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+                        <span class="n">start_mem</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span>
+
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+                        <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+                        <span class="n">X_</span> <span class="o">=</span> <span class="n">X_raw</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">Y_</span> <span class="o">=</span> <span class="n">Y_raw</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="n">sliced_wasserstein_distance</span><span class="p">(</span>
+                            <span class="n">X_</span><span class="p">,</span> <span class="n">Y_</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                            <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span>
+                            <span class="n">mode</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="p">)</span>
+                        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;cuda&#39;</span><span class="p">):</span>
+                        <span class="n">peak_mb</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">max_memory_allocated</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="o">-</span> <span class="n">start_mem</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+                        <span class="n">peak_mb</span> <span class="o">=</span> <span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span> <span class="o">-</span> <span class="n">start_mem</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">2</span>
+
+                    <span class="c1"># ---------------------------------------------------</span>
+                    <span class="c1"># (2) Gradient error (single pass, same seed)</span>
+                    <span class="c1"># ---------------------------------------------------</span>
+                    <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+                    <span class="n">X_grad</span> <span class="o">=</span> <span class="n">X_raw</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">Y_grad</span> <span class="o">=</span> <span class="n">Y_raw</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                    <span class="n">g_loss</span> <span class="o">=</span> <span class="n">sliced_wasserstein_distance</span><span class="p">(</span>
+                        <span class="n">X_grad</span><span class="p">,</span> <span class="n">Y_grad</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                    <span class="n">g_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+                    <span class="n">grad_err</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_grad</span><span class="o">.</span><span class="n">grad</span> <span class="o">-</span> <span class="n">grad_ref</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">/</span> <span class="n">ref_norm</span>
+
+                    <span class="c1"># ---------------------------------------------------</span>
+                    <span class="c1"># (3) Monte-Carlo replicates for mean / var / RMAE</span>
+                    <span class="c1"># ---------------------------------------------------</span>
+                    <span class="n">vals</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">reps</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                    <span class="n">tic</span>  <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+                    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">reps</span><span class="p">):</span>
+                            <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+                            <span class="n">vals</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">sliced_wasserstein_distance</span><span class="p">(</span>
+                                <span class="n">X_raw</span><span class="p">,</span> <span class="n">Y_raw</span><span class="p">,</span>
+                                <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                <span class="n">num_slices</span><span class="o">=</span><span class="n">num_slices</span><span class="p">,</span>
+                                <span class="n">mode</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
+                                <span class="n">vectorized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="p">)</span>
+                    <span class="n">elapsed</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">tic</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e3</span> <span class="o">/</span> <span class="n">reps</span>  <span class="c1"># ms/rep</span>
+
+                    <span class="n">results</span><span class="p">[</span><span class="n">sampler</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">mean</span>      <span class="o">=</span> <span class="n">vals</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span>
+                        <span class="n">var</span>       <span class="o">=</span> <span class="n">vals</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">unbiased</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span>
+                        <span class="n">rmae</span>      <span class="o">=</span> <span class="p">((</span><span class="n">vals</span> <span class="o">-</span> <span class="n">exact_val</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="n">exact_val</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span>
+                        <span class="n">grad_err</span>  <span class="o">=</span> <span class="n">grad_err</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span>
+                        <span class="n">peak_mb</span>   <span class="o">=</span> <span class="n">peak_mb</span><span class="p">,</span>
+                        <span class="n">elapsed</span>   <span class="o">=</span> <span class="n">elapsed</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_slices</span><span class="si">:</span><span class="s2">6d</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">sampler</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">sampler</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">10.2e</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">sampler</span><span class="p">][</span><span class="s1">&#39;var&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">10.2e</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">sampler</span><span class="p">][</span><span class="s1">&#39;rmae&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">10.2e</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">sampler</span><span class="p">][</span><span class="s1">&#39;grad_err&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">10.2e</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">sampler</span><span class="p">][</span><span class="s1">&#39;peak_mb&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2"> | &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">sampler</span><span class="p">][</span><span class="s1">&#39;elapsed&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Mikael Mieskolainen, Blackett Laboratory, Imperial College London.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

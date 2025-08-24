@@ -43,6 +43,14 @@ icefit.em
     :undoc-members:
 
 
+icefit.iceboard
+---------------------
+
+.. automodule:: icefit.iceboard
+    :members:
+    :undoc-members:
+
+
 icefit.icelimit
 ---------------------
 
@@ -91,6 +99,14 @@ icefit.peakfit
     :undoc-members:
 
 
+icefit.rezip
+---------------------
+
+.. automodule:: icefit.rezip
+    :members:
+    :undoc-members:
+
+
 icefit.score
 ---------------------
 
@@ -106,3 +122,10 @@ icefit.statstools
     :members:
     :undoc-members:
 
+
+icefit.transport
+---------------------
+
+.. automodule:: icefit.transport
+    :members:
+    :undoc-members:

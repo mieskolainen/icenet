@@ -14,8 +14,9 @@ Core deep learning and I/O functions and classes are designed to be problem gene
 That is, they can be used without any specific strict workflow and can handle near arbitrary
 inputs as suitable (parquet files, ROOT files ...).
 
-Many high energy physics applications such as the signal-from-background discrimination problem
-fit under certain "quasi-templated YAML-python-workflow" as manifested from the implemented applications.
+Many high energy physics applications such as the signal-from-background discrimination or
+reweighting (or morphing) problems problem fit under certain "quasi-templated YAML-python-workflow"
+as is manifest from the implemented applications.
 
 
 YAML-configuration files
@@ -45,13 +46,14 @@ specific I/O functions.
 	-icedqcd      DQCD analysis application [large scale new physics analysis, domain adaptation]
 	-icefit       Core fitting and statistics [tag & probe ++]
 	-icehgcal     HGCAL detector application [graph neural networks]
-	-icehnl       HNL analysis application [neural mutual information with BDT and MLP]
+	-icehnl       HNL analysis application [neural mutual information with ICEBOOST and MLP]
 	-iceid        Electron ID application
+	-icemc        Simple MC tools
 	-icenet       Core deep learning & I/O functions
 	-iceplot      Core plotting tools
 	-iceqsub      SGE submission steering functions
 	-icetrg       HLT trigger application
-	-icezee       High-dimensional reweighting application [advanced MLP models and regularization]
+	-icezee       High-dimensional reweighting application
 	-tests        Tests, continuous integration (CI) and bash-launch scripts
 	-output       HDF5, pickle outputs
 	-dev          Development code
@@ -65,7 +67,7 @@ AI-algorithms and models
 Various ML and AI-models are implemented and supported. From a fixed dimensional input models
 such as boosted decision trees (BDT) via XGBoost enhanced with a custom torch autograd driven loss function,
 aka ``ICEBOOST``, to more complex "Geometric Deep Learning" with graph neural networks using torch-geometric
-as a low-level backend.
+as a low-level backend, and normalizing flows.
 
 The library is ultimately agnostic regarding the underlying models, i.e.
 new torch models or loss functions can be easily added and other computational libraries such as JAX can be used.
@@ -80,7 +82,7 @@ Reasily available models such as
 	2.  Kolmogorov-Arnold representation theorem networks [pytorch]
 	3.  Lipschitz continuous MLPs [pytorch]
 	4.  Graph Neural Nets (graph-, node-, edge-level inference) [pytorch-geometric]
-	5.  Deep Normalizing Flow (BNAF) based pdfs & likelihood ratios [pytorch]
+	5.  Deep Normalizing Flow (BNAF), Spline Flows based pdfs & likelihood ratios [pytorch]
 	6.  Neural mutual information estimator (MINE) and non-linear distance correlation (DCORR) [pytorch]
 	7.  MaxOUT multilayer feedforward network [pytorch]
 	8.  Permutation Equivariant Networks (DeepSets) [pytorch]

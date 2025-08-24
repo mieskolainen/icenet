@@ -224,6 +224,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.em.test_EM"><code class="docutils literal notranslate"><span class="pre">test_EM()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.iceboard">icefit.iceboard</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.iceboard.combine_hparam"><code class="docutils literal notranslate"><span class="pre">combine_hparam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.iceboard.create_symlink"><code class="docutils literal notranslate"><span class="pre">create_symlink()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.iceboard.extract_variable_values"><code class="docutils literal notranslate"><span class="pre">extract_variable_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.iceboard.process_folders"><code class="docutils literal notranslate"><span class="pre">process_folders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.iceboard.read_tensorboard_data"><code class="docutils literal notranslate"><span class="pre">read_tensorboard_data()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.icelimit">icefit.icelimit</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.CL_single"><code class="docutils literal notranslate"><span class="pre">CL_single()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.icelimit.CL_single_asymptotic"><code class="docutils literal notranslate"><span class="pre">CL_single_asymptotic()</span></code></a></li>
@@ -284,6 +292,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.peakfit.run_jpsi_tagprobe"><code class="docutils literal notranslate"><span class="pre">run_jpsi_tagprobe()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.rezip">icefit.rezip</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.rezip.compress_parquet"><code class="docutils literal notranslate"><span class="pre">compress_parquet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.rezip.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.rezip.split_parquet"><code class="docutils literal notranslate"><span class="pre">split_parquet()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-icefit.score">icefit.score</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.score.logL"><code class="docutils literal notranslate"><span class="pre">logL()</span></code></a></li>
 </ul>
@@ -312,6 +326,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.tpratio_taylor"><code class="docutils literal notranslate"><span class="pre">tpratio_taylor()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.weighted_binomial_err"><code class="docutils literal notranslate"><span class="pre">weighted_binomial_err()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#icefit.statstools.welch_ttest"><code class="docutils literal notranslate"><span class="pre">welch_ttest()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-icefit.transport">icefit.transport</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.qr_projections"><code class="docutils literal notranslate"><span class="pre">qr_projections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.quantile_function"><code class="docutils literal notranslate"><span class="pre">quantile_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.rand_projections"><code class="docutils literal notranslate"><span class="pre">rand_projections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.sliced_wasserstein_distance"><code class="docutils literal notranslate"><span class="pre">sliced_wasserstein_distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.test_1D"><code class="docutils literal notranslate"><span class="pre">test_1D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.test_swd"><code class="docutils literal notranslate"><span class="pre">test_swd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.test_swd_advanced"><code class="docutils literal notranslate"><span class="pre">test_swd_advanced()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icefit.transport.wasserstein_distance_1D"><code class="docutils literal notranslate"><span class="pre">wasserstein_distance_1D()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -363,22 +388,17 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="icemc.html">icemc</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="icemc.html#module-icemc.icemc">icemc.icemc</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.Gamma2tau"><code class="docutils literal notranslate"><span class="pre">Gamma2tau()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.U"><code class="docutils literal notranslate"><span class="pre">U()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.annotate_heatmap"><code class="docutils literal notranslate"><span class="pre">annotate_heatmap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.outer_sim_loop"><code class="docutils literal notranslate"><span class="pre">outer_sim_loop()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.outer_sim_loop_2"><code class="docutils literal notranslate"><span class="pre">outer_sim_loop_2()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.produce_acceptance_sim"><code class="docutils literal notranslate"><span class="pre">produce_acceptance_sim()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.randexp"><code class="docutils literal notranslate"><span class="pre">randexp()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.randpow"><code class="docutils literal notranslate"><span class="pre">randpow()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.resonance_generator"><code class="docutils literal notranslate"><span class="pre">resonance_generator()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.set_aspect_true_equal"><code class="docutils literal notranslate"><span class="pre">set_aspect_true_equal()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.spherical_acceptance"><code class="docutils literal notranslate"><span class="pre">spherical_acceptance()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.tau2Gamma"><code class="docutils literal notranslate"><span class="pre">tau2Gamma()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.test"><code class="docutils literal notranslate"><span class="pre">test()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.test_toy_pt_spectrum"><code class="docutils literal notranslate"><span class="pre">test_toy_pt_spectrum()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.icemc.twobody"><code class="docutils literal notranslate"><span class="pre">twobody()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="icemc.html#module-icemc.analyzehepmc">icemc.analyzehepmc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.beta"><code class="docutils literal notranslate"><span class="pre">beta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.compute_stats"><code class="docutils literal notranslate"><span class="pre">compute_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.event_processor_contact_topology"><code class="docutils literal notranslate"><span class="pre">event_processor_contact_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.event_processor_sequential_topology"><code class="docutils literal notranslate"><span class="pre">event_processor_sequential_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.gamma"><code class="docutils literal notranslate"><span class="pre">gamma()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.pdf_merger"><code class="docutils literal notranslate"><span class="pre">pdf_merger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.wrapper_contact_topology"><code class="docutils literal notranslate"><span class="pre">wrapper_contact_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#icemc.analyzehepmc.wrapper_sequential_topology"><code class="docutils literal notranslate"><span class="pre">wrapper_sequential_topology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="icemc.html#module-icemc.icemc">icemc.icemc</a></li>
 </ul>
 </li>
 </ul>
@@ -391,18 +411,20 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-deep">icenet.deep</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="icenet.html#icenet-deep-autogradxgb">icenet.deep.autogradxgb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.bnaf">icenet.deep.bnaf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.cnn">icenet.deep.cnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.da">icenet.deep.da</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.daux">icenet.deep.daux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dbnf">icenet.deep.dbnf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deeptools">icenet.deep.deeptools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.deps">icenet.deep.deps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.dmlp">icenet.deep.dmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.fastkan">icenet.deep.fastkan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.flows">icenet.deep.flows</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.gcnn">icenet.deep.gcnn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.graph">icenet.deep.graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.iceboost">icenet.deep.iceboost</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.iceboostgrad">icenet.deep.iceboostgrad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.losstools">icenet.deep.losstools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.lzmlp">icenet.deep.lzmlp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.maxo">icenet.deep.maxo</a></li>
@@ -410,6 +432,8 @@
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.optimize">icenet.deep.optimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.pgraph">icenet.deep.pgraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.predict">icenet.deep.predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.rflow">icenet.deep.rflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.splines">icenet.deep.splines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.tempscale">icenet.deep.tempscale</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.train">icenet.deep.train</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.deep.vae">icenet.deep.vae</a></li>
@@ -424,7 +448,9 @@
 <li class="toctree-l2"><a class="reference internal" href="icenet.html#icenet-tools">icenet.tools</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux_torch">icenet.tools.aux_torch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.aux">icenet.tools.aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#icenet-tools-icelogger">icenet.tools.icelogger</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icemap">icenet.tools.icemap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.iceprint">icenet.tools.iceprint</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.iceroot">icenet.tools.iceroot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.icevec">icenet.tools.icevec</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.io">icenet.tools.io</a></li>
@@ -434,6 +460,7 @@
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.raytools">icenet.tools.raytools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.reweight">icenet.tools.reweight</a></li>
 <li class="toctree-l3"><a class="reference internal" href="icenet.html#module-icenet.tools.stx">icenet.tools.stx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icenet.html#icenet-tools-supertune">icenet.tools.supertune</a></li>
 </ul>
 </li>
 </ul>
@@ -1052,6 +1079,40 @@ Multivariate Density Estimation: Theory, Practice, and Visualization – 2D-Gaus
 </dd></dl>
 
 </section>
+<section id="module-icefit.iceboard">
+<span id="icefit-iceboard"></span><h2>icefit.iceboard<a class="headerlink" href="#module-icefit.iceboard" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.iceboard.combine_hparam">
+<span class="sig-name descname"><span class="pre">combine_hparam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/iceboard.html#combine_hparam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.iceboard.combine_hparam" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.iceboard.create_symlink">
+<span class="sig-name descname"><span class="pre">create_symlink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/iceboard.html#create_symlink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.iceboard.create_symlink" title="Link to this definition">¶</a></dt>
+<dd><p>Create symbolic link from src to dest using absolute paths.
+If the link exists, it will be removed and recreated.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.iceboard.extract_variable_values">
+<span class="sig-name descname"><span class="pre">extract_variable_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_path_parts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/iceboard.html#extract_variable_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.iceboard.extract_variable_values" title="Link to this definition">¶</a></dt>
+<dd><p>Extract variable values from the directory parts.
+Returns a dictionary of variable names and their values if all variables are found, else None.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.iceboard.process_folders">
+<span class="sig-name descname"><span class="pre">process_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/iceboard.html#process_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.iceboard.process_folders" title="Link to this definition">¶</a></dt>
+<dd><p>Process folders to create symbolic links under the output_base directory with the desired structure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.iceboard.read_tensorboard_data">
+<span class="sig-name descname"><span class="pre">read_tensorboard_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensorboard_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/iceboard.html#read_tensorboard_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.iceboard.read_tensorboard_data" title="Link to this definition">¶</a></dt>
+<dd><p>Reads scalar data from a TensorBoard file using tf.data.TFRecordDataset.</p>
+</dd></dl>
+
+</section>
 <section id="module-icefit.icelimit">
 <span id="icefit-icelimit"></span><h2>icefit.icelimit<a class="headerlink" href="#module-icefit.icelimit" title="Link to this heading">¶</a></h2>
 <dl class="py function">
@@ -1579,6 +1640,24 @@ model</p>
 </dd></dl>
 
 </section>
+<section id="module-icefit.rezip">
+<span id="icefit-rezip"></span><h2>icefit.rezip<a class="headerlink" href="#module-icefit.rezip" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.rezip.compress_parquet">
+<span class="sig-name descname"><span class="pre">compress_parquet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression_level</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/rezip.html#compress_parquet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.rezip.compress_parquet" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.rezip.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/rezip.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.rezip.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.rezip.split_parquet">
+<span class="sig-name descname"><span class="pre">split_parquet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_rows_per_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/rezip.html#split_parquet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.rezip.split_parquet" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
 <section id="module-icefit.score">
 <span id="icefit-score"></span><h2>icefit.score<a class="headerlink" href="#module-icefit.score" title="Link to this heading">¶</a></h2>
 <dl class="py function">
@@ -1969,6 +2048,135 @@ p : p-value from t-distribution</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>t</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-icefit.transport">
+<span id="icefit-transport"></span><h2>icefit.transport<a class="headerlink" href="#module-icefit.transport" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.qr_projections">
+<span class="sig-name descname"><span class="pre">qr_projections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_sign</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#qr_projections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.qr_projections" title="Link to this definition">¶</a></dt>
+<dd><p>Orthogonal blocks of random directions, with optional +-1 sign flip.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.quantile_function">
+<span class="sig-name descname"><span class="pre">quantile_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumweights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#quantile_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.quantile_function" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the quantile function of an empirical distribution</p>
+<p>(handles also multiple independent columns, i.e. for vectorized SWD)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qs</strong> – quantile positions where the quantile function is evaluated, (n,) or (n,2)</p></li>
+<li><p><strong>cumweights</strong> – cumulative weights of the 1D empirical distribution, (n,) or (n,2)</p></li>
+<li><p><strong>values</strong> – locations of the 1D empirical distribution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>quantiles of the distribution</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.rand_projections">
+<span class="sig-name descname"><span class="pre">rand_projections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#rand_projections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.rand_projections" title="Link to this definition">¶</a></dt>
+<dd><p>Define N random projection directions on the unit sphere S^{dim-1}
+Normally distributed components and final normalization guarantee (Harm) uniformity.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.sliced_wasserstein_distance">
+<span class="sig-name descname"><span class="pre">sliced_wasserstein_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_slices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'SWD'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vectorized</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse_power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#sliced_wasserstein_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.sliced_wasserstein_distance" title="Link to this definition">¶</a></dt>
+<dd><p>Sliced Wasserstein Distance over arbitrary dimensional samples</p>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://arxiv.org/abs/1902.00434">https://arxiv.org/abs/1902.00434</a>
+<a class="reference external" href="https://arxiv.org/abs/2211.08775">https://arxiv.org/abs/2211.08775</a>
+<a class="reference external" href="https://arxiv.org/abs/2304.13586">https://arxiv.org/abs/2304.13586</a></p>
+<p class="rubric">Notes</p>
+<p>When using this as a loss function e.g. with neural nets, large
+minibatch sizes may be beneficial or needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u_values</strong> – sample U vectors (n x dim)</p></li>
+<li><p><strong>v_values</strong> – sample V vectors (m x dim)</p></li>
+<li><p><strong>u_weights</strong> – sample U weights (n,) (if None, assumed to be unit)</p></li>
+<li><p><strong>v_weights</strong> – sample V weights (m,)</p></li>
+<li><p><strong>p</strong> – p-norm parameter (p = 1 is ‘Earth Movers’, 2 = is W-2, …)</p></li>
+<li><p><strong>num_slices</strong> – number of random MC projections (slices) (higher the better)</p></li>
+<li><p><strong>mode</strong> – ‘SWD’  (basic uniform MC random)
+‘SWD-QR’ (orthogonal random blocks, lower estimator variance)</p></li>
+<li><p><strong>norm_weights</strong> – normalize per sample (U,V) weights to sum to one</p></li>
+<li><p><strong>vectorized</strong> – fully vectorized (may take more GPU/CPU memory, but 10x faster)</p></li>
+<li><p><strong>inverse_power</strong> – apply final inverse power</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>distance between the empirical sample distributions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.test_1D">
+<span class="sig-name descname"><span class="pre">test_1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">EPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#test_1D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.test_1D" title="Link to this definition">¶</a></dt>
+<dd><p>Test function (fixed reference checked against scikit-learn)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.test_swd">
+<span class="sig-name descname"><span class="pre">test_swd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#test_swd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.test_swd" title="Link to this definition">¶</a></dt>
+<dd><p>Test sliced Wasserstein distance</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.test_swd_advanced">
+<span class="sig-name descname"><span class="pre">test_swd_advanced</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#test_swd_advanced"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.test_swd_advanced" title="Link to this definition">¶</a></dt>
+<dd><p>For each (dim, test-case, #rays) the routine compares two samplers</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>SWD:    i.i.d. Gaussian directions</p></li>
+<li><p>SWD-QR: QR-orthogonal blocks</p></li>
+</ul>
+</div></blockquote>
+<p>Metrics reported:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Monte-Carlo mean of SWD</p></li>
+<li><p>Variance across 100 replicates</p></li>
+<li><p>Relative mean-absolute error (RMAE) against a high-ray POT ref</p></li>
+<li><p>Mean relative gradient error vs. POT gradient</p></li>
+<li><p>Peak memory during a forward/backward pass</p></li>
+<li><p>Average wall-time per replicate</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="icefit.transport.wasserstein_distance_1D">
+<span class="sig-name descname"><span class="pre">wasserstein_distance_1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse_power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/icefit/transport.html#wasserstein_distance_1D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#icefit.transport.wasserstein_distance_1D" title="Link to this definition">¶</a></dt>
+<dd><p>Wasserstein 1D distance over two empirical samples.</p>
+<p>This function computes with quantile functions (not just CDFs as with special case p=1),
+thus compatible with arbitrary p.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u_values</strong> – sample U vectors (n, [possibly multiple independent columns, for vectorized])</p></li>
+<li><p><strong>v_values</strong> – sample V vectors (m, [as above])</p></li>
+<li><p><strong>u_weights</strong> – sample U weights (n,) (if None, assumed to be unit)</p></li>
+<li><p><strong>v_weights</strong> – sample V weights (m,)</p></li>
+<li><p><strong>p</strong> – p-norm parameter (p = 1 is ‘Earth Movers’, 2 = is W-2, …)</p></li>
+<li><p><strong>num_slices</strong> – number of random MC projections (slices) (higher the better)</p></li>
+<li><p><strong>inverse_power</strong> – apply final inverse power 1/p</p></li>
+<li><p><strong>norm_weights</strong> – normalize per sample (U,V) weights to sum to one</p></li>
+<li><p><strong>require_sort</strong> – always by default, unless presorted</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>distance between the empirical sample distributions</p>
 </dd>
 </dl>
 </dd></dl>
