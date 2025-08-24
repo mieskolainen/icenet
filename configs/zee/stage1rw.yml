@@ -31,6 +31,6 @@ diff_param:
     active_model: iceboost4D           # Under models.yml
     max_reg:      100.0                # Maximum weight cut-off regularization
     mode:         'LR'                 # 'LR', 'inverse-LR', 'DeepEfficiency', 'direct'
-
+    optimal_dequantize: False          # See info under tune0*.yml (set to False to deactive)
 
 # See NOTES.md

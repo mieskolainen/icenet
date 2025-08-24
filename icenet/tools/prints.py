@@ -103,7 +103,9 @@ def print_weights(weights, y, output_file=None, header=None, write_mode='w'):
                        f'{prc[6]:0.3E}'
         ])
     
-    print(header)
+    if header is not None:
+        print(header)
+    
     print(table)
     print('')
     
@@ -124,7 +126,7 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, out
     
     Args:
         X            : array (n x dim)
-        ids          : variable names (dim)
+        ids          : variable names list with len = dim
         W            : event weights
         exclude_vals : exclude special values from the stats
     
@@ -135,31 +137,38 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, out
     print('')
     print(f'Excluding values: {exclude_vals}')
     
-    table = PrettyTable(["i", "variable", "min", "Q1", "Q5", "med", "Q95", "Q99", "max", "# unique", "mean", "std", "#Inf", "#NaN"]) 
+    table = PrettyTable(["i", "variable",
+                         "min", "Q1", "Q5", "med", "Q95", "Q99", "max",
+                         "#unique", "mean", "std",
+                         "#Inf", "#NaN", "eff. mantissa (bits)"]) 
     
     for j in range(len(ids)):
         try:
             x   = np.array(X[:,j], dtype=np.float32).squeeze()
             ind = np.ones(len(x), dtype=bool)
-            
+
             if exclude_vals is not None:
-                # Exclude special values    
+                # Exclude special values
                 for k in range(len(exclude_vals)):
                     ind = np.logical_and(ind, (x != exclude_vals[k]))
 
             x = x[ind]
 
             prc = np.percentile(x, [0, 1, 5, 50, 95, 99, 100])
-            
+
             if W is not None:
                 mean,std = aux.weighted_avg_and_std(values=x, weights=W[ind])
             else:
-                mean,std = np.mean(x), np.std(x) 
+                mean,std = np.mean(x), np.std(x)
             num_unique = len(np.unique(x))
             
             isinf  = np.sum(np.isinf(x))
             isnan  = np.sum(np.isnan(x))
 
+            # Try to find the number of effective mantissa bits
+            out = io.infer_precision(arr=x)
+            mantissa_bits_eff = out['mantissa_bits_eff']
+            
             table.add_row([f'{j}',
                            f'{ids[j]}',
                            f'{prc[0]:10.2E}',
@@ -170,8 +179,11 @@ def print_variables(X : np.array, ids: List[str], W=None, exclude_vals=None, out
                            f'{prc[5]:10.2E}',
                            f'{prc[6]:10.2E}',
                            f'{num_unique}',
-                           f'{mean:10.2E}', f'{std:10.2E}',
-                           f'{isinf}', f'{isnan}'])
+                           f'{mean:10.2E}',
+                           f'{std:10.2E}',
+                           f'{isinf}',
+                           f'{isnan}',
+                           f'{mantissa_bits_eff}'])
         
         except Exception as e:
             print(e)

@@ -4,6 +4,8 @@
 
 import numpy as np
 import awkward as ak
+from collections import Counter
+from typing import Literal, Optional
 
 import numba
 import copy
@@ -748,3 +750,222 @@ def apply_madscore(X : np.array, X_m, X_mad, EPS=1E-12):
     for i in range(len(X_m)):
         Y[:,i] = scale * (X[:,i] - X_m[i]) / max(X_mad[i], EPS)
     return Y
+
+def infer_precision(
+    arr: np.ndarray,
+    *,
+    small_spacing_quantile: float = 0.20,
+    max_pairs: int = 100_000,
+    min_pairs: int = 500,
+    grid_coarse: int = 64,
+    grid_fine: int = 128,
+    assume_ieee: bool = True,
+    return_debug: bool = False,
+):
+    """
+    GPT5 driven (briefly tested)
+    
+    Estimate effective mantissa (fraction) bits p from a float array whose values are
+    on a binary quantization grid (possibly reduced precision). Invariant to affine
+    transforms y = a*x + b with a > 0.
+
+    Method:
+      - Take unique sorted values u (in float64 for stability).
+      - Center once with a robust location m = median(u).
+      - Spacings: d = u[i+1] - u[i]          (shift-invariant)
+      - Centered midpoints: c0 = (u[i]+u[i+1])/2 - m  (shift-invariant)
+      - For r in [0,1): z_r = log2(d) - ( floor(log2|c0| + r) - 1 )
+        For a binary quantizer with p fraction bits, z_r clusters near -p.
+      - Pick r minimizing MAD(z_r), then p = round(-median(z_r)).
+
+    Notes:
+      - Positive scaling y = a*x shifts both log2(d) and log2|c0| by log2(a); the r-search re-aligns
+        exponent bins, leaving z_r (and thus p) unchanged. Centering cancels b.
+      - For true full-precision float64 random arrays, you typically won't recover 52 without
+        huge N. This is intended for *reduced* precision data.
+    
+    Returns:
+      dict with keys:
+        mantissa_bits_eff : int | None
+        mad_bits          : float | None
+        samples_used      : int
+        pairs_used        : int
+        notes             : str
+        debug             : dict (if return_debug)
+    """
+    
+    x = np.asarray(arr)
+    if not np.issubdtype(x.dtype, np.floating):
+        raise TypeError("Input must be a floating dtype array.")
+    orig_dtype = x.dtype
+
+    # 1) Finite filter
+    x = x[np.isfinite(x)]
+    if x.size < 3:
+        return {'mantissa_bits_eff': None, 'mad_bits': None,
+                'samples_used': int(x.size), 'pairs_used': 0,
+                'notes': "Too few finite samples."}
+
+    # 2) Unique sorted (use float64 arithmetic)
+    u = np.unique(x.astype(np.float64, copy=False))
+    if u.size < 3:
+        return {'mantissa_bits_eff': None, 'mad_bits': None,
+                'samples_used': int(x.size), 'pairs_used': 0,
+                'notes': "Too few unique samples."}
+
+    # 3) Center once (shift invariance), build spacings and centered midpoints
+    m  = np.median(u)
+    d  = np.diff(u)                       # spacings (positive if unique-sorted)
+    c0 = 0.5 * (u[:-1] + u[1:]) - m       # centered midpoints
+
+    # 4) Clean
+    mask = (d > 0) & np.isfinite(c0) & (c0 != 0.0)
+    if assume_ieee:
+        # use original dtype tiny to drop (near-)subnormal midpoints after centering
+        mask &= (np.abs(c0) >= np.finfo(orig_dtype).tiny)
+
+    d  = d[mask]
+    c0 = c0[mask]
+    if d.size < min_pairs:
+        return {'mantissa_bits_eff': None, 'mad_bits': None,
+                'samples_used': int(x.size), 'pairs_used': int(d.size),
+                'notes': "Not enough spacing pairs after filtering."}
+
+    pairs_total = int(d.size)
+    log2d_all   = np.log2(d)           # d > 0 by construction
+    lc_all      = np.log2(np.abs(c0))  # |c0| > 0 by mask
+
+    # Helpers
+    def stats_over_r(log2d, lc, r_vec):
+        r = r_vec[:, None]  # [R,1]
+        # Key formula (affine-invariant): no '+r' on log2d; '- 1' inside to align bins
+        z = log2d[None, :] - (np.floor(lc[None, :] + r) - 1.0)
+        med = np.median(z, axis=1)
+        mad = np.median(np.abs(z - med[:, None]), axis=1)
+        return med, mad
+
+    def eval_subset(log2d, lc):
+        # coarse
+        R1 = int(max(16, grid_coarse))
+        r1 = np.linspace(0.0, 1.0, R1, endpoint=False)
+        med1, mad1 = stats_over_r(log2d, lc, r1)
+        i1 = int(np.argmin(mad1))
+        r_best = float(r1[i1])
+
+        # fine around best (wrap)
+        R2 = int(max(32, grid_fine))
+        halfw = 1.0 / R1
+        r2 = (r_best + np.linspace(-halfw, halfw, R2, endpoint=True)) % 1.0
+        med2, mad2 = stats_over_r(log2d, lc, r2)
+        i2 = int(np.argmin(mad2))
+        return float(r2[i2]), float(med2[i2]), float(mad2[i2])
+
+    def select_smallest(d_all, log2d_all, lc_all, q):
+        # pick k smallest spacings by d (fast, stable)
+        kq = int(np.ceil(q * d_all.size))
+        kq = max(kq, min_pairs)
+        if max_pairs is not None:
+            kq = min(kq, max_pairs)
+        if kq < d_all.size:
+            idx = np.argpartition(d_all, kq - 1)[:kq]
+            return log2d_all[idx], lc_all[idx], int(kq)
+        return log2d_all, lc_all, int(d_all.size)
+
+    # 5) Adaptive quantile sweep to find the tightest cluster
+    q0 = small_spacing_quantile if 0.0 < small_spacing_quantile < 1.0 else 1.0
+    tried = []
+    q = q0
+    for _ in range(6):  # q, q/2, q/4, ...
+        log2d, lc, k = select_smallest(d, log2d_all, lc_all, q)
+        r_star, med_star, mad_star = eval_subset(log2d, lc)
+        tried.append((q, k, r_star, med_star, mad_star))
+        # Early exit if perfectly clustered
+        if mad_star == 0.0:
+            break
+        q *= 0.5
+        if q < 1e-3:
+            break
+
+    # choose the attempt with minimal MAD
+    q_best, k_best, r_star, med_star, mad_star = min(tried, key=lambda t: t[4])
+    p = int(round(-med_star))  # z ≈ -p
+
+    out = {
+        'mantissa_bits_eff': p,
+        'mad_bits': mad_star,
+        'samples_used': int(x.size),
+        'pairs_used': int(k_best),
+        'notes': (
+            f"Affine-invariant (y=a*x+b, a>0). Used {k_best}/{pairs_total} pairs "
+            f"(q≈{q_best:.4f}). Best r={r_star:.6f}, MAD={mad_star:.3f} bits."
+        ),
+    }
+    if return_debug:
+        out['debug'] = {
+            'attempts': [
+                {'q': float(a[0]), 'pairs': int(a[1]), 'r': float(a[2]),
+                 'med': float(a[3]), 'mad': float(a[4])}
+                for a in tried
+            ]
+        }
+    
+    return out
+
+def optimal_dequantize(
+    x: np.ndarray,
+    p: float,
+    scale: float = 1.0,
+    zero_mode: Literal["median", "min_nonzero"] = "min_nonzero",
+    *,
+    rng: Optional[np.random.Generator] = None,
+) -> np.ndarray:
+    """
+    Optimal dequantization based on effective mantissa bits and a uniform
+    quantization model. Adds heteroscedastic Gaussian noise with relative STD.
+
+    Args:
+        x:         float array
+        p:         effective mantissa bits
+        scale:     extra multiplier for the dequantization strength
+        zero_mode: how to set the *reference magnitude* used for x == 0 elements:
+                   - "median":     use median(|x_nonzero|)
+                   - "min_nonzero":use min(|x_nonzero|) (more conservative near zero)
+        rng:       optional numpy Generator (for reproducibility)
+
+    Returns:
+        Dequantized array (same shape as x).
+    """
+    x = np.asarray(x)
+    if not np.issubdtype(x.dtype, np.floating):
+        raise TypeError("x must be a floating dtype")
+
+    # Relative STD implied by p-bit rounding noise (uniform -> Gaussian match)
+    rel_sigma = scale * (2.0 ** (-p)) / np.sqrt(12.0)
+
+    absx = np.abs(x)
+    nonzero_idx = np.flatnonzero(absx)
+
+    if nonzero_idx.size:
+
+        # Absolute
+        nz_vals = absx[nonzero_idx]
+        
+        if zero_mode == "median":
+            zero_ref = np.median(nz_vals)
+        elif zero_mode == "min_nonzero":
+            zero_ref = float(np.min(nz_vals))
+            # guard against pathological tiny values
+            zero_ref = max(zero_ref, np.finfo(x.dtype).tiny)
+        else:
+            raise ValueError("zero_mode must be 'median' or 'min_nonzero'")
+    else:
+        # All zeros -> fall back to 1.0 (dimensionless default)
+        zero_ref = 1.0
+
+    # Heteroscedastic sigma: proportional to |x|, with zero treated by zero_mode
+    sigma = rel_sigma * np.where(absx != 0.0, absx, zero_ref)
+
+    rng   = np.random.default_rng() if rng is None else rng
+    noise = rng.normal(loc=0.0, scale=1.0, size=x.shape) * sigma
+    
+    return x + noise

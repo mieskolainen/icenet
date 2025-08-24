@@ -2,11 +2,13 @@
 #
 # m.mieskolainen@imperial.ac.uk, 2025
 
+import os
 import numpy as np
 import awkward as ak
 import torch
 import matplotlib.pyplot as plt
 import copy
+from tqdm import tqdm
 
 from icenet.tools import aux, io, prints
 from icenet.deep  import iceboost, predict
@@ -276,12 +278,15 @@ def map_xyw(x, y, w, vars, c, reference_class):
     y_new[new_data.y == reference_class] = 1                
     
     new_data.y = y_new # !
+    
+    # Reference scale
+    n_tilde = max(np.sum(y_new == 0), np.sum(y_new == 1))
     # ----------------------------
     
     # Equalize class balance for the training
     for k in [0,1]:
         ind = (y_new == k)
-        new_data.w[ind] /= np.sum(new_data.w[ind])
+        new_data.w[ind] = n_tilde * new_data.w[ind] / np.sum(new_data.w[ind])
 
     return new_data
 
@@ -318,9 +323,57 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
     print(f'Training N-dim reweighting', 'magenta')
     print(f'x.shape = {x.shape}', 'magenta')
     print(f'variables = {variables}', 'magenta')
+    print('')
     
-    # Train model per class pair
+    # Train model per class pair (will skip if we use this function to evaluate)
     if pdf is None:
+        
+        print('Training mode:')
+        
+        aux.makedir(os.path.join(args["plotdir"], 'train/AIRW_S1'))
+        
+        # Training
+        print('Training sample RAW weights:', 'magenta')
+        output_file = os.path.join(args["plotdir"], 'train/AIRW_S1', 'stats_train_input_weights_raw.log')
+        prints.print_weights(weights=w, y=y, output_file=output_file)
+        
+        print('Training sample RAW data:', 'magenta')
+        output_file = os.path.join(f'{args["plotdir"]}', 'train/AIRW_S1', f'stats_train_input_data_raw.log')
+        prints.print_variables(x, variables, w, output_file=output_file)
+        
+        # Validation
+        print('Validation sample RAW weights:', 'magenta')
+        output_file = os.path.join(args["plotdir"], 'train/AIRW_S1', 'stats_validate_input_weights_raw.log')
+        prints.print_weights(weights=w_val, y=y_val, output_file=output_file)
+        
+        print('Validation sample RAW data:', 'magenta')
+        output_file = os.path.join(f'{args["plotdir"]}', 'train/AIRW_S1', f'stats_validate_input_data_raw.log')
+        prints.print_variables(x_val, variables, w_val, output_file=output_file)
+        
+        # --------------------------------------------------
+        # Optimal Dequantization
+        
+        if 'optimal_dequantize' in diff_args['AIRW_param'] and diff_args['AIRW_param']['optimal_dequantize'] > 0:
+            
+            print('Optimal Dequantization for training data based on mantissa bit depth', 'green')
+            
+            for j in tqdm(range(x.shape[1])):
+                
+                out = io.infer_precision(arr=x[:,j])
+                p   = out.get('mantissa_bits_eff', None)
+                
+                if p is None:
+                    name = variables[j]
+                    print(f"infer_precision failed to return mantissa_bits_eff for variable {name} -- skip")
+                else:
+                    scale  = diff_args['AIRW_param']['optimal_dequantize'] # Additional scale boost
+                    x[:,j] = io.optimal_dequantize(x=x[:,j], p=p, scale=scale)
+
+            print('Training data after dequantization:')
+            output_file = os.path.join(f'{args["plotdir"]}', 'train/AIRW_S1', f'stats_train_input_data_dequant.log')
+            prints.print_variables(x, variables, w, output_file=output_file)
+        
+        # Here one could add Z-standardization (but not needed with xgboost)
         
         pdf = {'ID': ID, 'param': param, 'model': {}, 'vars': variables}
         
@@ -329,6 +382,16 @@ def AIRW_helper(x, y, w, ids, pdf, args, x_val, y_val, w_val, EPS=1e-12):
                 
                 data_trn = map_xyw(x=x, y=y, w=w, vars=variables, c=c, reference_class=reference_class) 
                 data_val = map_xyw(x=x_val, y=y_val, w=w_val, vars=variables, c=c, reference_class=reference_class)
+                
+                # Train
+                print('Training sample weights going into training:', 'magenta')
+                output_file = os.path.join(args["plotdir"], 'train/AIRW_S1', 'stats_train_input_weights.log')
+                prints.print_weights(weights=data_trn.w, y=data_trn.y, output_file=output_file)
+                
+                # Validate
+                print('Validation sample weights going into training:', 'magenta')
+                output_file = os.path.join(args["plotdir"], 'train/AIRW_S1', 'stats_validate_input_weights.log')
+                prints.print_weights(weights=data_val.w, y=data_val.y, output_file=output_file)
                 
                 inputs = {'data_trn':    data_trn,
                           'data_val':    data_val,

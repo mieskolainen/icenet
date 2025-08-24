@@ -1,5 +1,5 @@
 # Python Developer Mini Guide
-m.mieskolainen@imperial.ac.uk, 2022
+m.mieskolainen@imperial.ac.uk, 2025
 
 
 ## Google Python Style Guide

@@ -37,14 +37,6 @@ icenet.deep
 Deep learning model classes.
 
 
-icenet.deep.autogradxgb
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: icenet.deep.autogradxgb
-    :members:
-    :undoc-members:
-
-
 icenet.deep.bnaf
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -68,6 +60,12 @@ icenet.deep.da
     :members:
     :undoc-members:
 
+icenet.deep.daux
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.daux
+    :members:
+    :undoc-members:
 
 icenet.deep.dbnf
 ~~~~~~~~~~~~~~~~~~~~~
@@ -108,6 +106,12 @@ icenet.deep.fastkan
     :members:
     :undoc-members:
 
+icenet.deep.flows
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.flows
+    :members:
+    :undoc-members:
 
 icenet.deep.gcnn
 ~~~~~~~~~~~~~~~~~~~~~
@@ -129,6 +133,14 @@ icenet.deep.iceboost
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.iceboost
+    :members:
+    :undoc-members:
+
+
+icenet.deep.iceboostgrad
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.iceboostgrad
     :members:
     :undoc-members:
 
@@ -185,6 +197,22 @@ icenet.deep.predict
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.deep.predict
+    :members:
+    :undoc-members:
+
+
+icenet.deep.rflow
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.rflow
+    :members:
+    :undoc-members:
+
+
+icenet.deep.splines
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.deep.splines
     :members:
     :undoc-members:
 
@@ -264,10 +292,26 @@ icenet.tools.aux
     :undoc-members:
 
 
+icenet.tools.icelogger
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.tools.icelogger
+    :members:
+    :undoc-members:
+
+
 icenet.tools.icemap
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.tools.icemap
+    :members:
+    :undoc-members:
+
+
+icenet.tools.iceprint
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.tools.iceprint
     :members:
     :undoc-members:
 
@@ -340,6 +384,14 @@ icenet.tools.stx
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: icenet.tools.stx
+    :members:
+    :undoc-members:
+
+
+icenet.tools.supertune
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: icenet.tools.supertune
     :members:
     :undoc-members:
 

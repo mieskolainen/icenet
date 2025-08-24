@@ -37,7 +37,7 @@ please include a citation:
       title   = "ICENET: a deep learning library for HEP",
       url     = "https://github.com/mieskolainen/icenet",
       version = {X.Y.Z},
-      date    = {2024-05-30},
+      date    = {2025-XX-YY},
     }
 
 

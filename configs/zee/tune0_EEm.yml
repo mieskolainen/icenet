@@ -19,6 +19,10 @@ mva_param: &MVA_INPUT_PARAM
   
   varnorm: 'zscore-weighted'          # Variable normalization: 'zscore', 'zscore-weighted', 'madscore', null
   
+  optimal_dequantize: False           # For dequantizing training data (based on effective mantissa bit depth)
+                                      # 1.0 gives default std_rel = (2**(-mbits) / sqrt(12)
+                                      # Set to False if None
+  
   #frac: [0.6, 0.1, 0.3]              # Train vs validate/test split fraction
   frac: None                          # Train vs validate/test split fraction (we use file structure)
   

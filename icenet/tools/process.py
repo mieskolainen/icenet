@@ -446,18 +446,51 @@ def generic_flow(rootname, func_loader, func_factor):
                     func_factor=func_factor, mvavars=f'configs.{rootname}.mvavars', runmode=runmode)
             
         if runmode == 'train':
-
-            output_file = f'{args["plotdir"]}/train/stats_train.log'
-            prints.print_variables(X=data['trn']['data'].x, W=data['trn']['data'].w, ids=data['trn']['data'].ids, output_file=output_file)
-            make_plots(data=data['trn'], args=args, runmode=runmode)
+            
+            aux.makedir(os.path.join(args["plotdir"], 'train'))
+            aux.makedir(os.path.join(args["plotdir"], 'train', 'validate'))
+            
+            print('Training sample weights:', 'magenta')
+            output_file = os.path.join(args["plotdir"], 'train', 'stats_train_weights.log')
+            prints.print_weights(weights=data['trn']['data'].w, y=data['trn']['data'].y, output_file=output_file)
+            
+            try:
+                print('Training sample data:', 'magenta')
+                output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_data.log')
+                prints.print_variables(data['trn']['data'].x, data['trn']['data'].ids, data['trn']['data'].w, output_file=output_file)
+            except:
+                pass
+            
+            print('Validation sample weights:', 'magenta')
+            output_file = os.path.join(args["plotdir"], 'train/validate', 'stats_validate_weights.log')
+            prints.print_weights(weights=data['val']['data'].w, y=data['val']['data'].y, output_file=output_file)
+            
+            try:
+                print('Validation sample data:', 'magenta')
+                output_file = os.path.join(f'{args["plotdir"]}', 'train/validate', f'stats_validate_data.log')
+                prints.print_variables(data['val']['data'].x, data['val']['data'].ids, data['val']['data'].w, output_file=output_file)
+            except:
+                pass
+            
+            make_plots(data=data['trn'], args=args, runmode="train")
+            make_plots(data=data['val'], args=args, runmode="train/validate")
             
             if args['__compute__']:
                 train_models(data_trn=data['trn'], data_val=data['val'], args=args)
 
         if runmode == 'eval':
             
-            output_file = f'{args["plotdir"]}/eval/stats_evaluate.log'
-            prints.print_variables(X=data['tst']['data'].x, W=data['tst']['data'].w, ids=data['tst']['data'].ids, output_file=output_file)        
+            print('Evaluation sample weights:', 'magenta')
+            output_file = os.path.join(args["plotdir"], 'eval', 'stats_eval_weights.log')
+            prints.print_weights(weights=data['tst']['data'].w, y=data['tst']['data'].y, output_file=output_file)
+            
+            try:
+                print('Evaluation sample data:', 'magenta')
+                output_file = os.path.join(f'{args["plotdir"]}', 'eval', f'stats_eval_data.log')
+                prints.print_variables(data['tst']['data'].x, data['tst']['data'].ids, data['tst']['data'].w, output_file=output_file)
+            except:
+                pass
+            
             make_plots(data=data['tst'], args=args, runmode=runmode)
             
             if args['__compute__']:
@@ -1040,21 +1073,38 @@ def train_models(data_trn, data_val, args=None):
     for sd in subdirs:
         os.makedirs(os.path.join(targetdir, sd), exist_ok = True)
     # ----------------------------------
+
     
-    # Print training stats
-    print('Training sample statistics:')
-    output_file = os.path.join(args["plotdir"], 'train', 'stats_train_weights.log')
-    prints.print_weights(weights=data_trn['data'].w, y=data_trn['data'].y, output_file=output_file)
+    # -----------------------------------------
+    # Optimal Dequantization
     
-    print('Validation sample statistics:')
-    output_file = os.path.join(args["plotdir"], 'train', 'stats_validate_weights.log')
-    prints.print_weights(weights=data_val['data'].w, y=data_val['data'].y, output_file=output_file)
+    if 'optimal_dequantize' in args and args['optimal_dequantize'] > 0:
+        
+        print('Optimal Dequantization for training data based on mantissa bit depth', 'green')
+        
+        for j in tqdm(range(data_trn['data'].x.shape[1])):
+            
+            out = io.infer_precision(arr=data_trn['data'].x[:,j])
+            p   = out.get('mantissa_bits_eff', None)
+            
+            if p is None:
+                name = data_trn['data'].ids[j]
+                print(f"infer_precision failed to return mantissa_bits_eff for variable {name} -- skip")
+            else:
+                scale = args['optimal_dequantize'] # Additional scale boost
+                data_trn['data'].x[:,j] = io.optimal_dequantize(x=data_trn['data'].x[:,j], p=p, scale=scale)
+
+        print('Training data after dequantization:')
+        output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_data_dequant.log')
+        prints.print_variables(data_trn['data'].x, data_trn['data'].ids, data_trn['data'].w, output_file=output_file)
+    
+    # -----------------------------------------
     
     # @@ Tensor normalization @@
     if data_trn['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
         
         print('')
-        print('Z-score normalizing tensor variables ...')
+        print('Z-score normalizing tensor variables ...', 'magenta')
         X_mu_tensor, X_std_tensor = io.calc_zscore_tensor(data_trn['data_tensor'])
         
         data_trn['data_tensor'] = io.apply_zscore_tensor(data_trn['data_tensor'], X_mu_tensor, X_std_tensor)
@@ -1132,7 +1182,7 @@ def train_models(data_trn, data_val, args=None):
     if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
         
         print('')
-        print('Z-score normalizing variables ...', 'magenta')
+        print('Z-score standardizing variables ...', 'magenta')
         
         if  args['varnorm'] == 'zscore-weighted':
             print('Using events weights with Z-score ["zscore-weighted"]', 'green')
@@ -1149,14 +1199,18 @@ def train_models(data_trn, data_val, args=None):
             pickle.dump({'X_mu': X_mu, 'X_std': X_std, 'ids': data_trn['data'].ids}, f,
                         protocol=pickle.HIGHEST_PROTOCOL)
 
-        # Print train
-        output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_{args["varnorm"]}.log')
+        print('Training data after standardization:')
+        output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_data_{args["varnorm"]}.log')
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
+
+        print('Validation data after standardization:')
+        output_file = os.path.join(f'{args["plotdir"]}', 'train/validate', f'stats_validate_data_{args["varnorm"]}.log')
+        prints.print_variables(data_val['data'].x, data_val['data'].ids, W=data_val['data'].w, output_file=output_file)
 
     elif args['varnorm'] == 'madscore' :
         
         print('')
-        print('MAD-score normalizing variables ...', 'magenta')
+        print('MAD-score standardizing variables ...', 'magenta')
         X_m, X_mad         = io.calc_madscore(data_trn['data'].x)
         
         data_trn['data'].x = io.apply_zscore(data_trn['data'].x, X_m, X_mad)
@@ -1167,9 +1221,13 @@ def train_models(data_trn, data_val, args=None):
             pickle.dump({'X_m': X_m, 'X_mad': X_mad, 'ids': data_trn['data'].ids}, f,
                         protocol=pickle.HIGHEST_PROTOCOL)
 
-        # Print train
-        output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_{args["varnorm"]}.log')
+        print('Training data after standardization:')
+        output_file = os.path.join(f'{args["plotdir"]}', 'train', f'stats_train_data_{args["varnorm"]}.log')
         prints.print_variables(data_trn['data'].x, data_trn['data'].ids, W=data_trn['data'].w, output_file=output_file)
+
+        print('Validation data after standardization:')
+        output_file = os.path.join(f'{args["plotdir"]}', 'train/validate', f'stats_validate_data_{args["varnorm"]}.log')
+        prints.print_variables(data_val['data'].x, data_val['data'].ids, W=data_val['data'].w, output_file=output_file)
 
     # -------------------------------------------------------------
     
@@ -1228,7 +1286,7 @@ def train_models(data_trn, data_val, args=None):
                 idx_trn = np.arange(len(data_trn['data'])) # Orig
                 idx_val = np.arange(len(data_val['data'])) # Orig
 
-                print(f'Original training sample', 'green')
+                print(f'Original training sample (no bootstrap)', 'green')
             
             try:
                 
@@ -1386,7 +1444,8 @@ def train_models(data_trn, data_val, args=None):
                 # --------------------------------------------------------
             
             except KeyboardInterrupt:
-                print(f'CTRL+C catched -- continue with the next model', 'red')
+                print(f'CTRL+C catched -- break', 'red')
+                break
             
             except Exception as e:
                 prints.printbar('*')
@@ -1449,14 +1508,6 @@ def evaluate_models(data=None, info=None, args=None):
     subdirs = ['']
     for sd in subdirs:
         os.makedirs(os.path.join(targetdir, sd), exist_ok = True)
-
-    # --------------------------------------------------------------------
-    
-    # Print evaluation stats
-    print('Evaluation sample statistics:')
-    output_file = os.path.join(args["plotdir"], 'eval', 'stats_eval_weights.log')
-    prints.print_weights(weights=data['data'].w, y=data['data'].y, output_file=output_file)
-    
     
     # --------------------------------------------------------------------
     # Collect data
@@ -1515,7 +1566,7 @@ def evaluate_models(data=None, info=None, args=None):
         if data['data_tensor'] is not None and (args['varnorm_tensor'] == 'zscore'):
             
             pickle_file = os.path.join(args["modeldir"], 'zscore_tensor.pkl')
-            print(f'Z-score normalizing tensor variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+            print(f'Z-score standardizing tensor variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
             
             with open(pickle_file, 'rb') as f:
                 Z_data = pickle.load(f)
@@ -1529,7 +1580,7 @@ def evaluate_models(data=None, info=None, args=None):
         if   args['varnorm'] == 'zscore' or args['varnorm'] == 'zscore-weighted':
             
             pickle_file = os.path.join(args["modeldir"], 'zscore.pkl')
-            print(f'Z-score normalizing variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+            print(f'Z-score standardizing variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
             
             with open(pickle_file, 'rb') as f:
                 Z_data = pickle.load(f)
@@ -1539,13 +1590,14 @@ def evaluate_models(data=None, info=None, args=None):
             
             X = io.apply_zscore(X, X_mu, X_std)
             
-            output_file = os.path.join(args["plotdir"], 'eval', f'stats_variables_{args["varnorm"]}.log')
+            print('Evaluation data after standardization:')
+            output_file = os.path.join(args["plotdir"], 'eval', f'stats_eval_data_{args["varnorm"]}.log')
             prints.print_variables(X, ids, weights, output_file=output_file)
 
         elif args['varnorm'] == 'madscore':
             
             pickle_file = os.path.join(args["modeldir"], 'madscore.pkl')
-            print(f'MAD-score normalizing variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
+            print(f'MAD-score standardizing variables ... [{pickle_file}] ({io.get_file_timestamp(pickle_file)})', 'magenta')
             
             with open(pickle_file, 'rb') as f:
                 Z_data = pickle.load(f)
@@ -1555,12 +1607,13 @@ def evaluate_models(data=None, info=None, args=None):
             
             X = io.apply_madscore(X, X_m, X_mad)
             
-            output_file = os.path.join(args["plotdir"], 'eval', f'stats_variables_{args["varnorm"]}.log')
+            print('Evaluation data after standardization:')
+            output_file = os.path.join(args["plotdir"], 'eval', f'stats_eval_data_{args["varnorm"]}.log')
             prints.print_variables(X, ids, weights, output_file=output_file)
-        
+    
     except Exception as e:
         print(e)
-        print(f'Exception occured in variable normalization. Continue without!', 'red')
+        print(f'Exception occured in variable standardization. Continue without!', 'red')
     
     # --------------------------------------------------------------------
     # For pytorch based

@@ -1,4 +1,4 @@
-# Custom pytorch-driven autograd losses for XGBoost
+# Autograd losses for iceboost == xgboost + torch
 # with various Hessian diagonal approaches.
 #
 # m.mieskolainen@imperial.ac.uk, 2025
@@ -16,9 +16,9 @@ from typing import Callable, Sequence, List, Tuple
 from icenet import print
 # ------------------------------------------
 
-class XgboostObjective():
+class AutogradObjective():
     """
-    XGB custom loss driver class with torch (autograd)
+    Custom loss driver class with xgboost + torch (autograd)
     
     hessian_mode: 'hutchinson' (or 'iterative') may make the model converge
     significantly faster (or better) than 'constant' in some cases.
@@ -26,20 +26,20 @@ class XgboostObjective():
     N.B. Remember to call manually:
     
     obj.mode = 'train' or obj.mode = 'eval' while running the training boost iteration
-    loop, otherwise .grad_prev, .preds_prev will get mixed with iterative hessian mode.
+    loop, otherwise .grad_prev, .preds_prev will get mixed with 'iterative' hessian mode.
     
     Args:
         loss_func:       Loss function handle
         mode:            'train' or 'eval', see the comment above
         flatten_grad:    For vector valued model output [experimental]
         hessian_mode:    'constant', 'iterative', 'hutchinson', 'exact'
-        hessian_const:   Scalar parameter constant 'hessian_mode'
         
-        hessian_gamma:   Hessian EMA smoothing parameter for the 'iterative' mode
-        hessian_eps:     Hessian estimate denominator regularization for the 'iterative'
-        hessian_absmax:  Hessian absolute clip parameter for the 'iterative'
+        hessian_const:   Hessian scalar parameter for the 'constant' mode
+        hessian_beta:    Hessian EMA smoothing parameter for the 'iterative' mode
+        hessian_eps:     Hessian estimate denominator regularization for the 'iterative' mode
+        hessian_slices:  Hutchinson MC estimator number of slices for the 'hutchinson' mode
+        hessian_limit:   Hessian absolute range clip parameters
         
-        hessian_slices:  Hutchinson MC estimator MC slice sample size for the 'hutchinson' mode
         device:          Torch device
     """
     
@@ -49,10 +49,10 @@ class XgboostObjective():
             flatten_grad:   bool=False,
             hessian_mode:   str='hutchinson',
             hessian_const:  float=1.0,
-            hessian_gamma:  float=0.9,
+            hessian_beta:   float=0.9,
             hessian_eps:    float=1e-8,
-            hessian_limit:  list=[1e-2, 20],
             hessian_slices: int=10,
+            hessian_limit:  list=[1e-2, 20],
             device: torch.device='cpu'
         ):
         
@@ -60,30 +60,32 @@ class XgboostObjective():
         self.loss_func      = loss_func
         self.device         = device
         self.hessian_mode   = hessian_mode
+        
+        # Constant mode
         self.hessian_const  = hessian_const
         
         # Iterative mode
-        self.hessian_gamma  = hessian_gamma
+        self.hessian_beta   = hessian_beta
         self.hessian_eps    = hessian_eps
-        self.hessian_limit  = hessian_limit
         
         # Hutchinson mode
         self.hessian_slices = int(hessian_slices)
         
+        self.hessian_limit  = hessian_limit
         self.flatten_grad   = flatten_grad
         
-        # For the optimization algorithms
+        # For the algorithms
         self.hess_diag  = None
         self.grad_prev  = None
         self.preds_prev = None
         
-        txt = f'Using device: {self.device} | hessian_mode = {self.hessian_mode}'
+        txt = f'Using device: {self.device} | hessian_mode = {self.hessian_mode} (use "constant" or "iterative" for speed)'
         
         match self.hessian_mode:
             case 'constant':
                 print(f'{txt} | hessian_const = {self.hessian_const}')
             case 'iterative':
-                print(f'{txt} | hessian_gamma = {self.hessian_gamma}')
+                print(f'{txt} | hessian_beta = {self.hessian_beta}')
             case 'hutchinson':
                 print(f'{txt} | hessian_slices = {self.hessian_slices}')
             case _:
@@ -141,7 +143,7 @@ class XgboostObjective():
             grad:  Current gradient vector
             preds: Current prediction vector
         """
-        print(f'Computing Hessian diag with iterative finite difference (gamma = {self.hessian_gamma})')
+        print(f'Computing Hessian diag with iterative finite difference (beta = {self.hessian_beta})')
         
         # Initialize to unit curvature as a neutral default
         # (if sigma_i^2 = 1/H_ii, then this is a Gaussian N(0,1) prior)
@@ -157,9 +159,9 @@ class XgboostObjective():
             hess_diag_new = dg / (ds + self.hessian_eps)
             hess_diag_new = self.regulate_hess(hess_diag_new) # regulate
         
-        # Exponential Moving Average (EMA), approx filter size ~ 1 / (1 - gamma) steps
-        self.hess_diag = self.hessian_gamma * self.hess_diag + \
-                         (1 - self.hessian_gamma) * hess_diag_new
+        # Exponential Moving Average (EMA), approx filter size ~ 1 / (1 - beta) steps
+        self.hess_diag = self.hessian_beta * self.hess_diag + \
+                         (1 - self.hessian_beta) * hess_diag_new
         
         # Save the gradient vector and predictions
         self.grad_prev  = grad.clone().detach()
@@ -254,7 +256,7 @@ class XgboostObjective():
             case 'exact':
                 grad2 = self.hessian_exact(grad=grad1, preds=preds)
 
-            # Squared derivative based [uncontrolled] approximation (always positive curvature)
+            # Squared derivative based [uncontrolled] approximation
             case 'squared_approx':
                 print(f'Setting Hessian diagonal using grad^2 [DEBUG ONLY]')
                 grad2 = grad1 * grad1

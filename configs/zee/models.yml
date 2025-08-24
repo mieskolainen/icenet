@@ -22,17 +22,17 @@ EVAL_PARAM: &EVAL_PARAM
 
 
 # ----------------------------------------------------------------
-# Note for the custom losses with ICEBOOST
-# 
+# Note for the custom losses with ICEBOOST (see NOTES.md)
+#  
 # For Hessian (2nd order grad descent) control:
 # 
-#   ':hessian:constant:1.0'   (Constant set on the diagonal, slow convergence  --> many trees needed)
-#   ':hessian:iterative:0.7'  (Iterative, with exponential moving average window size, e.g. 1/(1-0.7) ~ 3)
-#   ':hessian:hutchinson:10'  (Hutchinson MC estimator, with the number of MC samples [higher better])
-#   ':hessian:exact'          (Exact autograd)
+#  ':hessian:constant:1.0'  (Constant set on the diagonal (conservative) --> many trees needed)
+#  ':hessian:iterative:0.7' (Iterative, with exponential moving average window size, e.g. 1/(1-0.7) ~ 3)
+#  ':hessian:hutchinson:10' (Hutchinson MC estimator with autograd, with the number of MC samples [higher better])
+#  ':hessian:exact'         (Exact full autograd)
 # 
 # Usage example:
-#   objective: 'custom:binary_cross_entropy:hessian:hutchinson:20'
+#  objective: 'custom:binary_cross_entropy:hessian:hutchinson:20'
 # ----------------------------------------------------------------
 
 
@@ -66,7 +66,7 @@ iceboost4D:
     max_delta_step: 1.0
     subsample: 1
     
-    colsample_bytree:  1.0        # Keep at 1.0 (otherwise fixedGridRhoAll variable not well modelled)
+    colsample_bytree:  1.0        # Keep at 1.0 (otherwise fixedGridRhoAll might not be well fitted)
     colsample_bylevel: 1.0
     colsample_bynode:  1.0
     
@@ -75,6 +75,8 @@ iceboost4D:
     
     # learning task parameters
     objective: 'custom:binary_cross_entropy:hessian:hutchinson:100'
+    #objective: 'custom:binary_cross_entropy:hessian:constant:1.0'
+
     eval_metric: ['custom']       # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
@@ -146,7 +148,7 @@ xgb0:
   
   # Special optimization
   opt_param:
-    noise_reg: 0.0                # Scheduled noise regularization
+    noise_reg: 0.01               # Scheduled noise regularization
   
   plot_trees: false
   
@@ -187,8 +189,10 @@ iceboost0: &ICEBOOST0
     reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
     reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
     
-    objective: 'custom:binary_cross_entropy:hessian:iterative:0.7'
-    
+    #objective: 'custom:binary_cross_entropy:hessian:iterative:0.7'
+    #objective: 'custom:binary_cross_entropy:hessian:constant:1.0'
+    objective: 'custom:binary_cross_entropy:hessian:hutchinson:10'
+
     eval_metric: ['custom']  # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization

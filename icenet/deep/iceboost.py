@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 # icenet
 from icenet.tools import aux, stx, plots, io
-from icenet.deep import autogradxgb, optimize, losstools, tempscale, deeptools
+from icenet.deep import iceboostgrad, optimize, losstools, tempscale, deeptools
 from icefit import mine, cortools
 
 # ------------------------------------------
@@ -551,7 +551,7 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
     
     trn_aucs   = []
     val_aucs   = []
-
+    
     # ---------------------------------------
     # Update the parameters
     model_param = copy.deepcopy(param['model_param'])
@@ -607,9 +607,9 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
         ## Hessian diagonal treatment
         
         # Default values
-        hessian_mode   = 'iterative'
+        hessian_mode   = 'hutchinson'
         hessian_const  = 1.0
-        hessian_gamma  = 0.9
+        hessian_beta   = 0.9
         hessian_slices = 10
         
         # E.g. 'hessian:constant:1.0', 'hessian:iterative:0.9', 'hessian:hutchinson:10' or 'hessian:exact'
@@ -622,18 +622,18 @@ def train_xgb(config={'params': {}}, data_trn=None, data_val=None, y_soft=None, 
                     hessian_const = float(strs[strs.index('hessian')+2])
                 
                 elif hessian_mode == 'iterative':
-                    hessian_gamma = float(strs[strs.index('hessian')+2])
+                    hessian_beta  = float(strs[strs.index('hessian')+2])
             
                 elif hessian_mode == 'hutchinson':
                     hessian_slices = float(strs[strs.index('hessian')+2])
             except:
                 print('Using default Hessian estimator parameters')
         
-        autogradObj = autogradxgb.XgboostObjective(
+        autogradObj = iceboostgrad.AutogradObjective(
             loss_func      = loss_func,
             hessian_mode   = hessian_mode,
             hessian_const  = hessian_const,
-            hessian_gamma  = hessian_gamma,
+            hessian_beta   = hessian_beta,
             hessian_slices = hessian_slices,
             device         = device
         )
