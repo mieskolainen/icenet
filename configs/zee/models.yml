@@ -109,7 +109,7 @@ iceboost4D:
 # "Stage 2" models
 
 # Plain XGBoost
-# https://xgboost.readthedocs.io/en/latest/parameter.html
+# https://xgboost.readthedocs.io/en/stable/parameter.html
 xgb0:
   train:   'xgb'
   predict: 'xgb_scalar'
@@ -122,33 +122,33 @@ xgb0:
   
   # booster parameters
   model_param:
-    num_boost_round: 550          # number of epochs (equal to the number of trees!)
+    num_boost_round: 550         # number of epochs (equal to the number of trees!)
     
-    booster:     'gbtree'         # 'gbtree' (default), 'dart' (dropout boosting)
-    tree_method: 'hist'           # [xgb default 'hist']
-    device:      'auto'           # 'auto', 'cpu', 'cuda'
+    booster:     'gbtree'        # 'gbtree' (default), 'dart' (dropout boosting)
+    tree_method: 'hist'          # [xgb default 'hist']
+    device:      'auto'          # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.3            # [xgb default 0.3]
-    gamma: 0.0                    # [xgb default 0.0]
-    max_depth: 6                  # [xgb default   6]
-    min_child_weight: 1.0         # [xgb default 1.0]
-    max_delta_step: 1.0           # [xgb default 1.0]
-    subsample: 1.0                # [xgb default 1.0]
-
-    colsample_bytree:  1.0        # [xgb default 1.0]
-    colsample_bylevel: 1.0        # [xgb default 1.0]
-    colsample_bynode:  1.0        # [xgb default 1.0]
+    learning_rate: 0.3           # [xgb default 0.3]
+    gamma: 0.0                   # [xgb default   0] "Minimum loss reduction required to make a further partition on a leaf node of the tree"
+    max_depth: 6                 # [xgb default   6] "Maximum depth of a tree. Increasing this value will make the model more complex and more likely to overfit"
+    min_child_weight: 1.0        # [xgb default 1.0] "Minimum sum of instance weight (hessian) needed in a child"
+    max_delta_step: 0.0          # [xgb default   0] "Maximum delta step we allow each leaf output to be. Positive value can help making the update step more conservative."
+    subsample: 1.0               # [xgb default 1.0] "Subsample ratio of the training instances"
     
-    reg_lambda: 1.0               # [xgb default 1.0]
-    reg_alpha:  0.0               # [xgb default 0.0]
+    colsample_bytree:  1.0       # [xgb default 1.0] "Subsample ratio of columns when constructing each tree"
+    colsample_bylevel: 1.0       # [xgb default 1.0] "Subsample ratio of columns for each level"
+    colsample_bynode:  1.0       # [xgb default 1.0] "Subsample ratio of columns for each node (split)"
+    
+    reg_lambda: 1.0              # [xgb default 1.0] L2-regularization
+    reg_alpha:  0.0              # [xgb default 0.0] L1-regularization
     
     # learning task parameters
-    objective: 'binary:logistic'  # Note that 'multi:softprob' does not work with distillation
-    eval_metric: ['logloss']      # for custom losses, otherwise 'logloss', 'mlogloss' ...
+    objective: 'binary:logistic' # Note that 'multi:softprob' does not work with distillation
+    eval_metric: ['logloss']     # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
   opt_param:
-    noise_reg: 0.01               # Scheduled noise regularization
+    noise_reg: 0.0               # Scheduled noise regularization
   
   plot_trees: false
   
@@ -175,30 +175,30 @@ iceboost0: &ICEBOOST0
     tree_method: 'hist'
     device:      'auto'      # 'auto', 'cpu', 'cuda'
     
-    learning_rate: 0.1       # Use smaller with large number of trees
-    gamma: 1.5               # Minimum loss reduction required to make a further partition on a leaf node (~ controls the depth)
-    max_depth: 8             # Maximum depth of a tree (too high may overfit)
-    min_child_weight: 1.0    # Minimum sum of instance weight (hessian) needed in a child (higher -> more conservative)
-    max_delta_step: 1.0      # Constraint on the maximum change in the model's weights
-    subsample: 1             # Subsample ratio of the training instance (=1 uses all data)
+    learning_rate: 0.1
+    gamma: 1.5
+    max_depth: 8
+    min_child_weight: 1.0
+    max_delta_step: 1.0
+    subsample: 1
     
-    colsample_bytree:  1.0   # Specifies the fraction of features to be randomly selected for each tree
-    colsample_bylevel: 0.9   # As 'bytree' but applied to individual tree levels
-    colsample_bynode:  0.9   # The fraction of features to be randomly selected for each split in a tree
+    colsample_bytree:  1.0
+    colsample_bylevel: 0.9
+    colsample_bynode:  0.9
     
-    reg_lambda: 2.0          # L2 reg. A penalty to the weights of the features to prevent overfitting
-    reg_alpha: 0.05          # L1 reg. A penalty to the absolute value of the weights to induce sparsity
+    reg_lambda: 2.0
+    reg_alpha: 0.05
     
     #objective: 'custom:binary_cross_entropy:hessian:iterative:0.7'
     #objective: 'custom:binary_cross_entropy:hessian:constant:1.0'
     objective: 'custom:binary_cross_entropy:hessian:hutchinson:10'
-
+    
     eval_metric: ['custom']  # for custom losses, otherwise 'logloss', 'mlogloss' ...
   
   # Special optimization
   # (this can help with gapped/iso variables such as dR ...)
   opt_param:
-    noise_reg: 0.01          # Scheduled noise regularization
+    noise_reg: 0.0           # Scheduled noise regularization
   
   # BCE loss domains [use with custom:binary_cross_entropy]
   BCE_param:
