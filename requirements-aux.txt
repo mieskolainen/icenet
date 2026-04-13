@@ -74,7 +74,7 @@ notebook
 sphinx==7.3.7
 sphinx_rtd_theme
 sphinxawesome-theme
-pytest==8.2.0
+pytest==9.0.3
 
 #geomloss
 #functools
