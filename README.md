@@ -29,6 +29,10 @@ For end-to-end deep learning examples, see e.g. github actions (CI) workflows un
 
 ## AI-Tech Docs
 
+Novel ML reweighting method for calibrating EM showers in the CMS experiment (2026):
+
+[configs/zee/README_CMS_MLG_25_002.md]
+
 Introduction talk (2023):
 
 [docs/pdf/CMS_ML_forum_Mieskolainen_080223.pdf](docs/pdf/CMS_ML_forum_Mieskolainen_080223.pdf)
