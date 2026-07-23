@@ -31,7 +31,7 @@ For end-to-end deep learning examples, see e.g. github actions (CI) workflows un
 
 Novel ML reweighting method for calibrating EM showers in the CMS experiment (2026):
 
-[configs/zee/README_CMS_MLG_25_002.md]
+[configs/zee/README_CMS_MLG_25_002.md](configs/zee/README_CMS_MLG_25_002.md)
 
 Introduction talk (2023):
 
